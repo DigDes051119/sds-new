@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { ArrowUpRight, Circle, Sparkles } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
@@ -34,6 +34,40 @@ export function Home() {
       setActive(i);
     }
   };
+
+  const [isMobile, setIsMobile] = useState(false);
+  const serviceRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const observers = serviceRefs.current.map((el, index) => {
+      if (!el) return null;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setActive(index);
+          }
+        });
+      }, {
+        rootMargin: "-25% 0px -45% 0px",
+        threshold: 0.1
+      });
+      observer.observe(el);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach(obs => obs?.disconnect());
+    };
+  }, [isMobile]);
 
   const homeProjects = projects.map((p, i) => {
     const ids = ["sandyq", "ala-too", "one-ordo"];
@@ -144,11 +178,37 @@ export function Home() {
         className="mx-auto mt-28 max-w-[1380px] px-3 sm:px-6"
       >
         <div className="mb-8 flex items-end justify-between"><h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2><span className="hidden text-sm text-black/45 sm:block">{t.home.servicesHint}</span></div>
-        <div className="flex min-h-[620px] flex-col gap-3 md:h-[620px] md:flex-row">
+        <div className="flex flex-col gap-3 md:h-[620px] md:flex-row">
           {services.map((s, i) => (
-            <motion.button key={s[1]} onMouseEnter={() => setActive(i)} onClick={() => handleServiceClick(i, s[1])} animate={{ flex: active === i ? 2.7 : 0.82 }} transition={{ type: "spring", stiffness: 170, damping: 24 }} className="group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-black/10 bg-[#f4f4f0] p-7 text-left transition hover:border-[#0000FF]/60 interactive-element md:min-h-0">
-              <span className="text-sm text-[#0000FF]">{s[0]}</span><h3 className="mt-4 text-4xl font-semibold tracking-[-0.07em] sm:text-6xl">{s[1]}</h3>
-              <motion.p animate={{ opacity: active === i ? 1 : 0 }} className="absolute bottom-7 left-7 right-7 max-w-md text-[clamp(1.15rem,2vw,1.5rem)] leading-[1.16] tracking-[-0.05em] text-black/70">{s[2]}</motion.p>
+            <motion.button 
+              key={s[1]} 
+              ref={(el) => { serviceRefs.current[i] = el; }}
+              onMouseEnter={() => !isMobile && setActive(i)} 
+              onClick={() => handleServiceClick(i, s[1])} 
+              animate={isMobile ? {} : { flex: active === i ? 2.7 : 0.82 }} 
+              transition={{ type: "spring", stiffness: 170, damping: 24 }} 
+              className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-black/10 bg-[#f4f4f0] p-7 text-left transition hover:border-[#0000FF]/60 interactive-element min-h-[140px] md:min-h-0 md:h-full"
+            >
+              <div>
+                <span className="text-sm text-[#0000FF]">{s[0]}</span>
+                <h3 className="mt-4 text-4xl font-semibold tracking-[-0.07em] sm:text-6xl">{s[1]}</h3>
+              </div>
+
+              <motion.div 
+                animate={isMobile ? { 
+                  height: active === i ? "auto" : 0, 
+                  opacity: active === i ? 1 : 0,
+                  marginTop: active === i ? 16 : 0
+                } : {
+                  opacity: active === i ? 1 : 0
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className={isMobile ? "overflow-hidden" : "absolute bottom-7 left-7 right-7 max-w-md"}
+              >
+                <p className="text-[clamp(1.15rem,2vw,1.5rem)] leading-[1.16] tracking-[-0.05em] text-black/70">
+                  {s[2]}
+                </p>
+              </motion.div>
               <ArrowUpRight className="absolute right-7 top-7 text-[#0000FF]" />
             </motion.button>
           ))}

@@ -21,7 +21,7 @@ function CustomCursor() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 pointer-events-none z-[9999] flex items-center justify-center"
+      className="hidden md:flex fixed top-0 left-0 pointer-events-none z-[9999] items-center justify-center"
       animate={{
         x: position.x - 8,
         y: position.y - 8,
