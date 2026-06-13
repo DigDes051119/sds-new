@@ -36,23 +36,28 @@ export function Contacts() {
         >
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-black/40 mb-4">{t.contacts.writeUs}</h3>
-            <a href="mailto:hello@steeldrake.com" className="text-3xl md:text-5xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block">
-              hello@steeldrake.com
+            <a href="mailto:getdesign@steeldrakestudioteam.com" className="text-3xl md:text-5xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block">
+              getdesign@steeldrakestudioteam.com
             </a>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-black/40 mb-4">{t.contacts.callUs}</h3>
-            <a href="tel:+70000000000" className="text-3xl md:text-5xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block">
-              +7 (XXX) XXX-XX-XX
+            <a href="https://wa.me/996702507888" target="_blank" rel="noopener noreferrer" className="text-3xl md:text-5xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block">
+              +996 702 507 888
             </a>
           </div>
 
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-black/40 mb-4">{t.contacts.officeTitle}</h3>
-            <p className="text-2xl md:text-3xl font-light whitespace-pre-line">
+            <a 
+              href="https://www.google.com/maps/place/1%2F2+%D1%83%D0%BB.+%D0%93%D0%BE%D1%80%D1%8C%D0%BA%D0%BE%D0%B3%D0%BE,+%D0%91%D0%B8%D1%88%D0%BA%D0%B5%D0%BA+720001/@42.8569615,74.6340349,294m/data=!3m1!1e3!4m6!3m5!1s0x389eb649ed50dd4f:0xfa828968edacc1ba!8m2!3d42.856828!4d74.6180463!16s%2Fg%2F11ym4g96dn?hl=ru&entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2xl md:text-3xl font-light whitespace-pre-line hover:text-[#0000FF] transition-colors interactive-element inline-block"
+            >
               {t.contacts.officeAddress}
-            </p>
+            </a>
           </div>
 
           <div className="pt-8 border-t border-[#E5E5E7]">
@@ -61,28 +66,19 @@ export function Contacts() {
           </div>
         </motion.div>
 
-        {/* Interactive Map placeholder */}
+        {/* Interactive Map */}
         <motion.div 
           {...scrollRevealConfig}
-          className="h-[600px] bg-[#F8F8F9] rounded-3xl overflow-hidden relative group cursor-pointer interactive-element"
+          className="h-[600px] bg-[#F8F8F9] rounded-3xl overflow-hidden relative"
         >
-          {/* Simple map visual using CSS pattern since we can't easily embed real gmaps without api key */}
-          <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: `radial-gradient(#000000 1px, transparent 1px)`,
-            backgroundSize: '20px 20px'
-          }} />
-          
-          {/* Transition on hover to invert */}
-          <div className="absolute inset-0 bg-white mix-blend-difference opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          
-          {/* Marker */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="w-6 h-6 bg-[#0000FF] rounded-full animate-ping absolute opacity-50" />
-            <div className="w-6 h-6 bg-[#0000FF] rounded-full relative z-10 border-4 border-white shadow-lg" />
-            <div className="mt-4 px-4 py-2 bg-white rounded-full shadow-lg font-medium text-sm z-10 transition-colors group-hover:bg-black group-hover:text-white">
-              {t.contacts.markerLabel}
-            </div>
-          </div>
+          <iframe 
+            src="https://maps.google.com/maps?q=42.856828,74.6180463&t=&z=16&ie=UTF8&iwloc=&output=embed"
+            className="w-full h-full border-0"
+            allowFullScreen={false}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Google Maps"
+          />
         </motion.div>
       </div>
     </motion.div>
