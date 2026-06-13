@@ -1,48 +1,28 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-
-const team = [
-  {
-    id: 1,
-    name: "Олег Ермаков",
-    role: "Генеральный директор, Главный дизайнер",
-    img: "https://images.unsplash.com/photo-1506863530036-1efeddceb993?auto=format&fit=crop&q=80&w=800",
-    quote: "Мы убираем всё лишнее, чтобы обнажить суть вещей.",
-    skills: ["Визионерство", "Индустриальный дизайн", "Арт-дирекшн"],
-    projects: "Sandyq, Ala-Too, One Ordo"
-  },
-  {
-    id: 2,
-    name: "Анна Смирнова",
-    role: "Арт-директор",
-    img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
-    quote: "Эстетика — это не украшение, а способ коммуникации.",
-    skills: ["Брендинг", "Графический дизайн", "Типографика"],
-    projects: "Salkyn, TechStart"
-  },
-  {
-    id: 3,
-    name: "Михаил Чен",
-    role: "Lead 3D Artist",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800",
-    quote: "Каждая деталь имеет значение, когда ты создаешь миры.",
-    skills: ["3D Моделирование", "Рендеринг", "Motion Design"],
-    projects: "Auto Concept X, VR Space"
-  },
-  {
-    id: 4,
-    name: "Елена Вейс",
-    role: "Архитектор",
-    img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800",
-    quote: "Пространство должно дышать вместе с человеком.",
-    skills: ["Концепт-архитектура", "Урбанистика", "Интерьеры"],
-    projects: "One Ordo Resort, Eco Villa"
-  }
-];
+import { LanguageContext } from "../i18n";
+import { teamTranslations } from "../teamData";
 
 export function About() {
+  const { t, locale } = useContext(LanguageContext);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const labels = {
+    en: { skills: "Skills", projects: "Favorite projects" },
+    kg: { skills: "Компетенциялар", projects: "Тандалган долбоорлор" },
+    ru: { skills: "Компетенции", projects: "Любимые проекты" }
+  };
+
+  const currentLabels = labels[locale] || labels.ru;
+  const team = teamTranslations[locale] || teamTranslations.ru;
+
+  const scrollRevealConfig = {
+    initial: { y: 40, opacity: 0 },
+    whileInView: { y: 0, opacity: 1 },
+    viewport: { once: true, margin: "-12%" },
+    transition: { duration: 0.9, ease: [0.215, 0.61, 0.355, 1] }
+  };
 
   return (
     <motion.div
@@ -52,26 +32,34 @@ export function About() {
       className="max-w-[1440px] mx-auto px-6 py-20 flex flex-col gap-32"
     >
       {/* Manifesto */}
-      <section className="grid md:grid-cols-2 gap-12 items-start">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] sticky top-32">
-          Основано на страсти к форме.
+      <motion.section 
+        {...scrollRevealConfig}
+        className="grid md:grid-cols-2 gap-12 items-start"
+      >
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] md:sticky md:top-32">
+          {t.about.manifestoHeading}
         </h1>
         <div className="text-xl md:text-2xl leading-relaxed text-black/80 font-light">
-          «Steel Drake Studio была основана в 2011 году дизайнером и визионером Олегом Ермаковым. Начав как концепт-студия прогрессивного дизайна, мы выросли в международное бюро, способное решать задачи любого масштаба — от айдентики технологического стартапа до проектирования футуристичного транспорта и архитектурных ансамблей. Наша история — это непрерывный поиск гармонии между функциональностью и чистой эмоцией.»
+          «{t.about.manifestoText}»
         </div>
-      </section>
+      </motion.section>
 
       {/* Philosophy */}
-      <section className="bg-[#F8F8F9] rounded-3xl p-10 md:p-20">
-        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">Наш манифест</h2>
+      <motion.section 
+        {...scrollRevealConfig}
+        className="bg-[#F8F8F9] rounded-3xl p-10 md:p-20"
+      >
+        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">{t.about.philosophyTitle}</h2>
         <div className="text-xl md:text-2xl leading-relaxed text-black/80 max-w-4xl font-light">
-          «Мы верим, что дизайн — это не просто оформление поверхности. Это язык, на котором продукт разговаривает с пользователем. Мы убираем всё лишнее, чтобы обнажить суть вещей. Наша философия строится на трех столпах: бескомпромиссная эргономика, технологическая эстетика и долговечность смыслов. Мы не следуем трендам — мы проектируем будущее, которое останется актуальным через десятилетия.»
+          «{t.about.philosophyText}»
         </div>
-      </section>
+      </motion.section>
 
       {/* Team */}
-      <section>
-        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">Команда</h2>
+      <motion.section
+        {...scrollRevealConfig}
+      >
+        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">{t.about.teamTitle}</h2>
         <div className="flex flex-col gap-4">
           {team.map((member) => {
             const isExpanded = expandedId === member.id;
@@ -114,7 +102,7 @@ export function About() {
                         </div>
                         <div className="space-y-8">
                           <div>
-                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">Компетенции</h4>
+                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">{currentLabels.skills}</h4>
                             <div className="flex flex-wrap gap-2">
                               {member.skills.map(skill => (
                                 <span key={skill} className="px-4 py-2 bg-white rounded-full text-sm font-medium border border-[#E5E5E7]">
@@ -124,7 +112,7 @@ export function About() {
                             </div>
                           </div>
                           <div>
-                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">Любимые проекты</h4>
+                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">{currentLabels.projects}</h4>
                             <p className="text-lg">{member.projects}</p>
                           </div>
                         </div>
@@ -136,7 +124,7 @@ export function About() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
     </motion.div>
   );
 }
