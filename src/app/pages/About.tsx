@@ -3,9 +3,8 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { teamTranslations } from "../teamData";
-import { Globe, Award, Sparkles, MapPin, ChevronLeft, ChevronRight, Plus, Layers, Infinity, PenTool } from "lucide-react";
+import { Globe, Award, Sparkles, MapPin, Layers, Infinity, PenTool } from "lucide-react";
 import { Map, MapMarker, MarkerContent, MapPopup } from "../components/ui/map";
-import useEmblaCarousel from "embla-carousel-react";
 
 const scrollReveal = {
   initial: { y: 50, opacity: 0 },
@@ -16,64 +15,9 @@ const scrollReveal = {
 
 export function About() {
   const { t, locale } = useContext(LanguageContext);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Reference to track when user was last active in the slider
-  const [lastUserInteraction, setLastUserInteraction] = useState<number>(0);
 
   const ab = t.about || {};
   const team = teamTranslations[locale] || teamTranslations.ru;
-  const len = team.length;
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: "start",
-    containScroll: false
-  });
-
-  // Synchronize activeIndex with Embla's active index
-  useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => {
-      setActiveIndex(emblaApi.selectedScrollSnap() % len);
-    };
-    emblaApi.on("select", onSelect);
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi]);
-
-  // Auto-scroll cycle: scrollNext every 10 seconds, unless user recently interacted
-  useEffect(() => {
-    if (!emblaApi) return;
-    const interval = setInterval(() => {
-      const timeSinceInteraction = Date.now() - lastUserInteraction;
-      if (timeSinceInteraction > 15000) {
-        emblaApi.scrollNext();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [emblaApi, lastUserInteraction]);
-
-  const handleUserSelect = (idx: number) => {
-    setLastUserInteraction(Date.now());
-    emblaApi?.scrollTo(idx);
-  };
-
-  const handlePrev = () => {
-    setLastUserInteraction(Date.now());
-    emblaApi?.scrollPrev();
-  };
-
-  const handleNext = () => {
-    setLastUserInteraction(Date.now());
-    emblaApi?.scrollNext();
-  };
-
-  const handleScrollStart = () => {
-    setLastUserInteraction(Date.now());
-  };
 
   const statsLabels = {
     ru: { storyTitle: "Наша история" },
@@ -317,7 +261,7 @@ export function About() {
       </motion.section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5 — TEAM (Fixed Height Slider Layout with aligned bases)
+          SECTION 5 — TEAM (Grid layout with hover reveal)
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
@@ -325,142 +269,44 @@ export function About() {
       >
         <div className="h-px bg-black/10 w-full mb-16" />
 
-        {/* Section title & navigation controls */}
-        <div className="mb-12 flex items-center justify-between">
+        {/* Section title */}
+        <div className="mb-12">
           <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-[#111111]">
             {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
           </h2>
-          <div className="flex gap-4">
-            <button
-              onClick={handlePrev}
-              className="w-8 h-8 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none"
-            >
-              <ChevronLeft className="w-4 h-4 text-black" strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={handleNext}
-              className="w-8 h-8 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none"
-            >
-              <ChevronRight className="w-4 h-4 text-black" strokeWidth={1.5} />
-            </button>
-          </div>
         </div>
 
-        {/* Embla Carousel Viewport */}
-        <div
-          ref={emblaRef}
-          className="overflow-hidden max-w-[1296px]"
-        >
-          {/* Embla Carousel Container */}
-          <div className="flex gap-8 pb-8 items-start" style={{ minHeight: "600px" }}>
-            {(() => {
-              const infiniteTeam = [...team, ...team, ...team];
-              return infiniteTeam.map((member: any, idx: number) => {
-                const originalIdx = idx % len;
-                const isExpanded = expandedIndex === originalIdx;
-                const isCurrentActive = activeIndex === originalIdx;
-
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => handleUserSelect(idx)}
-                    className="shrink-0 flex flex-col group select-none cursor-pointer transition-all duration-700 ease-out"
-                    style={{
-                      width: "300px",
-                    }}
-                  >
-                    {/* Photo Container Box (Always Aligned to Top, with fixed height to prevent vertical alignment jumps) */}
-                    <div className="h-[400px] w-full flex items-end justify-center overflow-visible">
-                  <div 
-                    className="relative w-full bg-[#eeeee9] rounded-[0.8rem] overflow-hidden transition-all duration-700 ease-out origin-bottom"
-                    style={{
-                      height: isCurrentActive ? "400px" : "330px",
-                      boxShadow: isCurrentActive ? "0 25px 55px rgba(0,0,0,0.12)" : "none"
-                    }}
-                  >
-                    <ImageWithFallback
-                      src={member.img}
-                      alt={member.name}
-                      className="w-full h-full object-cover transition-all duration-500 ease-out"
-                      style={{
-                        filter: isCurrentActive ? "none" : "grayscale(100%)",
-                        opacity: isCurrentActive ? 1 : 0.65
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Name & Plus Info (Aligned consistently at the bottom of the photo) */}
-                <div 
-                  className="flex items-start justify-between gap-4 mt-6"
-                >
-                  <div className="min-h-[60px]">
-                    <span className="text-sm text-[#0000FF] font-semibold block mb-1">0{originalIdx + 1}</span>
-                    <h3 
-                      className="transition-all duration-700 ease-out tracking-tight text-xl font-semibold"
-                      style={{
-                        color: isCurrentActive ? "#0000FF" : "#111111"
-                      }}
-                    >
-                      {member.name}
-                    </h3>
-                    <p 
-                      className="mt-1.5 text-lg text-black/55"
-                    >
-                      {member.role}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLastUserInteraction(Date.now());
-                      setExpandedIndex(isExpanded ? null : idx);
-                    }}
-                    className="w-6 h-6 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none shrink-0"
-                  >
-                    <Plus className={`w-3.5 h-3.5 text-black/70 transition-transform duration-300 ${isExpanded ? "rotate-45 text-[#0000FF]" : ""}`} strokeWidth={1.5} />
-                  </button>
-                </div>
-
-                {/* Accordion panel for details (Skills, Projects) */}
-                <div
-                  className="overflow-hidden transition-all duration-500"
-                  style={{
-                    maxHeight: isExpanded ? "220px" : "0px",
-                    opacity: isExpanded ? 1 : 0,
-                    marginTop: isExpanded ? "16px" : "0px"
-                  }}
-                >
-                  <div className="border-t border-black/5 pt-4 flex flex-col gap-4 text-lg leading-relaxed text-black/65">
-                    <div>
-                      <span className="font-mono text-xs uppercase tracking-wider text-black/35 block mb-1">
-                        {locale === "ru" ? "Экспертиза" : locale === "kg" ? "Багыт" : "Expertise"}
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {(member.skills || []).map((sk: string, sidx: number) => (
-                          <span key={sidx} className="bg-black/5 px-2 py-0.5 rounded text-sm">
-                            {sk}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="italic">«{member.quote}»</p>
-                    {member.projects && (
-                      <div>
-                        <span className="font-mono text-xs uppercase tracking-wider text-black/35 block mb-0.5">
-                          {locale === "ru" ? "Проекты" : locale === "kg" ? "Долбоорлор" : "Projects"}
-                        </span>
-                        <span className="font-bold text-black/80">{member.projects}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+        {/* Team Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+          {team.map((member: any, idx: number) => (
+            <div
+              key={member.id || idx}
+              className="flex flex-col group select-none cursor-pointer"
+            >
+              {/* Photo Container */}
+              <div className="relative w-full aspect-[3/4] rounded-[0.8rem] overflow-hidden bg-[#eeeee9]">
+                <ImageWithFallback
+                  src={member.img}
+                  alt={member.name}
+                  className="w-full h-full object-cover transition-all duration-500 ease-out filter grayscale group-hover:grayscale-0 group-hover:scale-105"
+                />
               </div>
-            );
-          });
-        })()}
-        </div></div>
+
+              {/* Name & Role (Always visible below the photo) */}
+              <div className="mt-5">
+                <span className="text-[17px] text-[#0000FF] font-semibold block mb-1">
+                  0{idx + 1}
+                </span>
+                <h3 className="tracking-tight text-[22px] font-bold text-black transition-colors duration-300 group-hover:text-[#0000FF]">
+                  {member.name}
+                </h3>
+                <p className="mt-1.5 text-[18px] text-black/55 leading-snug">
+                  {member.role}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </motion.section>
 
     </div>

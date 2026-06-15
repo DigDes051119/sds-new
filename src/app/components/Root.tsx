@@ -126,7 +126,9 @@ export function Root() {
   const [locale, setLocale] = useState<Language>("ru");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const footerRef = useRef<HTMLElement>(null);
+  const lastScrollY = useRef(0);
 
 
   useEffect(() => {
@@ -146,18 +148,42 @@ export function Root() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      const currentScrollY = window.scrollY;
+      const diff = currentScrollY - lastScrollY.current;
+
+      if (isMenuOpen) {
+        setIsHeaderVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
       }
+
+      // Only hide/show if the scroll diff is significant (e.g. > 10px) to avoid jittering
+      if (Math.abs(diff) > 10) {
+        if (currentScrollY > 100 && diff > 0) {
+          setIsHeaderVisible(false);
+        } else if (diff < 0) {
+          setIsHeaderVisible(true);
+        }
+      }
+
+      // Always show header at the very top of the page
+      if (currentScrollY <= 40) {
+        setIsHeaderVisible(true);
+        setIsScrolled(false);
+      } else {
+        setIsScrolled(true);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setIsHeaderVisible(true);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -194,7 +220,15 @@ export function Root() {
       <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white">
         <InteractiveBackground />
         
-        <header className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6">
+        <motion.header
+          className={`fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6 ${isHeaderVisible ? "" : "pointer-events-none"}`}
+          initial={{ y: 0, opacity: 1 }}
+          animate={{ 
+            y: isHeaderVisible ? 0 : -150,
+            opacity: isHeaderVisible ? 1 : 0
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
           <div className="mx-auto relative flex h-20 max-w-[1380px] items-center justify-center">
             
             {/* Logo Container */}
@@ -209,10 +243,10 @@ export function Root() {
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.25)" : "rgba(255, 255, 255, 0.12)",
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
-                  boxShadow: isScrolled ? "0 12px 45px rgba(0,0,0,0.06)" : "0 24px 80px rgba(0,0,0,0.12)",
+                  boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
                 className="hidden md:flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
@@ -253,10 +287,10 @@ export function Root() {
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.25)" : "rgba(255, 255, 255, 0.12)",
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
-                  boxShadow: isScrolled ? "0 12px 45px rgba(0,0,0,0.06)" : "0 24px 80px rgba(0,0,0,0.12)",
+                  boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
                 className="flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
@@ -301,7 +335,7 @@ export function Root() {
               </button>
             </div>
           </div>
-        </header>
+        </motion.header>
 
         {/* Mobile Menu */}
         <AnimatePresence>

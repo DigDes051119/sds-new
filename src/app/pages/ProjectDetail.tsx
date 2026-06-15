@@ -5,7 +5,7 @@ import videoSrc from "../../imports/__Copy_this_cozy_soft_life_quote_roundup_tha
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { projectDetailsTranslations } from "../projectDetailsData";
-import { ArrowLeft, Target, Sparkles, Trophy, CheckCircle, ArrowRight } from "lucide-react";
+import { ArrowLeft, CheckCircle, ArrowRight } from "lucide-react";
 
 export function ProjectDetail() {
   const { t, locale } = useContext(LanguageContext);
@@ -98,9 +98,6 @@ export function ProjectDetail() {
       >
         <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-24 items-start">
           <div className="flex flex-col gap-6">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider text-[#0000FF] uppercase">
-              <Target size={16} /> {locale === "ru" ? "ВЫЗОВ И ИССЛЕДОВАНИЕ" : locale === "kg" ? "ТАПШЫРМА ЖАНА ИЗИЛДӨӨ" : "THE BRIEF & CONTEXT"}
-            </span>
             <h2 className="text-4xl sm:text-5xl lg:text-[52px] font-semibold tracking-[-0.06em] leading-[1.05] text-black">
               {t.projectDetail.challengeHeading}
             </h2>
@@ -138,9 +135,6 @@ export function ProjectDetail() {
       >
         <div className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <span className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider text-[#0000FF] uppercase mb-4">
-              <Sparkles size={16} /> {locale === "ru" ? "ПРОЦЕСС И ПРОЕКТИРОВАНИЕ" : locale === "kg" ? "ПРОЦЕСС ЖАНА ДОЛБООРЛОО" : "PROCESS & EXECUTION"}
-            </span>
             <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black">
               {locale === "ru" ? "Этапы реализации" : locale === "kg" ? "Ишке ашыруу этаптары" : "Development Exhibition"}
             </h2>
@@ -246,9 +240,6 @@ export function ProjectDetail() {
           {/* Infographic Stats Panel */}
           <div className="bg-white border border-black/[0.05] rounded-[2.5rem] p-8 md:p-16 flex flex-col justify-between shadow-[0_20px_60px_rgba(0,0,0,0.02)]">
             <div>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider text-[#0000FF] uppercase mb-6">
-                <Trophy size={16} /> {locale === "ru" ? "РЕЗУЛЬТАТЫ И ВЛИЯНИЕ" : locale === "kg" ? "НАТЫЙЖАЛАР ЖАНА ТААСИР" : "RESULTS & KEY IMPACT"}
-              </span>
               <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] mb-12">
                 {t.projectDetail.resultsHeading}
               </h2>
