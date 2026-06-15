@@ -18,8 +18,8 @@ export const translations = {
       contacts: "Contacts",
     },
     home: {
-      heroTag: "Design systems for objects, spaces and screens",
-      heroDescription: "A premium design studio at the intersection of engineering, 3D materials and calm digital luxury.",
+      heroTag: '(c) "Everything you see is but a primary link in how we perceive our physical world. That is my philosophy."',
+      heroDescription: "It took God billions of years to create eyes for all living creatures. The eye itself is one of the most complex things in the universe, which shows that vision is of primary importance",
       viewProjects: "View projects",
       statsYears: "13+",
       statsLabel: "years shaping products, brands and spaces.",
@@ -58,6 +58,9 @@ export const translations = {
         { title: "Sandyq", tag: "Hospitality / Identity" },
         { title: "Ala-Too", tag: "Strategy / Web" },
         { title: "Ordo X", tag: "Architecture / 3D" },
+        { title: "Salkyn", tag: "Industrial Design" },
+        { title: "TechStart", tag: "Branding / SaaS" },
+        { title: "Auto Concept X", tag: "Automotive / R&D" },
       ],
     },
     about: {
@@ -100,6 +103,24 @@ export const translations = {
           projects: "One Ordo Resort, Eco Villa",
         },
       ],
+      awardsTitle: "Recognition",
+      awardsSub: "Designing awards & milestones.",
+      awardsList: [
+        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Winner in Mobility Design Concept Category" },
+        { year: "2023", title: "Best Design Studio Central Asia", project: "Sandyq Hospitality", details: "Awarded by Regional Design Guild" },
+        { year: "2022", title: "IF Design Award Nominee", project: "Oasis Digital Ecosystem", details: "Recognized for interface innovation" },
+        { year: "2020", title: "A' Design Award Gold", project: "Ala-Too Workspace", details: "Best Workspace Design Concept" }
+      ],
+      valuesTitle: "Core Principles",
+      valuesSub: "The pillars behind our signature design philosophy.",
+      valuesList: [
+        { num: "01", title: "Tactile Minimalism", desc: "We strip away superficial noise to let the pure form of materials speak, creating a clean but warm presence." },
+        { num: "02", title: "Future Durability", desc: "We design against planned obsolescence. Our aesthetics and materials are built to outlast immediate trends." },
+        { num: "03", title: "Functional Aesthetics", desc: "No design is pure decoration. We integrate mechanical logic, ergonomics, and production constraints into early concepts." }
+      ],
+      mapTitle: "Global Footprint",
+      mapSub: "Designing across physical borders, uniting ideas globally.",
+      mapCities: "Projects developed for partners in Almaty, Bishkek, Tashkent, Berlin, and San Francisco."
     },
     services: {
       title: "Services",
@@ -234,6 +255,8 @@ export const translations = {
         { id: "ala-too", name: "Ala-Too", category: "Product Design", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
         { id: "one-ordo", name: "One Ordo Resort", category: "Architecture", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
+        { id: "techstart", name: "TechStart", category: "Branding & Web", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
       ],
     },
     projectCategories: {
@@ -253,6 +276,7 @@ export const translations = {
     },
     contacts: {
       title: "Let's discuss the future.",
+      letsTalk: "Let's Talk",
       writeUs: "Write to us",
       callUs: "Call us",
       officeTitle: "Office address",
@@ -306,8 +330,8 @@ export const translations = {
       contacts: "Байланыш",
     },
     home: {
-      heroTag: "Объекттер, мейкиндиктер жана экрандар үчүн дизайн системалары",
-      heroDescription: "Инженерия, 3D материалдар жана тынч санариптик люкс кесилишиндеги премиум дизайн студиясы.",
+      heroTag: "Сиз көргөн нерселердин баары биздин физикалык дүйнөнү кандай кабыл алганыбыздын баштапкы шилтемелеринин бири болуп саналат. Бул менин философиям.",
+      heroDescription: "«Кудай бардык тирүү жандыктар үчүн көздү жаратуу үчүн Ааламдын бардык билимине муктаж болгон. Бул организмдин эң татаал системаларынын бири, биз көргөн нерселердин маанилүү экенин далилдейт».",
       viewProjects: "Проекттерди караңыз",
       statsYears: "13+",
       statsLabel: "жыл продукттарды, бренддерди жана мейкиндиктерди түзүп келебиз.",
@@ -346,6 +370,9 @@ export const translations = {
         { title: "Sandyq", tag: "Гостиница / Айдентика" },
         { title: "Ala-Too", tag: "Стратегия / Веб" },
         { title: "Ordo X", tag: "Архитектура / 3D" },
+        { title: "Salkyn", tag: "Өнөр жай дизайны" },
+        { title: "TechStart", tag: "Брендинг / SaaS" },
+        { title: "Auto Concept X", tag: "Автомобиль / R&D" },
       ],
     },
     about: {
@@ -388,6 +415,24 @@ export const translations = {
           projects: "One Ordo Resort, Eco Villa",
         },
       ],
+      awardsTitle: "Таануу жана сыйлыктар",
+      awardsSub: "Дизайн багытындагы жетишкендиктерибиз.",
+      awardsList: [
+        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Унаа дизайны концепциясы категориясынын жеңүүчүсү" },
+        { year: "2023", title: "Борбордук Азиядагы эң мыкты дизайн студиясы", project: "Sandyq Hospitality", details: "Аймактык Дизайн Гильдиясы тарабынан берилген" },
+        { year: "2022", title: "IF Design Award Номинациясы", project: "Oasis Digital Ecosystem", details: "Интерфейс инновациялары үчүн таанылган" },
+        { year: "2020", title: "A' Design Award Алтын", project: "Ala-Too Workspace", details: "Мыкты жумушчу мейкиндигинин дизайны концепциясы" }
+      ],
+      valuesTitle: "Негизги принциптерибиз",
+      valuesSub: "Биздин өзгөчө дизайн философиясынын негизи.",
+      valuesList: [
+        { num: "01", title: "Сезүүчү Минимализм", desc: "Биз материалдардын таза формасы сүйлөшү үчүн үстүртөн ызы-чууну алып салабыз, таза бирок жылуу чөйрөнү жаратабыз." },
+        { num: "02", title: "Келечектин туруктуулугу", desc: "Биз эскирүүгө каршы долбоорлойбуз. Биздин эстетика жана материалдар тез өтүүчү тренддерден ашып түшүү үчүн курулган." },
+        { num: "03", title: "Функционалдуу эстетика", desc: "Эч бир дизайн жөн эле жасалга эмес. Биз механикалык логиканы, эргономиканы жана өндүрүш чектөөлөрүн алгачкы концепцияларга киргизебиз." }
+      ],
+      mapTitle: "Глобалдык география",
+      mapSub: "Физикалык чек аралардан тышкары дизайн түзүү, идеяларды бириктирүү.",
+      mapCities: "Долбоорлор Алматы, Бишкек, Ташкент, Берлин жана Сан-Францискодогу өнөктөштөр үчүн иштелип чыккан."
     },
     services: {
       title: "Кызматтар",
@@ -522,6 +567,8 @@ export const translations = {
         { id: "ala-too", name: "Ala-Too", category: "Продукт дизайны", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
         { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
+        { id: "techstart", name: "TechStart", category: "Брендинг", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Автомобиль дизайны", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
       ],
     },
     projectCategories: {
@@ -541,6 +588,7 @@ export const translations = {
     },
     contacts: {
       title: "Келечек жөнүндө сүйлөшөлү.",
+      letsTalk: "Сүйлөшөлү",
       writeUs: "Бизге жаз",
       callUs: "Чалып көр",
       officeTitle: "Офис дареги",
@@ -594,17 +642,17 @@ export const translations = {
       contacts: "Контакты",
     },
     home: {
-      heroTag: "Дизайн-системы для объектов, пространств и экранов",
-      heroDescription: "Премиальная дизайн-студия на стыке инженерии, 3D-материалов и спокойной цифровой роскоши.",
+      heroTag: "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, Такова моя философия",
+      heroDescription: "«Богу потребовались все знания Вселенной, чтобы создать глаза для всего живого. Это одна из сложнейших систем организма, доказывающая, то что мы видим имеет важное значение».",
       viewProjects: "Смотреть проекты",
       statsYears: "13+",
       statsLabel: "лет формируем продукты, бренды и пространства.",
       globalLabel: "Проекты для рынков Центральной Азии, Европы и digital-first команд.",
       principleLabel: "Минимум шума. Максимум тактильности.",
       studioLabel: "Форма будущего должна казаться неизбежной.",
-      servicesTitle: "Services",
-      servicesHint: "hover / expand",
-      selectedWorkTitle: "Selected work",
+      servicesTitle: "Услуги",
+      servicesHint: "наведение / раскрытие",
+      selectedWorkTitle: "Избранные проекты",
       featuredProjectsTitle: "Новый и недавний проект",
       newProject: {
         label: "Новый проект",
@@ -634,6 +682,9 @@ export const translations = {
         { title: "Sandyq", tag: "Hospitality / Identity" },
         { title: "Ala-Too", tag: "Strategy / Web" },
         { title: "Ordo X", tag: "Architecture / 3D" },
+        { title: "Salkyn", tag: "Индустриальный дизайн" },
+        { title: "TechStart", tag: "Брендирование / SaaS" },
+        { title: "Auto Concept X", tag: "Automotive / R&D" },
       ],
     },
     about: {
@@ -676,6 +727,24 @@ export const translations = {
           projects: "One Ordo Resort, Eco Villa",
         },
       ],
+      awardsTitle: "Признание и награды",
+      awardsSub: "Наши достижения в области дизайна и проектирования.",
+      awardsList: [
+        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Победитель в категории концептов мобильности будущего" },
+        { year: "2023", title: "Лучшая дизайн-студия Центральной Азии", project: "Sandyq Hospitality", details: "Награда Региональной Гильдии Дизайнеров" },
+        { year: "2022", title: "IF Design Award Номинация", project: "Oasis Digital Ecosystem", details: "За инновации в пользовательских интерфейсах" },
+        { year: "2020", title: "A' Design Award Gold", project: "Ala-Too Workspace", details: "Лучший концепт интерьера рабочего пространства" }
+      ],
+      valuesTitle: "Наши принципы",
+      valuesSub: "Фундамент нашей уникальной философии дизайна.",
+      valuesList: [
+        { num: "01", title: "Тактильный минимализм", desc: "Мы убираем визуальный шум, позволяя чистой форме материалов говорить за себя. Создаем чистую, но теплую атмосферу." },
+        { num: "02", title: "Долговечность смыслов", desc: "Мы проектируем против запланированного устаревания. Наша эстетика создается вне рамок сиюминутных трендов." },
+        { num: "03", title: "Функциональная эстетика", desc: "Никакой декор не должен быть бесполезным. Мы закладываем эргономику, конструктивную логику и ограничения производства на самых ранних стадиях." }
+      ],
+      mapTitle: "География проектов",
+      mapSub: "Проектируем без границ, объединяя идеи по всему миру.",
+      mapCities: "Проекты разработаны для партнеров в Алматы, Бишкеке, Ташкенте, Берлине и Сан-Франциско."
     },
     services: {
       title: "Услуги",
@@ -810,6 +879,8 @@ export const translations = {
         { id: "ala-too", name: "Ala-Too", category: "Продукт Дизайн", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
         { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
+        { id: "techstart", name: "TechStart", category: "Брендирование", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
       ],
     },
     projectCategories: {
@@ -829,6 +900,7 @@ export const translations = {
     },
     contacts: {
       title: "Давайте обсудим будущее.",
+      letsTalk: "Давайте обсудим",
       writeUs: "Написать нам",
       callUs: "Позвонить",
       officeTitle: "Адрес офиса",

@@ -1,130 +1,468 @@
-import { motion, AnimatePresence } from "motion/react";
-import { useContext, useState } from "react";
+import { motion } from "motion/react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { teamTranslations } from "../teamData";
+import { Globe, Award, Sparkles, MapPin, ChevronLeft, ChevronRight, Plus, Layers, Infinity, PenTool } from "lucide-react";
+import { Map, MapMarker, MarkerContent, MapPopup } from "../components/ui/map";
+import useEmblaCarousel from "embla-carousel-react";
+
+const scrollReveal = {
+  initial: { y: 50, opacity: 0 },
+  whileInView: { y: 0, opacity: 1 },
+  viewport: { once: true, margin: "-10%" },
+  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+};
 
 export function About() {
   const { t, locale } = useContext(LanguageContext);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const labels = {
-    en: { skills: "Skills", projects: "Favorite projects" },
-    kg: { skills: "Компетенциялар", projects: "Тандалган долбоорлор" },
-    ru: { skills: "Компетенции", projects: "Любимые проекты" }
-  };
+  // Reference to track when user was last active in the slider
+  const [lastUserInteraction, setLastUserInteraction] = useState<number>(0);
 
-  const currentLabels = labels[locale] || labels.ru;
+  const ab = t.about || {};
   const team = teamTranslations[locale] || teamTranslations.ru;
+  const len = team.length;
 
-  const scrollRevealConfig = {
-    initial: { y: 40, opacity: 0 },
-    whileInView: { y: 0, opacity: 1 },
-    viewport: { once: true, margin: "-12%" },
-    transition: { duration: 0.9, ease: [0.215, 0.61, 0.355, 1] }
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: "start",
+    containScroll: false
+  });
+
+  // Synchronize activeIndex with Embla's active index
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => {
+      setActiveIndex(emblaApi.selectedScrollSnap() % len);
+    };
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
+  // Auto-scroll cycle: scrollNext every 10 seconds, unless user recently interacted
+  useEffect(() => {
+    if (!emblaApi) return;
+    const interval = setInterval(() => {
+      const timeSinceInteraction = Date.now() - lastUserInteraction;
+      if (timeSinceInteraction > 15000) {
+        emblaApi.scrollNext();
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [emblaApi, lastUserInteraction]);
+
+  const handleUserSelect = (idx: number) => {
+    setLastUserInteraction(Date.now());
+    emblaApi?.scrollTo(idx);
   };
+
+  const handlePrev = () => {
+    setLastUserInteraction(Date.now());
+    emblaApi?.scrollPrev();
+  };
+
+  const handleNext = () => {
+    setLastUserInteraction(Date.now());
+    emblaApi?.scrollNext();
+  };
+
+  const handleScrollStart = () => {
+    setLastUserInteraction(Date.now());
+  };
+
+  const statsLabels = {
+    ru: { storyTitle: "Наша история" },
+    en: { storyTitle: "Our story" },
+    kg: { storyTitle: "Биздин тарых" },
+  };
+  const stats = statsLabels[locale] || statsLabels.ru;
+
+  const awardImages = [
+    "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80",
+  ];
+
+  // Actual geographic LngLat coordinates of target cities
+  const mapPoints = [
+    { name: "Almaty", lng: 76.9286, lat: 43.2389, count: 12 },
+    { name: "Bishkek", lng: 74.59, lat: 42.8747, count: 18 },
+    { name: "Tashkent", lng: 69.2401, lat: 41.2995, count: 6 },
+    { name: "Berlin", lng: 13.405, lat: 52.52, count: 4 },
+    { name: "San Francisco", lng: -122.4194, lat: 37.7749, count: 3 }
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-[1440px] mx-auto px-6 py-20 flex flex-col gap-32"
+    <div
+      className="overflow-hidden pb-32 bg-[#fafaf6] text-[#111] pt-16 text-lg sm:text-[1.125rem]"
     >
-      {/* Manifesto */}
-      <motion.section 
-        {...scrollRevealConfig}
-        className="grid md:grid-cols-2 gap-12 items-start"
-      >
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] md:sticky md:top-32">
-          {t.about.manifestoHeading}
-        </h1>
-        <div className="text-xl md:text-2xl leading-relaxed text-black/80 font-light">
-          «{t.about.manifestoText}»
-        </div>
-      </motion.section>
 
-      {/* Philosophy */}
-      <motion.section 
-        {...scrollRevealConfig}
-        className="bg-[#F8F8F9] rounded-3xl p-10 md:p-20"
-      >
-        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">{t.about.philosophyTitle}</h2>
-        <div className="text-xl md:text-2xl leading-relaxed text-black/80 max-w-4xl font-light">
-          «{t.about.philosophyText}»
-        </div>
-      </motion.section>
-
-      {/* Team */}
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 1 — STUDIO STORY
+      ═══════════════════════════════════════════════════════════════ */}
       <motion.section
-        {...scrollRevealConfig}
+        {...scrollReveal}
+        className="mx-auto max-w-[1380px] px-3 sm:px-6"
       >
-        <h2 className="text-4xl md:text-5xl font-bold leading-[1.12] mb-12">{t.about.teamTitle}</h2>
-        <div className="flex flex-col gap-4">
-          {team.map((member) => {
-            const isExpanded = expandedId === member.id;
+        <div className="grid md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-start">
+          <div>
+            <h2 className="text-5xl sm:text-7xl font-semibold tracking-[-0.07em] leading-[0.95]">
+              {stats.storyTitle}
+            </h2>
+            <div className="mt-6 h-1 w-16 bg-[#0000FF] rounded-full" />
+          </div>
 
-            return (
-              <motion.div
-                key={member.id}
-                layout
-                onClick={() => setExpandedId(isExpanded ? null : member.id)}
-                className="bg-white border border-[#E5E5E7] rounded-3xl overflow-hidden cursor-pointer interactive-element group"
+          <p className="text-[clamp(1.15rem,2vw,1.55rem)] leading-[1.55] tracking-[-0.02em] text-[#111]/80 text-lg sm:text-[1.125rem]">
+            {ab.manifestoText}
+          </p>
+        </div>
+      </motion.section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 2 — CORE VALUES (Infographic style)
+      ═══════════════════════════════════════════════════════════════ */}
+      <motion.section
+        {...scrollReveal}
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+      >
+        <div className="h-px bg-black/10 w-full mb-16" />
+        <div className="grid lg:grid-cols-[1fr_2.5fr] gap-12 lg:gap-16">
+          <div>
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black">
+              {ab.valuesSub || "Signature Approach"}
+            </h2>
+            <p className="mt-6 text-base text-black/55 leading-relaxed hidden lg:block">
+              {locale === "ru"
+                ? "Инженерные стандарты и принципы, которые лежат в основе каждого нашего решения."
+                : locale === "kg"
+                ? "Биздин ар бир чечимибиздин негизинде жаткан инженердик стандарттар жана принциптер."
+                : "The engineering standards and core design principles behind every decision we make."}
+            </p>
+          </div>
+          
+          <div className="relative grid sm:grid-cols-3 gap-8">
+            {/* Visual connecting pipeline for infographic style */}
+            <div className="absolute top-[88px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-[#0000FF]/5 via-[#0000FF]/40 to-[#0000FF]/5 hidden sm:block z-0 pointer-events-none" />
+
+            {(ab.valuesList || []).map((val: any, idx: number) => {
+              // Map technical icons matching the card themes
+              const stepMeta = [
+                {
+                  icon: <Layers className="text-[#0000FF]" size={24} />,
+                },
+                {
+                  icon: <Infinity className="text-[#0000FF]" size={24} />,
+                },
+                {
+                  icon: <PenTool className="text-[#0000FF]" size={24} />,
+                }
+              ][idx] || {
+                icon: <Sparkles className="text-[#0000FF]" size={24} />,
+              };
+
+              return (
+                <motion.div
+                  key={idx}
+                  whileHover={{ y: -8, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="relative bg-white border border-black/[0.06] rounded-[2rem] p-7 flex flex-col justify-start shadow-[0_20px_50px_rgba(0,0,0,0.03)] overflow-hidden group min-h-[300px] z-10"
+                >
+                  {/* Infographic Technical Grid Overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity" 
+                    style={{ 
+                      backgroundImage: 'radial-gradient(#0000FF 1px, transparent 1px)', 
+                      backgroundSize: '18px 18px' 
+                    }} 
+                  />
+
+                  {/* Header row with Number pill and Icon circle */}
+                  <div className="flex items-center justify-between z-10">
+                    <span className="text-sm bg-black/[0.03] text-[#0000FF] font-bold px-3 py-1.5 rounded-full border border-black/[0.04]">
+                      {val.num}
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-[#0000FF]/5 flex items-center justify-center border border-[#0000FF]/10 group-hover:bg-[#0000FF] group-hover:text-white transition-all duration-300">
+                      <div className="group-hover:brightness-0 group-hover:invert transition-all">
+                        {stepMeta.icon}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content details */}
+                  <div className="mt-10 mb-2 z-10">
+                    <h3 className="text-2xl font-bold tracking-tight mb-3 text-black">
+                      {val.title}
+                    </h3>
+                    <p className="text-[15px] leading-relaxed text-black/60 font-light">
+                      {val.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 3 — AWARDS
+      ═══════════════════════════════════════════════════════════════ */}
+      <motion.section
+        {...scrollReveal}
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 relative"
+      >
+        <div className="h-px bg-black/10 w-full mb-16" />
+        <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-start">
+          <div>
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02]">
+              {ab.awardsSub || "Awards"}
+            </h2>
+          </div>
+
+          <div className="divide-y divide-black/10">
+            {(ab.awardsList || []).map((aw: any, idx: number) => (
+              <div
+                key={idx}
+                className="py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
               >
-                <div className="flex flex-col md:flex-row items-center p-6 gap-8">
-                  <motion.div layout className="relative w-24 h-24 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-full">
-                    <ImageWithFallback 
-                      src={member.img} 
-                      alt={member.name}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                    />
-                  </motion.div>
+                <div className="flex items-start gap-6">
+                  <span className="font-mono text-xl text-black/35 pt-1">
+                    {aw.year}
+                  </span>
+                  <div>
+                    <h3 className="text-2xl font-bold tracking-tight text-black">
+                      {aw.title}
+                    </h3>
+                    <p className="text-lg text-black/55 mt-1">{aw.project}</p>
+                  </div>
+                </div>
+                <div className="text-right sm:text-right text-lg font-medium text-black/65 sm:max-w-[280px]">
+                  {aw.details}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4 — GEOGRAPHY MAP (Using custom mapcn library with MapLibre GL)
+      ═══════════════════════════════════════════════════════════════ */}
+      <motion.section
+        {...scrollReveal}
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+      >
+        <div className="h-px bg-black/10 w-full mb-16" />
+        <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-center">
+          <div>
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02]">
+              {ab.mapSub || "International Projects"}
+            </h2>
+            <p className="mt-6 text-lg text-black/65 leading-relaxed max-w-[380px]">
+              {ab.mapCities}
+            </p>
+          </div>
+
+          {/* Mapcn Map component wrapper with light Positron elegant styling */}
+          <div className="relative w-full aspect-[16/9] bg-[#eeeee9] rounded-[2rem] border border-black/10 overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.06)]">
+            <Map
+              theme="light"
+              viewport={{
+                center: [30, 45], // Centered between Central Asia and Europe
+                zoom: 2.2,
+                bearing: 0,
+                pitch: 0,
+              }}
+              className="w-full h-full"
+            >
+              {mapPoints.map((pt, idx) => (
+                <MapMarker
+                  key={idx}
+                  longitude={pt.lng}
+                  latitude={pt.lat}
+                >
+                  <MarkerContent>
+                    <div className="relative group flex items-center justify-center">
+                      {/* Elegant pulsing target marker styled in blue */}
+                      <span className="absolute w-7 h-7 rounded-full bg-[#0000FF]/25 animate-ping" />
+                      <div className="relative w-4 h-4 rounded-full bg-[#0000FF] border-2 border-white shadow-[0_2px_10px_rgba(0,0,255,0.4)] transition-transform duration-300 group-hover:scale-125" />
+                    </div>
+                  </MarkerContent>
                   
-                  <motion.div layout className="flex-1 text-center md:text-left">
-                    <h3 className="text-2xl font-bold">{member.name}</h3>
-                    <p className="text-[#0000FF] font-medium mt-1">{member.role}</p>
-                  </motion.div>
+                  {/* Styled Popups inside mapcn structure */}
+                  <MapPopup closeOnClick={false} anchor="bottom" offset={14}>
+                    <div className="bg-white/80 backdrop-blur-md text-black py-3.5 px-5 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.06)] flex items-center gap-4 border border-black/[0.08]">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#0000FF]/8 text-[#0000FF] shrink-0">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-black/95 text-lg font-semibold leading-tight">{pt.name}</span>
+                        <span className="text-[#0000FF] font-mono text-[17px] mt-0.5 font-semibold">
+                          {pt.count} {locale === "ru" ? "проект." : locale === "kg" ? "долбоор." : "proj."}
+                        </span>
+                      </div>
+                    </div>
+                  </MapPopup>
+                </MapMarker>
+              ))}
+            </Map>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 5 — TEAM (Fixed Height Slider Layout with aligned bases)
+      ═══════════════════════════════════════════════════════════════ */}
+      <motion.section
+        {...scrollReveal}
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+      >
+        <div className="h-px bg-black/10 w-full mb-16" />
+
+        {/* Section title & navigation controls */}
+        <div className="mb-12 flex items-center justify-between">
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-[#111111]">
+            {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
+          </h2>
+          <div className="flex gap-4">
+            <button
+              onClick={handlePrev}
+              className="w-8 h-8 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none"
+            >
+              <ChevronLeft className="w-4 h-4 text-black" strokeWidth={1.5} />
+            </button>
+            <button
+              onClick={handleNext}
+              className="w-8 h-8 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none"
+            >
+              <ChevronRight className="w-4 h-4 text-black" strokeWidth={1.5} />
+            </button>
+          </div>
+        </div>
+
+        {/* Embla Carousel Viewport */}
+        <div
+          ref={emblaRef}
+          className="overflow-hidden max-w-[1296px]"
+        >
+          {/* Embla Carousel Container */}
+          <div className="flex gap-8 pb-8 items-start" style={{ minHeight: "600px" }}>
+            {(() => {
+              const infiniteTeam = [...team, ...team, ...team];
+              return infiniteTeam.map((member: any, idx: number) => {
+                const originalIdx = idx % len;
+                const isExpanded = expandedIndex === originalIdx;
+                const isCurrentActive = activeIndex === originalIdx;
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => handleUserSelect(idx)}
+                    className="shrink-0 flex flex-col group select-none cursor-pointer transition-all duration-700 ease-out"
+                    style={{
+                      width: "300px",
+                    }}
+                  >
+                    {/* Photo Container Box (Always Aligned to Top, with fixed height to prevent vertical alignment jumps) */}
+                    <div className="h-[400px] w-full flex items-end justify-center overflow-visible">
+                  <div 
+                    className="relative w-full bg-[#eeeee9] rounded-[0.8rem] overflow-hidden transition-all duration-700 ease-out origin-bottom"
+                    style={{
+                      height: isCurrentActive ? "400px" : "330px",
+                      boxShadow: isCurrentActive ? "0 25px 55px rgba(0,0,0,0.12)" : "none"
+                    }}
+                  >
+                    <ImageWithFallback
+                      src={member.img}
+                      alt={member.name}
+                      className="w-full h-full object-cover transition-all duration-500 ease-out"
+                      style={{
+                        filter: isCurrentActive ? "none" : "grayscale(100%)",
+                        opacity: isCurrentActive ? 1 : 0.65
+                      }}
+                    />
+                  </div>
                 </div>
 
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden border-t border-[#E5E5E7]"
+                {/* Name & Plus Info (Aligned consistently at the bottom of the photo) */}
+                <div 
+                  className="flex items-start justify-between gap-4 mt-6"
+                >
+                  <div className="min-h-[60px]">
+                    <span className="text-sm text-[#0000FF] font-semibold block mb-1">0{originalIdx + 1}</span>
+                    <h3 
+                      className="transition-all duration-700 ease-out tracking-tight text-xl font-semibold"
+                      style={{
+                        color: isCurrentActive ? "#0000FF" : "#111111"
+                      }}
                     >
-                      <div className="p-8 md:p-12 grid md:grid-cols-2 gap-12 bg-[#F8F8F9]">
-                        <div>
-                          <p className="text-2xl font-light italic text-black/80 mb-6">
-                            "{member.quote}"
-                          </p>
-                        </div>
-                        <div className="space-y-8">
-                          <div>
-                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">{currentLabels.skills}</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {member.skills.map(skill => (
-                                <span key={skill} className="px-4 py-2 bg-white rounded-full text-sm font-medium border border-[#E5E5E7]">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <h4 className="text-sm text-black/50 uppercase tracking-wider font-semibold mb-3">{currentLabels.projects}</h4>
-                            <p className="text-lg">{member.projects}</p>
-                          </div>
-                        </div>
+                      {member.name}
+                    </h3>
+                    <p 
+                      className="mt-1.5 text-lg text-black/55"
+                    >
+                      {member.role}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLastUserInteraction(Date.now());
+                      setExpandedIndex(isExpanded ? null : idx);
+                    }}
+                    className="w-6 h-6 rounded-full border border-black/10 hover:border-black flex items-center justify-center cursor-pointer transition focus:outline-none shrink-0"
+                  >
+                    <Plus className={`w-3.5 h-3.5 text-black/70 transition-transform duration-300 ${isExpanded ? "rotate-45 text-[#0000FF]" : ""}`} strokeWidth={1.5} />
+                  </button>
+                </div>
+
+                {/* Accordion panel for details (Skills, Projects) */}
+                <div
+                  className="overflow-hidden transition-all duration-500"
+                  style={{
+                    maxHeight: isExpanded ? "220px" : "0px",
+                    opacity: isExpanded ? 1 : 0,
+                    marginTop: isExpanded ? "16px" : "0px"
+                  }}
+                >
+                  <div className="border-t border-black/5 pt-4 flex flex-col gap-4 text-lg leading-relaxed text-black/65">
+                    <div>
+                      <span className="font-mono text-xs uppercase tracking-wider text-black/35 block mb-1">
+                        {locale === "ru" ? "Экспертиза" : locale === "kg" ? "Багыт" : "Expertise"}
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {(member.skills || []).map((sk: string, sidx: number) => (
+                          <span key={sidx} className="bg-black/5 px-2 py-0.5 rounded text-sm">
+                            {sk}
+                          </span>
+                        ))}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                    </div>
+                    <p className="italic">«{member.quote}»</p>
+                    {member.projects && (
+                      <div>
+                        <span className="font-mono text-xs uppercase tracking-wider text-black/35 block mb-0.5">
+                          {locale === "ru" ? "Проекты" : locale === "kg" ? "Долбоорлор" : "Projects"}
+                        </span>
+                        <span className="font-bold text-black/80">{member.projects}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             );
-          })}
-        </div>
+          });
+        })()}
+        </div></div>
       </motion.section>
-    </motion.div>
+
+    </div>
   );
 }

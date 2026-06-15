@@ -4,12 +4,12 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
-import referenceA from "../../imports/image.png";
+import abstractBlue from "../../imports/abstract_blue.webp";
 import projectImg1 from "../../imports/image.png";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
 
 export function Home() {
-  const { t } = useContext(LanguageContext);
+  const { t, locale } = useContext(LanguageContext);
   const navigate = useNavigate();
   const [active, setActive] = useState(0);
   const services = t.home.services;
@@ -70,11 +70,14 @@ export function Home() {
   }, [isMobile]);
 
   const homeProjects = projects.map((p, i) => {
-    const ids = ["sandyq", "ala-too", "one-ordo"];
+    const ids = ["sandyq", "ala-too", "one-ordo", "salkyn", "techstart", "auto-concept-x"];
     const images = [
       projectImg1,
       projectImg2,
-      "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600"
+      "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600",
+      "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
+      "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600"
     ];
     return {
       ...p,
@@ -91,7 +94,7 @@ export function Home() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="overflow-hidden pb-24">
+    <div className="overflow-hidden pb-24">
       {/* Hero Section */}
       <section className="px-3 sm:px-6 pt-8">
         <motion.div
@@ -101,18 +104,20 @@ export function Home() {
           className="relative mx-auto max-w-[1380px] overflow-hidden rounded-[2rem] border border-black/10 bg-[#f6f6f2]/90 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.10)] sm:rounded-[2.7rem] sm:p-8"
         >
           <div className="relative min-h-[520px] overflow-hidden rounded-[1.5rem] bg-[#eeeee9] sm:rounded-[2rem]">
-            <div className="absolute bottom-8 left-6 right-6 grid gap-8 sm:bottom-10 sm:left-10 sm:right-10 lg:grid-cols-[1.1fr_.9fr] lg:items-end">
-              <div>
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-medium text-white interactive-element"><Sparkles size={14} /> {t.home.heroTag}</div>
-                <h1 className="max-w-[780px] text-[clamp(3.8rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.075em] text-black">
+            <div className="absolute bottom-8 left-6 right-6 grid gap-8 sm:bottom-10 sm:left-10 sm:right-10 lg:grid-cols-[1.15fr_.85fr] lg:items-end">
+              <div className="flex flex-col gap-5 max-w-[680px]">
+                <h1 className="text-[clamp(3.8rem,9vw,6.5rem)] font-semibold leading-[0.95] tracking-[-0.075em] text-black">
                   AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
                 </h1>
+                <p className="text-balance text-sm font-medium italic text-black/45 leading-relaxed border-l-2 border-[#0000FF]/30 pl-4 mt-2">
+                  {t.home.heroTag}
+                </p>
               </div>
-              <div className="grid gap-5 lg:justify-items-end lg:text-right">
-                <p className="max-w-[420px] text-balance text-lg leading-[1.16] tracking-[-0.035em] text-black/75 sm:text-2xl lg:ml-auto">
+              <div className="flex flex-col gap-6 items-start lg:pl-8">
+                <p className="text-balance text-lg sm:text-[19px] leading-[1.35] tracking-[-0.03em] text-black/80">
                   {t.home.heroDescription}
                 </p>
-                <Link to="/projects" className="group inline-flex w-fit items-center gap-4 rounded-full bg-[#0000FF] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black interactive-element">
+                <Link to="/projects" className="group inline-flex w-fit items-center gap-4 rounded-full bg-[#0000FF] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-black interactive-element mt-1">
                   {t.home.viewProjects} <ArrowUpRight size={18} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
@@ -124,8 +129,11 @@ export function Home() {
       {/* Featured Projects Block */}
       <motion.section 
         {...scrollRevealConfig}
-        className="mx-auto mt-16 max-w-[1380px] px-3 sm:px-6"
+        className="mx-auto mt-24 max-w-[1380px] px-3 sm:px-6"
       >
+        <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black mb-8">
+          {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
+        </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {[t.home.newProject, t.home.recentProject].map((project) => (
             <motion.div
@@ -168,7 +176,7 @@ export function Home() {
           <p className="text-sm text-white/45">studio[04]</p><p className="mt-auto max-w-[720px] text-left text-[clamp(2.05rem,4.65vw,3.75rem)] leading-[1.04] tracking-[-0.075em]">{t.home.studioLabel}</p>
         </motion.div>
         <motion.div whileHover={{ y: -6 }} className="overflow-hidden rounded-[2rem] border border-black/10 bg-white interactive-element md:col-span-2">
-          <ImageWithFallback src={referenceA} alt="interface collage" className="h-full w-full object-cover opacity-90 transition duration-700 hover:scale-105" />
+          <ImageWithFallback src={abstractBlue} alt="abstract blue art" className="h-full w-full object-cover opacity-90 transition duration-700 hover:scale-105" />
         </motion.div>
       </motion.section>
 
@@ -177,7 +185,15 @@ export function Home() {
         {...scrollRevealConfig}
         className="mx-auto mt-28 max-w-[1380px] px-3 sm:px-6"
       >
-        <div className="mb-8 flex items-end justify-between"><h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2><span className="hidden text-sm text-black/45 sm:block">{t.home.servicesHint}</span></div>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2>
+          <Link
+            to="/services"
+            className="inline-flex items-center justify-center px-6 py-2.5 border border-black/20 hover:border-[#0000FF] hover:text-[#0000FF] rounded-full text-[17px] font-semibold transition-all duration-300 interactive-element whitespace-nowrap mb-2 sm:mb-0"
+          >
+            {locale === "ru" ? "Смотреть все услуги" : locale === "kg" ? "Бардык кызматтарды көрүү" : "View all services"}
+          </Link>
+        </div>
         <div className="flex flex-col gap-3 md:h-[620px] md:flex-row">
           {services.map((s, i) => (
             <motion.button 
@@ -233,6 +249,6 @@ export function Home() {
           ))}
         </div>
       </motion.section>
-    </motion.div>
+    </div>
   );
 }

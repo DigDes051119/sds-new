@@ -54,17 +54,14 @@ export function Projects() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+    <div
       className="max-w-[1440px] mx-auto px-6 py-20"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-12"
+        className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-12"
       >
         {t.projects.title}
       </motion.h1>
@@ -128,6 +125,6 @@ export function Projects() {
           </motion.div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

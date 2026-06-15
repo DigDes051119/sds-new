@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router";
+import { Outlet, NavLink, useLocation, useOutlet } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState, useRef } from "react";
 import { Menu, X, Mail, Instagram, ArrowUpRight, MapPin } from "lucide-react";
@@ -6,40 +6,6 @@ import logoPng from "../../imports/logo.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { LanguageContext, languageOptions, translations, type Language } from "../i18n";
 
-// Custom cursor component
-function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const updatePosition = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener("mousemove", updatePosition);
-    return () => window.removeEventListener("mousemove", updatePosition);
-  }, []);
-
-  return (
-    <motion.div
-      className="hidden md:flex fixed top-0 left-0 pointer-events-none z-[9999] items-center justify-center"
-      animate={{
-        x: position.x - 8,
-        y: position.y - 8,
-      }}
-      transition={{ type: "tween", duration: 0.03, ease: "linear" }}
-    >
-      <motion.div
-        className="rounded-full bg-[#0000FF] flex items-center justify-center overflow-hidden"
-        animate={{
-          width: 16,
-          height: 16,
-          opacity: 1,
-        }}
-        transition={{ duration: 0.2 }}
-      />
-    </motion.div>
-  );
-}
 
 // Interactive background grid
 function InteractiveBackground() {
@@ -154,11 +120,14 @@ const CustomInstagramIcon = () => (
 );
 
 export function Root() {
+  const location = useLocation();
+  const outlet = useOutlet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [locale, setLocale] = useState<Language>("ru");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
+
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -186,6 +155,10 @@ export function Root() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem("siteLanguage") as Language | null;
@@ -218,69 +191,101 @@ export function Root() {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>
-      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white md:cursor-none">
-        <CustomCursor />
+      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white">
         <InteractiveBackground />
         
         <header className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6">
-          <div className="mx-auto relative flex h-20 max-w-[1380px] items-center">
+          <div className="mx-auto relative flex h-20 max-w-[1380px] items-center justify-center">
             
             {/* Logo Container */}
-            <motion.div
-              animate={{
-                opacity: isScrolled ? 0 : 1,
-                pointerEvents: isScrolled ? "none" : "auto",
-              }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute left-0 flex items-center z-10"
-            >
+            <div className="absolute left-0 flex items-center z-10">
               <NavLink to="/" className="flex min-w-[130px] shrink-0 items-center">
                 <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className="block h-[54px] w-auto object-contain" />
               </NavLink>
-            </motion.div>
+            </div>
 
-             {/* Menu Wrapper without CSS transition to avoid conflict with Framer Motion layout */}
-            <div className={`w-full flex ${isScrolled ? "justify-center" : "justify-end"}`}>
+            {/* Menu Wrapper (Centered) */}
+            <div className="flex justify-center">
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0.70)",
+                  backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.25)" : "rgba(255, 255, 255, 0.12)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
                   boxShadow: isScrolled ? "0 12px 45px rgba(0,0,0,0.06)" : "0 24px 80px rgba(0,0,0,0.12)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                className="hidden md:flex items-center gap-3 rounded-full border border-white/60 backdrop-blur-2xl px-4"
+                className="hidden md:flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
               >
-                <nav className="flex items-center gap-1 rounded-full bg-black/[0.035] p-1">
+                <nav className="flex items-center gap-1 rounded-full p-1">
                   {navLinks.map((link) => (
                     <NavLink
                       key={link.path}
                       to={link.path}
                       className={({ isActive }) =>
-                        `rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-colors ${
-                          isActive ? "bg-[#0000FF] text-white" : "text-black/65 hover:bg-white hover:text-black"
-                        } interactive-element`
+                        `relative rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-colors interactive-element ${
+                          isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        }`
                       }
                     >
-                      {link.name}
+                      {({ isActive }) => (
+                        <>
+                          {isActive && (
+                            <motion.div
+                              layoutId="activeMenuPill"
+                              className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none"
+                              transition={{ type: "spring", stiffness: 140, damping: 22, mass: 0.8 }}
+                            >
+                              <div className="w-14 h-14 rounded-full bg-[#0066FF]/50 blur-xl" />
+                            </motion.div>
+                          )}
+                          <span className="relative z-10">{link.name}</span>
+                        </>
+                      )}
                     </NavLink>
                   ))}
                 </nav>
+              </motion.div>
+            </div>
 
-                <div className="flex items-center gap-2 rounded-full bg-white/90 p-1 shadow-sm">
-                  {languageOptions.map(({ code, label }) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => setLocale(code)}
-                      className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
-                        locale === code ? "bg-[#0000FF] text-white" : "bg-transparent text-black/70 hover:bg-black/5"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+            {/* Language Selector (Separate Plaque on the right) */}
+            <div className="absolute right-0 hidden md:flex items-center z-10">
+              <motion.div
+                layout
+                animate={{
+                  backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.25)" : "rgba(255, 255, 255, 0.12)",
+                  paddingTop: isScrolled ? "10px" : "12px",
+                  paddingBottom: isScrolled ? "10px" : "12px",
+                  boxShadow: isScrolled ? "0 12px 45px rgba(0,0,0,0.06)" : "0 24px 80px rgba(0,0,0,0.12)",
+                }}
+                transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+                className="flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
+              >
+                <div className="flex items-center gap-1 rounded-full p-1">
+                  {languageOptions.map(({ code, label }) => {
+                    const isActive = locale === code;
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => setLocale(code)}
+                        className={`relative rounded-full px-3 py-2 text-sm font-semibold transition-colors interactive-element ${
+                          isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        }`}
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeLanguagePill"
+                            className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none"
+                            transition={{ type: "spring", stiffness: 140, damping: 22, mass: 0.8 }}
+                          >
+                            <div className="w-14 h-14 rounded-full bg-[#0066FF]/50 blur-xl" />
+                          </motion.div>
+                        )}
+                        <span className="relative z-10">{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </div>
@@ -345,58 +350,107 @@ export function Root() {
           )}
         </AnimatePresence>
 
-        <main className="pt-24">
-          <AnimatePresence mode="wait">
-            <Outlet />
+         <main className="pt-24">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ willChange: "opacity" }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut"
+              }}
+            >
+              {outlet}
+            </motion.div>
           </AnimatePresence>
         </main>
 
-        <footer ref={footerRef} className="w-full bg-gradient-to-b from-[#0000FF] to-[#000033] text-white pt-28 pb-20 mt-24">
+        <footer ref={footerRef} className="w-full bg-gradient-to-b from-[#0000FF] to-[#000033] text-white pt-24 pb-12 mt-24">
           <div className="mx-auto max-w-[1380px] px-6">
             
-            {/* First Row: Contacts */}
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 pb-8 border-b border-white/10">
-              <a 
-                href="mailto:getdesign@steeldrakestudioteam.com" 
-                className="flex items-center gap-2.5 text-white/85 hover:text-white transition-colors text-sm font-medium interactive-element"
-              >
-                <span className="opacity-70"><CustomMailIcon /></span>
-                <span>getdesign@steeldrakestudioteam.com</span>
-              </a>
-              <a 
-                href="https://wa.me/996702507888" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-2.5 text-white/85 hover:text-white transition-colors text-sm font-medium interactive-element"
-              >
-                <span className="opacity-70"><CustomWhatsAppIcon /></span>
-                <span>+996702507888</span>
-              </a>
-              <a 
-                href="https://www.instagram.com/steeldrakestudioteam/#" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-2.5 text-white/85 hover:text-white transition-colors text-sm font-medium interactive-element"
-              >
-                <span className="opacity-70"><CustomInstagramIcon /></span>
-                <span>@steeldrakestudioteam</span>
-              </a>
-              <a 
-                href="https://www.google.com/maps/place/1%2F2+ул.+Горького,+Бишкек+720001/@42.8569615,74.6340349,294m/data=!3m1!1e3!4m6!3m5!1s0x389eb649ed50dd4f:0xfa828968edacc1ba!8m2!3d42.856828!4d74.6180463!16s%2Fg%2F11ym4g96dn?hl=ru&entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-2.5 text-white/85 hover:text-white transition-colors text-sm font-medium interactive-element"
-              >
-                <span className="opacity-70"><MapPin size={20} /></span>
-                <span>{t.contacts.addressFooter}</span>
-              </a>
+            <div className="flex flex-col md:flex-row justify-between pb-16">
+              
+              {/* Left side: Let's Talk & Email */}
+              <div className="flex flex-col items-start gap-6 mb-12 md:mb-0">
+                <NavLink 
+                  to="/contacts" 
+                  className="inline-flex items-center justify-center px-5 py-2 border border-white/30 rounded-full text-sm font-medium hover:bg-white hover:text-[#0000FF] hover:border-white transition-all duration-300 interactive-element"
+                >
+                  {t.contacts.letsTalk}
+                </NavLink>
+                <a 
+                  href="mailto:getdesign@steeldrakestudioteam.com" 
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-tight hover:text-white/80 transition-colors interactive-element"
+                >
+                  getdesign@steeldrakestudioteam.com
+                </a>
+              </div>
+
+              {/* Right side: Socials */}
+              <div className="flex flex-col items-start md:items-end gap-5">
+                <a 
+                  href="https://www.instagram.com/steeldrakestudioteam/#" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 text-[15px] hover:opacity-80 transition-opacity interactive-element"
+                >
+                  Instagram <ArrowUpRight className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                </a>
+                <a 
+                  href="https://wa.me/996702507888" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 text-[15px] hover:opacity-80 transition-opacity interactive-element"
+                >
+                  WhatsApp <ArrowUpRight className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                </a>
+              </div>
+
             </div>
 
-            {/* Second Row: Copyright */}
-            <div className="pt-8 flex items-center justify-center">
-              <p className="text-xs text-white/55 tracking-wide">
-                © 2026 STEEL DRAKE STUDIO TEAM.
-              </p>
+            {/* Info Row */}
+            <div className="flex flex-col md:flex-row gap-12 md:gap-32 pb-12">
+              <div className="flex flex-col gap-3">
+                <span className="text-sm font-medium">{t.contacts.officeTitle}</span>
+                <a 
+                  href="https://www.google.com/maps/place/1%2F2+ул.+Горького,+Бишкек+720001/@42.8569615,74.6340349,294m/data=!3m1!1e3!4m6!3m5!1s0x389eb649ed50dd4f:0xfa828968edacc1ba!8m2!3d42.856828!4d74.6180463!16s%2Fg%2F11ym4g96dn?hl=ru&entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-[15px] text-white hover:opacity-80 transition-opacity leading-relaxed interactive-element"
+                >
+                  {t.contacts.officeAddress.split('\n').map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i !== t.contacts.officeAddress.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
+                </a>
+              </div>
+              <div className="flex flex-col gap-3">
+                <span className="text-sm font-medium">{t.contacts.callUs}</span>
+                <a 
+                  href="tel:+996702507888" 
+                  className="text-[15px] text-white hover:opacity-80 transition-opacity interactive-element"
+                >
+                  +996 702 507888
+                </a>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-white/20 w-full mb-10"></div>
+
+            {/* Bottom Row */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center">
+                <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className="block h-10 w-auto object-contain brightness-0 invert" />
+              </div>
+              <div className="text-[13px] text-white/80">
+                © 2026 STEEL DRAKE STUDIO TEAM. All Right Reserved
+              </div>
             </div>
 
           </div>

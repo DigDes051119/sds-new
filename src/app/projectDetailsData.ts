@@ -65,6 +65,32 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600"
       ],
       results: ["Zero-emission green rating", "Full architectural documentation delivered"]
+    },
+    techstart: {
+      name: "TechStart",
+      desc: "A complete digital product brand identity and design system for a SaaS workspace.",
+      client: "TechStart Inc.",
+      year: "2026",
+      service: "Branding, Web",
+      challenge: "Design a scalable design system and brand identity that communicates efficiency and modern collaboration.",
+      processImages: [
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Design system adopted by 20+ engineering teams", "Conversion rate increased by 25%"]
+    },
+    "auto-concept-x": {
+      name: "Auto Concept X",
+      desc: "Futuristic electric vehicle conceptual design and proportional packaging study.",
+      client: "X-Motors",
+      year: "2025",
+      service: "Automotive Design",
+      challenge: "Create a visionary hypercar styling concept highlighting aerodynamic efficiency and premium carbon composites.",
+      processImages: [
+        "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Showcased at Geneva Motor Show", "Won Michelin Design Challenge Gold"]
     }
   },
   kg: {
@@ -119,6 +145,32 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600"
       ],
       results: ["Нөлдүк эмиссия жашыл рейтинги", "Толук архитектуралык документтер жеткирилди"]
+    },
+    techstart: {
+      name: "TechStart",
+      desc: "SaaS платформасы үчүн толук фирмалык стиль жана дизайн системасы.",
+      client: "TechStart Inc.",
+      year: "2026",
+      service: "Брендинг, Веб",
+      challenge: "Натыйжалуулукту жана заманбап кызматташууну билдирген масштабдуу дизайн тутумун жана бренд иденттүүлүгүн долбоорлоо.",
+      processImages: [
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Дизайн системасы 20+ инженердик топ тарабынан кабыл алынды", "Конверсиялык көрсөткүч 25% жогорулады"]
+    },
+    "auto-concept-x": {
+      name: "Auto Concept X",
+      desc: "Футуристтик электромобилдин концептуалдык дизайны жана пропорциялуу долбоорлоо.",
+      client: "X-Motors",
+      year: "2025",
+      service: "Автомобиль дизайны",
+      challenge: "Аэродинамикалык эффективдүүлүктү жана премиум көмүртек композиттерин көрсөткөн гиперкардын стилистикалык концепциясын түзүү.",
+      processImages: [
+        "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Женева автосалонунда көрсөтүлгөн", "Michelin Design Challenge Алтын сыйлыгын алды"]
     }
   },
   ru: {
@@ -173,6 +225,32 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600"
       ],
       results: ["Зеленый рейтинг с нулевым уровнем выбросов", "Передана полная архитектурная документация"]
+    },
+    techstart: {
+      name: "TechStart",
+      desc: "Комплексный фирменный стиль и дизайн-система для SaaS-платформы.",
+      client: "TechStart Inc.",
+      year: "2026",
+      service: "Брендирование, Веб",
+      challenge: "Разработать масштабируемую систему дизайна и фирменный стиль, выражающие эффективность и современное сотрудничество.",
+      processImages: [
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Система дизайна внедрена более чем в 20 командах", "Рост конверсии составил 25%"]
+    },
+    "auto-concept-x": {
+      name: "Auto Concept X",
+      desc: "Концептуальный дизайн футуристического электромобиля и пропорциональное проектирование.",
+      client: "X-Motors",
+      year: "2025",
+      service: "Automotive Design",
+      challenge: "Создать инновационную дизайн-концепцию гиперкара, подчеркивающую аэродинамику и использование премиального углепластика.",
+      processImages: [
+        "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1600"
+      ],
+      results: ["Показан на Женевском автосалоне", "Золотая медаль конкурса Michelin Design Challenge"]
     }
   }
 };
