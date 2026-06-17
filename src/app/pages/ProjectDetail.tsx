@@ -5,16 +5,26 @@ import videoSrc from "../../imports/__Copy_this_cozy_soft_life_quote_roundup_tha
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { projectDetailsTranslations } from "../projectDetailsData";
+import { cmsService } from "../cmsService";
 import { ArrowLeft, CheckCircle, ArrowRight } from "lucide-react";
 
 export function ProjectDetail() {
   const { t, locale } = useContext(LanguageContext);
   const { id } = useParams();
 
-  const localeData = projectDetailsTranslations[locale] || projectDetailsTranslations.ru;
+  const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
+
+  useEffect(() => {
+    return cmsService.subscribe(() => {
+      setProjectDetails(cmsService.getProjectDetails());
+    });
+  }, []);
+
+  const localeData = projectDetails[locale] || projectDetails.ru || projectDetailsTranslations.ru;
   const data = id && localeData[id]
     ? localeData[id]
     : t.projectDetail.defaultProject;
+
 
   const [activeTab, setActiveTab] = useState(0);
 

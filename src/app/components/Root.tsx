@@ -5,6 +5,9 @@ import { Menu, X, Mail, Instagram, ArrowUpRight, MapPin } from "lucide-react";
 import logoPng from "../../imports/logo.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { LanguageContext, languageOptions, translations, type Language } from "../i18n";
+import { cmsService } from "../cmsService";
+import { supabaseClient } from "../supabaseClient";
+
 
 
 // Interactive background grid
@@ -128,8 +131,23 @@ export function Root() {
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const footerRef = useRef<HTMLElement>(null);
-  const lastScrollY = useRef(0);
+  useEffect(() => {
+    cmsService.initSupabaseSync();
 
+    // Dynamic Umami script loading
+    const websiteId = localStorage.getItem("sds_umami_website_id");
+    const scriptUrl = localStorage.getItem("sds_umami_script_url") || "https://cloud.umami.is/script.js";
+    if (websiteId) {
+      const oldScripts = document.querySelectorAll('script[src*="umami"]');
+      oldScripts.forEach((s) => s.remove());
+
+      const script = document.createElement("script");
+      script.defer = true;
+      script.src = scriptUrl;
+      script.setAttribute("data-website-id", websiteId);
+      document.head.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -187,17 +205,33 @@ export function Root() {
   }, [location.pathname]);
 
   useEffect(() => {
+    const isEnabled = localStorage.getItem("sds_analytics_enabled") !== "false";
+    if (isEnabled) {
+      supabaseClient.logVisit(location.pathname, locale);
+    }
+  }, [location.pathname, locale]);
+
+  useEffect(() => {
     const storedLocale = window.localStorage.getItem("siteLanguage") as Language | null;
     if (storedLocale && translations[storedLocale]) {
       setLocale(storedLocale);
     }
   }, []);
 
+  const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+
+  useEffect(() => {
+    return cmsService.subscribe(() => {
+      setSiteTranslations(cmsService.getTranslations());
+    });
+  }, []);
+
   useEffect(() => {
     window.localStorage.setItem("siteLanguage", locale);
   }, [locale]);
 
-  const t = translations[locale];
+  const t = siteTranslations[locale] || translations[locale];
+
 
   // Smooth scroll behavior
   useEffect(() => {
