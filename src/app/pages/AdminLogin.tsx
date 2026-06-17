@@ -28,7 +28,7 @@ export function AdminLogin() {
       localStorage.setItem("sds_admin_logged_in", "true");
       navigate("/admin");
     } catch (err: any) {
-      setError(err.message || "Ошибка входа. Попробуйте sdstadmin / sdst2011team");
+      setError(err.message || "Неверный логин или пароль");
     }
   };
 
@@ -74,8 +74,7 @@ export function AdminLogin() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="sdstadmin"
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-white/30 focus:border-[#0066FF] focus:bg-white/[0.06] outline-none transition-all duration-300 text-base"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3.5 pl-12 pr-4 text-white focus:border-[#0066FF] focus:bg-white/[0.06] outline-none transition-all duration-300 text-base"
                 required
               />
             </div>
@@ -89,8 +88,7 @@ export function AdminLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-white/30 focus:border-[#0066FF] focus:bg-white/[0.06] outline-none transition-all duration-300 text-base"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3.5 pl-12 pr-4 text-white focus:border-[#0066FF] focus:bg-white/[0.06] outline-none transition-all duration-300 text-base"
                 required
               />
             </div>

@@ -516,8 +516,16 @@ export function Root() {
               <div className="flex items-center">
                 <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className="block h-10 w-auto object-contain brightness-0 invert" />
               </div>
-              <div className="text-[13px] text-white/80">
-                © 2026 STEEL DRAKE STUDIO TEAM. All Right Reserved
+              <div className="flex flex-col items-center md:items-end gap-1">
+                <div className="text-[13px] text-white/80">
+                  © 2026 STEEL DRAKE STUDIO TEAM. All Right Reserved
+                </div>
+                <NavLink 
+                  to="/admin" 
+                  className="text-[10px] text-white/20 hover:text-white/40 transition-colors"
+                >
+                  admin
+                </NavLink>
               </div>
             </div>
 
