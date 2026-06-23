@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
-import { LayoutDashboard, FileText, FolderGit, LogOut, ChevronRight, Check, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, LogOut, ChevronRight, Check, Sun, Moon, Star, Users, FolderGit, MapPin, Shield, Briefcase } from "lucide-react";
 import logoPng from "../../imports/logo.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
@@ -10,6 +10,13 @@ export function AdminLayout() {
   const location = useLocation();
   const [resetSuccess, setResetSuccess] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("sds_admin_theme") || "dark");
+  const [currentAdmin, setCurrentAdmin] = useState<any>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("sds_admin_logged_in");
@@ -20,6 +27,7 @@ export function AdminLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("sds_admin_logged_in");
+    localStorage.removeItem("sds_current_admin");
     navigate("/admin/login");
   };
 
@@ -32,10 +40,28 @@ export function AdminLayout() {
   };
 
   const menuItems = [
-    { name: "Сводка & Аналитика", path: "/admin", icon: LayoutDashboard },
-    { name: "Редактор контента (Переводы)", path: "/admin/content", icon: FileText },
-    { name: "Управление проектами", path: "/admin/projects", icon: FolderGit },
+    { name: "Сводка и аналитика", path: "/admin", icon: LayoutDashboard, permKey: "analytics" },
+    { name: "Избранные проекты", path: "/admin/featured", icon: Star, permKey: "featured" },
+    { name: "О нас", path: "/admin/about", icon: Users, permKey: "about" },
+    { name: "Управление проектами", path: "/admin/projects", icon: FolderGit, permKey: "projects" },
+    { name: "Контакты", path: "/admin/contacts", icon: MapPin, permKey: "contacts" },
+    { name: "Управление услугами", path: "/admin/services", icon: Briefcase, permKey: "services" },
+    { name: "Администрация", path: "/admin/administration", icon: Shield },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!currentAdmin) return false;
+    if (currentAdmin.role === "creator") return true;
+    if (item.permKey) {
+      return currentAdmin.permissions?.[item.permKey] !== false;
+    }
+    return true;
+  });
+
+  const currentPath = location.pathname;
+  const matchedItem = menuItems.find(item => item.path === currentPath);
+  const isAllowed = !matchedItem || !matchedItem.permKey || currentAdmin?.role === "creator" || currentAdmin?.permissions?.[matchedItem.permKey] !== false;
+
 
   return (
     <div className={`min-h-screen flex font-['Inter',sans-serif] transition-colors duration-300 ${
@@ -194,7 +220,7 @@ export function AdminLayout() {
         </div>
 
         <nav className="flex-1 px-4 py-8 space-y-2">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
 
@@ -234,7 +260,7 @@ export function AdminLayout() {
             {resetSuccess ? (
               <>
                 <Check className="w-4 h-4" />
-                Сброшено!
+                Сброжено!
               </>
             ) : (
               "Сбросить всё по умолчанию"
@@ -281,6 +307,17 @@ export function AdminLayout() {
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
+            {currentAdmin && currentAdmin.first_name && (
+              <span className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border flex items-center gap-2 ${
+                theme === "dark" 
+                  ? "bg-white/[0.05] border-white/[0.08] text-white/75" 
+                  : "bg-black/[0.04] border-black/[0.08] text-black/75"
+              }`}>
+                <Shield className="w-3.5 h-3.5 text-[#0066FF]" />
+                {currentAdmin.first_name} {currentAdmin.last_name} ({currentAdmin.role === "creator" ? "Создатель" : currentAdmin.role === "full" ? "Администратор" : "Модератор"})
+              </span>
+            )}
+
             <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border flex items-center gap-2 ${
               theme === "dark" 
                 ? "bg-white/[0.05] border-white/[0.08] text-white/75" 
@@ -293,7 +330,17 @@ export function AdminLayout() {
         </header>
 
         <div className="flex-1 p-10 bg-transparent">
-          <Outlet />
+          {isAllowed ? (
+            <Outlet />
+          ) : (
+            <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
+              <Shield className="w-16 h-16 text-red-500/80 animate-pulse" />
+              <h3 className="text-xl font-bold tracking-tight text-white/90">Доступ ограничен</h3>
+              <p className="text-white/40 text-sm max-w-md">
+                У вашей учетной записи нет прав для просмотра раздела "{matchedItem?.name}". Обратитесь к создателю сайта для изменения прав доступа.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

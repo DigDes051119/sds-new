@@ -10,8 +10,12 @@ import { Contacts } from "./pages/Contacts";
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminLogin } from "./pages/AdminLogin";
 import { AdminDashboard } from "./pages/AdminDashboard";
-import { AdminContentEditor } from "./pages/AdminContentEditor";
 import { AdminProjectsEditor } from "./pages/AdminProjectsEditor";
+import { AdminFeaturedProjects } from "./pages/AdminFeaturedProjects";
+import { AdminAboutEditor } from "./pages/AdminAboutEditor";
+import { AdminContactsEditor } from "./pages/AdminContactsEditor";
+import { AdminUsersManager } from "./pages/AdminUsersManager";
+import { AdminServicesEditor } from "./pages/AdminServicesEditor";
 
 export const router = createBrowserRouter([
   {
@@ -35,8 +39,12 @@ export const router = createBrowserRouter([
     Component: AdminLayout,
     children: [
       { index: true, Component: AdminDashboard },
-      { path: "content", Component: AdminContentEditor },
+      { path: "featured", Component: AdminFeaturedProjects },
+      { path: "about", Component: AdminAboutEditor },
       { path: "projects", Component: AdminProjectsEditor },
+      { path: "contacts", Component: AdminContactsEditor },
+      { path: "services", Component: AdminServicesEditor },
+      { path: "administration", Component: AdminUsersManager },
     ],
   },
 ]);

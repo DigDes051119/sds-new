@@ -1,4 +1,5 @@
 import { createContext, Dispatch, SetStateAction } from "react";
+import { teamTranslations } from "./teamData";
 
 export type Language = "en" | "kg" | "ru";
 
@@ -69,40 +70,7 @@ export const translations = {
       philosophyTitle: "Our manifesto",
       philosophyText: "We believe design is not just surface treatment. It is a language through which a product speaks to its user. We remove everything unnecessary to reveal the essence. Our philosophy is built on three pillars: uncompromising ergonomics, technological aesthetics, and durable meaning. We don't follow trends — we design a future that remains relevant for decades.",
       teamTitle: "Team",
-      team: [
-        {
-          id: 1,
-          name: "Oleg Ermakov",
-          role: "Founder, Chief Designer",
-          quote: "We remove everything extra to reveal the essence of things.",
-          skills: ["Vision", "Industrial Design", "Art Direction"],
-          projects: "Sandyq, Ala-Too, One Ordo",
-        },
-        {
-          id: 2,
-          name: "Anna Smirnova",
-          role: "Art Director",
-          quote: "Aesthetics is not decoration; it is a way of communication.",
-          skills: ["Branding", "Graphic Design", "Typography"],
-          projects: "Salkyn, TechStart",
-        },
-        {
-          id: 3,
-          name: "Mikhail Chen",
-          role: "Lead 3D Artist",
-          quote: "Every detail matters when you create worlds.",
-          skills: ["3D Modeling", "Rendering", "Motion Design"],
-          projects: "Auto Concept X, VR Space",
-        },
-        {
-          id: 4,
-          name: "Elena Veis",
-          role: "Architect",
-          quote: "Space should breathe together with a person.",
-          skills: ["Concept Architecture", "Urbanism", "Interiors"],
-          projects: "One Ordo Resort, Eco Villa",
-        },
-      ],
+      team: teamTranslations.en,
       awardsTitle: "Recognition",
       awardsSub: "Designing awards & milestones.",
       awardsList: [
@@ -381,40 +349,7 @@ export const translations = {
       philosophyTitle: "Биздин манифест",
       philosophyText: "Биз дизайн жөн гана беттик өңдөө эмес деп ишенебиз. Бул продукт колдонуучу менен сүйлөшкөн тил. Биз бардык керексиз нерселерди алып салабыз, түйүнүн ачабыз. Биздин философия үч устунга курулган: суроо-жоопсуз эргономика, технологикалык эстетика жана маанилердин туруктуулугу. Биз тренддерди көздөбөйбүз — он жылдыкта актуалдуу болчу келечекти долбоорлайбыз.",
       teamTitle: "Команда",
-      team: [
-        {
-          id: 1,
-          name: "Олег Ермаков",
-          role: "Негиздөөчү, Башкы дизайнер",
-          quote: "Биз нерсенин маңызын ачуу үчүн бардык керексизди алып салабыз.",
-          skills: ["Визион","Өнөр жай дизайны","Арт-дирекшн"],
-          projects: "Sandyq, Ala-Too, One Ordo",
-        },
-        {
-          id: 2,
-          name: "Анна Смирнова",
-          role: "Арт директор",
-          quote: "Эстетика — бул кооздоо эмес, байланыш жолү.",
-          skills: ["Брендинг","Графикалык дизайн","Типография"],
-          projects: "Salkyn, TechStart",
-        },
-        {
-          id: 3,
-          name: "Михаил Чен",
-          role: "Lead 3D Artist",
-          quote: "Ар бир детал маанилүү, дүйнөлөрдү жаратып жатканда.",
-          skills: ["3D моделдөө","Рендеринг","Motion дизайн"],
-          projects: "Auto Concept X, VR Space",
-        },
-        {
-          id: 4,
-          name: "Елена Вейс",
-          role: "Архитектор",
-          quote: "Мейкиндик адам менен бирге дем алышы керек.",
-          skills: ["Концепт архитектура","Урбанистика","Интерьер"],
-          projects: "One Ordo Resort, Eco Villa",
-        },
-      ],
+      team: teamTranslations.kg,
       awardsTitle: "Таануу жана сыйлыктар",
       awardsSub: "Дизайн багытындагы жетишкендиктерибиз.",
       awardsList: [
@@ -693,40 +628,7 @@ export const translations = {
       philosophyTitle: "Наш манифест",
       philosophyText: "Мы верим, что дизайн — это не просто оформление поверхности. Это язык, на котором продукт разговаривает с пользователем. Мы убираем всё лишнее, чтобы обнажить суть вещей. Наша философия строится на трех столпах: бескомпромиссная эргономика, технологическая эстетика и долговечность смыслов. Мы не следуем трендам — мы проектируем будущее, которое останется актуальным через десятилетия.",
       teamTitle: "Команда",
-      team: [
-        {
-          id: 1,
-          name: "Олег Ермаков",
-          role: "Генеральный директор, Главный дизайнер",
-          quote: "Мы убираем всё лишнее, чтобы обнажить суть вещей.",
-          skills: ["Визионерство", "Индустриальный дизайн", "Арт-дирекшн"],
-          projects: "Sandyq, Ala-Too, One Ordo",
-        },
-        {
-          id: 2,
-          name: "Анна Смирнова",
-          role: "Арт-директор",
-          quote: "Эстетика — это не украшение, а способ коммуникации.",
-          skills: ["Брендинг", "Графический дизайн", "Типографика"],
-          projects: "Salkyn, TechStart",
-        },
-        {
-          id: 3,
-          name: "Михаил Чен",
-          role: "Lead 3D Artist",
-          quote: "Каждая деталь имеет значение, когда ты создаешь миры.",
-          skills: ["3D Моделирование", "Рендеринг", "Motion Design"],
-          projects: "Auto Concept X, VR Space",
-        },
-        {
-          id: 4,
-          name: "Елена Вейс",
-          role: "Архитектор",
-          quote: "Пространство должно дышать вместе с человеком.",
-          skills: ["Концепт-архитектура", "Урбанистика", "Интерьеры"],
-          projects: "One Ordo Resort, Eco Villa",
-        },
-      ],
+      team: teamTranslations.ru,
       awardsTitle: "Признание и награды",
       awardsSub: "Наши достижения в области дизайна и проектирования.",
       awardsList: [

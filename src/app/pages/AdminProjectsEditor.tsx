@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { translateText } from "../translateHelper";
+import { logAdminAction } from "../adminLogger";
+
 
 export function AdminProjectsEditor() {
   const [translations, setTranslations] = useState(() => cmsService.getTranslations());
@@ -9,6 +12,7 @@ export function AdminProjectsEditor() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   // Form states for creating/editing a project
   const [formId, setFormId] = useState("");
@@ -159,91 +163,131 @@ export function AdminProjectsEditor() {
     setFormResult2Kg(detailKg.results?.[1] || "");
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newTranslations = { ...translations };
-    const newDetails = { ...projectDetails };
+    try {
+      setTranslating(true);
+      
+      // Auto translate RU fields to EN and KG
+      const nameEn = await translateText(formNameRu, "en");
+      const nameKg = await translateText(formNameRu, "kg");
+      
+      const categoryEn = await translateText(formCategoryRu, "en");
+      const categoryKg = await translateText(formCategoryRu, "kg");
+      
+      const descEn = await translateText(formDescRu, "en");
+      const descKg = await translateText(formDescRu, "kg");
+      
+      const clientEn = await translateText(formClientRu, "en");
+      const clientKg = await translateText(formClientRu, "kg");
+      
+      const serviceEn = await translateText(formServiceRu, "en");
+      const serviceKg = await translateText(formServiceRu, "kg");
+      
+      const challengeEn = await translateText(formChallengeRu, "en");
+      const challengeKg = await translateText(formChallengeRu, "kg");
+      
+      const result1En = await translateText(formResult1Ru, "en");
+      const result1Kg = await translateText(formResult1Ru, "kg");
+      
+      const result2En = await translateText(formResult2Ru, "en");
+      const result2Kg = await translateText(formResult2Ru, "kg");
 
-    // Formulate the project list entries
-    const listEntryRu = { id: formId, name: formNameRu, category: formCategoryRu, categoryKey: formCategoryKey, img: formImg };
-    const listEntryEn = { id: formId, name: formNameEn, category: formCategoryEn, categoryKey: formCategoryKey, img: formImg };
-    const listEntryKg = { id: formId, name: formNameKg, category: formCategoryKg, categoryKey: formCategoryKey, img: formImg };
+      const newTranslations = { ...translations };
+      const newDetails = { ...projectDetails };
 
-    // Formulate project details entries
-    const detailEntryRu = {
-      name: formNameRu,
-      desc: formDescRu,
-      client: formClientRu,
-      year: formYear,
-      service: formServiceRu,
-      challenge: formChallengeRu,
-      processImages: [formImage1, formImage2].filter(Boolean),
-      results: [formResult1Ru, formResult2Ru].filter(Boolean)
-    };
+      // Formulate the project list entries
+      const listEntryRu = { id: formId, name: formNameRu, category: formCategoryRu, categoryKey: formCategoryKey, img: formImg };
+      const listEntryEn = { id: formId, name: nameEn, category: categoryEn, categoryKey: formCategoryKey, img: formImg };
+      const listEntryKg = { id: formId, name: nameKg, category: categoryKg, categoryKey: formCategoryKey, img: formImg };
 
-    const detailEntryEn = {
-      name: formNameEn,
-      desc: formDescEn,
-      client: formClientEn,
-      year: formYear,
-      service: formServiceEn,
-      challenge: formChallengeEn,
-      processImages: [formImage1, formImage2].filter(Boolean),
-      results: [formResult1En, formResult2En].filter(Boolean)
-    };
+      // Formulate project details entries
+      const detailEntryRu = {
+        name: formNameRu,
+        desc: formDescRu,
+        client: formClientRu,
+        year: formYear,
+        service: formServiceRu,
+        challenge: formChallengeRu,
+        processImages: [formImage1, formImage2].filter(Boolean),
+        results: [formResult1Ru, formResult2Ru].filter(Boolean)
+      };
 
-    const detailEntryKg = {
-      name: formNameKg,
-      desc: formDescKg,
-      client: formClientKg,
-      year: formYear,
-      service: formServiceKg,
-      challenge: formChallengeKg,
-      processImages: [formImage1, formImage2].filter(Boolean),
-      results: [formResult1Kg, formResult2Kg].filter(Boolean)
-    };
+      const detailEntryEn = {
+        name: nameEn,
+        desc: descEn,
+        client: clientEn,
+        year: formYear,
+        service: serviceEn,
+        challenge: challengeEn,
+        processImages: [formImage1, formImage2].filter(Boolean),
+        results: [result1En, result2En].filter(Boolean)
+      };
 
-    if (editingId) {
-      // Modify existing entries in translations
-      ["ru", "en", "kg"].forEach((lang) => {
-        const items = newTranslations[lang].projects.items;
-        const index = items.findIndex((p: any) => p.id === editingId);
-        if (index !== -1) {
-          items[index] = lang === "ru" ? listEntryRu : lang === "en" ? listEntryEn : listEntryKg;
-        }
-      });
+      const detailEntryKg = {
+        name: nameKg,
+        desc: descKg,
+        client: clientKg,
+        year: formYear,
+        service: serviceKg,
+        challenge: challengeKg,
+        processImages: [formImage1, formImage2].filter(Boolean),
+        results: [result1Kg, result2Kg].filter(Boolean)
+      };
 
-      // Modify existing entries in details
-      newDetails.ru[editingId] = detailEntryRu;
-      newDetails.en[editingId] = detailEntryEn;
-      newDetails.kg[editingId] = detailEntryKg;
-    } else {
-      // Add new entries to translations
-      newTranslations.ru.projects.items.push(listEntryRu);
-      newTranslations.en.projects.items.push(listEntryEn);
-      newTranslations.kg.projects.items.push(listEntryKg);
+      if (editingId) {
+        // Modify existing entries in translations
+        ["ru", "en", "kg"].forEach((lang) => {
+          const items = newTranslations[lang].projects.items;
+          const index = items.findIndex((p: any) => p.id === editingId);
+          if (index !== -1) {
+            items[index] = lang === "ru" ? listEntryRu : lang === "en" ? listEntryEn : listEntryKg;
+          }
+        });
 
-      // Add to details
-      newDetails.ru[formId] = detailEntryRu;
-      newDetails.en[formId] = detailEntryEn;
-      newDetails.kg[formId] = detailEntryKg;
+        // Modify existing entries in details
+        newDetails.ru[editingId] = detailEntryRu;
+        newDetails.en[editingId] = detailEntryEn;
+        newDetails.kg[editingId] = detailEntryKg;
+      } else {
+        // Add new entries to translations
+        newTranslations.ru.projects.items.push(listEntryRu);
+        newTranslations.en.projects.items.push(listEntryEn);
+        newTranslations.kg.projects.items.push(listEntryKg);
+
+        // Add to details
+        newDetails.ru[formId] = detailEntryRu;
+        newDetails.en[formId] = detailEntryEn;
+        newDetails.kg[formId] = detailEntryKg;
+      }
+
+      // Save and publish
+      await cmsService.updateTranslations(newTranslations);
+      await cmsService.updateProjectDetails(newDetails);
+
+      // Log action
+      await logAdminAction(
+        "Управление проектами",
+        editingId ? "Редактирование проекта" : "Создание проекта",
+        editingId ? `Изменен проект: ${formId} (${formNameRu})` : `Создан новый проект: ${formId} (${formNameRu})`
+      );
+
+      setTranslations(newTranslations);
+      setProjectDetails(newDetails);
+
+      setSuccess(true);
+      setEditingId(null);
+      setIsAdding(false);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      alert("Ошибка перевода или сохранения: " + err.message);
+    } finally {
+      setTranslating(false);
     }
-
-    // Save and publish
-    cmsService.updateTranslations(newTranslations);
-    cmsService.updateProjectDetails(newDetails);
-
-    setTranslations(newTranslations);
-    setProjectDetails(newDetails);
-
-    setSuccess(true);
-    setEditingId(null);
-    setIsAdding(false);
-    setTimeout(() => setSuccess(false), 3000);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Вы действительно хотите удалить проект?")) {
       const newTranslations = { ...translations };
       const newDetails = { ...projectDetails };
@@ -256,8 +300,15 @@ export function AdminProjectsEditor() {
       delete newDetails.en[id];
       delete newDetails.kg[id];
 
-      cmsService.updateTranslations(newTranslations);
-      cmsService.updateProjectDetails(newDetails);
+      await cmsService.updateTranslations(newTranslations);
+      await cmsService.updateProjectDetails(newDetails);
+
+      // Log action
+      await logAdminAction(
+        "Управление проектами",
+        "Удаление проекта",
+        `Удален проект с ID: ${id}`
+      );
 
       setTranslations(newTranslations);
       setProjectDetails(newDetails);
@@ -386,81 +437,28 @@ export function AdminProjectsEditor() {
             </div>
           </div>
 
-          {/* Multilingual Names and Categories */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* RU */}
-            <div className="space-y-4 bg-white/[0.01] border border-white/[0.04] p-6 rounded-2xl">
-              <span className="text-xs font-bold text-[#0066FF] uppercase tracking-wider block">Русский язык (RU)</span>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Название</label>
-                <input
-                  type="text"
-                  value={formNameRu}
-                  onChange={(e) => setFormNameRu(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Категория</label>
-                <input
-                  type="text"
-                  value={formCategoryRu}
-                  onChange={(e) => setFormCategoryRu(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-white/50">Название проекта (RU)</label>
+              <input
+                type="text"
+                value={formNameRu}
+                onChange={(e) => setFormNameRu(e.target.value)}
+                placeholder="Sandyq"
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                required
+              />
             </div>
-
-            {/* EN */}
-            <div className="space-y-4 bg-white/[0.01] border border-white/[0.04] p-6 rounded-2xl">
-              <span className="text-xs font-bold text-[#0066FF] uppercase tracking-wider block">English (EN)</span>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Name</label>
-                <input
-                  type="text"
-                  value={formNameEn}
-                  onChange={(e) => setFormNameEn(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Category</label>
-                <input
-                  type="text"
-                  value={formCategoryEn}
-                  onChange={(e) => setFormCategoryEn(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* KG */}
-            <div className="space-y-4 bg-white/[0.01] border border-white/[0.04] p-6 rounded-2xl">
-              <span className="text-xs font-bold text-[#0066FF] uppercase tracking-wider block">Кыргыз тили (KG)</span>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Аталышы</label>
-                <input
-                  type="text"
-                  value={formNameKg}
-                  onChange={(e) => setFormNameKg(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50">Категориясы</label>
-                <input
-                  type="text"
-                  value={formCategoryKg}
-                  onChange={(e) => setFormCategoryKg(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-white/50">Категория (RU)</label>
+              <input
+                type="text"
+                value={formCategoryRu}
+                onChange={(e) => setFormCategoryRu(e.target.value)}
+                placeholder="Брендинг"
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                required
+              />
             </div>
           </div>
 
@@ -519,19 +517,7 @@ export function AdminProjectsEditor() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Краткое описание проекта (EN)</label>
-                <textarea
-                  value={formDescEn}
-                  onChange={(e) => setFormDescEn(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-20 text-sm leading-relaxed"
-                  required
-                />
-              </div>
-            </div>
 
-            {/* Challenge / Задача */}
-            <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-white/50">Сложность / Вызов проекта (RU)</label>
                 <textarea
@@ -541,18 +527,8 @@ export function AdminProjectsEditor() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Challenge (EN)</label>
-                <textarea
-                  value={formChallengeEn}
-                  onChange={(e) => setFormChallengeEn(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-24 text-sm leading-relaxed"
-                  required
-                />
-              </div>
             </div>
 
-            {/* Gallery Images */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-white/50">Изображение этапа 1 (URL)</label>
@@ -575,72 +551,57 @@ export function AdminProjectsEditor() {
               </div>
             </div>
 
-            {/* Results */}
-            <div className="grid md:grid-cols-2 gap-6 bg-white/[0.01] border border-white/[0.04] p-6 rounded-2xl">
-              <div className="space-y-4">
-                <span className="text-xs font-bold text-[#0066FF] uppercase tracking-wider block">Показатель 1 (Статистика, например: +40% вовлеченность)</span>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/50">Результат (RU)</label>
-                  <input
-                    type="text"
-                    value={formResult1Ru}
-                    onChange={(e) => setFormResult1Ru(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/50">Result (EN)</label>
-                  <input
-                    type="text"
-                    value={formResult1En}
-                    onChange={(e) => setFormResult1En(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  />
-                </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Результат / Показатель 1 (RU)</label>
+                <input
+                  type="text"
+                  value={formResult1Ru}
+                  onChange={(e) => setFormResult1Ru(e.target.value)}
+                  placeholder="Выход на международный рынок"
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                />
               </div>
-
-              <div className="space-y-4">
-                <span className="text-xs font-bold text-[#0066FF] uppercase tracking-wider block">Показатель 2 (Статистика, например: Выход на международный рынок)</span>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/50">Результат (RU)</label>
-                  <input
-                    type="text"
-                    value={formResult2Ru}
-                    onChange={(e) => setFormResult2Ru(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white/50">Result (EN)</label>
-                  <input
-                    type="text"
-                    value={formResult2En}
-                    onChange={(e) => setFormResult2En(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-sm"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Результат / Показатель 2 (RU)</label>
+                <input
+                  type="text"
+                  value={formResult2Ru}
+                  onChange={(e) => setFormResult2Ru(e.target.value)}
+                  placeholder="Увеличение вовлеченности аудитории на 40%"
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              className="px-6 py-4 bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg transition duration-300"
-            >
-              <Save className="w-4 h-4" />
-              Сохранить проект
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setIsAdding(false);
-              }}
-              className="px-6 py-4 bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.06] font-bold rounded-xl text-sm transition duration-300"
-            >
-              Отмена
-            </button>
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={translating}
+                className="px-6 py-4 bg-[#0066FF] hover:bg-[#0052cc] text-white font-bold rounded-xl text-sm transition duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {translating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Перевод и сохранение...
+                  </>
+                ) : editingId ? (
+                  "Сохранить изменения"
+                ) : (
+                  "Создать проект"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setIsAdding(false);
+                }}
+                className="px-6 py-4 bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.06] font-bold rounded-xl text-sm transition duration-300"
+              >
+                Отмена
+              </button>
+            </div>
           </div>
         </motion.form>
       )}

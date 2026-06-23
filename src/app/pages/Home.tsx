@@ -70,8 +70,9 @@ export function Home() {
   }, [isMobile]);
 
   const homeProjects = projects.map((p, i) => {
-    const ids = ["sandyq", "ala-too", "one-ordo", "salkyn", "techstart", "auto-concept-x"];
-    const images = [
+    // Helper fallback for legacy static values
+    const legacyIds = ["sandyq", "ala-too", "one-ordo", "salkyn", "techstart", "auto-concept-x"];
+    const legacyImages = [
       projectImg1,
       projectImg2,
       "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600",
@@ -79,10 +80,12 @@ export function Home() {
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600",
       "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600"
     ];
+
     return {
-      ...p,
-      id: ids[i] || "default",
-      image: images[i]
+      id: p.id || legacyIds[i] || "default",
+      title: p.title || p.name || "",
+      tag: p.tag || p.category || "",
+      image: p.image || p.img || legacyImages[i] || projectImg1
     };
   });
 

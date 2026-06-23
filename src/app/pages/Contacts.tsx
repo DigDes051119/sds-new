@@ -38,8 +38,8 @@ export function Contacts() {
         >
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-black/40 mb-4">{t.contacts.writeUs}</h3>
-            <a href="mailto:getdesign@steeldrakestudioteam.com" className="text-lg sm:text-2xl md:text-3xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block break-all sm:break-normal">
-              getdesign@steeldrakestudioteam.com
+            <a href="mailto:contact@steeldrakestudio.com" className="text-lg sm:text-2xl md:text-3xl font-medium hover:text-[#0000FF] transition-colors interactive-element inline-block break-all sm:break-normal">
+              contact@steeldrakestudio.com
             </a>
           </div>
           

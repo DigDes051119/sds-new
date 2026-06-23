@@ -50,18 +50,45 @@ export const cmsService = {
     this.notify();
   },
 
-  // Get current translations (loads from localStorage or default)
   getTranslations() {
     const stored = localStorage.getItem("sds_translations");
+    let data: any;
     if (!stored) {
-      localStorage.setItem("sds_translations", JSON.stringify(defaultTranslations));
-      return defaultTranslations;
+      data = JSON.parse(JSON.stringify(defaultTranslations));
+    } else {
+      try {
+        data = JSON.parse(stored);
+      } catch {
+        data = JSON.parse(JSON.stringify(defaultTranslations));
+      }
     }
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return defaultTranslations;
+
+    // Auto-migration/sync: If the translations fetched from Supabase/localStorage have
+    // an empty team or the old 4-member mock team, replace it with the real 10-member team list.
+    const langs = ["ru", "en", "kg"] as const;
+    let modified = false;
+    for (const lang of langs) {
+      if (!data[lang]) data[lang] = {};
+      if (!data[lang].about) data[lang].about = {};
+
+      const team = data[lang].about.team;
+      const realTeam = defaultTranslations[lang]?.about?.team;
+
+      if (!team || !Array.isArray(team) || team.length === 0 || (team.length <= 4 && team[0] && !team[0].img)) {
+        data[lang].about.team = JSON.parse(JSON.stringify(realTeam));
+        modified = true;
+      }
     }
+
+    if (modified) {
+      localStorage.setItem("sds_translations", JSON.stringify(data));
+      // Save to Supabase to synchronize database as well
+      supabaseClient.upsertTable("sds_translations", [{ id: 1, data }]).catch((e) => {
+        console.error("Failed to push migrated translations to Supabase:", e);
+      });
+    }
+
+    return data;
   },
 
   // Update translations locally & remotely

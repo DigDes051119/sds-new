@@ -17,7 +17,7 @@ export function About() {
   const { t, locale } = useContext(LanguageContext);
 
   const ab = t.about || {};
-  const team = teamTranslations[locale] || teamTranslations.ru;
+  const team = ab.team || teamTranslations[locale] || teamTranslations.ru;
 
   const statsLabels = {
     ru: { storyTitle: "Наша история" },

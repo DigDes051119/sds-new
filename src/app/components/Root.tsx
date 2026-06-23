@@ -131,6 +131,7 @@ export function Root() {
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const footerRef = useRef<HTMLElement>(null);
+  const lastScrollY = useRef(0);
   useEffect(() => {
     cmsService.initSupabaseSync();
 
@@ -261,7 +262,7 @@ export function Root() {
             y: isHeaderVisible ? 0 : -150,
             opacity: isHeaderVisible ? 1 : 0
           }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="mx-auto relative flex h-20 max-w-[1380px] items-center justify-center">
             
@@ -450,10 +451,10 @@ export function Root() {
                   {t.contacts.letsTalk}
                 </NavLink>
                 <a 
-                  href="mailto:getdesign@steeldrakestudioteam.com" 
+                  href="mailto:contact@steeldrakestudio.com" 
                   className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-tight hover:text-white/80 transition-colors interactive-element"
                 >
-                  getdesign@steeldrakestudioteam.com
+                  contact@steeldrakestudio.com
                 </a>
               </div>
 
@@ -543,7 +544,7 @@ export function Root() {
               className="fixed bottom-8 left-1/2 z-40 flex items-center gap-3"
             >
               <a 
-                href="mailto:design@steeldrakestudioteam.com" 
+                href="mailto:contact@steeldrakestudio.com" 
                 className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
                 title="Mail"
               >

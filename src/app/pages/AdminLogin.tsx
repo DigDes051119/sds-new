@@ -16,19 +16,57 @@ export function AdminLogin() {
 
     // Fallback local auth for initial testing
     if (username === "sdstadmin" && password === "sdst2011team") {
+      const fallbackAdmin = {
+        username: "sdstadmin",
+        first_name: "Системный",
+        last_name: "Администратор",
+        role: "creator",
+        permissions: {
+          analytics: true,
+          featured: true,
+          about: true,
+          projects: true,
+          contacts: true,
+          services: true,
+          history: true
+        }
+      };
       localStorage.setItem("sds_admin_logged_in", "true");
+      localStorage.setItem("sds_current_admin", JSON.stringify(fallbackAdmin));
       navigate("/admin");
       return;
     }
 
-    // Attempt Supabase Auth
+    // Query sds_admins table
     try {
-      const email = username.includes("@") ? username : `${username}@steeldrakestudio.com`;
-      await supabaseClient.signInWithPassword(email, password);
-      localStorage.setItem("sds_admin_logged_in", "true");
-      navigate("/admin");
+      const admins = await supabaseClient.fetchTable("sds_admins");
+      const matched = admins.find((a: any) => a.username === username.trim().toLowerCase() && a.password === password);
+      
+      if (matched) {
+        const defaultPerms = {
+          analytics: true,
+          featured: matched.role !== "limited",
+          about: matched.role !== "limited",
+          projects: true,
+          contacts: matched.role !== "limited",
+          services: true,
+          history: matched.role === "creator" || matched.role === "full"
+        };
+
+        localStorage.setItem("sds_admin_logged_in", "true");
+        localStorage.setItem("sds_current_admin", JSON.stringify({
+          username: matched.username,
+          first_name: matched.first_name,
+          last_name: matched.last_name,
+          role: matched.role,
+          permissions: matched.permissions ? { ...defaultPerms, ...matched.permissions } : defaultPerms
+        }));
+        navigate("/admin");
+      } else {
+        setError("Неверный логин или пароль");
+      }
     } catch (err: any) {
-      setError(err.message || "Неверный логин или пароль");
+      setError("Ошибка: " + err.message);
     }
   };
 

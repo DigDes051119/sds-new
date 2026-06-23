@@ -95,24 +95,73 @@ export const supabaseClient = {
 
   async upsertTable(tableName: string, rows: any[]) {
     const token = this.getToken() || SUPABASE_KEY;
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}`, {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates",
-      },
-      body: JSON.stringify(rows),
-    });
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 10000);
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ message: response.statusText }));
-      throw new Error(err.message || `Failed to upsert table ${tableName}`);
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates",
+        },
+        body: JSON.stringify(rows),
+        signal: controller.signal
+      });
+
+      clearTimeout(id);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(err.message || `Failed to upsert table ${tableName}`);
+      }
+
+      return true;
+    } catch (e: any) {
+      clearTimeout(id);
+      if (e.name === 'AbortError') {
+        throw new Error("Превышено время ожидания ответа от сервера (таймаут 10 сек). Возможно, таблица заблокирована в Supabase.");
+      }
+      throw e;
     }
-
-    return true;
   },
+
+  async insertTable(tableName: string, rows: any[]) {
+    const token = this.getToken() || SUPABASE_KEY;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(rows),
+        signal: controller.signal
+      });
+
+      clearTimeout(id);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(err.message || `Failed to insert into table ${tableName}`);
+      }
+
+      return true;
+    } catch (e: any) {
+      clearTimeout(id);
+      if (e.name === 'AbortError') {
+        throw new Error("Превышено время ожидания ответа от сервера (таймаут 10 сек). Возможно, таблица заблокирована в Supabase.");
+      }
+      throw e;
+    }
+  },
+
 
   async clearAnalytics() {
     const token = this.getToken() || SUPABASE_KEY;
@@ -131,5 +180,40 @@ export const supabaseClient = {
     }
 
     return true;
+  },
+
+  async uploadFile(bucketName: string, path: string, file: File) {
+    const token = this.getToken() || SUPABASE_KEY;
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${path}`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${token}`,
+      },
+      body: file
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      if (err.message && (err.message.includes("already exists") || err.error === "Duplicate")) {
+        // Try PUT to overwrite
+        const overwriteResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${path}`, {
+          method: "PUT",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${token}`,
+          },
+          body: file
+        });
+        if (!overwriteResponse.ok) {
+          const overwriteErr = await overwriteResponse.json().catch(() => ({ message: overwriteResponse.statusText }));
+          throw new Error(overwriteErr.message || `Failed to upload file to ${bucketName}/${path}`);
+        }
+        return `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${path}`;
+      }
+      throw new Error(err.message || `Failed to upload file to ${bucketName}/${path}`);
+    }
+
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${path}`;
   }
 };
