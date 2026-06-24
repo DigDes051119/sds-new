@@ -27,6 +27,21 @@ export function AdminServicesEditor() {
     setTranslations(updated);
   };
 
+  const handleHomeServiceFieldChange = (index: number, fieldIdx: number, value: string) => {
+    if (isReadOnly) return;
+    const updated = { ...translations };
+    if (!updated.ru) updated.ru = {};
+    if (!updated.ru.home) updated.ru.home = {};
+    if (!updated.ru.home.services) updated.ru.home.services = [];
+
+    const homeServices = [...updated.ru.home.services];
+    const item = [...(homeServices[index] || [])];
+    item[fieldIdx] = value;
+    homeServices[index] = item;
+    updated.ru.home.services = homeServices;
+    setTranslations(updated);
+  };
+
   const handleStepChange = (serviceIndex: number, stepIndex: number, value: string) => {
     if (isReadOnly) return;
     const updated = { ...translations };
@@ -98,6 +113,21 @@ export function AdminServicesEditor() {
             updated[lang].services.items = translatedItems;
           }
         }
+
+        // Translate and sync homepage services
+        if (updated.ru.home && updated.ru.home.services) {
+          if (!updated[lang].home) updated[lang].home = {};
+          const translatedHomeServices = [];
+          for (const item of updated.ru.home.services) {
+            translatedHomeServices.push([
+              item[0], // id
+              await translateText(item[1] || "", lang), // title
+              await translateText(item[2] || "", lang), // description
+              item[3] || "" // image URL
+            ]);
+          }
+          updated[lang].home.services = translatedHomeServices;
+        }
       }
 
       setTranslations(updated);
@@ -107,7 +137,7 @@ export function AdminServicesEditor() {
       await logAdminAction(
         "Управление услугами",
         "Сохранение услуг",
-        `Обновлен список услуг (${updated.ru.services?.items?.length || 0} шт.) и этапы работы`
+        `Обновлен список услуг (${updated.ru.services?.items?.length || 0} шт.), этапы работы и блоки услуг на главной (${updated.ru.home?.services?.length || 0} шт.)`
       );
 
       setSuccess(true);
@@ -121,6 +151,7 @@ export function AdminServicesEditor() {
 
   const currentData = translations.ru || {};
   const servicesList = currentData.services?.items || [];
+  const homeServicesList = currentData.home?.services || [];
 
   return (
     <div className="space-y-8 max-w-5xl font-['Inter',sans-serif]">
@@ -154,6 +185,76 @@ export function AdminServicesEditor() {
           Доступ ограничен. У вас нет прав на редактирование услуг.
         </div>
       )}
+
+      {/* Homepage Services Editor */}
+      <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8">
+        <h3 className="text-lg font-bold tracking-tight mb-2 flex items-center gap-2 text-[#0066FF]">
+          <Briefcase className="w-5 h-5" />
+          Услуги на Главной странице (RU)
+        </h3>
+        <p className="text-xs text-white/40 mb-6">
+          Эти 4 блока услуг отображаются в виде раскрывающихся карт на главной странице сайта. Ссылка на картинку может быть как внешней (Unsplash/др.), так и из хранилища Supabase Storage.
+        </p>
+
+        {homeServicesList.length === 0 ? (
+          <div className="text-center py-8 text-white/40 text-sm border border-dashed border-white/10 rounded-2xl">
+            Список услуг на главной странице пуст.
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {homeServicesList.map((service: any, idx: number) => {
+              const serviceId = service[0] || "";
+              const serviceTitle = service[1] || "";
+              const serviceDesc = service[2] || "";
+              const serviceImg = service[3] || "";
+
+              return (
+                <div key={serviceId || idx} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-light text-[#0000FF]">{serviceId}</span>
+                    <input
+                      type="text"
+                      value={serviceTitle}
+                      onChange={(e) => handleHomeServiceFieldChange(idx, 1, e.target.value)}
+                      disabled={isReadOnly}
+                      className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-base font-semibold"
+                      placeholder="Название услуги"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Описание услуги</label>
+                    <textarea
+                      value={serviceDesc}
+                      onChange={(e) => handleHomeServiceFieldChange(idx, 2, e.target.value)}
+                      disabled={isReadOnly}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none h-16 text-sm"
+                      placeholder="Краткое описание на главной странице"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Ссылка на изображение</label>
+                    <input
+                      type="text"
+                      value={serviceImg}
+                      onChange={(e) => handleHomeServiceFieldChange(idx, 3, e.target.value)}
+                      disabled={isReadOnly}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2 text-white focus:border-[#0066FF] outline-none text-xs"
+                      placeholder="Вставьте ссылку на картинку"
+                    />
+                    {serviceImg && (
+                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-black/40 border border-white/5 relative">
+                        <img src={serviceImg} alt={serviceTitle} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Services List Editor */}
       <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8">

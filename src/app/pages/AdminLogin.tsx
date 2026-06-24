@@ -14,33 +14,8 @@ export function AdminLogin() {
     e.preventDefault();
     setError("");
 
-    // Fallback local auth for initial testing
-    if (username === "sdstadmin" && password === "sdst2011team") {
-      const fallbackAdmin = {
-        username: "sdstadmin",
-        first_name: "Системный",
-        last_name: "Администратор",
-        role: "creator",
-        permissions: {
-          analytics: true,
-          featured: true,
-          about: true,
-          projects: true,
-          contacts: true,
-          services: true,
-          history: true
-        }
-      };
-      localStorage.setItem("sds_admin_logged_in", "true");
-      localStorage.setItem("sds_current_admin", JSON.stringify(fallbackAdmin));
-      navigate("/admin");
-      return;
-    }
-
-    // Query sds_admins table
     try {
-      const admins = await supabaseClient.fetchTable("sds_admins");
-      const matched = admins.find((a: any) => a.username === username.trim().toLowerCase() && a.password === password);
+      const matched = await supabaseClient.verifyAdmin(username.trim().toLowerCase(), password);
       
       if (matched) {
         const defaultPerms = {
@@ -61,6 +36,10 @@ export function AdminLogin() {
           role: matched.role,
           permissions: matched.permissions ? { ...defaultPerms, ...matched.permissions } : defaultPerms
         }));
+        
+        // Save password in sessionStorage to authorize admin operations
+        sessionStorage.setItem("sds_current_admin_password", password);
+        
         navigate("/admin");
       } else {
         setError("Неверный логин или пароль");

@@ -45,11 +45,8 @@ export function AdminUsersManager() {
   const isCreator = currentAdmin.role === "creator";
   const canViewLogs = currentAdmin.role === "creator" || (currentAdmin.role === "full" && currentAdmin.permissions?.history !== false);
 
-  const sqlCode = `-- SQL для добавления колонки прав к существующей таблице (запустите, если sds_admins уже создана):
-alter table sds_admins add column if not exists permissions jsonb;
-
--- Полный скрипт инициализации таблиц (для новой базы):
-create table sds_admins (
+  const sqlCode = `-- 1. Создание таблицы sds_admins (если еще нет)
+create table if not exists sds_admins (
   id bigint generated always as identity primary key,
   username text unique not null,
   password text not null,
@@ -60,15 +57,123 @@ create table sds_admins (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Отключаем защиту RLS для возможности записи администраторов
-alter table sds_admins disable row level security;
+-- 2. Включаем RLS (прямой публичный доступ к таблице будет заблокирован)
+alter table sds_admins enable row level security;
 
--- Добавляем первого создателя
+-- 3. Добавляем системного создателя
 insert into sds_admins (username, password, first_name, last_name, role, permissions)
-values ('akimkhan', 'akimkhan2026', 'Акимхан', 'Солтокулов', 'creator', '{"analytics":true,"featured":true,"about":true,"projects":true,"contacts":true,"services":true,"history":true}');
+values ('sdstadmin', 'sdst2011team', 'Системный', 'Администратор', 'creator', '{"analytics":true,"featured":true,"about":true,"projects":true,"contacts":true,"services":true,"history":true}')
+on conflict (username) do nothing;
 
--- Создаем таблицу логов действий администраторов
-create table sds_admin_logs (
+-- 4. Создаем функцию верификации при входе (verify_admin_credentials)
+CREATE OR REPLACE FUNCTION verify_admin_credentials(p_username text, p_password text)
+RETURNS TABLE (
+  username text,
+  first_name text,
+  last_name text,
+  role text,
+  permissions jsonb
+) SECURITY DEFINER AS $$
+BEGIN
+  RETURN QUERY
+  SELECT a.username, a.first_name, a.last_name, a.role, a.permissions
+  FROM sds_admins a
+  WHERE LOWER(a.username) = LOWER(p_username) AND a.password = p_password;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 5. Создаем функцию получения списка администраторов (get_admins_list)
+CREATE OR REPLACE FUNCTION get_admins_list(p_requester_username text, p_requester_password text)
+RETURNS TABLE (
+  id bigint,
+  username text,
+  password text,
+  first_name text,
+  last_name text,
+  role text,
+  permissions jsonb
+) SECURITY DEFINER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM sds_admins a
+    WHERE LOWER(a.username) = LOWER(p_requester_username) 
+      AND a.password = p_requester_password 
+      AND a.role = 'creator'
+  ) THEN
+    RETURN QUERY
+    SELECT a.id, a.username, a.password, a.first_name, a.last_name, a.role, a.permissions
+    FROM sds_admins a;
+  ELSE
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 6. Создаем функцию добавления/редактирования (upsert_admin_user)
+CREATE OR REPLACE FUNCTION upsert_admin_user(
+  p_requester_username text, 
+  p_requester_password text,
+  p_id bigint,
+  p_username text,
+  p_password text,
+  p_first_name text,
+  p_last_name text,
+  p_role text,
+  p_permissions jsonb
+)
+RETURNS boolean SECURITY DEFINER AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM sds_admins 
+    WHERE LOWER(username) = LOWER(p_requester_username) 
+      AND password = p_requester_password 
+      AND role = 'creator'
+  ) THEN
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+
+  IF p_id IS NULL OR p_id = 0 THEN
+    INSERT INTO sds_admins (username, password, first_name, last_name, role, permissions)
+    VALUES (LOWER(p_username), p_password, p_first_name, p_last_name, p_role, p_permissions);
+  ELSE
+    UPDATE sds_admins
+    SET username = LOWER(p_username),
+        password = p_password,
+        first_name = p_first_name,
+        last_name = p_last_name,
+        role = p_role,
+        permissions = p_permissions
+    WHERE id = p_id;
+  END IF;
+  
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 7. Создаем функцию удаления администратора (delete_admin_user)
+CREATE OR REPLACE FUNCTION delete_admin_user(
+  p_requester_username text,
+  p_requester_password text,
+  p_user_id bigint
+)
+RETURNS boolean SECURITY DEFINER AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM sds_admins 
+    WHERE LOWER(username) = LOWER(p_requester_username) 
+      AND password = p_requester_password 
+      AND role = 'creator'
+  ) THEN
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+
+  DELETE FROM sds_admins WHERE id = p_user_id;
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 8. Создаем таблицу логов действий (если еще нет)
+create table if not exists sds_admin_logs (
   id bigint generated always as identity primary key,
   admin_username text not null,
   admin_name text not null,
@@ -78,7 +183,7 @@ create table sds_admin_logs (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Отключаем защиту RLS для логов
+-- Отключаем защиту RLS для логов (для возможности ведения журналов действий)
 alter table sds_admin_logs disable row level security;`;
 
   const copySQL = () => {
@@ -90,7 +195,8 @@ alter table sds_admin_logs disable row level security;`;
   const loadAdmins = async () => {
     try {
       setLoading(true);
-      const data = await supabaseClient.fetchTable("sds_admins");
+      const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+      const data = await supabaseClient.getAdminsList(currentAdmin.username, requesterPassword);
       setAdmins(data || []);
       setError(null);
     } catch (err: any) {
@@ -103,7 +209,8 @@ alter table sds_admin_logs disable row level security;`;
   const loadLogs = async () => {
     try {
       setLoadingLogs(true);
-      const data = await supabaseClient.fetchTable("sds_admin_logs");
+      const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+      const data = await supabaseClient.getAdminLogsSecure(currentAdmin.username, requesterPassword);
       const sorted = (data || []).sort(
         (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -194,7 +301,8 @@ alter table sds_admin_logs disable row level security;`;
         permissions: formPermissions
       };
 
-      await supabaseClient.insertTable("sds_admins", [newAdmin]);
+      const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+      await supabaseClient.upsertAdminUser(currentAdmin.username, requesterPassword, newAdmin);
       
       await logAdminAction(
         "Администрация",
@@ -254,7 +362,8 @@ alter table sds_admin_logs disable row level security;`;
         permissions: formPermissions
       };
 
-      await supabaseClient.upsertTable("sds_admins", [updatedAdmin]);
+      const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+      await supabaseClient.upsertAdminUser(currentAdmin.username, requesterPassword, updatedAdmin);
 
       await logAdminAction(
         "Администрация",
@@ -285,19 +394,8 @@ alter table sds_admin_logs disable row level security;`;
     if (confirm(`Вы действительно хотите удалить администратора ${username}?`)) {
       try {
         setLoading(true);
-        const token = supabaseClient.getToken() || "sb_publishable_3DWLrcWUpjuE_gNKEivM8A_UHOmJLgu";
-        const response = await fetch(`https://hniqpnuqqsmqpolxgbav.supabase.co/rest/v1/sds_admins?id=eq.${id}`, {
-          method: "DELETE",
-          headers: {
-            "apikey": "sb_publishable_3DWLrcWUpjuE_gNKEivM8A_UHOmJLgu",
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Не удалось удалить запись");
-        }
+        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        await supabaseClient.deleteAdminUser(currentAdmin.username, requesterPassword, id);
 
         await logAdminAction(
           "Администрация",
@@ -375,9 +473,9 @@ alter table sds_admin_logs disable row level security;`;
         <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 flex items-start gap-4">
           <AlertCircle className="w-8 h-8 text-red-400 shrink-0" />
           <div className="space-y-2">
-            <h3 className="text-lg font-bold tracking-tight text-white">Требуется обновление базы данных</h3>
-            <p className="text-white/60 text-sm leading-relaxed">
-              Необходимо выполнить SQL-запрос для добавления колонки прав (permissions) или создания таблиц.
+            <h3 className="text-lg font-bold tracking-tight text-white">Ошибка подключения к базе данных</h3>
+            <p className="text-red-400 font-mono text-sm leading-relaxed mt-1 bg-black/30 p-3 rounded-lg border border-red-500/10">
+              {error}
             </p>
           </div>
         </div>

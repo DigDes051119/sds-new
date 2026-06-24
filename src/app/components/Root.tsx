@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, cloneElement } from "react";
 import { Menu, X, Mail, Instagram, ArrowUpRight, MapPin } from "lucide-react";
 import logoPng from "../../imports/logo.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -126,12 +126,47 @@ export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [locale, setLocale] = useState<Language>("ru");
+  const [locale, setLocale] = useState<Language>("en");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const footerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
+
+  const [isContactPopupOpen, setIsContactPopupOpen] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientName || !clientPhone) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Save to Supabase database sds_leads table (triggers email automatically on backend!)
+      await supabaseClient.insertTable("sds_leads", [
+        {
+          name: clientName,
+          phone: clientPhone,
+          created_at: new Date().toISOString()
+        }
+      ]);
+
+      setSubmitSuccess(true);
+      setClientName("");
+      setClientPhone("");
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      // Fallback redirect to email client
+      window.location.href = `mailto:contact@steeldrakestudio.com?subject=${encodeURIComponent("Заявка с сайта")}&body=${encodeURIComponent(`Имя: ${clientName}\nТелефон: ${clientPhone}`)}`;
+      setSubmitSuccess(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   useEffect(() => {
     cmsService.initSupabaseSync();
 
@@ -256,11 +291,10 @@ export function Root() {
         <InteractiveBackground />
         
         <motion.header
-          className={`fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6 ${isHeaderVisible ? "" : "pointer-events-none"}`}
-          initial={{ y: 0, opacity: 1 }}
+          className={`fixed left-0 right-0 z-50 px-3 sm:px-6 ${isHeaderVisible ? "" : "pointer-events-none"}`}
+          initial={{ top: "12px" }}
           animate={{ 
-            y: isHeaderVisible ? 0 : -150,
-            opacity: isHeaderVisible ? 1 : 0
+            top: isHeaderVisible ? "12px" : "-150px"
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -421,19 +455,21 @@ export function Root() {
 
          <main className="pt-24">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ willChange: "opacity" }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut"
-              }}
-            >
-              {outlet}
-            </motion.div>
+            {outlet && (
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ willChange: "opacity" }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut"
+                }}
+              >
+                {cloneElement(outlet, { context: { openContactForm: () => setIsContactPopupOpen(true) } })}
+              </motion.div>
+            )}
           </AnimatePresence>
         </main>
 
@@ -444,12 +480,13 @@ export function Root() {
               
               {/* Left side: Let's Talk & Email */}
               <div className="flex flex-col items-start gap-6 mb-12 md:mb-0">
-                <NavLink 
-                  to="/contacts" 
+                <button 
+                  type="button"
+                  onClick={() => setIsContactPopupOpen(true)}
                   className="inline-flex items-center justify-center px-5 py-2 border border-white/30 rounded-full text-sm font-medium hover:bg-white hover:text-[#0000FF] hover:border-white transition-all duration-300 interactive-element"
                 >
                   {t.contacts.letsTalk}
-                </NavLink>
+                </button>
                 <a 
                   href="mailto:contact@steeldrakestudio.com" 
                   className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-medium tracking-tight hover:text-white/80 transition-colors interactive-element"
@@ -521,12 +558,6 @@ export function Root() {
                 <div className="text-[13px] text-white/80">
                   © 2026 STEEL DRAKE STUDIO TEAM. All Right Reserved
                 </div>
-                <NavLink 
-                  to="/admin" 
-                  className="text-[10px] text-white/20 hover:text-white/40 transition-colors"
-                >
-                  admin
-                </NavLink>
               </div>
             </div>
 
@@ -568,6 +599,125 @@ export function Root() {
               >
                 <CustomInstagramIcon />
               </a>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Contact Popup Modal */}
+        <AnimatePresence>
+          {isContactPopupOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+              onClick={() => {
+                if (!isSubmitting) setIsContactPopupOpen(false);
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.95, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="bg-white rounded-[2rem] p-8 max-w-[440px] w-full shadow-2xl relative border border-white/20 text-black flex flex-col justify-between"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsContactPopupOpen(false)}
+                  disabled={isSubmitting}
+                  className="absolute top-6 right-6 p-2 bg-black/[0.03] hover:bg-black/[0.08] text-black/60 hover:text-black rounded-full transition-colors disabled:opacity-50"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {submitSuccess ? (
+                  <div className="py-8 text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-3xl font-bold animate-bounce">
+                      ✓
+                    </div>
+                    <h3 className="text-2xl font-bold tracking-tight mt-2">
+                      {locale === "ru" ? "Заявка отправлена!" : locale === "kg" ? "Билдирүү жөнөтүлдү!" : "Request Sent!"}
+                    </h3>
+                    <p className="text-black/55 text-sm leading-relaxed max-w-[320px]">
+                      {locale === "ru" 
+                        ? "Спасибо! Мы свяжемся с вами в ближайшее время для обсуждения вашего проекта." 
+                        : locale === "kg"
+                        ? "Рахмат! Долбооруңузду талкуулоо үчүн жакында сиз менен байланышабыз."
+                        : "Thank you! We will contact you shortly to discuss your project."}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitSuccess(false);
+                        setIsContactPopupOpen(false);
+                      }}
+                      className="mt-6 px-6 py-2.5 bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold rounded-xl text-sm transition-all"
+                    >
+                      {locale === "ru" ? "Закрыть" : locale === "kg" ? "Жабуу" : "Close"}
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-6">
+                    <div>
+                      <h3 className="text-2xl font-bold tracking-tight">
+                        {locale === "ru" ? "Давайте обсудим проект" : locale === "kg" ? "Долбоорду талкуулайлы" : "Let's discuss your project"}
+                      </h3>
+                      <p className="text-sm text-black/50 mt-1">
+                        {locale === "ru" 
+                          ? "Оставьте ваши данные, и мы свяжемся с вами." 
+                          : locale === "kg"
+                          ? "Маалыматыңызды калтырыңыз, биз сиз менен байланышабыз."
+                          : "Leave your details and we will get in touch."}
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-black/40 uppercase tracking-wider mb-2">
+                          {locale === "ru" ? "Ваше имя" : locale === "kg" ? "Атыңыз" : "Your Name"}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={clientName}
+                          onChange={(e) => setClientName(e.target.value)}
+                          placeholder={locale === "ru" ? "Иван Иванов" : locale === "kg" ? "Атыңызды жазыңыз" : "John Doe"}
+                          className="w-full bg-black/[0.03] border border-black/5 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#0000FF] focus:ring-1 focus:ring-[#0000FF] transition-all text-base placeholder-black/30"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-black/40 uppercase tracking-wider mb-2">
+                          {locale === "ru" ? "Номер телефона" : locale === "kg" ? "Телефон номериңиз" : "Phone Number"}
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={clientPhone}
+                          onChange={(e) => setClientPhone(e.target.value)}
+                          placeholder="+996 (___) __-__-__"
+                          className="w-full bg-black/[0.03] border border-black/5 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#0000FF] focus:ring-1 focus:ring-[#0000FF] transition-all text-base placeholder-black/30"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-[#0000FF]/10 hover:shadow-[#0000FF]/25 flex items-center justify-center gap-2 disabled:opacity-70 active:scale-[0.98]"
+                    >
+                      {isSubmitting ? (
+                        <span className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                      ) : (
+                        <span>{locale === "ru" ? "Отправить заявку" : locale === "kg" ? "Жөнөтүү" : "Submit Request"}</span>
+                      )}
+                    </button>
+                  </form>
+                )}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

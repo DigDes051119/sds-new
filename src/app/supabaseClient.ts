@@ -215,5 +215,202 @@ export const supabaseClient = {
     }
 
     return `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${path}`;
+  },
+
+  async verifyAdmin(username: string, password: string) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/verify_admin_credentials`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_username: username, p_password: password }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Неверный логин или пароль");
+    }
+
+    const data = await response.json();
+    return data[0] || null;
+  },
+
+  async getAdminsList(requesterUsername: string, requesterPassword: string) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_admins_list`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка получения списка администраторов");
+    }
+
+    return await response.json();
+  },
+
+  async upsertAdminUser(requesterUsername: string, requesterPassword: string, adminUser: any) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/upsert_admin_user`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword,
+        p_id: adminUser.id || 0,
+        p_username: adminUser.username,
+        p_password: adminUser.password,
+        p_first_name: adminUser.first_name,
+        p_last_name: adminUser.last_name,
+        p_role: adminUser.role,
+        p_permissions: adminUser.permissions
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка сохранения администратора");
+    }
+
+    return true;
+  },
+
+  async deleteAdminUser(requesterUsername: string, requesterPassword: string, userId: number) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_admin_user`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword,
+        p_user_id: userId
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка удаления администратора");
+    }
+
+    return true;
+  },
+
+  async updateTranslationsSecure(requesterUsername: string, requesterPassword: string, data: any) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_translations_secure`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword,
+        p_data: data
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка обновления переводов");
+    }
+
+    return true;
+  },
+
+  async updateProjectDetailsSecure(requesterUsername: string, requesterPassword: string, data: any) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_project_details_secure`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword,
+        p_data: data
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка обновления деталей проекта");
+    }
+
+    return true;
+  },
+
+  async getAdminLogsSecure(requesterUsername: string, requesterPassword: string) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_admin_logs`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка получения логов");
+    }
+
+    return await response.json();
+  },
+
+  async getAnalyticsDataSecure(requesterUsername: string, requesterPassword: string) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_analytics_data`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка получения аналитики");
+    }
+
+    return await response.json();
+  },
+
+  async clearAnalyticsSecure(requesterUsername: string, requesterPassword: string) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/clear_analytics_data`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_requester_username: requesterUsername,
+        p_requester_password: requesterPassword
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(err.message || "Ошибка очистки аналитики");
+    }
+
+    return true;
   }
 };

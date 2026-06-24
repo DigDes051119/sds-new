@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
+import { supabaseClient } from "../supabaseClient";
 
 
 export function AdminProjectsEditor() {
@@ -13,6 +14,33 @@ export function AdminProjectsEditor() {
   const [isAdding, setIsAdding] = useState(false);
   const [success, setSuccess] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [uploadingImage1, setUploadingImage1] = useState(false);
+  const [uploadingImage2, setUploadingImage2] = useState(false);
+
+  const handleUploadPhoto = async (target: "img" | "image1" | "image2", file: File) => {
+    try {
+      if (target === "img") setUploadingImg(true);
+      else if (target === "image1") setUploadingImage1(true);
+      else if (target === "image2") setUploadingImage2(true);
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `project-${target}-${Date.now()}.${fileExt}`;
+      const path = `projects/${fileName}`;
+
+      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+      
+      if (target === "img") setFormImg(publicUrl);
+      else if (target === "image1") setFormImage1(publicUrl);
+      else if (target === "image2") setFormImage2(publicUrl);
+    } catch (e: any) {
+      alert("Ошибка при загрузке фотографии: " + e.message);
+    } finally {
+      if (target === "img") setUploadingImg(false);
+      else if (target === "image1") setUploadingImage1(false);
+      else if (target === "image2") setUploadingImage2(false);
+    }
+  };
 
   // Form states for creating/editing a project
   const [formId, setFormId] = useState("");
@@ -497,13 +525,42 @@ export function AdminProjectsEditor() {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-white/50">Главное превью (Изображение)</label>
-                <input
-                  type="text"
-                  value={formImg}
-                  onChange={(e) => setFormImg(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  required
-                />
+                <div className="grid grid-cols-[120px_1fr] gap-4 items-center">
+                  <label className="relative aspect-video bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/20 rounded-xl overflow-hidden flex flex-col items-center justify-center cursor-pointer transition group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhoto("img", file);
+                      }}
+                      className="hidden"
+                      disabled={uploadingImg}
+                    />
+                    {uploadingImg ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-5 h-5 text-[#0066FF] animate-spin" />
+                      </div>
+                    ) : formImg ? (
+                      <>
+                        <img src={formImg} alt="Preview" className="w-full h-full object-cover transition duration-300 group-hover:brightness-50" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <Camera className="w-5 h-5 text-white/30 group-hover:text-white/60" />
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={formImg}
+                    onChange={(e) => setFormImg(e.target.value)}
+                    placeholder="Или вставьте ссылку..."
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-sm"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -531,23 +588,81 @@ export function AdminProjectsEditor() {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Изображение этапа 1 (URL)</label>
-                <input
-                  type="text"
-                  value={formImage1}
-                  onChange={(e) => setFormImage1(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  required
-                />
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Изображение этапа 1 (Изображение)</label>
+                <div className="grid grid-cols-[120px_1fr] gap-4 items-center">
+                  <label className="relative aspect-video bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/20 rounded-xl overflow-hidden flex flex-col items-center justify-center cursor-pointer transition group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhoto("image1", file);
+                      }}
+                      className="hidden"
+                      disabled={uploadingImage1}
+                    />
+                    {uploadingImage1 ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-5 h-5 text-[#0066FF] animate-spin" />
+                      </div>
+                    ) : formImage1 ? (
+                      <>
+                        <img src={formImage1} alt="Preview" className="w-full h-full object-cover transition duration-300 group-hover:brightness-50" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <Camera className="w-5 h-5 text-white/30 group-hover:text-white/60" />
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={formImage1}
+                    onChange={(e) => setFormImage1(e.target.value)}
+                    placeholder="Или вставьте ссылку..."
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-sm"
+                    required
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Изображение этапа 2 (URL)</label>
-                <input
-                  type="text"
-                  value={formImage2}
-                  onChange={(e) => setFormImage2(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                />
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Изображение этапа 2 (Изображение)</label>
+                <div className="grid grid-cols-[120px_1fr] gap-4 items-center">
+                  <label className="relative aspect-video bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/20 rounded-xl overflow-hidden flex flex-col items-center justify-center cursor-pointer transition group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhoto("image2", file);
+                      }}
+                      className="hidden"
+                      disabled={uploadingImage2}
+                    />
+                    {uploadingImage2 ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-5 h-5 text-[#0066FF] animate-spin" />
+                      </div>
+                    ) : formImage2 ? (
+                      <>
+                        <img src={formImage2} alt="Preview" className="w-full h-full object-cover transition duration-300 group-hover:brightness-50" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <Camera className="w-5 h-5 text-white/30 group-hover:text-white/60" />
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={formImage2}
+                    onChange={(e) => setFormImage2(e.target.value)}
+                    placeholder="Или вставьте ссылку..."
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-sm"
+                  />
+                </div>
               </div>
             </div>
 

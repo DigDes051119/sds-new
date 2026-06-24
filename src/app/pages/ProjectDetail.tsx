@@ -104,7 +104,7 @@ export function ProjectDetail() {
       {/* Block 2: Redesigned Challenge Block (Split Editorial) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 py-28 md:py-36 border-b border-black/[0.06]"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
       >
         <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-24 items-start">
           <div className="flex flex-col gap-6">
@@ -141,7 +141,7 @@ export function ProjectDetail() {
       {/* Block 3: Redesigned Process Gallery (Interactive Exhibition) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 py-28 md:py-36 border-b border-black/[0.06]"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
       >
         <div className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
@@ -243,7 +243,7 @@ export function ProjectDetail() {
       {/* Block 4: Redesigned Results & Impact Showcase (Vibrant Grid) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 py-28 md:py-36"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36"
       >
         <div className="grid lg:grid-cols-[1.8fr_1.2fr] gap-12 lg:gap-20 items-stretch">
           

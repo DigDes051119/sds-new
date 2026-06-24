@@ -4,6 +4,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
+import { cmsService } from "../cmsService";
 import abstractBlue from "../../imports/abstract_blue.webp";
 import projectImg1 from "../../imports/image.png";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
@@ -14,6 +15,60 @@ export function Home() {
   const [active, setActive] = useState(0);
   const services = t.home.services;
   const projects = t.home.projects;
+
+  const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
+
+  useEffect(() => {
+    return cmsService.subscribe(() => {
+      setProjectDetails(cmsService.getProjectDetails());
+    });
+  }, []);
+
+  const allDbProjects = t.projects?.items || [];
+  const localizedDetails = projectDetails[locale] || projectDetails["ru"] || {};
+
+  const recentWorks = allDbProjects.length >= 2
+    ? [...allDbProjects].slice(-2).reverse().map((p, idx) => {
+        const detail = localizedDetails[p.id] || {};
+        return {
+          id: p.id,
+          label: idx === 0
+            ? (locale === "ru" ? "Новый проект" : locale === "kg" ? "Жаңы долбоор" : "New project")
+            : (locale === "ru" ? "Недавний проект" : locale === "kg" ? "Жакында долбоор" : "Recent project"),
+          title: p.name || "",
+          description: detail.desc || "",
+          image: p.img || projectImg1,
+          date: detail.year || "2026",
+          action: locale === "ru" ? "Посмотреть" : locale === "kg" ? "Караңыз" : "View"
+        };
+      })
+    : [
+        {
+          id: "sandyq",
+          label: t.home.newProject.label,
+          title: t.home.newProject.title,
+          description: t.home.newProject.description,
+          image: projectImg1,
+          date: t.home.newProject.date,
+          action: t.home.newProject.action
+        },
+        {
+          id: "ala-too",
+          label: t.home.recentProject.label,
+          title: t.home.recentProject.title,
+          description: t.home.recentProject.description,
+          image: projectImg2,
+          date: t.home.recentProject.date,
+          action: t.home.recentProject.action
+        }
+      ];
+
+  const serviceImages = [
+    "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800", // Brand
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800", // Industrial Design
+    "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800", // Marketing
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"  // Concept Design
+  ];
 
   const categoryMap: Record<string, string> = {
     "Brand": "branding",
@@ -99,31 +154,26 @@ export function Home() {
   return (
     <div className="overflow-hidden pb-24">
       {/* Hero Section */}
-      <section className="px-3 sm:px-6 pt-8">
+      <section className="px-3 sm:px-6 min-[1380px]:px-0 pt-8">
         <motion.div
           initial={{ y: 28, opacity: 0, scale: 0.985 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mx-auto max-w-[1380px] overflow-hidden rounded-[2rem] border border-black/10 bg-[#f6f6f2]/90 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.10)] sm:rounded-[2.7rem] sm:p-8"
+          className="relative mx-auto max-w-[1380px] pt-16 pb-20 sm:pt-24 sm:pb-28"
         >
-          <div className="relative min-h-[520px] overflow-hidden rounded-[1.5rem] bg-[#eeeee9] sm:rounded-[2rem]">
-            <div className="absolute bottom-8 left-6 right-6 grid gap-8 sm:bottom-10 sm:left-10 sm:right-10 lg:grid-cols-[1.15fr_.85fr] lg:items-end">
-              <div className="flex flex-col gap-5 max-w-[680px]">
-                <h1 className="text-[clamp(3.8rem,9vw,6.5rem)] font-semibold leading-[0.95] tracking-[-0.075em] text-black">
-                  AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
-                </h1>
-                <p className="text-balance text-sm font-medium italic text-black/45 leading-relaxed border-l-2 border-[#0000FF]/30 pl-4 mt-2">
-                  {t.home.heroTag}
-                </p>
-              </div>
-              <div className="flex flex-col gap-6 items-start lg:pl-8">
-                <p className="text-balance text-lg sm:text-[19px] leading-[1.35] tracking-[-0.03em] text-black/80">
-                  {t.home.heroDescription}
-                </p>
-                <Link to="/projects" className="group inline-flex w-fit items-center gap-4 rounded-full bg-[#0000FF] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-black interactive-element mt-1">
-                  {t.home.viewProjects} <ArrowUpRight size={18} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
-              </div>
+          <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
+            <div className="flex flex-col gap-5 max-w-[900px]">
+              <h1 className="text-[clamp(7.6rem,18vw,13rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-black">
+                AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
+              </h1>
+            </div>
+            <div className="flex flex-col justify-between items-start lg:items-end lg:pl-8 lg:h-full gap-6 lg:gap-0">
+              <p className="text-balance text-lg sm:text-[19px] leading-[1.35] tracking-[-0.03em] text-black/80 text-left lg:text-right">
+                {t.home.heroDescription}
+              </p>
+              <Link to="/projects" className="group inline-flex w-fit items-center gap-4 rounded-full bg-[#0000FF] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-black interactive-element mt-1 lg:self-end lg:-translate-y-3">
+                {t.home.viewProjects} <ArrowUpRight size={18} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
             </div>
           </div>
         </motion.div>
@@ -132,124 +182,163 @@ export function Home() {
       {/* Featured Projects Block */}
       <motion.section 
         {...scrollRevealConfig}
-        className="mx-auto mt-24 max-w-[1380px] px-3 sm:px-6"
+        className="px-3 sm:px-6 mt-24"
       >
-        <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black mb-8">
-          {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {[t.home.newProject, t.home.recentProject].map((project) => (
-            <motion.div
-              key={project.title}
-              whileHover={{ y: -6 }}
-              className="group flex min-h-[300px] flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element"
-            >
-              <span className="text-sm text-black/45">{project.label}</span>
-              <h3 className="mt-4 text-4xl font-semibold tracking-[-0.07em] sm:text-5xl">{project.title}</h3>
-              <p className="mt-5 max-w-xl text-[clamp(1.1rem,2vw,1.45rem)] leading-[1.5] tracking-[-0.035em] text-black/70">{project.description}</p>
-              <div className="mt-auto flex flex-wrap items-center gap-4 text-sm text-black/60">
-                <span>{project.publishedLabel}</span>
-                <span>{project.date}</span>
-                <span>{project.time}</span>
-              </div>
-              <Link to="/projects" className="mt-8 inline-flex w-fit items-center justify-center rounded-full bg-[#0000FF] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black">
-                {project.action}
-              </Link>
-            </motion.div>
-          ))}
+        <div className="mx-auto max-w-[1380px]">
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black mb-8">
+            {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {recentWorks.map((project) => (
+              <motion.div
+                key={project.id}
+                whileHover={{ y: -6 }}
+                className="group flex flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element"
+              >
+                <div className="w-full aspect-[16/10] rounded-[1.5rem] overflow-hidden mb-6 bg-[#eeeee9]">
+                  <ImageWithFallback src={project.image} alt={project.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-102" />
+                </div>
+                <span className="text-sm text-black/45">{project.label}</span>
+                <h3 className="mt-3 text-4xl font-semibold tracking-[-0.07em] sm:text-5xl">{project.title}</h3>
+                <p className="mt-4 max-w-xl text-[clamp(1.1rem,2vw,1.35rem)] leading-[1.45] tracking-[-0.035em] text-black/70 line-clamp-3">{project.description}</p>
+                <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
+                  <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
+                  <span>{project.date}</span>
+                </div>
+                <Link to={`/projects/${project.id}`} className="mt-6 inline-flex w-fit items-center justify-center rounded-full bg-[#0000FF] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black">
+                  {project.action}
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </motion.section>
 
       {/* Stats/Philosophy Grid */}
       <motion.section 
         {...scrollRevealConfig}
-        className="mx-auto mt-16 grid max-w-[1380px] grid-cols-1 gap-4 px-3 sm:px-6 md:grid-cols-4 md:auto-rows-[300px]"
+        className="px-3 sm:px-6 mt-16"
       >
-        <motion.div whileHover={{ y: -6 }} className="group flex min-h-[300px] flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element md:col-span-2">
-          <p className="text-sm text-black/45">about[01]</p><div className="mt-auto text-[clamp(5.2rem,10vw,7rem)] font-semibold leading-[0.96] tracking-[-0.08em] text-[#0000FF]">{t.home.statsYears}</div><p className="mt-3 max-w-[520px] text-[clamp(1.25rem,2.25vw,1.75rem)] leading-[1.14] tracking-[-0.055em]">{t.home.statsLabel}</p>
-        </motion.div>
-        <motion.div whileHover={{ y: -6 }} className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#0000FF] p-7 text-white interactive-element">
-          <Circle className="absolute -right-12 -top-12 h-56 w-56 opacity-20" strokeWidth={0.6} />
-          <p className="text-sm text-white/60">global[02]</p><p className="mt-16 text-[clamp(1.55rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.globalLabel}</p>
-        </motion.div>
-        <motion.div whileHover={{ y: -6 }} className="rounded-[2rem] border border-black/10 bg-[#f1f1ed] p-7 interactive-element">
-          <p className="text-sm text-black/45">principle[03]</p><p className="mt-16 text-[clamp(1.6rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.principleLabel}</p>
-        </motion.div>
-        <motion.div whileHover={{ y: -6 }} className="relative flex min-h-[300px] overflow-hidden rounded-[2rem] border border-black/10 bg-black p-7 text-white interactive-element md:col-span-2">
-          <p className="text-sm text-white/45">studio[04]</p><p className="mt-auto max-w-[720px] text-left text-[clamp(2.05rem,4.65vw,3.75rem)] leading-[1.04] tracking-[-0.075em]">{t.home.studioLabel}</p>
-        </motion.div>
-        <motion.div whileHover={{ y: -6 }} className="overflow-hidden rounded-[2rem] border border-black/10 bg-white interactive-element md:col-span-2">
-          <ImageWithFallback src={abstractBlue} alt="abstract blue art" className="h-full w-full object-cover opacity-90 transition duration-700 hover:scale-105" />
-        </motion.div>
+        <div className="mx-auto max-w-[1380px] grid grid-cols-1 gap-4 md:grid-cols-4 md:auto-rows-[300px]">
+          <motion.div whileHover={{ y: -6 }} className="group flex min-h-[300px] flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element md:col-span-2">
+            <p className="text-sm text-black/45">about[01]</p><div className="mt-auto text-[clamp(5.2rem,10vw,7rem)] font-semibold leading-[0.96] tracking-[-0.08em] text-[#0000FF]">{t.home.statsYears}</div><p className="mt-3 max-w-[520px] text-[clamp(1.25rem,2.25vw,1.75rem)] leading-[1.14] tracking-[-0.055em]">{t.home.statsLabel}</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -6 }} className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#0000FF] p-7 text-white interactive-element">
+            <Circle className="absolute -right-12 -top-12 h-56 w-56 opacity-20" strokeWidth={0.6} />
+            <p className="text-sm text-white/60">global[02]</p><p className="mt-16 text-[clamp(1.55rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.globalLabel}</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -6 }} className="rounded-[2rem] border border-black/10 bg-[#f1f1ed] p-7 interactive-element">
+            <p className="text-sm text-black/45">principle[03]</p><p className="mt-16 text-[clamp(1.6rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.principleLabel}</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -6 }} className="relative flex min-h-[300px] overflow-hidden rounded-[2rem] border border-black/10 bg-black p-7 text-white interactive-element md:col-span-2">
+            <p className="text-sm text-white/45">studio[04]</p><p className="mt-auto max-w-[720px] text-left text-[clamp(2.05rem,4.65vw,3.75rem)] leading-[1.04] tracking-[-0.075em]">{t.home.studioLabel}</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -6 }} className="overflow-hidden rounded-[2rem] border border-black/10 bg-white interactive-element md:col-span-2">
+            <ImageWithFallback src={abstractBlue} alt="abstract blue art" className="h-full w-full object-cover opacity-90 transition duration-700 hover:scale-105" />
+          </motion.div>
+        </div>
       </motion.section>
 
       {/* Services Section */}
       <motion.section 
         {...scrollRevealConfig}
-        className="mx-auto mt-28 max-w-[1380px] px-3 sm:px-6"
+        className="px-3 sm:px-6 mt-28"
       >
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2>
-          <Link
-            to="/services"
-            className="inline-flex items-center justify-center px-6 py-2.5 border border-black/20 hover:border-[#0000FF] hover:text-[#0000FF] rounded-full text-[17px] font-semibold transition-all duration-300 interactive-element whitespace-nowrap mb-2 sm:mb-0"
-          >
-            {locale === "ru" ? "Смотреть все услуги" : locale === "kg" ? "Бардык кызматтарды көрүү" : "View all services"}
-          </Link>
-        </div>
-        <div className="flex flex-col gap-3 md:h-[620px] md:flex-row">
-          {services.map((s, i) => (
-            <motion.button 
-              key={s[1]} 
-              ref={(el) => { serviceRefs.current[i] = el; }}
-              onMouseEnter={() => !isMobile && setActive(i)} 
-              onClick={() => handleServiceClick(i, s[1])} 
-              animate={isMobile ? {} : { flex: active === i ? 2.7 : 0.82 }} 
-              transition={{ type: "spring", stiffness: 170, damping: 24 }} 
-              className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-black/10 bg-[#f4f4f0] p-7 text-left transition hover:border-[#0000FF]/60 interactive-element min-h-[140px] md:min-h-0 md:h-full"
+        <div className="mx-auto max-w-[1380px]">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2>
+            <Link
+              to="/services"
+              className="inline-flex items-center justify-center px-6 py-2.5 border border-black/20 hover:border-[#0000FF] hover:text-[#0000FF] rounded-full text-[17px] font-semibold transition-all duration-300 interactive-element whitespace-nowrap mb-2 sm:mb-0"
             >
-              <div>
-                <span className="text-sm text-[#0000FF]">{s[0]}</span>
-                <h3 className="mt-4 text-4xl font-semibold tracking-[-0.07em] sm:text-6xl">{s[1]}</h3>
-              </div>
+              {locale === "ru" ? "Смотреть все услуги" : locale === "kg" ? "Бардык кызматтарды көрүү" : "View all services"}
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3 md:h-[620px] md:flex-row">
+            {services.map((s, i) => {
+              const imageSrc = s[3] || serviceImages[i % serviceImages.length];
+              return (
+                <motion.button 
+                  key={s[1]} 
+                  ref={(el) => { serviceRefs.current[i] = el; }}
+                  onMouseEnter={() => !isMobile && setActive(i)} 
+                  onClick={() => handleServiceClick(i, s[1])} 
+                  animate={isMobile ? {} : { flex: active === i ? 2.7 : 0.82 }} 
+                  transition={{ type: "spring", stiffness: 170, damping: 24 }} 
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-black/10 bg-[#f4f4f0] p-7 text-left transition hover:border-[#0000FF]/60 interactive-element min-h-[140px] md:min-h-0 md:h-full"
+                >
+                  <div className={active === i && !isMobile ? "max-w-[55%]" : ""}>
+                    <span className="text-sm text-[#0000FF]">{s[0]}</span>
+                    <h3 className="mt-4 text-4xl font-semibold tracking-[-0.07em] sm:text-6xl">{s[1]}</h3>
+                  </div>
 
-              <motion.div 
-                animate={isMobile ? { 
-                  height: active === i ? "auto" : 0, 
-                  opacity: active === i ? 1 : 0,
-                  marginTop: active === i ? 16 : 0
-                } : {
-                  opacity: active === i ? 1 : 0
-                }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={isMobile ? "overflow-hidden" : "absolute bottom-7 left-7 right-7 max-w-md"}
-              >
-                <p className="text-[clamp(1.15rem,2vw,1.5rem)] leading-[1.16] tracking-[-0.05em] text-black/70">
-                  {s[2]}
-                </p>
-              </motion.div>
-              <ArrowUpRight className="absolute right-7 top-7 text-[#0000FF]" />
-            </motion.button>
-          ))}
+                  {/* Desktop Image */}
+                  {active === i && !isMobile && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="absolute right-0 top-0 bottom-0 w-[42%] overflow-hidden bg-black/5"
+                    >
+                      <img src={imageSrc} alt={s[1]} className="w-full h-full object-cover" />
+                    </motion.div>
+                  )}
+
+                  <motion.div 
+                    animate={isMobile ? { 
+                      height: active === i ? "auto" : 0, 
+                      opacity: active === i ? 1 : 0,
+                      marginTop: active === i ? 16 : 0
+                    } : {
+                      opacity: active === i ? 1 : 0
+                    }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className={isMobile ? "overflow-hidden" : "absolute bottom-7 left-7 right-[45%] max-w-md"}
+                  >
+                    <p className="text-[clamp(1.15rem,2vw,1.5rem)] leading-[1.16] tracking-[-0.05em] text-black/70">
+                      {s[2]}
+                    </p>
+                    
+                    {/* Mobile Image */}
+                    {isMobile && (
+                      <div className="w-full aspect-[16/10] rounded-2xl overflow-hidden mt-4 bg-black/5">
+                        <img src={imageSrc} alt={s[1]} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </motion.div>
+                  
+                  <div className={`absolute right-7 top-7 p-2 rounded-full transition-all duration-300 z-10 ${
+                    active === i && !isMobile 
+                      ? "bg-white text-[#0000FF] shadow-lg scale-110" 
+                      : "bg-transparent text-[#0000FF]"
+                  }`}>
+                    <ArrowUpRight className="w-5 h-5" />
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
       </motion.section>
 
       {/* Selected Works Section */}
       <motion.section 
         {...scrollRevealConfig}
-        className="mx-auto mt-28 max-w-[1380px] px-3 sm:px-6"
+        className="px-3 sm:px-6 mt-28"
       >
-        <h2 className="mb-8 text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.selectedWorkTitle}</h2>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {homeProjects.map((p, i) => (
-            <Link key={p.title} to={`/projects/${p.id}`} className="group relative h-[520px] overflow-hidden rounded-[2rem] bg-black interactive-element">
-              <ImageWithFallback src={p.image} alt={p.title} className="h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-95" />
-              <div className="absolute inset-x-5 bottom-5 rounded-[1.5rem] bg-white/88 p-5 backdrop-blur-xl transition group-hover:bg-[#0000FF] group-hover:text-white">
-                <p className="text-sm opacity-60">0{i + 1} / {p.tag}</p>
-                <h3 className="mt-2 text-4xl font-semibold tracking-[-0.06em]">{p.title}</h3>
-              </div>
-            </Link>
-          ))}
+        <div className="mx-auto max-w-[1380px]">
+          <h2 className="mb-8 text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.selectedWorkTitle}</h2>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {homeProjects.map((p, i) => (
+              <Link key={p.title} to={`/projects/${p.id}`} className="group relative h-[520px] overflow-hidden rounded-[2rem] bg-black interactive-element">
+                <ImageWithFallback src={p.image} alt={p.title} className="h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-95" />
+                <div className="absolute inset-x-5 bottom-5 rounded-[1.5rem] bg-white/88 p-5 backdrop-blur-xl transition group-hover:bg-[#0000FF] group-hover:text-white">
+                  <p className="text-sm opacity-60">0{i + 1} / {p.tag}</p>
+                  <h3 className="mt-2 text-4xl font-semibold tracking-[-0.06em]">{p.title}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </motion.section>
     </div>

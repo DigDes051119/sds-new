@@ -20,10 +20,10 @@ export const translations = {
     },
     home: {
       heroTag: '(c) "Everything you see is but a primary link in how we perceive our physical world. That is my philosophy."',
-      heroDescription: "It took God billions of years to create eyes for all living creatures. The eye itself is one of the most complex things in the universe, which shows that vision is of primary importance",
+      heroDescription: "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first.",
       viewProjects: "View projects",
-      statsYears: "13+",
-      statsLabel: "years shaping products, brands and spaces.",
+      statsYears: "15+",
+      statsLabel: "Real experience in the independent industry, creating brands and directions since 2011.",
       globalLabel: "Projects for Central Asia, Europe and digital-first teams.",
       principleLabel: "Minimal noise. Maximum tactility.",
       studioLabel: "The form of the future should feel inevitable.",
@@ -50,10 +50,10 @@ export const translations = {
         action: "View",
       },
       services: [
-        ["01", "Brand", "Identity, motion systems, visual language, and product launch."],
-        ["03", "Industrial Design", "Developing aesthetic, functional, and technological physical products for serial production."],
-        ["09", "Marketing", "Strategic product promotion and launch campaigns in digital environments."],
-        ["06", "Concept Design", "Creating bold concepts for film, games, presentations, and R&D research."],
+        ["01", "Brand", "Identity, motion systems, visual language, and product launch.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
+        ["03", "Industrial Design", "Developing aesthetic, functional, and technological physical products for serial production.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
+        ["09", "Marketing", "Strategic product promotion and launch campaigns in digital environments.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
+        ["06", "Concept Design", "Creating bold concepts for film, games, presentations, and R&D research.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },
@@ -74,21 +74,21 @@ export const translations = {
       awardsTitle: "Recognition",
       awardsSub: "Designing awards & milestones.",
       awardsList: [
-        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Winner in Mobility Design Concept Category" },
-        { year: "2023", title: "Best Design Studio Central Asia", project: "Sandyq Hospitality", details: "Awarded by Regional Design Guild" },
-        { year: "2022", title: "IF Design Award Nominee", project: "Oasis Digital Ecosystem", details: "Recognized for interface innovation" },
-        { year: "2020", title: "A' Design Award Gold", project: "Ala-Too Workspace", details: "Best Workspace Design Concept" }
+        { year: "2011", title: "First Red Jolbor Fest Kyrgyzstan", project: "1 award out of 6", details: "Art direction of the brand magazine for Manas Airport" },
+        { year: "2008", title: "Silver medalist of the Design Championship", project: "Kyrgyzstan", details: "National Design Championship" },
+        { year: "2014", title: "The most popular smartphone concept in the world - iPhone ©Google", project: "This project didn't just sit on Behance. Virtually all major trade and lifestyle publications wrote about it:\n\nForbes, Business Insider, and CNET published compilations of renders, calling them 'the most beautiful look into the future.'\n\nIn the Russian segment, the concept was widely discussed on TJournal, iPhones.ru, and Hi-Tech Mail.ru.\n\nVideos of this concept on YouTube gathered hundreds of thousands of views, with many users in comments seriously asking: 'Is this the real iPhone 8?'", details: "Verdict: If measured by global likes, it ranks in the Top 10 best of all time. If measured by real results (sale of rights, author's career), it is likely No.1 in history. Most other creators only got likes on Behance." },
+        { year: "2011–2015", title: "Global viral reach", project: "During the peak of publications, the author's concepts gathered millions of views on leading design and tech platforms worldwide, including Yanko Design, Trendland, Delood, Motoring Exposure, and Trend Hunter.", details: "Steel Drake's works regularly topped the views and were discussed in print and online publications worldwide. ©Google" }
       ],
       valuesTitle: "Core Principles",
-      valuesSub: "The pillars behind our signature design philosophy.",
+      valuesSub: "Philosophy\nFoundation",
       valuesList: [
-        { num: "01", title: "Tactile Minimalism", desc: "We strip away superficial noise to let the pure form of materials speak, creating a clean but warm presence." },
-        { num: "02", title: "Future Durability", desc: "We design against planned obsolescence. Our aesthetics and materials are built to outlast immediate trends." },
-        { num: "03", title: "Functional Aesthetics", desc: "No design is pure decoration. We integrate mechanical logic, ergonomics, and production constraints into early concepts." }
+        { num: "01", title: "First\nPerception", desc: "As stated in our statement, the very first thing that happens is what you visually perceive." },
+        { num: "02", title: "Feelings", desc: "After the first look, you start to experience certain feelings: whether you like it or not, want to examine it, or are already starting to try it on." },
+        { num: "03", title: "Emotions", desc: "If the result does not bring\nemotion, then something is wrong.\nIt's like locking your car and not turning to look at it before leaving — if so, you have the wrong car." }
       ],
       mapTitle: "Global Footprint",
-      mapSub: "Designing across physical borders, uniting ideas globally.",
-      mapCities: "Projects developed for partners in Almaty, Bishkek, Tashkent, Berlin, and San Francisco."
+      mapSub: "Working with the whole world",
+      mapCities: "Except Antarctica and the North Pole, we don't tolerate cold very well. Today, our clients include partners from Kyrgyzstan, USA (Miami, Washington), Belgium (Brussels), Kazakhstan, United Kingdom, Canada, China, Tajikistan, Uzbekistan, Ukraine, Germany, and France."
     },
     services: {
       title: "Services",
@@ -299,10 +299,10 @@ export const translations = {
     },
     home: {
       heroTag: "Сиз көргөн нерселердин баары биздин физикалык дүйнөнү кандай кабыл алганыбыздын баштапкы шилтемелеринин бири болуп саналат. Бул менин философиям.",
-      heroDescription: "«Кудай бардык тирүү жандыктар үчүн көздү жаратуу үчүн Ааламдын бардык билимине муктаж болгон. Бул организмдин эң татаал системаларынын бири, биз көргөн нерселердин маанилүү экенин далилдейт».",
+      heroDescription: "Сиз көргөн нерселердин баары биздин физикалык дүйнөнү кандай кабыл алганыбыздын баштапкы шилтемелеринин бири болуп саналат, ошондуктан студиянын философиясы - бул биринчи кезекте Дизайн.",
       viewProjects: "Проекттерди караңыз",
-      statsYears: "13+",
-      statsLabel: "жыл продукттарды, бренддерди жана мейкиндиктерди түзүп келебиз.",
+      statsYears: "15+",
+      statsLabel: "Көз карандысыз тармактагы чыныгы тажрыйба, 2011-жылдан бери бренддерди жана багыттарды түзүп келебиз.",
       globalLabel: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор.",
       principleLabel: "Аз сөз. Көптик тактилдүүлүк.",
       studioLabel: "Келечектин формасы неизбилүү сезилиши керек.",
@@ -329,10 +329,10 @@ export const translations = {
         action: "Караңыз",
       },
       services: [
-        ["01", "Brand", "Айдентика, motion системасы, визуалдык тил жана продуктту баштоо."],
-        ["03", "Industrial Design", "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык физикалык объекттерди иштеп чыгуу."],
-        ["09", "Marketing", "Продуктту жана брендди санариптик мейкиндикте стратегиялык илгерилетүү."],
-        ["06", "Concept Design", "Кино, оюн, презентация жана R&D үчүн келечектүү жана эрктүү концепттерди түзүү."],
+        ["01", "Brand", "Айдентика, motion системасы, визуалдык тил жана продуктту баштоо.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
+        ["03", "Industrial Design", "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык физикалык объекттерди иштеп чыгуу.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
+        ["09", "Marketing", "Продуктту жана брендди санариптик мейкиндикте стратегиялык илгерилетүү.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
+        ["06", "Concept Design", "Кино, оюн, презентация жана R&D үчүн келечектүү жана эрктүү концепттерди түзүү.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
       ],
       projects: [
         { title: "Sandyq", tag: "Гостиница / Айдентика" },
@@ -353,21 +353,21 @@ export const translations = {
       awardsTitle: "Таануу жана сыйлыктар",
       awardsSub: "Дизайн багытындагы жетишкендиктерибиз.",
       awardsList: [
-        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Унаа дизайны концепциясы категориясынын жеңүүчүсү" },
-        { year: "2023", title: "Борбордук Азиядагы эң мыкты дизайн студиясы", project: "Sandyq Hospitality", details: "Аймактык Дизайн Гильдиясы тарабынан берилген" },
-        { year: "2022", title: "IF Design Award Номинациясы", project: "Oasis Digital Ecosystem", details: "Интерфейс инновациялары үчүн таанылган" },
-        { year: "2020", title: "A' Design Award Алтын", project: "Ala-Too Workspace", details: "Мыкты жумушчу мейкиндигинин дизайны концепциясы" }
+        { year: "2011", title: "Биринчи Red Jolbor Fest Кыргызстан", project: "6 сыйлыктын ичинен 1 статуэтка", details: "Манас аэропортунун бренд журналынын арт-дирекциясы" },
+        { year: "2008", title: "Дизайн боюнча чемпионаттын күмүш байгесинин ээси", project: "Кыргызстан", details: "Улуттук дизайн чемпионаты" },
+        { year: "2014", title: "Дүйнөдөгү эң популярдуу смартфон концепциясы - iPhone ©Google", project: "Бул долбоор жөн гана Behance-те туруп калган жок. Ал жөнүндө дээрлик бардык ири тармактык жана лайфстайл басылмалар жазышкан:\n\nForbes, Business Insider жана CNET рендерлердин жыйнагын жарыялап, аларды 'келечектин эң кооз көрүнүшү' деп аташкан.\n\nКоомдук тармактарда концепция кызуу талкууланган.\n\nYouTube-дагы бул концепт видеолору жүз миңдеген көрүүлөргө ээ болуп, көптөгөн колдонуучулар пикирлеринде олуттуу түрдө: 'Бул чыныгы iPhone 8би?' деп сурашкан.", details: "Чечим: Эгерде дүйнөлүк деңгээлдеги лайктар менен өлчөсөк — ал бардык убактагы эң мыкты Топ-10го кирет. Эгерде реалдуу жыйынтык менен өлчөсөк (укуктарды сатуу, автордун карьерасы) — бул тарыхта №1 болушу мүмкүн. Башка авторлордун көбү Behance-те гана лайк алышкан." },
+        { year: "2011–2015", title: "Глобалдык вирус оозу", project: "Басылмалардын туу чокусунда автордун концепциялары дүйнөлүк алдыңкы дизайн жана техно-платформаларда миллиондогон көрүүлөргө ээ болгон, анын ичинде Yanko Design, Trendland, Delood, Motoring Exposure жана Trend Hunter.", details: "Steel Drake иштери дүйнө жүзү боюнча басылмаларда талкууланган. ©Google" }
       ],
       valuesTitle: "Негизги принциптерибиз",
-      valuesSub: "Биздин өзгөчө дизайн философиясынын негизи.",
+      valuesSub: "Философиянын\nнегизи",
       valuesList: [
-        { num: "01", title: "Сезүүчү Минимализм", desc: "Биз материалдардын таза формасы сүйлөшү үчүн үстүртөн ызы-чууну алып салабыз, таза бирок жылуу чөйрөнү жаратабыз." },
-        { num: "02", title: "Келечектин туруктуулугу", desc: "Биз эскирүүгө каршы долбоорлойбуз. Биздин эстетика жана материалдар тез өтүүчү тренддерден ашып түшүү үчүн курулган." },
-        { num: "03", title: "Функционалдуу эстетика", desc: "Эч бир дизайн жөн эле жасалга эмес. Биз механикалык логиканы, эргономиканы жана өндүрүш чектөөлөрүн алгачкы концепцияларга киргизебиз." }
+        { num: "01", title: "Биринчи\nкабыл алуу", desc: "Биздин билдирүүбүздө айтылгандай, эң биринчи болуп сиз көргөн нерсе ишке ашат." },
+        { num: "02", title: "Сезимдер", desc: "Биринчи карагандан кийин сиз белгилүү бир сезимдерди баштан өткөрө баштайсыз: бул сизге жагабы же жокпу, кылдат изилдегиңиз келеби же аны кийип көрө баштайсызбы." },
+        { num: "03", title: "Эмоциялар", desc: "Эгерде натыйжа эмоция\nалып келбесе, анда бир нерсе туура эмес.\nБул унааңызды кулпулап, кетээрдин алдында артыңызды карап койбогон сыяктуу — андай болсо, анда сизде туура эмес унаа бар." }
       ],
       mapTitle: "Глобалдык география",
-      mapSub: "Физикалык чек аралардан тышкары дизайн түзүү, идеяларды бириктирүү.",
-      mapCities: "Долбоорлор Алматы, Бишкек, Ташкент, Берлин жана Сан-Францискодогу өнөктөштөр үчүн иштелип чыккан."
+      mapSub: "Бүткүл дүйнө менен иштейбиз",
+      mapCities: "Антарктида жана түндүк уюлдан тышкары, суукту анча жактыра бербейбиз. Бүгүнкү күндө биздин кардарлардын өлкөлөрүнүн тизмеси: Кыргызстан, АКШ (Майами, Вашингтон), Бельгия (Брюссель), Казакстан, Улуу Британия, Канада, Кытай, Тажикстан, Өзбекстан, Украина, Германия, Франция."
     },
     services: {
       title: "Кызматтар",
@@ -578,10 +578,10 @@ export const translations = {
     },
     home: {
       heroTag: "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, Такова моя философия",
-      heroDescription: "«Богу потребовались все знания Вселенной, чтобы создать глаза для всего живого. Это одна из сложнейших систем организма, доказывающая, то что мы видим имеет важное значение».",
+      heroDescription: "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь",
       viewProjects: "Смотреть проекты",
-      statsYears: "13+",
-      statsLabel: "лет формируем продукты, бренды и пространства.",
+      statsYears: "15+",
+      statsLabel: "Настоящего опыта в независимой сфере с 2011 года создаем бренды и направления",
       globalLabel: "Проекты для рынков Центральной Азии, Европы и digital-first команд.",
       principleLabel: "Минимум шума. Максимум тактильности.",
       studioLabel: "Форма будущего должна казаться неизбежной.",
@@ -608,10 +608,10 @@ export const translations = {
         action: "Посмотреть",
       },
       services: [
-        ["01", "Brand", "Айдентика, motion-система, визуальный язык и запуск продукта."],
-        ["03", "Industrial Design", "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства."],
-        ["09", "Marketing", "Стратегическое продвижение продуктов и брендов в цифровой среде."],
-        ["06", "Concept Design", "Создание футуристических и смелых концептов для кино, игр, презентаций и R&D-исследований."],
+        ["01", "Brand", "Айдентика, motion-система, визуальный язык и запуск продукта.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
+        ["03", "Industrial Design", "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
+        ["09", "Marketing", "Стратегическое продвижение продуктов и брендов в цифровой среде.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
+        ["06", "Concept Design", "Создание футуристических и смелых концептов для кино, игр, презентаций и R&D-исследований.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },
@@ -632,21 +632,21 @@ export const translations = {
       awardsTitle: "Признание и награды",
       awardsSub: "Наши достижения в области дизайна и проектирования.",
       awardsList: [
-        { year: "2024", title: "Red Dot Design Award", project: "Futuristic EV Concept", details: "Победитель в категории концептов мобильности будущего" },
-        { year: "2023", title: "Лучшая дизайн-студия Центральной Азии", project: "Sandyq Hospitality", details: "Награда Региональной Гильдии Дизайнеров" },
-        { year: "2022", title: "IF Design Award Номинация", project: "Oasis Digital Ecosystem", details: "За инновации в пользовательских интерфейсах" },
-        { year: "2020", title: "A' Design Award Gold", project: "Ala-Too Workspace", details: "Лучший концепт интерьера рабочего пространства" }
+        { year: "2011", title: "Первый Red Jolbor Fest Кыргызстан", project: "1 статуэтка из 6", details: "Арт дирекшн брендового журнала для аэропорт Манас" },
+        { year: "2008", title: "Серебряный призер чемпионата по дизайну", project: "Кыргызстан", details: "Национальный чемпионат по дизайну" },
+        { year: "2014", title: "Самый популярный концепт смартфона в мире - iphone ©Google", project: "Этот проект не просто висел на Behance. О нем написали практически все крупные профильные и лайфстайл издания:\n\nForbes, Business Insider и CNET опубликовали подборки рендеров, называя их «самым красивым взглядом в будущее».\n\nВ российском сегменте (так как дизайнер из Киргизии) концепт обсуждали на тJournal, iPhones.ru и Hi-Tech Mail.ru.\n\nВидео с этим концептом на YouTube набирали сотни тысяч просмотров, причем многие пользователи в комментариях всерьез спрашивали: «Это настоящий iPhone 8?».", details: "Вердикт: Если мерить лайками в мировом масштабе — он входит в Топ-10 лучших за все время. Если мерить реальным результатом (продажа прав, карьера автора) — это, возможно, №1 в истории. Большинству других авторов достались только лайки на Behance." },
+        { year: "2011–2015", title: "Глобальный вирусный охват", project: "В период пика публикаций концепты автора суммарно набрали миллионы просмотров на ведущих мировых дизайн- и техно-платформах, включая Yanko Design, Trendland, Delood, Motoring Exposure и Trend Hunter.", details: "Работы Steel Drake регулярно возглавляли топы просмотров и обсуждались в профильных печатных и онлайн-изданиях по всему миру. ©Google" }
       ],
       valuesTitle: "Наши принципы",
-      valuesSub: "Фундамент нашей уникальной философии дизайна.",
+      valuesSub: "Фундамент\nфилософии",
       valuesList: [
-        { num: "01", title: "Тактильный минимализм", desc: "Мы убираем визуальный шум, позволяя чистой форме материалов говорить за себя. Создаем чистую, но теплую атмосферу." },
-        { num: "02", title: "Долговечность смыслов", desc: "Мы проектируем против запланированного устаревания. Наша эстетика создается вне рамок сиюминутных трендов." },
-        { num: "03", title: "Функциональная эстетика", desc: "Никакой декор не должен быть бесполезным. Мы закладываем эргономику, конструктивную логику и ограничения производства на самых ранних стадиях." }
+        { num: "01", title: "Первое\nвосприятие", desc: "То о чем говорится в нашем утверждении, первое что происходит это то что вы видите." },
+        { num: "02", title: "Чувства", desc: "После первого взгляда вы начинаете испытывать определенные чувства, вам это нравится или нет, хочется рассмотреть или уже начинаете примерять это." },
+        { num: "03", title: "Эмоции", desc: "Если результат не приносит\nэмоции значит что то не так,\nЭто как если вы закрываете свою машину и не повернулись посмотреть на нее перед уходом, значит у вас не та машина" }
       ],
       mapTitle: "География проектов",
-      mapSub: "Проектируем без границ, объединяя идеи по всему миру.",
-      mapCities: "Проекты разработаны для партнеров в Алматы, Бишкеке, Ташкенте, Берлине и Сан-Франциско."
+      mapSub: "Работаем со всем миром",
+      mapCities: "Кроме Антарктиды, и северного полюса, не очень переносим холод.\nНа сегодня список стран наших клиентов:\nКыргызстан. США Майами, Вашингтон, Брюссель, Казахстан, Великобритания, Канада, \nКитай, Таджикистан, Узбекистан, Украина, Германия, Франция."
     },
     services: {
       title: "Услуги",
@@ -856,7 +856,7 @@ export const LanguageContext = createContext<{
   setLocale: Dispatch<SetStateAction<Language>>;
   t: TranslationSet;
 }>({
-  locale: "ru",
+  locale: "en",
   setLocale: () => {},
-  t: translations.ru,
+  t: translations.en,
 });

@@ -69,7 +69,46 @@ export const cmsService = {
     let modified = false;
     for (const lang of langs) {
       if (!data[lang]) data[lang] = {};
+      if (!data[lang].home) data[lang].home = {};
+
+      if (data[lang].home.heroDescription !== defaultTranslations[lang].home.heroDescription) {
+        data[lang].home.heroDescription = defaultTranslations[lang].home.heroDescription;
+        modified = true;
+      }
+      if (data[lang].home.heroTag !== defaultTranslations[lang].home.heroTag) {
+        data[lang].home.heroTag = defaultTranslations[lang].home.heroTag;
+        modified = true;
+      }
+      if (data[lang].home.statsYears !== defaultTranslations[lang].home.statsYears) {
+        data[lang].home.statsYears = defaultTranslations[lang].home.statsYears;
+        modified = true;
+      }
+      if (data[lang].home.statsLabel !== defaultTranslations[lang].home.statsLabel) {
+        data[lang].home.statsLabel = defaultTranslations[lang].home.statsLabel;
+        modified = true;
+      }
+
       if (!data[lang].about) data[lang].about = {};
+
+      if (data[lang].about.mapSub !== defaultTranslations[lang].about.mapSub) {
+        data[lang].about.mapSub = defaultTranslations[lang].about.mapSub;
+        modified = true;
+      }
+      if (data[lang].about.mapCities !== defaultTranslations[lang].about.mapCities) {
+        data[lang].about.mapCities = defaultTranslations[lang].about.mapCities;
+        modified = true;
+      }
+      if (data[lang].about.valuesSub !== defaultTranslations[lang].about.valuesSub) {
+        data[lang].about.valuesSub = defaultTranslations[lang].about.valuesSub;
+        modified = true;
+      }
+      
+      data[lang].about.valuesList = JSON.parse(JSON.stringify(defaultTranslations[lang].about.valuesList));
+      modified = true;
+      
+      // Sync awards list changes
+      data[lang].about.awardsList = JSON.parse(JSON.stringify(defaultTranslations[lang].about.awardsList));
+      modified = true;
 
       const team = data[lang].about.team;
       const realTeam = defaultTranslations[lang]?.about?.team;
@@ -98,9 +137,12 @@ export const cmsService = {
 
     // Push to Supabase if possible
     try {
-      await supabaseClient.upsertTable("sds_translations", [
-        { id: 1, data: newTranslations }
-      ]);
+      const currentAdminStr = localStorage.getItem("sds_current_admin");
+      if (currentAdminStr) {
+        const currentAdmin = JSON.parse(currentAdminStr);
+        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        await supabaseClient.updateTranslationsSecure(currentAdmin.username, requesterPassword, newTranslations);
+      }
     } catch (e) {
       console.error("Failed to push translations to Supabase:", e);
     }
@@ -126,9 +168,12 @@ export const cmsService = {
     this.notify();
 
     try {
-      await supabaseClient.upsertTable("sds_project_details", [
-        { id: 1, data: newDetails }
-      ]);
+      const currentAdminStr = localStorage.getItem("sds_current_admin");
+      if (currentAdminStr) {
+        const currentAdmin = JSON.parse(currentAdminStr);
+        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        await supabaseClient.updateProjectDetailsSecure(currentAdmin.username, requesterPassword, newDetails);
+      }
     } catch (e) {
       console.error("Failed to push project details to Supabase:", e);
     }

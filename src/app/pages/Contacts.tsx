@@ -19,7 +19,7 @@ export function Contacts() {
 
   return (
     <div
-      className="max-w-[1440px] mx-auto px-6 pt-20 pb-32 md:pb-20 flex flex-col gap-20 md:gap-32 bg-[#fafaf6] text-black"
+      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-20 pb-32 md:pb-20 flex flex-col gap-20 md:gap-32 text-black"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}
@@ -62,10 +62,7 @@ export function Contacts() {
             </a>
           </div>
 
-          <div className="pt-8 border-t border-[#E5E5E7]">
-            <p className="text-base md:text-lg text-black/60 mb-2">{t.contacts.leader}</p>
-            <p className="text-base md:text-lg text-black/60">{t.contacts.legal}</p>
-          </div>
+
         </motion.div>
 
         {/* Interactive Map (Using mapcn component wrapper around MapLibre GL) */}

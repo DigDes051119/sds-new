@@ -81,7 +81,7 @@ export function AdminDashboard() {
     flows: [] as { path: string; count: number }[]
   });
 
-  const sqlCode = `create table sds_analytics (
+  const sqlCode = `create table if not exists sds_analytics (
   id bigint generated always as identity primary key,
   session_id text not null,
   path text not null,
@@ -91,8 +91,55 @@ export function AdminDashboard() {
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Отключаем защиту RLS для возможности записи публичных посещений
-alter table sds_analytics disable row level security;`;
+-- 1. Включаем RLS (прямой публичный доступ к чтению/удалению заблокирован)
+alter table sds_analytics enable row level security;
+
+-- 2. Разрешаем публичное добавление логов (INSERT) с сайта
+drop policy if exists "Allow public insert analytics" on sds_analytics;
+create policy "Allow public insert analytics" on sds_analytics for insert to anon with check (true);
+
+-- 3. Создаем функцию получения аналитики для администраторов (get_analytics_data)
+CREATE OR REPLACE FUNCTION get_analytics_data(p_requester_username text, p_requester_password text)
+RETURNS TABLE (
+  id bigint,
+  session_id text,
+  path text,
+  locale text,
+  referrer text,
+  user_agent text,
+  created_at timestamp with time zone
+) SECURITY DEFINER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM sds_admins 
+    WHERE LOWER(username) = LOWER(p_requester_username) 
+      AND password = p_requester_password 
+      AND (role = 'creator' OR role = 'full')
+  ) THEN
+    RETURN QUERY SELECT a.id, a.session_id, a.path, a.locale, a.referrer, a.user_agent, a.created_at FROM sds_analytics a;
+  ELSE
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 4. Создаем функцию очистки аналитики (clear_analytics_data)
+CREATE OR REPLACE FUNCTION clear_analytics_data(p_requester_username text, p_requester_password text)
+RETURNS boolean SECURITY DEFINER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM sds_admins 
+    WHERE LOWER(username) = LOWER(p_requester_username) 
+      AND password = p_requester_password 
+      AND (role = 'creator' OR role = 'full')
+  ) THEN
+    DELETE FROM sds_analytics;
+    RETURN TRUE;
+  ELSE
+    RAISE EXCEPTION 'Access Denied';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;`;
 
   const copySQL = () => {
     navigator.clipboard.writeText(sqlCode);
@@ -110,7 +157,9 @@ alter table sds_analytics disable row level security;`;
     if (confirm("Вы действительно хотите полностью очистить всю собранную аналитику? Это действие нельзя отменить.")) {
       try {
         setRefreshing(true);
-        await supabaseClient.clearAnalytics();
+        const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
+        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        await supabaseClient.clearAnalyticsSecure(currentAdmin.username, requesterPassword);
         await loadAnalytics(true);
       } catch (err: any) {
         alert(err.message || "Ошибка сброса данных");
@@ -125,7 +174,9 @@ alter table sds_analytics disable row level security;`;
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
-      const data = await supabaseClient.fetchTable("sds_analytics");
+      const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
+      const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+      const data = await supabaseClient.getAnalyticsDataSecure(currentAdmin.username, requesterPassword);
       const rows: AnalyticsRow[] = data || [];
       setLogs(rows);
 

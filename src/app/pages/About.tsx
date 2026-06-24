@@ -3,7 +3,7 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { teamTranslations } from "../teamData";
-import { Globe, Award, Sparkles, MapPin, Layers, Infinity, PenTool } from "lucide-react";
+import { Globe, Award, Sparkles, MapPin, Layers, Infinity, PenTool, Plus, Eye, Heart, Zap } from "lucide-react";
 import { Map, MapMarker, MarkerContent, MapPopup } from "../components/ui/map";
 
 const scrollReveal = {
@@ -15,6 +15,14 @@ const scrollReveal = {
 
 export function About() {
   const { t, locale } = useContext(LanguageContext);
+  const [expandedAwards, setExpandedAwards] = useState<Record<number, boolean>>({});
+
+  const toggleAward = (idx: number) => {
+    setExpandedAwards(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
 
   const ab = t.about || {};
   const team = ab.team || teamTranslations[locale] || teamTranslations.ru;
@@ -52,7 +60,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto max-w-[1380px] px-3 sm:px-6"
+        className="mx-auto max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="grid md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-start">
           <div>
@@ -73,21 +81,14 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1fr_2.5fr] gap-12 lg:gap-16">
           <div>
-            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black">
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black whitespace-pre-line">
               {ab.valuesSub || "Signature Approach"}
             </h2>
-            <p className="mt-6 text-base text-black/55 leading-relaxed hidden lg:block">
-              {locale === "ru"
-                ? "Инженерные стандарты и принципы, которые лежат в основе каждого нашего решения."
-                : locale === "kg"
-                ? "Биздин ар бир чечимибиздин негизинде жаткан инженердик стандарттар жана принциптер."
-                : "The engineering standards and core design principles behind every decision we make."}
-            </p>
           </div>
           
           <div className="relative grid sm:grid-cols-3 gap-8">
@@ -95,16 +96,16 @@ export function About() {
             <div className="absolute top-[88px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-[#0000FF]/5 via-[#0000FF]/40 to-[#0000FF]/5 hidden sm:block z-0 pointer-events-none" />
 
             {(ab.valuesList || []).map((val: any, idx: number) => {
-              // Map technical icons matching the card themes
+              // Map technical icons matching the card themes (Perception, Feelings, Emotions)
               const stepMeta = [
                 {
-                  icon: <Layers className="text-[#0000FF]" size={24} />,
+                  icon: <Eye className="text-[#0000FF]" size={24} />,
                 },
                 {
-                  icon: <Infinity className="text-[#0000FF]" size={24} />,
+                  icon: <Heart className="text-[#0000FF]" size={24} />,
                 },
                 {
-                  icon: <PenTool className="text-[#0000FF]" size={24} />,
+                  icon: <Zap className="text-[#0000FF]" size={24} />,
                 }
               ][idx] || {
                 icon: <Sparkles className="text-[#0000FF]" size={24} />,
@@ -140,10 +141,10 @@ export function About() {
 
                   {/* Content details */}
                   <div className="mt-10 mb-2 z-10">
-                    <h3 className="text-2xl font-bold tracking-tight mb-3 text-black">
+                    <h3 className="text-2xl font-bold tracking-tight mb-3 text-black whitespace-pre-line">
                       {val.title}
                     </h3>
-                    <p className="text-[15px] leading-relaxed text-black/60 font-light">
+                    <p className="text-[15px] leading-relaxed text-black/60 font-light whitespace-pre-line">
                       {val.desc}
                     </p>
                   </div>
@@ -159,7 +160,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 relative"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0 relative"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-start">
@@ -170,27 +171,62 @@ export function About() {
           </div>
 
           <div className="divide-y divide-black/10">
-            {(ab.awardsList || []).map((aw: any, idx: number) => (
-              <div
-                key={idx}
-                className="py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
-              >
-                <div className="flex items-start gap-6">
-                  <span className="font-mono text-xl text-black/35 pt-1">
-                    {aw.year}
-                  </span>
-                  <div>
-                    <h3 className="text-2xl font-bold tracking-tight text-black">
-                      {aw.title}
-                    </h3>
-                    <p className="text-lg text-black/55 mt-1">{aw.project}</p>
+            {(ab.awardsList || []).map((aw: any, idx: number) => {
+              const isExpanded = !!expandedAwards[idx];
+              return (
+                <div
+                  key={idx}
+                  onClick={() => toggleAward(idx)}
+                  className="py-8 flex flex-col transition-all duration-300 cursor-pointer hover:bg-black/[0.02] px-4 -mx-4 rounded-2xl select-none group"
+                >
+                  <div className="flex items-center justify-between gap-6 w-full">
+                    <div className="flex items-start gap-6 md:w-[45%] shrink-0">
+                      <span className="font-mono text-xl text-black/35 pt-1">
+                        {aw.year}
+                      </span>
+                      <div>
+                        <h3 className="text-2xl font-bold tracking-tight text-black transition-colors group-hover:text-[#0000FF]">
+                          {aw.title}
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <div className="w-10 h-10 rounded-full bg-black/[0.03] flex items-center justify-center shrink-0 border border-black/[0.04] transition-all group-hover:bg-[#0000FF]/5 group-hover:border-[#0000FF]/10">
+                      <Plus 
+                        className={`w-5 h-5 text-black/60 transition-transform duration-300 group-hover:text-[#0000FF] ${
+                          isExpanded ? "rotate-45" : ""
+                        }`} 
+                      />
+                    </div>
                   </div>
+
+                  <motion.div
+                    initial={false}
+                    animate={
+                      isExpanded
+                        ? { height: "auto", opacity: 1, marginTop: 24 }
+                        : { height: 0, opacity: 0, marginTop: 0 }
+                    }
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden w-full flex flex-col md:flex-row md:items-start justify-between gap-8"
+                  >
+                    <div className="hidden md:block md:w-[45%] shrink-0" />
+                    <div className="text-left text-lg text-black/65 md:flex-1 whitespace-pre-line leading-relaxed pt-1 md:pl-8 flex flex-col gap-4">
+                      {aw.project && (
+                        <p className="text-black/75">
+                          {aw.project}
+                        </p>
+                      )}
+                      {aw.details && (
+                        <p className="text-black/55 font-medium border-t border-black/[0.06] pt-3 mt-1">
+                          {aw.details}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
                 </div>
-                <div className="text-right sm:text-right text-lg font-medium text-black/65 sm:max-w-[280px]">
-                  {aw.details}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </motion.section>
@@ -200,7 +236,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-center">
@@ -265,7 +301,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
 
