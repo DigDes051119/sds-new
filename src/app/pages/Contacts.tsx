@@ -19,7 +19,7 @@ export function Contacts() {
 
   return (
     <div
-      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-20 pb-32 md:pb-20 flex flex-col gap-20 md:gap-32 text-black"
+      className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 pt-20 pb-32 md:pb-20 flex flex-col gap-20 md:gap-32 text-black"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}

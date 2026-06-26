@@ -4,6 +4,8 @@ import { useParams, Link } from "react-router";
 import videoSrc from "../../imports/__Copy_this_cozy_soft_life_quote_roundup_that_feel_luxe_without_spending_a_fortune_that_balance_trend_comfort_and_everyday_function_and_make_your_-_Pin-1090082284813034216.mp4";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
+import projectImg1 from "../../imports/image.png";
+import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import { cmsService } from "../cmsService";
 import { ArrowLeft, CheckCircle, ArrowRight } from "lucide-react";
@@ -25,6 +27,10 @@ export function ProjectDetail() {
     ? localeData[id]
     : t.projectDetail.defaultProject;
 
+  const projectListItem = t.projects?.items?.find((p: any) => p.id === id);
+  const coverImg = projectListItem
+    ? (projectListItem.id === "sandyq" ? projectImg1 : projectListItem.id === "ala-too" ? projectImg2 : projectListItem.img)
+    : (data.processImages?.[0] || "");
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -68,20 +74,19 @@ export function ProjectDetail() {
           />
         ) : (
           <ImageWithFallback
-            src={data.processImages[0]}
+            src={coverImg}
             className="absolute inset-0 w-full h-full object-cover opacity-70"
             alt={data.name}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-        <div className="relative z-10 w-full max-w-[1380px] mx-auto flex flex-col md:flex-row justify-between items-end gap-8 text-white">
+        <div className="relative z-10 w-full max-w-[1720px] mx-auto flex flex-col md:flex-row justify-between items-end gap-8 text-white">
           <div className="max-w-2xl">
             <Link to="/projects" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-6 group text-sm uppercase tracking-wider font-semibold">
               <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> {locale === "ru" ? "Все проекты" : locale === "kg" ? "Баардык долбоорлор" : "All projects"}
             </Link>
             <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[1.08] mb-4">{data.name}</h1>
-            <p className="text-xl md:text-2xl font-light opacity-90">{data.desc}</p>
           </div>
 
           <div className="flex gap-8 md:gap-16 text-sm uppercase tracking-widest font-medium opacity-80 shrink-0 border-l border-white/20 pl-8">
@@ -104,7 +109,7 @@ export function ProjectDetail() {
       {/* Block 2: Redesigned Challenge Block (Split Editorial) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
+        className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
       >
         <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-24 items-start">
           <div className="flex flex-col gap-6">
@@ -117,6 +122,9 @@ export function ProjectDetail() {
           <div className="flex flex-col gap-8">
             <p className="text-2xl sm:text-3xl md:text-[34px] font-light leading-[1.4] tracking-[-0.035em] text-black/85">
               {data.challenge}
+            </p>
+            <p className="text-lg sm:text-xl text-black/60 leading-relaxed font-light">
+              {data.desc}
             </p>
             <div className="grid sm:grid-cols-2 gap-8 mt-4 pt-8 border-t border-black/[0.06]">
               <div>
@@ -138,117 +146,70 @@ export function ProjectDetail() {
         </div>
       </motion.section>
 
-      {/* Block 3: Redesigned Process Gallery (Interactive Exhibition) */}
-      <motion.section 
-        {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
-      >
-        <div className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div>
-            <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black">
-              {locale === "ru" ? "Этапы реализации" : locale === "kg" ? "Ишке ашыруу этаптары" : "Development Exhibition"}
-            </h2>
-          </div>
-          <p className="text-lg text-black/55 max-w-md">
-            {locale === "ru" 
-              ? "От концептуальных набросков и 3D-чертежей до финального подбора материалов и текстур." 
-              : locale === "kg"
-              ? "Концептуалдык эскиздерден жана 3D чиймелерден баштап материалдарды жана текстураларды акыркы тандоого чейин."
-              : "Every stage is a transition from digital concepts to high-end serial materials and functional systems."}
-          </p>
-        </div>
+      {/* Block 3: Redesigned Process Gallery (Vertically Stacked Editorial Collage) */}
+      <section className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-20 space-y-16 md:space-y-28 border-b border-black/[0.06]">
+        {(() => {
+          const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
+            ? data.collageBlocks
+            : (data.processImages || []).map((img: string) => [img]);
 
-        <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-16 items-stretch">
-          {/* Controls / Stage description */}
-          <div className="flex flex-col justify-between gap-8 py-2">
-            <div className="flex flex-col gap-3">
-              {data.processImages.map((_, idx) => {
-                const stage = processStages[idx] || { label: `Stage 0${idx + 1}`, desc: "Process step details" };
-                const isActive = activeTab === idx;
+          return blocks.map((block: string[], blockIdx: number) => {
+            if (!block || block.length === 0) return null;
+            const isAlternating = blockIdx % 2 === 1;
+            const count = block.length;
 
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setActiveTab(idx)}
-                    className={`text-left p-6 rounded-2xl border transition-all duration-300 interactive-element ${
-                      isActive 
-                        ? "bg-white border-[#0000FF]/25 shadow-[0_15px_35px_rgba(0,0,0,0.02)] text-black" 
-                        : "bg-transparent border-transparent text-black/45 hover:text-black hover:bg-black/[0.02]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-bold font-mono tracking-widest ${isActive ? "text-[#0000FF]" : "text-black/30"}`}>
-                        STAGE 0{idx + 1}
-                      </span>
-                      {isActive && <span className="w-2 h-2 rounded-full bg-[#0000FF]" />}
-                    </div>
-                    <h4 className="text-xl font-bold tracking-tight mb-1">{stage.label}</h4>
-                    <p className="text-sm opacity-80 leading-relaxed font-light">{stage.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
+            const getGridColsClass = (c: number) => {
+              if (c <= 1) return "grid-cols-1";
+              if (c === 2) return "grid-cols-1 md:grid-cols-2";
+              if (c === 3) return "grid-cols-1 md:grid-cols-3";
+              if (c === 4) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+              return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5";
+            };
 
-            <div className="bg-black/5 p-6 rounded-2xl flex items-center justify-between">
-              <span className="text-sm font-semibold tracking-wider uppercase text-black/55">
-                {locale === "ru" ? "АКТИВНЫЙ ШАГ" : locale === "kg" ? "АКТИВДҮҮ КАДАМ" : "ACTIVE VIEW"}
-              </span>
-              <span className="font-mono text-base font-bold text-[#0000FF]">
-                0{activeTab + 1} / 0{data.processImages.length}
-              </span>
-            </div>
-          </div>
+            const getImageAspectClass = (c: number) => {
+              if (c <= 1) return "aspect-[1.5] sm:aspect-[1.7]";
+              if (c === 2) return "aspect-[1.4] sm:aspect-[1.5]";
+              if (c === 3) return "aspect-[1.2] sm:aspect-[1.3]";
+              return "aspect-square";
+            };
 
-          {/* Interactive display area */}
-          <div className="relative aspect-[1.45] bg-[#eeeee9] rounded-[2.2rem] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.06)] border border-black/5">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-0 w-full h-full"
+            return (
+              <div 
+                key={blockIdx}
+                className="w-full"
               >
-                <ImageWithFallback
-                  src={data.processImages[activeTab] || data.processImages[0]}
-                  className="w-full h-full object-cover"
-                  alt={`Process Step ${activeTab + 1}`}
-                />
-              </motion.div>
-            </AnimatePresence>
-            
-            {/* Quick helper controls inside the image */}
-            <div className="absolute bottom-6 right-6 z-10 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveTab((prev) => (prev - 1 + data.processImages.length) % data.processImages.length)}
-                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md shadow-md hover:bg-white flex items-center justify-center transition interactive-element"
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab((prev) => (prev + 1) % data.processImages.length)}
-                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md shadow-md hover:bg-white flex items-center justify-center transition interactive-element"
-              >
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.section>
+                <div className={`grid gap-6 ${getGridColsClass(count)}`}>
+                  {block.map((imgUrl: string, imgIdx: number) => (
+                    <motion.div
+                      key={imgIdx}
+                      {...scrollRevealConfig}
+                      className="relative rounded-[2rem] overflow-hidden bg-[#eeeee9] border border-black/5 shadow-[0_30px_70px_rgba(0,0,0,0.04)] w-full"
+                    >
+                      <div className={`w-full ${getImageAspectClass(count)}`}>
+                        <ImageWithFallback
+                          src={imgUrl}
+                          className="w-full h-full object-cover transition-transform duration-[1.2s] hover:scale-105"
+                          alt={`${data.name} - Block ${blockIdx + 1} Image ${imgIdx + 1}`}
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            );
+          });
+        })()}
+      </section>
 
       {/* Block 4: Redesigned Results & Impact Showcase (Vibrant Grid) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36"
+        className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-28 md:py-36"
       >
-        <div className="grid lg:grid-cols-[1.8fr_1.2fr] gap-12 lg:gap-20 items-stretch">
+        <div className="w-full">
           
           {/* Infographic Stats Panel */}
-          <div className="bg-white border border-black/[0.05] rounded-[2.5rem] p-8 md:p-16 flex flex-col justify-between shadow-[0_20px_60px_rgba(0,0,0,0.02)]">
+          <div className="bg-white border border-black/[0.05] rounded-[2.5rem] p-8 md:p-16 flex flex-col justify-between shadow-[0_20px_60px_rgba(0,0,0,0.02)] w-full">
             <div>
               <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] mb-12">
                 {t.projectDetail.resultsHeading}
@@ -285,24 +246,6 @@ export function ProjectDetail() {
                 {locale === "ru" ? "Все проекты" : locale === "kg" ? "Баардык долбоорлор" : "View other projects"}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
-            </div>
-          </div>
-
-          {/* Sidebar decorative final result layout */}
-          <div className="relative rounded-[2.5rem] overflow-hidden border border-black/5 bg-[#eeeee9] shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col justify-end min-h-[420px] lg:min-h-0">
-            <ImageWithFallback
-              src={data.processImages[data.processImages.length - 1] || data.processImages[0]}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-              alt="Final showcase"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-            <div className="relative z-10 p-8 text-white">
-              <span className="font-mono text-xs tracking-wider text-white/50 font-semibold uppercase block mb-1">
-                {locale === "ru" ? "ФИНАЛЬНЫЙ РЕНДЕР" : locale === "kg" ? "АКЫРКЫ ВИЗУАЛ" : "FINAL SHOWCASE"}
-              </span>
-              <h4 className="text-xl font-bold tracking-tight">
-                {data.name} — {data.year}
-              </h4>
             </div>
           </div>
 

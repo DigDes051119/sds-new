@@ -111,7 +111,7 @@ export function AdminFeaturedProjects() {
   );
 
   return (
-    <div className="space-y-8 max-w-5xl font-['Inter',sans-serif]">
+    <div className="space-y-8 max-w-[1720px] mx-auto font-['Inter',sans-serif]">
       {/* Save bar & Language info */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
         <div className="flex items-center gap-2 text-white/50 text-xs font-semibold pl-2">

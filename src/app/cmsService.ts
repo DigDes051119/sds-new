@@ -145,6 +145,7 @@ export const cmsService = {
       }
     } catch (e) {
       console.error("Failed to push translations to Supabase:", e);
+      throw e;
     }
   },
 
@@ -176,6 +177,7 @@ export const cmsService = {
       }
     } catch (e) {
       console.error("Failed to push project details to Supabase:", e);
+      throw e;
     }
   },
 

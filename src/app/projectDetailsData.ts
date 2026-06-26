@@ -9,6 +9,7 @@ export interface ProjectDetailData {
   service: string;
   challenge: string;
   processImages: string[];
+  collageBlocks?: string[][];
   results: string[];
 }
 
