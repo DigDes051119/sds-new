@@ -60,7 +60,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto max-w-[1720px] px-3 sm:px-6 min-[1720px]:px-0"
+        className="mx-auto max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="grid md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-start">
           <div>
@@ -81,7 +81,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1720px] px-3 sm:px-6 min-[1720px]:px-0"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1fr_2.5fr] gap-12 lg:gap-16">
@@ -161,7 +161,7 @@ export function About() {
       {/* 
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1720px] px-3 sm:px-6 min-[1720px]:px-0 relative"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0 relative"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-start">
@@ -238,7 +238,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1720px] px-3 sm:px-6 min-[1720px]:px-0"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
         <div className="grid lg:grid-cols-[1.2fr_2fr] gap-12 lg:gap-24 items-center">
@@ -303,7 +303,7 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1720px] px-3 sm:px-6 min-[1720px]:px-0"
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
         <div className="h-px bg-black/10 w-full mb-16" />
 

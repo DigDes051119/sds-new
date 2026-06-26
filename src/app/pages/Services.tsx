@@ -17,7 +17,7 @@ export function Services() {
 
   return (
     <div
-      className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-20"
+      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-20"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}

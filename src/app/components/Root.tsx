@@ -298,7 +298,7 @@ export function Root() {
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="mx-auto relative flex h-20 max-w-[1720px] w-full items-center justify-center">
+          <div className="mx-auto relative flex h-20 max-w-[1380px] w-full items-center justify-center">
             
             {/* Logo Container */}
             <div className="absolute left-0 flex items-center z-10">
@@ -474,7 +474,7 @@ export function Root() {
         </main>
 
         <footer ref={footerRef} className="w-full bg-gradient-to-b from-[#0000FF] to-[#000033] text-white pt-24 pb-12 mt-24">
-          <div className="mx-auto max-w-[1720px] w-full px-6">
+          <div className="mx-auto max-w-[1380px] w-full px-6">
             
             <div className="flex flex-col md:flex-row justify-between pb-16">
               

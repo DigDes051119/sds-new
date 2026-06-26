@@ -154,12 +154,12 @@ export function Home() {
   return (
     <div className="overflow-hidden pb-24">
       {/* Hero Section */}
-      <section className="px-3 sm:px-6 min-[1720px]:px-0 pt-8">
+      <section className="px-3 sm:px-6 min-[1380px]:px-0 pt-8">
         <motion.div
           initial={{ y: 28, opacity: 0, scale: 0.985 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mx-auto max-w-[1720px] pt-16 pb-20 sm:pt-24 sm:pb-28"
+          className="relative mx-auto max-w-[1380px] pt-16 pb-20 sm:pt-24 sm:pb-28"
         >
           <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
             <div className="flex flex-col gap-5 max-w-[900px]">
@@ -184,7 +184,7 @@ export function Home() {
         {...scrollRevealConfig}
         className="px-3 sm:px-6 mt-24"
       >
-        <div className="mx-auto max-w-[1720px]">
+        <div className="mx-auto max-w-[1380px]">
           <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black mb-8">
             {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
           </h2>
@@ -219,7 +219,7 @@ export function Home() {
         {...scrollRevealConfig}
         className="px-3 sm:px-6 mt-16"
       >
-        <div className="mx-auto max-w-[1720px] grid grid-cols-1 gap-4 md:grid-cols-4 md:auto-rows-[300px]">
+        <div className="mx-auto max-w-[1380px] grid grid-cols-1 gap-4 md:grid-cols-4 md:auto-rows-[300px]">
           <motion.div whileHover={{ y: -6 }} className="group flex min-h-[300px] flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element md:col-span-2">
             <p className="text-sm text-black/45">about[01]</p><div className="mt-auto text-[clamp(5.2rem,10vw,7rem)] font-semibold leading-[0.96] tracking-[-0.08em] text-[#0000FF]">{t.home.statsYears}</div><p className="mt-3 max-w-[520px] text-[clamp(1.25rem,2.25vw,1.75rem)] leading-[1.14] tracking-[-0.055em]">{t.home.statsLabel}</p>
           </motion.div>
@@ -238,7 +238,7 @@ export function Home() {
         {...scrollRevealConfig}
         className="px-3 sm:px-6 mt-28"
       >
-        <div className="mx-auto max-w-[1720px]">
+        <div className="mx-auto max-w-[1380px]">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <h2 className="text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.servicesTitle}</h2>
             <Link
@@ -320,7 +320,7 @@ export function Home() {
         {...scrollRevealConfig}
         className="px-3 sm:px-6 mt-28"
       >
-        <div className="mx-auto max-w-[1720px]">
+        <div className="mx-auto max-w-[1380px]">
           <h2 className="mb-8 text-5xl font-semibold tracking-[-0.07em] sm:text-8xl">{t.home.selectedWorkTitle}</h2>
           <div className="grid gap-4 lg:grid-cols-3">
             {homeProjects.map((p, i) => (

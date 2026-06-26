@@ -81,7 +81,7 @@ export function ProjectDetail() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-        <div className="relative z-10 w-full max-w-[1720px] mx-auto flex flex-col md:flex-row justify-between items-end gap-8 text-white">
+        <div className="relative z-10 w-full max-w-[1380px] mx-auto flex flex-col md:flex-row justify-between items-end gap-8 text-white">
           <div className="max-w-2xl">
             <Link to="/projects" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-6 group text-sm uppercase tracking-wider font-semibold">
               <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> {locale === "ru" ? "Все проекты" : locale === "kg" ? "Баардык долбоорлор" : "All projects"}
@@ -109,7 +109,7 @@ export function ProjectDetail() {
       {/* Block 2: Redesigned Challenge Block (Split Editorial) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
       >
         <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-24 items-start">
           <div className="flex flex-col gap-6">
@@ -147,7 +147,7 @@ export function ProjectDetail() {
       </motion.section>
 
       {/* Block 3: Redesigned Process Gallery (Vertically Stacked Editorial Collage) */}
-      <section className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-20 space-y-16 md:space-y-28 border-b border-black/[0.06]">
+      <section className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-20 space-y-16 md:space-y-28 border-b border-black/[0.06]">
         {(() => {
           const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
             ? data.collageBlocks
@@ -204,7 +204,7 @@ export function ProjectDetail() {
       {/* Block 4: Redesigned Results & Impact Showcase (Vibrant Grid) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1720px] mx-auto px-6 min-[1720px]:px-0 py-28 md:py-36"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36"
       >
         <div className="w-full">
           

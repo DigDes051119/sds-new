@@ -784,7 +784,7 @@ export function AdminProjectsEditor() {
               </div>
 
               {/* Mock Challenge Section (Splitted Editorial layout matching site) */}
-              <div className="max-w-[1720px] mx-auto px-6 py-12 border-b border-black/[0.06] bg-[#fafaf6]">
+              <div className="max-w-[1380px] mx-auto px-6 py-12 border-b border-black/[0.06] bg-[#fafaf6]">
                 <div className="grid grid-cols-[1fr_1.8fr] gap-6 items-start">
                   <div className="flex flex-col gap-2">
                     <h2 className="text-md font-bold tracking-tight text-black">Задача и Вызов</h2>
