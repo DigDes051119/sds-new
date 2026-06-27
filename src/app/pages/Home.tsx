@@ -154,7 +154,7 @@ export function Home() {
   return (
     <div className="overflow-hidden pb-24">
       {/* Hero Section */}
-      <section className="px-3 sm:px-6 min-[1380px]:px-0 pt-8">
+      <section className="px-3 sm:px-6 min-[1380px]:px-0 pt-10 sm:pt-16">
         <motion.div
           initial={{ y: 28, opacity: 0, scale: 0.985 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}

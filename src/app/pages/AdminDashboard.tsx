@@ -114,7 +114,7 @@ BEGIN
     SELECT 1 FROM sds_admins 
     WHERE LOWER(username) = LOWER(p_requester_username) 
       AND password = p_requester_password 
-      AND (role = 'creator' OR role = 'full')
+      AND (role = 'creator' OR role = 'full' OR (permissions->>'analytics')::boolean = true)
   ) THEN
     RETURN QUERY SELECT a.id, a.session_id, a.path, a.locale, a.referrer, a.user_agent, a.created_at FROM sds_analytics a;
   ELSE
@@ -131,7 +131,7 @@ BEGIN
     SELECT 1 FROM sds_admins 
     WHERE LOWER(username) = LOWER(p_requester_username) 
       AND password = p_requester_password 
-      AND (role = 'creator' OR role = 'full')
+      AND (role = 'creator' OR role = 'full' OR (permissions->>'analytics')::boolean = true)
   ) THEN
     DELETE FROM sds_analytics;
     RETURN TRUE;
@@ -494,15 +494,25 @@ $$ LANGUAGE plpgsql;`;
   }
 
   if (error) {
+    const isAccessDenied = error.includes("Access Denied");
     return (
       <div className="space-y-8 max-w-4xl font-['Inter',sans-serif]">
         <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 flex items-start gap-4">
           <AlertCircle className="w-8 h-8 text-red-400 shrink-0" />
           <div className="space-y-2">
-            <h3 className="text-lg font-bold tracking-tight text-white">Таблица аналитики не найдена</h3>
+            <h3 className="text-lg font-bold tracking-tight text-white">
+              {isAccessDenied ? "Доступ к аналитике ограничен" : "Таблица аналитики не найдена"}
+            </h3>
             <p className="text-white/60 text-sm leading-relaxed">
-              Для работы встроенной аналитики необходимо создать таблицу <b>sds_analytics</b> в вашем проекте Supabase.
+              {isAccessDenied 
+                ? "У вашей учетной записи нет прав для просмотра аналитики в базе данных, либо SQL-функция get_analytics_data не обновлена для вашей роли."
+                : "Для работы встроенной аналитики необходимо создать таблицу sds_analytics в вашем проекте Supabase."}
             </p>
+            {error && (
+              <p className="text-red-400 font-mono text-xs leading-relaxed mt-2 bg-black/30 p-3 rounded-lg border border-red-500/10">
+                Детали ошибки: {error}
+              </p>
+            )}
           </div>
         </div>
 

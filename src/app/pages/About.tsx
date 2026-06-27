@@ -234,6 +234,55 @@ export function About() {
       */}
 
       {/* ═══════════════════════════════════════════════════════════════
+          SECTION 5 — TEAM (Grid layout with hover reveal)
+      ═══════════════════════════════════════════════════════════════ */}
+      <motion.section
+        {...scrollReveal}
+        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
+      >
+        <div className="h-px bg-black/10 w-full mb-16" />
+
+        {/* Section title */}
+        <div className="mb-12">
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-[#111111]">
+            {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
+          </h2>
+        </div>
+
+        {/* Team Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+          {team.map((member: any, idx: number) => (
+            <div
+              key={member.id || idx}
+              className="flex flex-col group select-none cursor-pointer"
+            >
+              {/* Photo Container */}
+              <div className="relative w-full aspect-[3/4] rounded-[0.8rem] overflow-hidden bg-[#eeeee9]">
+                <ImageWithFallback
+                  src={member.img}
+                  alt={member.name}
+                  className="w-full h-full object-cover transition-all duration-500 ease-out filter grayscale group-hover:grayscale-0 group-hover:scale-105"
+                />
+              </div>
+
+              {/* Name & Role (Always visible below the photo) */}
+              <div className="mt-5">
+                <span className="text-[17px] text-[#0000FF] font-semibold block mb-1">
+                  0{idx + 1}
+                </span>
+                <h3 className="tracking-tight text-[22px] font-bold text-black transition-colors duration-300 group-hover:text-[#0000FF]">
+                  {member.name}
+                </h3>
+                <p className="mt-1.5 text-[18px] text-black/55 leading-snug">
+                  {member.role}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* ═══════════════════════════════════════════════════════════════
           SECTION 4 — GEOGRAPHY MAP (Using custom mapcn library with MapLibre GL)
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
@@ -295,55 +344,6 @@ export function About() {
               ))}
             </Map>
           </div>
-        </div>
-      </motion.section>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5 — TEAM (Grid layout with hover reveal)
-      ═══════════════════════════════════════════════════════════════ */}
-      <motion.section
-        {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
-      >
-        <div className="h-px bg-black/10 w-full mb-16" />
-
-        {/* Section title */}
-        <div className="mb-12">
-          <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-[#111111]">
-            {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
-          </h2>
-        </div>
-
-        {/* Team Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-          {team.map((member: any, idx: number) => (
-            <div
-              key={member.id || idx}
-              className="flex flex-col group select-none cursor-pointer"
-            >
-              {/* Photo Container */}
-              <div className="relative w-full aspect-[3/4] rounded-[0.8rem] overflow-hidden bg-[#eeeee9]">
-                <ImageWithFallback
-                  src={member.img}
-                  alt={member.name}
-                  className="w-full h-full object-cover transition-all duration-500 ease-out filter grayscale group-hover:grayscale-0 group-hover:scale-105"
-                />
-              </div>
-
-              {/* Name & Role (Always visible below the photo) */}
-              <div className="mt-5">
-                <span className="text-[17px] text-[#0000FF] font-semibold block mb-1">
-                  0{idx + 1}
-                </span>
-                <h3 className="tracking-tight text-[22px] font-bold text-black transition-colors duration-300 group-hover:text-[#0000FF]">
-                  {member.name}
-                </h3>
-                <p className="mt-1.5 text-[18px] text-black/55 leading-snug">
-                  {member.role}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
       </motion.section>
 

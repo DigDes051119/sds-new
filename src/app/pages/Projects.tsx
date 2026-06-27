@@ -1,17 +1,18 @@
 import { motion } from "motion/react";
 import { Link, useSearchParams } from "react-router";
-import { ArrowUpRight } from "lucide-react";
 import projectImg1 from "../../imports/image.png";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
 import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { cmsService } from "../cmsService";
 
 export function Projects() {
-  const { t } = useContext(LanguageContext);
+  const { t, locale } = useContext(LanguageContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || "all");
+  const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
 
   useEffect(() => {
     if (categoryParam) {
@@ -21,10 +22,23 @@ export function Projects() {
     }
   }, [categoryParam]);
 
-  const projects = t.projects.items.map((project) => ({
-    ...project,
-    img: project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img,
-  }));
+  useEffect(() => {
+    return cmsService.subscribe(() => {
+      setProjectDetails(cmsService.getProjectDetails());
+    });
+  }, []);
+
+  const localizedDetails = projectDetails[locale] || projectDetails["ru"] || {};
+
+  const projects = t.projects.items.map((project) => {
+    const detail = localizedDetails[project.id] || {};
+    return {
+      ...project,
+      img: project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img,
+      desc: detail.desc || "",
+      year: detail.year || "2026",
+    };
+  });
 
   const filteredProjects = selectedCategory === "all" 
     ? projects 
@@ -92,35 +106,30 @@ export function Projects() {
         })}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.map((project) => (
           <motion.div 
             key={project.id}
             {...scrollRevealConfig}
-            layout
+            whileHover={{ y: -6 }}
+            className="group flex flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element"
           >
-            <Link 
-              to={`/projects/${project.id}`}
-              className="group relative h-[600px] rounded-3xl overflow-hidden interactive-element block"
-            >
-              <div className="absolute inset-0 bg-black/10 z-10 transition-opacity group-hover:opacity-0" />
-              <ImageWithFallback 
-                src={project.img} 
-                alt={project.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              />
-              
-              {/* Arrow on hover */}
-              <div className="absolute top-8 right-8 z-20 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                <ArrowUpRight className="text-[#0000FF]" size={24} />
-              </div>
-
-              <div className="absolute bottom-8 left-8 right-8 z-20 flex justify-between items-end">
-                <div className="bg-white/90 backdrop-blur-md px-8 py-6 rounded-2xl transition-colors duration-300 group-hover:bg-[#0000FF] group-hover:text-white flex flex-col w-full md:w-auto">
-                  <h3 className="text-3xl font-bold mb-2">{project.name}</h3>
-                  <p className="text-base opacity-80">{project.category}</p>
-                </div>
-              </div>
+            <div className="w-full aspect-[16/10] rounded-[1.5rem] overflow-hidden mb-6 bg-[#eeeee9]">
+              <ImageWithFallback src={project.img} alt={project.name} className="w-full h-full object-cover transition duration-500 group-hover:scale-102" />
+            </div>
+            <span className="text-sm text-black/45">
+              {project.category && !["projects", "проекты", "проекттер"].includes(project.category.toLowerCase())
+                ? project.category 
+                : (t.projectCategories[project.categoryKey] || project.category)}
+            </span>
+            <h3 className="mt-3 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">{project.name}</h3>
+            <p className="mt-4 max-w-xl text-[15px] sm:text-base leading-relaxed tracking-[-0.02em] text-black/70 line-clamp-3">{project.desc}</p>
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
+              <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
+              <span>{project.year}</span>
+            </div>
+            <Link to={`/projects/${project.id}`} className="mt-6 inline-flex w-fit items-center justify-center rounded-full bg-[#0000FF] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black">
+              {locale === "ru" ? "Посмотреть" : locale === "kg" ? "Караңыз" : "View"}
             </Link>
           </motion.div>
         ))}

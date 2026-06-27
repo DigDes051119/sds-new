@@ -193,6 +193,10 @@ alter table sds_admin_logs disable row level security;`;
   };
 
   const loadAdmins = async () => {
+    if (!isCreator) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
@@ -738,9 +742,14 @@ alter table sds_admin_logs disable row level security;`;
       {/* Users Tab View */}
       {activeTab === "users" && !isAdding && editingId === null && (
         <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead>
+          {!isCreator ? (
+            <div className="p-12 text-center text-white/40 text-sm">
+              Список сотрудников и их учетные данные скрыты из соображений безопасности.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
                 <tr className="border-b border-white/[0.06] bg-white/[0.02]">
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-white/50">Имя и Фамилия</th>
                   {isCreator && <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-white/50">Логин (Имя пользователя)</th>}
@@ -819,6 +828,7 @@ alter table sds_admin_logs disable row level security;`;
               </tbody>
             </table>
           </div>
+          )}
         </div>
       )}
 

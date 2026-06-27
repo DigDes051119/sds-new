@@ -109,7 +109,7 @@ export function ProjectDetail() {
       {/* Block 2: Redesigned Challenge Block (Split Editorial) */}
       <motion.section 
         {...scrollRevealConfig}
-        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-28 md:py-36 border-b border-black/[0.06]"
+        className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-28 md:pt-36 pb-8 border-b border-black/[0.06]"
       >
         <div className="grid lg:grid-cols-[1.1fr_1.9fr] gap-12 lg:gap-24 items-start">
           <div className="flex flex-col gap-6">
@@ -147,7 +147,7 @@ export function ProjectDetail() {
       </motion.section>
 
       {/* Block 3: Redesigned Process Gallery (Vertically Stacked Editorial Collage) */}
-      <section className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-20 space-y-16 md:space-y-28 border-b border-black/[0.06]">
+      <section className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-8 pb-20 space-y-2 border-b border-black/[0.06]">
         {(() => {
           const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
             ? data.collageBlocks
@@ -178,12 +178,12 @@ export function ProjectDetail() {
                 key={blockIdx}
                 className="w-full"
               >
-                <div className={`grid gap-6 ${getGridColsClass(count)}`}>
+                <div className={`grid gap-2 ${getGridColsClass(count)}`}>
                   {block.map((imgUrl: string, imgIdx: number) => (
                     <motion.div
                       key={imgIdx}
                       {...scrollRevealConfig}
-                      className="relative rounded-[2rem] overflow-hidden bg-[#eeeee9] border border-black/5 shadow-[0_30px_70px_rgba(0,0,0,0.04)] w-full"
+                      className="relative overflow-hidden bg-[#eeeee9] border border-black/5 shadow-[0_30px_70px_rgba(0,0,0,0.04)] w-full"
                     >
                       <div className={`w-full ${getImageAspectClass(count)}`}>
                         <ImageWithFallback
