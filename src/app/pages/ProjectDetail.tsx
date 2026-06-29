@@ -155,7 +155,6 @@ export function ProjectDetail() {
 
           return blocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
-            const isAlternating = blockIdx % 2 === 1;
             const count = block.length;
 
             const getGridColsClass = (c: number) => {
@@ -164,13 +163,6 @@ export function ProjectDetail() {
               if (c === 3) return "grid-cols-1 md:grid-cols-3";
               if (c === 4) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
               return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5";
-            };
-
-            const getImageAspectClass = (c: number) => {
-              if (c <= 1) return "aspect-[1.5] sm:aspect-[1.7]";
-              if (c === 2) return "aspect-[1.4] sm:aspect-[1.5]";
-              if (c === 3) return "aspect-[1.2] sm:aspect-[1.3]";
-              return "aspect-square";
             };
 
             return (
@@ -185,13 +177,11 @@ export function ProjectDetail() {
                       {...scrollRevealConfig}
                       className="relative overflow-hidden bg-[#eeeee9] border border-black/5 shadow-[0_30px_70px_rgba(0,0,0,0.04)] w-full"
                     >
-                      <div className={`w-full ${getImageAspectClass(count)}`}>
-                        <ImageWithFallback
-                          src={imgUrl}
-                          className="w-full h-full object-cover transition-transform duration-[1.2s] hover:scale-105"
-                          alt={`${data.name} - Block ${blockIdx + 1} Image ${imgIdx + 1}`}
-                        />
-                      </div>
+                      <ImageWithFallback
+                        src={imgUrl}
+                        className="w-full h-auto block"
+                        alt={`${data.name} - Block ${blockIdx + 1} Image ${imgIdx + 1}`}
+                      />
                     </motion.div>
                   ))}
                 </div>

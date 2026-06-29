@@ -201,7 +201,7 @@ export function Home() {
                 <span className="text-sm text-black/45">{project.label}</span>
                 <h3 className="mt-3 text-4xl font-semibold tracking-[-0.07em] sm:text-5xl">{project.title}</h3>
                 <p className="mt-4 max-w-xl text-[clamp(1.1rem,2vw,1.35rem)] leading-[1.45] tracking-[-0.035em] text-black/70 line-clamp-3">{project.description}</p>
-                <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
+                <div className="mt-auto pt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
                   <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
                   <span>{project.date}</span>
                 </div>

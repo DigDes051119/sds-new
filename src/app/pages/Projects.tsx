@@ -124,7 +124,7 @@ export function Projects() {
             </span>
             <h3 className="mt-3 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">{project.name}</h3>
             <p className="mt-4 max-w-xl text-[15px] sm:text-base leading-relaxed tracking-[-0.02em] text-black/70 line-clamp-3">{project.desc}</p>
-            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
+            <div className="mt-auto pt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
               <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
               <span>{project.year}</span>
             </div>
