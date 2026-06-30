@@ -221,14 +221,14 @@ export function Home() {
       >
         <div className="mx-auto max-w-[1380px] grid grid-cols-1 gap-4 md:grid-cols-4 md:auto-rows-[300px]">
           <motion.div whileHover={{ y: -6 }} className="group flex min-h-[300px] flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element md:col-span-2">
-            <p className="text-sm text-black/45">about[01]</p><div className="mt-auto text-[clamp(5.2rem,10vw,7rem)] font-semibold leading-[0.96] tracking-[-0.08em] text-[#0000FF]">{t.home.statsYears}</div><p className="mt-3 max-w-[520px] text-[clamp(1.25rem,2.25vw,1.75rem)] leading-[1.14] tracking-[-0.055em]">{t.home.statsLabel}</p>
+            <p className="text-sm text-black/45">about[01]</p><div className="mt-auto text-[clamp(5.2rem,10vw,7rem)] font-semibold leading-[0.96] tracking-[-0.08em] text-[#0000FF]">{t.home.statsYears}</div><p className="mt-3 max-w-[520px] text-[26px] leading-[1.14] tracking-[-0.03em]">{t.home.statsLabel}</p>
           </motion.div>
           <motion.div whileHover={{ y: -6 }} className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#0000FF] p-7 text-white interactive-element">
             <Circle className="absolute -right-12 -top-12 h-56 w-56 opacity-20" strokeWidth={0.6} />
-            <p className="text-sm text-white/60">global[02]</p><p className="mt-16 text-[clamp(1.55rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.globalLabel}</p>
+            <p className="text-sm text-white/60">global[02]</p><p className="mt-16 text-[26px] leading-[1.12] tracking-[-0.03em]">{t.home.globalLabel}</p>
           </motion.div>
           <motion.div whileHover={{ y: -6 }} className="rounded-[2rem] border border-black/10 bg-[#f1f1ed] p-7 interactive-element">
-            <p className="text-sm text-black/45">principle[03]</p><p className="mt-16 text-[clamp(1.6rem,2.5vw,2rem)] leading-[1.12] tracking-[-0.06em]">{t.home.principleLabel}</p>
+            <p className="text-sm text-black/45">principle[03]</p><p className="mt-16 text-[26px] leading-[1.12] tracking-[-0.03em]">{t.home.principleLabel}</p>
           </motion.div>
         </div>
       </motion.section>
@@ -278,16 +278,16 @@ export function Home() {
                     </motion.div>
                   )}
 
-                  <motion.div 
-                    animate={isMobile ? { 
-                      height: active === i ? "auto" : 0, 
-                      opacity: active === i ? 1 : 0,
+                  <div 
+                    className={`transition-all duration-500 ease-out ${
+                      isMobile ? "overflow-hidden" : "absolute bottom-7 left-7 w-[320px]"
+                    } ${
+                      active === i ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+                    }`}
+                    style={isMobile ? {
+                      height: active === i ? "auto" : 0,
                       marginTop: active === i ? 16 : 0
-                    } : {
-                      opacity: active === i ? 1 : 0
-                    }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className={isMobile ? "overflow-hidden" : "absolute bottom-7 left-7 right-[45%] max-w-md"}
+                    } : undefined}
                   >
                     <p className="text-[clamp(1.15rem,2vw,1.5rem)] leading-[1.16] tracking-[-0.05em] text-black/70">
                       {s[2]}
@@ -299,7 +299,7 @@ export function Home() {
                         <img src={imageSrc} alt={s[1]} className="w-full h-full object-cover" />
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                   
                   <div className={`absolute right-7 top-7 p-2 rounded-full transition-all duration-300 z-10 ${
                     active === i && !isMobile 

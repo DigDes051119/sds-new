@@ -124,14 +124,128 @@ const CustomInstagramIcon = () => (
 
 export function Root() {
   const location = useLocation();
+  const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname !== '/projects';
   const outlet = useOutlet();
+  const [isDarkThemeBehind, setIsDarkThemeBehind] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [locale, setLocale] = useState<Language>("en");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isPastMiddle, setIsPastMiddle] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const checkHeaderTheme = () => {
+      // If we are at the very top of the page, the header sits on the white background
+      if (window.scrollY < 20) {
+        setIsDarkThemeBehind(false);
+        return;
+      }
+
+      // 1. Fast check for elements with data-theme="dark"
+      const darkElements = document.querySelectorAll('[data-theme="dark"]');
+      const headerHeight = 92; // 12px top + 80px height
+      let isDarkBehind = false;
+
+      for (let i = 0; i < darkElements.length; i++) {
+        const rect = darkElements[i].getBoundingClientRect();
+        if (rect.top <= headerHeight && rect.bottom >= 12) {
+          isDarkBehind = true;
+          break;
+        }
+      }
+
+      // 2. Dynamic element & image brightness detection
+      if (!isDarkBehind) {
+        // Temporarily disable pointer events on the header to look behind it
+        const headerEl = document.querySelector('header');
+        if (headerEl) headerEl.style.pointerEvents = 'none';
+
+        // Sample at the center of the header position
+        const x = window.innerWidth / 2;
+        const y = 50; 
+        const element = document.elementFromPoint(x, y);
+
+        if (headerEl) headerEl.style.pointerEvents = '';
+
+        if (element) {
+          // Check CSS background color of the element and its parents
+          let currentEl: HTMLElement | null = element as HTMLElement;
+          while (currentEl && currentEl !== document.body) {
+            const style = window.getComputedStyle(currentEl);
+            const bgColor = style.backgroundColor;
+            if (bgColor && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)') {
+              const rgb = bgColor.match(/\d+/g);
+              if (rgb && rgb.length >= 3) {
+                const r = parseInt(rgb[0], 10);
+                const g = parseInt(rgb[1], 10);
+                const b = parseInt(rgb[2], 10);
+                const a = rgb[3] ? parseFloat(rgb[3]) : 1;
+                if (a > 0.5) {
+                  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                  if (brightness < 120) {
+                    isDarkBehind = true;
+                  }
+                  break; // Found solid background, stop traversing
+                }
+              }
+            }
+            currentEl = currentEl.parentElement;
+          }
+
+          // If no dark background, check if there is an image under the header
+          if (!isDarkBehind) {
+            const img = element.tagName === 'IMG' ? element : element.querySelector('img');
+            if (img && img.complete && (img as HTMLImageElement).naturalWidth > 0) {
+              try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(img, 0, 0, 1, 1);
+                  const pixel = ctx.getImageData(0, 0, 1, 1).data;
+                  if (pixel[3] > 100) {
+                    const brightness = (pixel[0] * 299 + pixel[1] * 587 + pixel[2] * 114) / 1000;
+                    if (brightness < 120) {
+                      isDarkBehind = true;
+                    }
+                  }
+                }
+              } catch (e) {
+                // CORS or other canvas error: fallback to URL keywords and route check
+                const src = img.getAttribute('src') || '';
+                if (
+                  src.toLowerCase().includes('dark') || 
+                  src.toLowerCase().includes('black') || 
+                  src.toLowerCase().includes('chyraq') ||
+                  location.pathname.startsWith('/projects/')
+                ) {
+                  isDarkBehind = true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      setIsDarkThemeBehind(isDarkBehind);
+    };
+
+    checkHeaderTheme();
+    const timer = setTimeout(checkHeaderTheme, 100);
+
+    window.addEventListener("scroll", checkHeaderTheme, { passive: true });
+    window.addEventListener("resize", checkHeaderTheme);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", checkHeaderTheme);
+      window.removeEventListener("resize", checkHeaderTheme);
+    };
+  }, [location.pathname]);
 
   const [isContactPopupOpen, setIsContactPopupOpen] = useState(false);
   const [clientName, setClientName] = useState("");
@@ -205,6 +319,11 @@ export function Root() {
       const currentScrollY = window.scrollY;
       const diff = currentScrollY - lastScrollY.current;
 
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight > 0) {
+        setIsPastMiddle(currentScrollY > scrollHeight / 2 && currentScrollY < scrollHeight * 0.8);
+      }
+
       if (isMenuOpen) {
         setIsHeaderVisible(true);
         lastScrollY.current = currentScrollY;
@@ -238,6 +357,7 @@ export function Root() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsHeaderVisible(true);
+    setIsPastMiddle(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -246,6 +366,38 @@ export function Root() {
       supabaseClient.logVisit(location.pathname, locale);
     }
   }, [location.pathname, locale]);
+
+  useEffect(() => {
+    // 1. Disable right-click globally on the entire site
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    // 2. Disable Ctrl+S and Cmd+S key combinations globally
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+      }
+    };
+
+    // 3. Disable dragging of images
+    const handleDragStart = (e: DragEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "IMG" || target.closest("img"))) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("dragstart", handleDragStart);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("dragstart", handleDragStart);
+    };
+  }, []);
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem("siteLanguage") as Language | null;
@@ -303,7 +455,7 @@ export function Root() {
             {/* Logo Container */}
             <div className="absolute left-0 flex items-center z-10">
               <NavLink to="/" className="flex min-w-[130px] shrink-0 items-center">
-                <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className="block h-[54px] w-auto object-contain" />
+                <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className={`block h-[54px] w-auto object-contain transition-all duration-300 ${isDarkThemeBehind ? "brightness-0 invert" : ""}`} />
               </NavLink>
             </div>
 
@@ -312,13 +464,15 @@ export function Root() {
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  backgroundColor: isDarkThemeBehind ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.15)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
                   boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                className="hidden md:flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
+                className={`hidden md:flex items-center rounded-full border backdrop-blur-2xl px-4 overflow-hidden transition-colors duration-500 ${
+                  isDarkThemeBehind ? "border-white/50" : "border-white/35"
+                }`}
               >
                 <nav className="flex items-center gap-1 rounded-full p-1">
                   {navLinks.map((link) => (
@@ -326,8 +480,10 @@ export function Root() {
                       key={link.path}
                       to={link.path}
                       className={({ isActive }) =>
-                        `relative rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-colors interactive-element ${
-                          isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        `relative rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-colors duration-300 interactive-element ${
+                          isDarkThemeBehind
+                            ? isActive ? "text-white" : "text-white/60 hover:text-white"
+                            : isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
                         }`
                       }
                     >
@@ -356,13 +512,15 @@ export function Root() {
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  backgroundColor: isDarkThemeBehind ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.15)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
                   boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                className="flex items-center rounded-full border border-white/35 backdrop-blur-2xl px-4 overflow-hidden"
+                className={`flex items-center rounded-full border backdrop-blur-2xl px-4 overflow-hidden transition-colors duration-500 ${
+                  isDarkThemeBehind ? "border-white/50" : "border-white/35"
+                }`}
               >
                 <div className="flex items-center gap-1 rounded-full p-1">
                   {languageOptions.map(({ code, label }) => {
@@ -372,8 +530,10 @@ export function Root() {
                         key={code}
                         type="button"
                         onClick={() => setLocale(code)}
-                        className={`relative rounded-full px-3 py-2 text-sm font-semibold transition-colors interactive-element ${
-                          isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        className={`relative rounded-full px-3 py-2 text-sm font-semibold transition-colors duration-300 interactive-element ${
+                          isDarkThemeBehind
+                            ? isActive ? "text-white" : "text-white/60 hover:text-white"
+                            : isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
                         }`}
                       >
                         {isActive && (
@@ -398,7 +558,11 @@ export function Root() {
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="rounded-full bg-white/70 border border-white/60 p-3 shadow-[0_16px_40px_rgba(0,0,0,0.12)] interactive-element"
+                className={`rounded-full border p-3 shadow-[0_16px_40px_rgba(0,0,0,0.12)] interactive-element transition-all duration-300 ${
+                  isDarkThemeBehind
+                    ? "bg-black/35 border-white/25 text-white hover:bg-black/50"
+                    : "bg-white/70 border-white/60 text-black hover:bg-white/95"
+                }`}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -473,7 +637,7 @@ export function Root() {
           </AnimatePresence>
         </main>
 
-        <footer ref={footerRef} className="w-full bg-gradient-to-b from-[#0000FF] to-[#000033] text-white pt-24 pb-12 mt-24">
+        <footer data-theme="dark" ref={footerRef} className="w-full bg-gradient-to-b from-[#0000FF] to-[#000033] text-white pt-24 pb-12 mt-24">
           <div className="mx-auto max-w-[1380px] w-full px-6">
             
             <div className="flex flex-col md:flex-row justify-between pb-16">
@@ -565,43 +729,75 @@ export function Root() {
         </footer>
 
         {/* Floating Contacts Pill */}
-        <AnimatePresence>
-          {!isFooterVisible && (
-            <motion.div
-              initial={{ y: 100, x: "-50%", opacity: 0 }}
-              animate={{ y: 0, x: "-50%", opacity: 1 }}
-              exit={{ y: 100, x: "-50%", opacity: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed bottom-8 left-1/2 z-40 flex items-center gap-3"
+        <div
+          className={`fixed bottom-8 left-0 right-0 mx-auto w-fit z-40 flex flex-col items-center transition-all duration-500 ease-out overflow-hidden border text-center rounded-[2.5rem] ${
+            isFooterVisible 
+              ? "opacity-0 translate-y-10 pointer-events-none" 
+              : "opacity-100 translate-y-0"
+          } ${
+            isProjectDetail && isPastMiddle
+              ? "bg-white/95 border-white/60 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur-2xl p-6 max-h-[300px] max-w-[400px]"
+              : "bg-transparent border-transparent p-0 max-h-[60px] max-w-[200px]"
+          }`}
+        >
+          <div 
+            className={`transition-all duration-500 ease-out w-full flex justify-center ${
+              isProjectDetail && isPastMiddle 
+                ? "opacity-100 mb-3 transform translate-y-0 max-h-[100px]" 
+                : "opacity-0 max-h-0 pointer-events-none transform -translate-y-2 overflow-hidden"
+            }`}
+          >
+            <p className="text-[17px] font-semibold text-black/90 leading-relaxed tracking-tight max-w-[320px]">
+              {locale === "ru" ? (
+                <>
+                  Понравился проект?
+                  <br />
+                  Свяжитесь с нами для обсуждения вашей идеи.
+                </>
+              ) : locale === "kg" ? (
+                <>
+                  Долбоор жактыбы?
+                  <br />
+                  Идеяңызды талкуулоо үчүн биз менен байланышыңыз.
+                </>
+              ) : (
+                <>
+                  Liked the project?
+                  <br />
+                  Contact us to discuss your idea.
+                </>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a 
+              href="mailto:contact@steeldrakestudio.com" 
+              className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
+              title="Mail"
             >
-              <a 
-                href="mailto:contact@steeldrakestudio.com" 
-                className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
-                title="Mail"
-              >
-                <CustomMailIcon />
-              </a>
-              <a 
-                href="https://wa.me/996702507888" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
-                title="WhatsApp"
-              >
-                <CustomWhatsAppIcon />
-              </a>
-              <a 
-                href="https://www.instagram.com/steeldrakestudioteam/#" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
-                title="Instagram"
-              >
-                <CustomInstagramIcon />
-              </a>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <CustomMailIcon />
+            </a>
+            <a 
+              href="https://wa.me/996702507888" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
+              title="WhatsApp"
+            >
+              <CustomWhatsAppIcon />
+            </a>
+            <a 
+              href="https://www.instagram.com/steeldrakestudioteam/#" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"
+              title="Instagram"
+            >
+              <CustomInstagramIcon />
+            </a>
+          </div>
+        </div>
 
         {/* Contact Popup Modal */}
         <AnimatePresence>

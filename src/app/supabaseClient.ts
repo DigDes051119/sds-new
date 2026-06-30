@@ -183,6 +183,54 @@ export const supabaseClient = {
   },
 
   async uploadFile(bucketName: string, path: string, file: File) {
+    // Convert to WebP in browser before uploading if it's an image (excluding already WebP images)
+    if (file.type.startsWith("image/") && file.type !== "image/webp") {
+      try {
+        file = await new Promise<File>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) {
+                reject(new Error("Failed to get canvas context"));
+                return;
+              }
+              ctx.drawImage(img, 0, 0);
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob) {
+                    reject(new Error("Failed to convert to WebP"));
+                    return;
+                  }
+                  const webpFile = new File(
+                    [blob],
+                    file.name.replace(/\.[^/.]+$/, "") + ".webp",
+                    { type: "image/webp" }
+                  );
+                  resolve(webpFile);
+                },
+                "image/webp",
+                0.85
+              );
+            };
+            img.onerror = () => reject(new Error("Failed to load image"));
+            img.src = event.target?.result as string;
+          };
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          reader.readAsDataURL(file);
+        });
+        
+        // Update path extension to .webp
+        path = path.replace(/\.[^/.]+$/, "") + ".webp";
+      } catch (webpError) {
+        console.warn("WebP client-side conversion failed, uploading original image:", webpError);
+      }
+    }
+
     const token = this.getToken() || SUPABASE_KEY;
     const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${path}`, {
       method: "POST",

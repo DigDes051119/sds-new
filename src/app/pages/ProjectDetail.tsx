@@ -62,7 +62,7 @@ export function ProjectDetail() {
   return (
     <div className="pb-32 bg-[#fafaf6] text-black">
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[800px] w-full bg-black flex flex-col justify-end p-6 md:p-12 pb-24">
+      <section data-theme="dark" className="relative h-screen min-h-[800px] w-full bg-black flex flex-col justify-end p-6 md:p-12 pb-24">
         {id === "sandyq" ? (
           <video
             src={videoSrc}
@@ -175,6 +175,7 @@ export function ProjectDetail() {
                     <motion.div
                       key={imgIdx}
                       {...scrollRevealConfig}
+                      data-theme={data.collageTheme || (id?.toLowerCase() === "ala-too" || id?.toLowerCase() === "chyraq" || id?.toLowerCase() === "auto-concept-x" ? "dark" : "light")}
                       className="relative overflow-hidden bg-[#eeeee9] border border-black/5 shadow-[0_30px_70px_rgba(0,0,0,0.04)] w-full"
                     >
                       <ImageWithFallback

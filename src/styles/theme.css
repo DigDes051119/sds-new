@@ -201,3 +201,11 @@
 .maplibregl-popup-tip {
   display: none !important;
 }
+
+/* Image Copy & Download Protection */
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}

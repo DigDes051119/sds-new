@@ -92,6 +92,7 @@ export function AdminProjectsEditor() {
   
   // Collage Blocks (array of arrays of image URLs)
   const [formCollageBlocks, setFormCollageBlocks] = useState<string[][]>([]);
+  const [formCollageTheme, setFormCollageTheme] = useState("light");
 
   // Results (list of stats)
   const [formResult1Ru, setFormResult1Ru] = useState("");
@@ -151,6 +152,7 @@ export function AdminProjectsEditor() {
     setFormResult2Ru("");
     setFormResult2En("");
     setFormResult2Kg("");
+    setFormCollageTheme("light");
   };
 
   const startAdding = () => {
@@ -208,6 +210,7 @@ export function AdminProjectsEditor() {
       ? JSON.parse(JSON.stringify(detailRu.collageBlocks))
       : (detailRu.processImages && detailRu.processImages.length > 0 ? [JSON.parse(JSON.stringify(detailRu.processImages))] : [[]]);
     setFormCollageBlocks(initialBlocks);
+    setFormCollageTheme(detailRu.collageTheme || (id === "ala-too" || id === "chyraq" || id === "auto-concept-x" ? "dark" : "light"));
 
     setFormResult1Ru(detailRu.results?.[0] || "");
     setFormResult1En(detailEn.results?.[0] || "");
@@ -326,6 +329,7 @@ export function AdminProjectsEditor() {
         challenge: formChallengeRu,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
+        collageTheme: formCollageTheme,
         results: [formResult1Ru, formResult2Ru].filter(Boolean)
       };
 
@@ -338,6 +342,7 @@ export function AdminProjectsEditor() {
         challenge: challengeEn,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
+        collageTheme: formCollageTheme,
         results: [result1En, result2En].filter(Boolean)
       };
 
@@ -350,6 +355,7 @@ export function AdminProjectsEditor() {
         challenge: challengeKg,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
+        collageTheme: formCollageTheme,
         results: [result1Kg, result2Kg].filter(Boolean)
       };
 
@@ -539,7 +545,7 @@ export function AdminProjectsEditor() {
               </button>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-white/50">ID Проекта (URL латиница)</label>
                 <input
@@ -577,6 +583,18 @@ export function AdminProjectsEditor() {
                   className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тема коллажей</label>
+                <select
+                  value={formCollageTheme}
+                  onChange={(e) => setFormCollageTheme(e.target.value)}
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                >
+                  <option value="light" className="bg-[#080810] text-white">Светлая</option>
+                  <option value="dark" className="bg-[#080810] text-white">Темная</option>
+                </select>
               </div>
             </div>
 

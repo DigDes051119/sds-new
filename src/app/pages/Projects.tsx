@@ -106,32 +106,34 @@ export function Projects() {
         })}
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
         {filteredProjects.map((project) => (
-          <motion.div 
+          <Link 
             key={project.id}
-            {...scrollRevealConfig}
-            whileHover={{ y: -6 }}
-            className="group flex flex-col rounded-[2rem] border border-black/10 bg-white p-7 shadow-[0_18px_60px_rgba(0,0,0,0.05)] transition interactive-element"
+            to={`/projects/${project.id}`}
+            className="group flex flex-col interactive-element"
           >
-            <div className="w-full aspect-[16/10] rounded-[1.5rem] overflow-hidden mb-6 bg-[#eeeee9]">
-              <ImageWithFallback src={project.img} alt={project.name} className="w-full h-full object-cover transition duration-500 group-hover:scale-102" />
-            </div>
-            <span className="text-sm text-black/45">
-              {project.category && !["projects", "проекты", "проекттер"].includes(project.category.toLowerCase())
-                ? project.category 
-                : (t.projectCategories[project.categoryKey] || project.category)}
-            </span>
-            <h3 className="mt-3 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl">{project.name}</h3>
-            <p className="mt-4 max-w-xl text-[15px] sm:text-base leading-relaxed tracking-[-0.02em] text-black/70 line-clamp-3">{project.desc}</p>
-            <div className="mt-auto pt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
-              <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
-              <span>{project.year}</span>
-            </div>
-            <Link to={`/projects/${project.id}`} className="mt-6 inline-flex w-fit items-center justify-center rounded-full bg-[#0000FF] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black">
-              {locale === "ru" ? "Посмотреть" : locale === "kg" ? "Караңыз" : "View"}
-            </Link>
-          </motion.div>
+            <motion.div 
+              {...scrollRevealConfig}
+              whileHover={{ y: -6 }}
+              className="flex flex-col h-full"
+            >
+              <div className="w-full aspect-[16/10] rounded-[1.5rem] overflow-hidden mb-5 bg-[#eeeee9]">
+                <ImageWithFallback src={project.img} alt={project.name} className="w-full h-full object-cover transition duration-500 group-hover:scale-102" />
+              </div>
+              <span className="text-sm text-black/45">
+                {project.category && !["projects", "проекты", "проекттер"].includes(project.category.toLowerCase())
+                  ? project.category 
+                  : (t.projectCategories[project.categoryKey] || project.category)}
+              </span>
+              <h3 className="mt-3 text-3xl font-semibold tracking-[-0.06em] sm:text-4xl transition-colors duration-300 group-hover:text-[#0000FF]">{project.name}</h3>
+              <p className="mt-4 max-w-xl text-[15px] sm:text-base leading-relaxed tracking-[-0.02em] text-black/70 line-clamp-3">{project.desc}</p>
+              <div className="mt-auto pt-6 flex flex-wrap items-center gap-4 text-sm text-black/60">
+                <span>{locale === "ru" ? "Опубликовано" : locale === "kg" ? "Жарыяланды" : "Published"}</span>
+                <span>{project.year}</span>
+              </div>
+            </motion.div>
+          </Link>
         ))}
       </div>
     </div>
