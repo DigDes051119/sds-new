@@ -163,7 +163,7 @@ export function Home() {
         >
           <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
             <div className="flex flex-col gap-5 max-w-[900px]">
-              <h1 className="text-[clamp(3.5rem,15vw,13rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-black">
+              <h1 className="text-[clamp(2.5rem,15vw,13rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-black">
                 AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
               </h1>
             </div>

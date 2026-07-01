@@ -137,7 +137,7 @@ export function Root() {
   const lastScrollY = useRef(0);
 
   const [isCollageActive, setIsCollageActive] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -477,7 +477,7 @@ export function Root() {
           style={{ top: "12px" }}
         >
           <motion.div
-            initial={{ maxWidth: "100%" }}
+            initial={{ maxWidth: isMobile ? "100%" : "1380px" }}
             animate={{ maxWidth: isCollageActive ? (isMobile ? "88%" : "1200px") : (isMobile ? "100%" : "1380px") }}
             transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
             className="mx-auto relative flex h-20 w-full items-center justify-center"
