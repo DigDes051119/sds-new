@@ -463,7 +463,7 @@ export function Root() {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>
-      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white pb-20 md:pb-0">
+      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white pb-20 md:pb-0 overflow-x-hidden">
         <InteractiveBackground />
         
         <motion.header
