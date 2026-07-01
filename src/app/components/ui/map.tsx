@@ -402,6 +402,7 @@ export function MapPopup({
   const popup = useMemo(() => {
     const popupInstance = new MapLibreGL.Popup({
       closeButton: false,
+      focusAfterOpen: false,
       ...popupOptions,
     });
     popupInstance.on("close", () => onCloseRef.current?.());

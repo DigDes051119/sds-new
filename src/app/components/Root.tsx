@@ -585,7 +585,10 @@ export function Root() {
         </motion.header>
 
         {/* Mobile Bottom Navigation Bar */}
-        <div className="md:hidden fixed bottom-5 left-4 right-4 z-50 max-w-[480px] mx-auto">
+        <div 
+          className="md:hidden fixed left-0 right-0 z-50 w-full max-w-[480px] px-4 mx-auto"
+          style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
+        >
           <div className="flex items-center justify-around rounded-full border border-black/5 bg-white/85 backdrop-blur-2xl py-2 px-3 shadow-[0_12px_45px_rgba(0,0,0,0.08)]">
             {navLinks.map((link) => {
               const isActive = link.path === "/" 
@@ -737,12 +740,15 @@ export function Root() {
         {/* Floating Contacts Pill */}
         <div
           className={`fixed left-0 right-0 mx-auto w-full max-w-[480px] px-4 md:px-0 md:w-fit z-40 flex flex-col items-center gap-4 transition-all duration-500 ease-out pointer-events-none ${
-            isMobile ? "bottom-24" : "bottom-8"
-          } ${
             isFooterVisible 
               ? "opacity-0 translate-y-10" 
               : "opacity-100 translate-y-0"
           }`}
+          style={{
+            bottom: isMobile 
+              ? "calc(6rem + env(safe-area-inset-bottom, 0px))" 
+              : "2rem"
+          }}
         >
           {/* Blue Pill CTA */}
           <AnimatePresence>
