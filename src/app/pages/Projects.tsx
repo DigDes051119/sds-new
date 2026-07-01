@@ -69,8 +69,17 @@ export function Projects() {
 
   return (
     <div
-      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-10 md:py-20"
+      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-10 md:py-20 overflow-x-hidden"
     >
+      <style dangerouslySetInnerHTML={{__html: `
+        .scrollbar-none::-webkit-scrollbar {
+          display: none !important;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}} />
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
