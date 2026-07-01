@@ -50,10 +50,10 @@ export const translations = {
         action: "View",
       },
       services: [
-        ["01", "Brand", "Identity, motion systems, visual language, and product launch.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
-        ["03", "Industrial Design", "Developing aesthetic, functional, and technological physical products for serial production.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
-        ["09", "Marketing", "Strategic product promotion and launch campaigns in digital environments.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
-        ["06", "Concept Design", "Creating bold concepts for film, games, presentations, and R&D research.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
+        ["01", "Brand", "Identity, motion systems, visual language, and product launch.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/brand.png"],
+        ["03", "Industrial Design", "Developing aesthetic, functional, and technological physical products for serial production.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/industrial.png"],
+        ["09", "Marketing", "Strategic product promotion and launch campaigns in digital environments.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/marketing.png"],
+        ["06", "Concept Design", "Creating bold concepts for film, games, presentations, and R&D research.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/concept.png"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },
@@ -292,9 +292,9 @@ export const translations = {
   kg: {
     nav: {
       home: "Башкы",
-      about: "Биз жөнүндө",
+      about: "Биз",
       services: "Кызматтар",
-      projects: "Проекттер",
+      projects: "Долбоор",
       contacts: "Байланыш",
     },
     home: {
@@ -329,10 +329,10 @@ export const translations = {
         action: "Караңыз",
       },
       services: [
-        ["01", "Brand", "Айдентика, motion системасы, визуалдык тил жана продуктту баштоо.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
-        ["03", "Industrial Design", "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык физикалык объекттерди иштеп чыгуу.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
-        ["09", "Marketing", "Продуктту жана брендди санариптик мейкиндикте стратегиялык илгерилетүү.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
-        ["06", "Concept Design", "Кино, оюн, презентация жана R&D үчүн келечектүү жана эрктүү концепттерди түзүү.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
+        ["01", "Brand", "Айдентика, motion системасы, визуалдык тил жана продуктту баштоо.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/brand.png"],
+        ["03", "Industrial Design", "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык физикалык объекттерди иштеп чыгуу.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/industrial.png"],
+        ["09", "Marketing", "Продуктту жана брендди санариптик мейкиндикте стратегиялык илгерилетүү.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/marketing.png"],
+        ["06", "Concept Design", "Кино, оюн, презентация жана R&D үчүн келечектүү жана эрктүү концепттерди түзүү.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/concept.png"],
       ],
       projects: [
         { title: "Sandyq", tag: "Гостиница / Айдентика" },
@@ -608,10 +608,10 @@ export const translations = {
         action: "Посмотреть",
       },
       services: [
-        ["01", "Brand", "Айдентика, motion-система, визуальный язык и запуск продукта.", "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"],
-        ["03", "Industrial Design", "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства.", "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
-        ["09", "Marketing", "Стратегическое продвижение продуктов и брендов в цифровой среде.", "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800"],
-        ["06", "Concept Design", "Создание футуристических и смелых концептов для кино, игр, презентаций и R&D-исследований.", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"],
+        ["01", "Brand", "Айдентика, motion-система, визуальный язык и запуск продукта.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/brand.png"],
+        ["03", "Industrial Design", "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/industrial.png"],
+        ["09", "Marketing", "Стратегическое продвижение продуктов и брендов в цифровой среде.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/marketing.png"],
+        ["06", "Concept Design", "Создание футуристических и смелых концептов для кино, игр, презентаций и R&D-исследований.", "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/concept.png"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },

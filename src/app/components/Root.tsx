@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation, useOutlet } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState, useRef, cloneElement } from "react";
-import { Menu, X, Mail, Instagram, ArrowUpRight, MapPin } from "lucide-react";
+import { Menu, X, Mail, Instagram, ArrowUpRight, MapPin, ThumbsUp, Home, Info, Briefcase, LayoutGrid, Phone } from "lucide-react";
 import logoPng from "../../imports/logo.png";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { LanguageContext, languageOptions, translations, type Language } from "../i18n";
@@ -135,6 +135,30 @@ export function Root() {
   const [isPastMiddle, setIsPastMiddle] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
+
+  const [isCollageActive, setIsCollageActive] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const handleCollageInView = (e: Event) => {
+      setIsCollageActive((e as CustomEvent).detail);
+    };
+    window.addEventListener("sds-collage-in-view", handleCollageInView);
+    return () => {
+      window.removeEventListener("sds-collage-in-view", handleCollageInView);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsCollageActive(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkHeaderTheme = () => {
@@ -439,23 +463,30 @@ export function Root() {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>
-      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white">
+      <div className="min-h-screen bg-[#f7f7f3] text-black font-['Inter',sans-serif] selection:bg-[#0000FF] selection:text-white pb-20 md:pb-0">
         <InteractiveBackground />
         
         <motion.header
           className={`fixed left-0 right-0 z-50 px-3 sm:px-6 ${isHeaderVisible ? "" : "pointer-events-none"}`}
-          initial={{ top: "12px" }}
+          initial={{ y: -100, opacity: 0 }}
           animate={{ 
-            top: isHeaderVisible ? "12px" : "-150px"
+            y: isHeaderVisible ? 0 : -150,
+            opacity: isHeaderVisible ? 1 : 0
           }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{ top: "12px" }}
         >
-          <div className="mx-auto relative flex h-20 max-w-[1380px] w-full items-center justify-center">
+          <motion.div
+            initial={{ maxWidth: "100%" }}
+            animate={{ maxWidth: isCollageActive ? (isMobile ? "88%" : "1200px") : (isMobile ? "100%" : "1380px") }}
+            transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+            className="mx-auto relative flex h-20 w-full items-center justify-center"
+          >
             
             {/* Logo Container */}
             <div className="absolute left-0 flex items-center z-10">
-              <NavLink to="/" className="flex min-w-[130px] shrink-0 items-center">
-                <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className={`block h-[54px] w-auto object-contain transition-all duration-300 ${isDarkThemeBehind ? "brightness-0 invert" : ""}`} />
+              <NavLink to="/" className="flex min-w-[90px] md:min-w-[130px] shrink-0 items-center">
+                <ImageWithFallback src={logoPng} alt="Steel Drake Studio" className={`block h-[34px] md:h-[54px] w-auto object-contain transition-all duration-300 ${isDarkThemeBehind ? "brightness-0 invert" : ""}`} />
               </NavLink>
             </div>
 
@@ -464,15 +495,15 @@ export function Root() {
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: isDarkThemeBehind ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.15)",
+                  backgroundColor: "rgba(255, 255, 255, 0.85)",
                   paddingTop: isScrolled ? "10px" : "12px",
                   paddingBottom: isScrolled ? "10px" : "12px",
+                  paddingLeft: "16px",
+                  paddingRight: "16px",
                   boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                className={`hidden md:flex items-center rounded-full border backdrop-blur-2xl px-4 overflow-hidden transition-colors duration-500 ${
-                  isDarkThemeBehind ? "border-white/50" : "border-white/35"
-                }`}
+                className="hidden md:flex items-center rounded-full border border-black/5 backdrop-blur-2xl overflow-hidden"
               >
                 <nav className="flex items-center gap-1 rounded-full p-1">
                   {navLinks.map((link) => (
@@ -480,10 +511,8 @@ export function Root() {
                       key={link.path}
                       to={link.path}
                       className={({ isActive }) =>
-                        `relative rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-colors duration-300 interactive-element ${
-                          isDarkThemeBehind
-                            ? isActive ? "text-white" : "text-white/60 hover:text-white"
-                            : isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        `relative rounded-full px-4 py-2 text-sm font-semibold tracking-[-0.01em] transition-all duration-500 interactive-element ${
+                          isActive ? "text-black/90" : "text-black/60 hover:text-black/90"
                         }`
                       }
                     >
@@ -508,21 +537,21 @@ export function Root() {
             </div>
 
             {/* Language Selector (Separate Plaque on the right) */}
-            <div className="absolute right-0 hidden md:flex items-center z-10">
+            <div className="absolute right-0 flex items-center z-10">
               <motion.div
                 layout
                 animate={{
-                  backgroundColor: isDarkThemeBehind ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.15)",
-                  paddingTop: isScrolled ? "10px" : "12px",
-                  paddingBottom: isScrolled ? "10px" : "12px",
+                  backgroundColor: "rgba(255, 255, 255, 0.85)",
+                  paddingTop: isMobile ? "6px" : (isScrolled ? "10px" : "12px"),
+                  paddingBottom: isMobile ? "6px" : (isScrolled ? "10px" : "12px"),
+                  paddingLeft: isMobile ? "8px" : "16px",
+                  paddingRight: isMobile ? "8px" : "16px",
                   boxShadow: "0 12px 45px rgba(0,0,0,0.04)",
                 }}
                 transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                className={`flex items-center rounded-full border backdrop-blur-2xl px-4 overflow-hidden transition-colors duration-500 ${
-                  isDarkThemeBehind ? "border-white/50" : "border-white/35"
-                }`}
+                className="flex items-center rounded-full border border-black/5 backdrop-blur-2xl overflow-hidden"
               >
-                <div className="flex items-center gap-1 rounded-full p-1">
+                <div className="flex items-center gap-1 rounded-full p-0.5">
                   {languageOptions.map(({ code, label }) => {
                     const isActive = locale === code;
                     return (
@@ -530,10 +559,10 @@ export function Root() {
                         key={code}
                         type="button"
                         onClick={() => setLocale(code)}
-                        className={`relative rounded-full px-3 py-2 text-sm font-semibold transition-colors duration-300 interactive-element ${
-                          isDarkThemeBehind
-                            ? isActive ? "text-white" : "text-white/60 hover:text-white"
-                            : isActive ? "text-black/80" : "text-black/55 hover:text-black/80"
+                        className={`relative rounded-full transition-all duration-500 interactive-element ${
+                          isMobile ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm"
+                        } font-semibold ${
+                          isActive ? "text-black/90" : "text-black/60 hover:text-black/90"
                         }`}
                       >
                         {isActive && (
@@ -552,70 +581,47 @@ export function Root() {
                 </div>
               </motion.div>
             </div>
-
-            {/* Mobile Menu Toggle (stays on right) */}
-            <div className="flex items-center gap-2 md:hidden absolute right-0">
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`rounded-full border p-3 shadow-[0_16px_40px_rgba(0,0,0,0.12)] interactive-element transition-all duration-300 ${
-                  isDarkThemeBehind
-                    ? "bg-black/35 border-white/25 text-white hover:bg-black/50"
-                    : "bg-white/70 border-white/60 text-black hover:bg-white/95"
-                }`}
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
+          </motion.div>
         </motion.header>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="fixed inset-0 z-40 bg-white pt-24 px-6"
-            >
-              <nav className="flex flex-col gap-6 mt-8">
-                {navLinks.map((link) => (
-                  <NavLink
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `text-3xl font-semibold tracking-tight ${
-                        isActive ? "text-[#0000FF]" : "text-black"
-                      }`
-                    }
-                  >
-                    {link.name}
-                  </NavLink>
-                ))}
-              </nav>
+        {/* Mobile Bottom Navigation Bar */}
+        <div className="md:hidden fixed bottom-5 left-4 right-4 z-50 max-w-[480px] mx-auto">
+          <div className="flex items-center justify-around rounded-full border border-black/5 bg-white/85 backdrop-blur-2xl py-2 px-3 shadow-[0_12px_45px_rgba(0,0,0,0.08)]">
+            {navLinks.map((link) => {
+              const isActive = link.path === "/" 
+                ? location.pathname === "/" 
+                : location.pathname.startsWith(link.path);
+              let Icon = Home;
+              if (link.path === "/about") Icon = Info;
+              if (link.path === "/services") Icon = Briefcase;
+              if (link.path === "/projects") Icon = LayoutGrid;
+              if (link.path === "/contacts") Icon = Phone;
 
-              <div className="mt-10 flex flex-wrap gap-3">
-                {languageOptions.map(({ code, label }) => (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => {
-                      setLocale(code);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      locale === code ? "border-[#0000FF] bg-[#0000FF] text-white" : "border-black/10 bg-white text-black/80 hover:border-[#0000FF]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-full transition-all duration-300 ${
+                    isActive ? "text-[#0000FF] scale-105" : "text-black/45 hover:text-black/75"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeMobileMenuPill"
+                      className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none"
+                      transition={{ type: "spring", stiffness: 140, damping: 22, mass: 0.8 }}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#0066FF]/15 blur-lg" />
+                    </motion.div>
+                  )}
+                  <Icon size={22} className="stroke-[2px]" />
+                  <span className="text-[11px] font-bold tracking-tight">{link.name}</span>
+                </NavLink>
+              );
+            })}
+          </div>
+        </div>
+
 
          <main className="pt-24">
           <AnimatePresence mode="wait" initial={false}>
@@ -730,47 +736,67 @@ export function Root() {
 
         {/* Floating Contacts Pill */}
         <div
-          className={`fixed bottom-8 left-0 right-0 mx-auto w-fit z-40 flex flex-col items-center transition-all duration-500 ease-out overflow-hidden border text-center rounded-[2.5rem] ${
-            isFooterVisible 
-              ? "opacity-0 translate-y-10 pointer-events-none" 
-              : "opacity-100 translate-y-0"
+          className={`fixed left-0 right-0 mx-auto w-full max-w-[480px] px-4 md:px-0 md:w-fit z-40 flex flex-col items-center gap-4 transition-all duration-500 ease-out pointer-events-none ${
+            isMobile ? "bottom-24" : "bottom-8"
           } ${
-            isProjectDetail && isPastMiddle
-              ? "bg-white/95 border-white/60 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur-2xl p-6 max-h-[300px] max-w-[400px]"
-              : "bg-transparent border-transparent p-0 max-h-[60px] max-w-[200px]"
+            isFooterVisible 
+              ? "opacity-0 translate-y-10" 
+              : "opacity-100 translate-y-0"
           }`}
         >
-          <div 
-            className={`transition-all duration-500 ease-out w-full flex justify-center ${
-              isProjectDetail && isPastMiddle 
-                ? "opacity-100 mb-3 transform translate-y-0 max-h-[100px]" 
-                : "opacity-0 max-h-0 pointer-events-none transform -translate-y-2 overflow-hidden"
-            }`}
-          >
-            <p className="text-[17px] font-semibold text-black/90 leading-relaxed tracking-tight max-w-[320px]">
-              {locale === "ru" ? (
-                <>
-                  Понравился проект?
-                  <br />
-                  Свяжитесь с нами для обсуждения вашей идеи.
-                </>
-              ) : locale === "kg" ? (
-                <>
-                  Долбоор жактыбы?
-                  <br />
-                  Идеяңызды талкуулоо үчүн биз менен байланышыңыз.
-                </>
-              ) : (
-                <>
-                  Liked the project?
-                  <br />
-                  Contact us to discuss your idea.
-                </>
-              )}
-            </p>
-          </div>
+          {/* Blue Pill CTA */}
+          <AnimatePresence>
+            {isProjectDetail && isPastMiddle && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                onClick={() => setIsContactPopupOpen(true)}
+                className="bg-[#0000FF] text-white p-5 pl-7 pr-5 rounded-[2.5rem] shadow-[0_24px_80px_rgba(0,0,0,0.18)] max-w-[480px] md:max-w-[340px] w-full flex items-center justify-between gap-4 pointer-events-auto cursor-pointer hover:bg-[#0000DD] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+              >
+                <div className="flex flex-col text-left gap-0.5">
+                  <h4 className="text-[17px] font-bold tracking-tight leading-tight text-white">
+                    {locale === "ru" ? "Понравился проект?" : locale === "kg" ? "Долбоор жактыбы?" : "Liked the project?"}
+                  </h4>
+                  <p className="text-[13px] text-white/85 leading-snug">
+                    {locale === "ru" ? (
+                      <>
+                        Свяжитесь с нами
+                        <br />
+                        для обсуждения вашей идеи.
+                      </>
+                    ) : locale === "kg" ? (
+                      <>
+                        Идеяңызды талкуулоо үчүн
+                        <br />
+                        биз менен байланышыңыз.
+                      </>
+                    ) : (
+                      <>
+                        Contact us to
+                        <br />
+                        discuss your idea.
+                      </>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="w-12 h-12 rounded-full bg-white text-[#0000FF] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 shadow-md shrink-0 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsContactPopupOpen(true);
+                  }}
+                >
+                  <ThumbsUp className="w-5 h-5 text-[#0000FF]" strokeWidth={2} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="flex items-center gap-3">
+          {/* Three Contact Buttons */}
+          <div className="flex items-center gap-3 pointer-events-auto">
             <a 
               href="mailto:contact@steeldrakestudio.com" 
               className="w-12 h-12 rounded-full bg-white/90 border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-md text-black/70 hover:bg-white hover:text-[#0000FF] hover:scale-110 active:scale-95 transition-all duration-300 interactive-element flex items-center justify-center"

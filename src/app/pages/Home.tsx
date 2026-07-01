@@ -64,10 +64,10 @@ export function Home() {
       ];
 
   const serviceImages = [
-    "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800", // Brand
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800", // Industrial Design
-    "https://images.unsplash.com/photo-1542744094-3a31f103e35f?auto=format&fit=crop&q=80&w=800", // Marketing
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"  // Concept Design
+    "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/brand.png", // Brand
+    "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/industrial.png", // Industrial Design
+    "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/marketing.png", // Marketing
+    "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/services/concept.png"  // Concept Design
   ];
 
   const categoryMap: Record<string, string> = {
@@ -163,7 +163,7 @@ export function Home() {
         >
           <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
             <div className="flex flex-col gap-5 max-w-[900px]">
-              <h1 className="text-[clamp(7.6rem,18vw,13rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-black">
+              <h1 className="text-[clamp(3.5rem,15vw,13rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-black">
                 AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
               </h1>
             </div>

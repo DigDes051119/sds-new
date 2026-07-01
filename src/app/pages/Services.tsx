@@ -17,13 +17,13 @@ export function Services() {
 
   return (
     <div
-      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-20"
+      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-10 md:py-20"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-20"
+        className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-10 md:mb-20"
       >
         {t.services.title}
       </motion.h1>
@@ -42,14 +42,14 @@ export function Services() {
                 onClick={() => setExpandedId(isExpanded ? null : service.id)}
                 className="w-full py-8 flex items-center justify-between group text-left"
               >
-                <div className="flex items-baseline gap-8">
-                  <span className="text-2xl font-light text-[#0000FF] w-12">{service.id}</span>
-                  <span className="text-3xl md:text-5xl font-semibold group-hover:text-[#0000FF] transition-colors">
+                <div className="flex items-baseline gap-4 md:gap-8">
+                  <span className="text-xl md:text-2xl font-light text-[#0000FF] w-8 md:w-12">{service.id}</span>
+                  <span className="text-2xl md:text-5xl font-semibold group-hover:text-[#0000FF] transition-colors">
                     {service.title}
                   </span>
                 </div>
                 <div className={`p-2 rounded-full border ${isExpanded ? 'border-[#0000FF] text-[#0000FF]' : 'border-[#E5E5E7] text-black group-hover:border-[#0000FF] group-hover:text-[#0000FF]'} transition-colors`}>
-                  {isExpanded ? <Minus size={24} /> : <Plus size={24} />}
+                  {isExpanded ? <Minus size={20} /> : <Plus size={20} />}
                 </div>
               </button>
 
@@ -61,7 +61,7 @@ export function Services() {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="pb-12 pl-20 grid md:grid-cols-2 gap-12">
+                    <div className="pb-12 pl-0 md:pl-20 grid md:grid-cols-2 gap-8 md:gap-12">
                       <div>
                         <p className="text-xl md:text-2xl font-light leading-relaxed text-black/80">
                           {service.desc}

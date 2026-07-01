@@ -81,9 +81,9 @@ export function About() {
       ═══════════════════════════════════════════════════════════════ */}
       <motion.section
         {...scrollReveal}
-        className="mx-auto mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
+        className="mx-auto mt-16 md:mt-32 max-w-[1380px] px-3 sm:px-6 min-[1380px]:px-0"
       >
-        <div className="h-px bg-black/10 w-full mb-16" />
+        <div className="h-px bg-black/10 w-full mb-12 md:mb-16" />
         <div className="grid lg:grid-cols-[1fr_2.5fr] gap-12 lg:gap-16">
           <div>
             <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.06em] leading-[1.02] text-black whitespace-pre-line">
@@ -116,7 +116,7 @@ export function About() {
                   key={idx}
                   whileHover={{ y: -8, scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="relative bg-white border border-black/[0.06] rounded-[2rem] p-7 flex flex-col justify-start shadow-[0_20px_50px_rgba(0,0,0,0.03)] overflow-hidden group min-h-[300px] z-10"
+                  className="relative bg-white border border-black/[0.06] rounded-[2rem] p-7 flex flex-col justify-start shadow-[0_20px_50px_rgba(0,0,0,0.03)] overflow-hidden group min-h-[260px] sm:min-h-[300px] z-10"
                 >
                   {/* Infographic Technical Grid Overlay */}
                   <div 
@@ -144,7 +144,7 @@ export function About() {
                     <h3 className="text-2xl font-bold tracking-tight mb-3 text-black whitespace-pre-line">
                       {val.title}
                     </h3>
-                    <p className="text-[15px] leading-relaxed text-black/60 font-light whitespace-pre-line">
+                    <p className="text-[15px] leading-relaxed text-black/65 font-light whitespace-pre-line">
                       {val.desc}
                     </p>
                   </div>

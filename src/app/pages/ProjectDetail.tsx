@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router";
 import videoSrc from "../../imports/__Copy_this_cozy_soft_life_quote_roundup_that_feel_luxe_without_spending_a_fortune_that_balance_trend_comfort_and_everyday_function_and_make_your_-_Pin-1090082284813034216.mp4";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -13,6 +13,7 @@ import { ArrowLeft, CheckCircle, ArrowRight } from "lucide-react";
 export function ProjectDetail() {
   const { t, locale } = useContext(LanguageContext);
   const { id } = useParams();
+  const collageRef = useRef<HTMLElement>(null);
 
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
 
@@ -21,6 +22,37 @@ export function ProjectDetail() {
       setProjectDetails(cmsService.getProjectDetails());
     });
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!collageRef.current) return;
+      const rect = collageRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Narrow the header only when the collage block covers the center line of the screen (50vh)
+      const centerLine = viewportHeight * 0.5;
+      const isIntersecting = rect.top < centerLine && rect.bottom > centerLine;
+      
+      window.dispatchEvent(new CustomEvent('sds-collage-in-view', { detail: isIntersecting }));
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    
+    handleScroll();
+    const t1 = setTimeout(handleScroll, 100);
+    const t2 = setTimeout(handleScroll, 500);
+    const t3 = setTimeout(handleScroll, 1200);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      window.dispatchEvent(new CustomEvent('sds-collage-in-view', { detail: false }));
+    };
+  }, [id]);
 
   const localeData = projectDetails[locale] || projectDetails.ru || projectDetailsTranslations.ru;
   const data = id && localeData[id]
@@ -81,15 +113,15 @@ export function ProjectDetail() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-        <div className="relative z-10 w-full max-w-[1380px] mx-auto flex flex-col md:flex-row justify-between items-end gap-8 text-white">
+        <div className="relative z-10 w-full max-w-[1380px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-8 text-white">
           <div className="max-w-2xl">
             <Link to="/projects" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-6 group text-sm uppercase tracking-wider font-semibold">
               <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> {locale === "ru" ? "Все проекты" : locale === "kg" ? "Баардык долбоорлор" : "All projects"}
             </Link>
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[1.08] mb-4">{data.name}</h1>
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tighter leading-[1.08] mb-4">{data.name}</h1>
           </div>
 
-          <div className="flex gap-8 md:gap-16 text-sm uppercase tracking-widest font-medium opacity-80 shrink-0 border-l border-white/20 pl-8">
+          <div className="flex flex-wrap md:flex-nowrap gap-6 md:gap-16 text-sm uppercase tracking-widest font-medium opacity-80 shrink-0 border-l border-white/20 pl-6 md:pl-8">
             <div>
               <p className="opacity-50 mb-1.5">{t.projectDetail.labels.client}</p>
               <p className="font-semibold">{data.client}</p>
@@ -147,7 +179,7 @@ export function ProjectDetail() {
       </motion.section>
 
       {/* Block 3: Redesigned Process Gallery (Vertically Stacked Editorial Collage) */}
-      <section className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-8 pb-20 space-y-2 border-b border-black/[0.06]">
+      <section ref={collageRef} className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 pt-8 pb-20 space-y-2 border-b border-black/[0.06]">
         {(() => {
           const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
             ? data.collageBlocks

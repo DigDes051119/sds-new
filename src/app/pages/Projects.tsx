@@ -69,19 +69,19 @@ export function Projects() {
 
   return (
     <div
-      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-20"
+      className="max-w-[1380px] mx-auto px-6 min-[1380px]:px-0 py-10 md:py-20"
     >
       <motion.h1 
         initial={{ y: 25, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-12"
+        className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[1.08] text-[#0000FF] mb-10 md:mb-12"
       >
         {t.projects.title}
       </motion.h1>
 
       {/* Category Changer */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
+      <div className="flex overflow-x-auto scrollbar-none snap-x flex-nowrap justify-start md:justify-center md:flex-wrap gap-2 md:gap-3 mb-10 md:mb-16 -mx-6 px-6 md:mx-0 md:px-0">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.key;
           return (
@@ -106,7 +106,7 @@ export function Projects() {
         })}
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+      <div className="grid md:grid-cols-2 gap-x-8 gap-y-12">
         {filteredProjects.map((project) => (
           <Link 
             key={project.id}
