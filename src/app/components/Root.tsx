@@ -5,7 +5,6 @@ import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
-import { BottomMenuWithDuck } from "./BottomMenuWithDuck";
 
 export function Root() {
   const location = useLocation();
@@ -190,7 +189,6 @@ export function Root() {
   const t = siteTranslations[locale] || translations[locale];
 
   const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
-  const showSidebar = isScrolled && !isProjectDetailPage;
 
   const navLinks = [
     { name: t.nav.home, path: "/" },
@@ -309,15 +307,8 @@ export function Root() {
         </div>
       </header>
 
-        {/* Main Content + Footer shift container (slides right when sidebar opens) */}
-        <div
-          className="flex flex-col flex-grow"
-          style={{
-            paddingLeft: showSidebar ? 200 : 0,
-            transition: "padding-left 600ms cubic-bezier(0.16, 1, 0.3, 1)",
-            willChange: "padding-left"
-          }}
-        >
+        {/* Main Content + Footer container */}
+        <div className="flex flex-col flex-grow">
           {/* Main Content Area */}
           <main key={location.pathname} className="w-full flex-grow px-[28px] md:px-[59px] page-transition">
             {outlet}
@@ -413,15 +404,7 @@ export function Root() {
           </footer>
         </div>
 
-        {/* Sidebar Navigation with Duck (replaces floating bottom bar on scroll) */}
-        <BottomMenuWithDuck
-          locale={locale}
-          setLocale={setLocale}
-          navLinks={navLinks}
-          isScrolled={showSidebar}
-          locationPathname={location.pathname}
-          onContactClick={() => setIsContactFormOpen(true)}
-        />
+{/* Sidebar Navigation disabled */}
 
         {/* Contact Form Overlay and Panel */}
         <AnimatePresence>

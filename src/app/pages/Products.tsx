@@ -22,7 +22,14 @@ export function Products() {
     return {
       ...product,
       tags: detail.service || "Product",
-      year: detail.year || "2026"
+      year: detail.year || "2026",
+      desc: detail.desc || "",
+      client: detail.client || "",
+      studio: detail.studio || "-",
+      designer: detail.designer || "-",
+      location: detail.location || "-",
+      projectType: detail.projectType || "-",
+      class: detail.class || "-"
     };
   });
 
@@ -46,7 +53,7 @@ export function Products() {
             <Link to={`/products/${product.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}
-              <div className="w-full bg-[#191919] aspect-[4/3] overflow-hidden relative">
+              <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                 <ImageWithFallback 
                   src={product.img} 
                   alt={product.name} 
@@ -55,23 +62,77 @@ export function Products() {
                 />
               </div>
 
-              {/* Meta details */}
-              <div className="mt-[15px] flex justify-between items-start border-b border-[#808080] pb-[12px] group-hover:border-black transition-colors">
-                <div className="flex flex-col gap-1">
-                  <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080]">
-                    [{String(index + 1).padStart(2, '0')}/PRODUCT]
-                  </span>
-                  <h2 className="text-[21px] font-normal leading-[1.40] tracking-[-0.21px] text-black m-0">
+              {/* Meta details — two columns with vertical divider */}
+              <div className="mt-[20px] flex justify-between items-stretch gap-0">
+                {/* Left column: title + tags + desc */}
+                <div className="flex-[3] min-w-0 flex flex-col pr-5">
+                  <h2 className="text-[28px] md:text-[34px] font-medium leading-[1.2] tracking-[-0.03em] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                     {product.name}
                   </h2>
+                  {product.category && (
+                    <span className="text-[12px] md:text-[13px] font-mono tracking-[0.1em] text-[#808080] uppercase mt-1 block">
+                      {product.category}
+                    </span>
+                  )}
+
+                  {/* Horizontal row of metadata (Category, Class, Year) without icons */}
+                  <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 mb-6">
+                    <div className="flex flex-col">
+                      <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
+                        {locale === "ru" ? "КАТЕГОРИЯ" : locale === "kg" ? "КАТЕГОРИЯ" : "CATEGORY"}
+                      </span>
+                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
+                        {product.tags}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
+                        {locale === "ru" ? "КЛАСС" : locale === "kg" ? "КЛАСС" : "CLASS"}
+                      </span>
+                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
+                        {product.class}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
+                        {locale === "ru" ? "ГОД" : locale === "kg" ? "ЖЫЛ" : "YEAR"}
+                      </span>
+                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
+                        {product.year}
+                      </span>
+                    </div>
+                  </div>
+
+                  {product.desc && (
+                    <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-3">
+                      {product.desc}
+                    </p>
+                  )}
                 </div>
-                <div className="text-right flex flex-col gap-1">
-                  <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                    {product.tags}
-                  </span>
-                  <span className="font-mono text-[16px] tracking-[0.04em] text-black">
-                    {product.year}
-                  </span>
+                {/* Vertical divider */}
+                <div className="w-[1px] bg-[#D0D0D0] shrink-0"></div>
+                {/* Right column: index + metadata */}
+                <div className="flex-[2] min-w-0 flex flex-col pl-5">
+
+                  {/* Metadata rows with full-width borders */}
+                  <div className="w-full flex flex-col">
+                    {[
+                      { label: t.productDetail?.labels?.project || "Project", value: String(index + 1).padStart(2, '0') },
+                      { label: t.productDetail?.labels?.studio || "Studio", value: product.studio },
+                      { label: t.productDetail?.labels?.designer || "Designer", value: product.designer },
+                      { label: t.productDetail?.labels?.location || "Location", value: product.location },
+                      { label: t.productDetail?.labels?.projectType || "Project Type", value: product.projectType },
+                    ].map((item, rowIdx) => (
+                      <div key={rowIdx} className="flex justify-between items-center py-2.5 border-b border-[#E5E5E5] gap-4">
+                        <span className="font-mono text-[11px] md:text-[12px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
+                          {item.label}
+                        </span>
+                        <span className="text-[14px] md:text-[15px] text-black font-normal text-right">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 

@@ -170,7 +170,7 @@ export function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
           {recentProjects.map((project, index) => (
-            <div key={`recent-${project.id}`} className="w-full flex flex-col">
+            <div key={`recent-${project.id}`} className="w-full flex flex-col group">
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
                 <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
@@ -179,25 +179,30 @@ export function Home() {
                     className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
                   />
                 </div>
-                <div className="mt-[15px] flex flex-col border-b border-[#808080] pb-[12px] group-hover:border-black transition-colors">
+                <div className="mt-[25px] flex flex-col">
                   <div className="flex justify-between items-start w-full">
-                    <div className="flex flex-col gap-1">
+                    {/* Left block: label + title */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
-                        [0{index + 1}/NEW]
+                        0{index + 1} / NEW
                       </span>
-                      <h3 className="text-[21px] font-normal leading-[1.40] tracking-[-0.21px] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[21px] font-bold leading-[1.40] tracking-[-0.21px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
+                      {project.desc && (
+                        <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                          {project.desc}
+                        </p>
+                      )}
                     </div>
-                    <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                      {project.tags}
-                    </span>
+                    {/* Vertical divider */}
+                    <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                    {/* Right block: category + year */}
+                    <div className="text-left flex flex-col gap-1 shrink-0">
+                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">{project.tags}</span>
+                      <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">{project.year}</span>
+                    </div>
                   </div>
-                  {project.desc && (
-                    <p className="text-[16px] leading-[1.44] text-[#808080] m-0 mt-3 font-normal w-full group-hover:text-black transition-colors duration-300 line-clamp-2">
-                      {project.desc}
-                    </p>
-                  )}
                 </div>
               </Link>
             </div>
@@ -330,9 +335,9 @@ export function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
           {featuredProjects.map((project, index) => (
-            <div key={`featured-${project.id}`} className="w-full flex flex-col">
+            <div key={`featured-${project.id}`} className="w-full flex flex-col group">
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
-                <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition-all duration-500 ${
+                <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition-all duration-500 rounded-[8px] ${
                   index % 2 === 1 
                     ? 'bg-[#0000FF]/5' 
                     : 'bg-[#191919]'
@@ -343,25 +348,25 @@ export function Home() {
                     className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
                   />
                 </div>
-                <div className="mt-[15px] flex flex-col border-b border-[#808080] pb-[12px] group-hover:border-black transition-colors">
+                <div className="mt-[25px] flex flex-col">
                   <div className="flex justify-between items-start w-full">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
-                        [{String(index + 1).padStart(2, '0')}/WORK]
+                        {String(index + 1).padStart(2, '0')} / WORK
                       </span>
-                      <h3 className="text-[21px] font-normal leading-[1.40] tracking-[-0.21px] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[21px] font-bold leading-[1.40] tracking-[-0.21px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
+                      {project.desc && (
+                        <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">{project.desc}</p>
+                      )}
                     </div>
-                    <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                      {project.tags}
-                    </span>
+                    <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                    <div className="text-left flex flex-col gap-1 shrink-0">
+                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">{project.tags}</span>
+                      <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">{project.year}</span>
+                    </div>
                   </div>
-                  {project.desc && (
-                    <p className="text-[16px] leading-[1.44] text-[#808080] m-0 mt-3 font-normal w-full line-clamp-2">
-                      {project.desc}
-                    </p>
-                  )}
                 </div>
               </Link>
             </div>

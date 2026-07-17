@@ -154,6 +154,11 @@ export function AdminProductsEditor() {
   const [formServiceRu, setFormServiceRu] = useState("");
   const [formServiceEn, setFormServiceEn] = useState("");
   const [formServiceKg, setFormServiceKg] = useState("");
+  const [formStudioRu, setFormStudioRu] = useState("");
+  const [formDesignerRu, setFormDesignerRu] = useState("");
+  const [formLocationRu, setFormLocationRu] = useState("");
+  const [formProjectTypeRu, setFormProjectTypeRu] = useState("");
+  const [formProductClass, setFormProductClass] = useState("-");
   const [formChallengeRu, setFormChallengeRu] = useState("");
   const [formChallengeEn, setFormChallengeEn] = useState("");
   const [formChallengeKg, setFormChallengeKg] = useState("");
@@ -203,6 +208,11 @@ export function AdminProductsEditor() {
     setFormServiceRu("");
     setFormServiceEn("");
     setFormServiceKg("");
+    setFormStudioRu("");
+    setFormDesignerRu("");
+    setFormLocationRu("");
+    setFormProjectTypeRu("");
+    setFormProductClass("-");
     setFormChallengeRu("");
     setFormChallengeEn("");
     setFormChallengeKg("");
@@ -264,6 +274,12 @@ export function AdminProductsEditor() {
     setFormServiceRu(detailRu.service || "");
     setFormServiceEn(detailEn.service || "");
     setFormServiceKg(detailKg.service || "");
+
+    setFormStudioRu(detailRu.studio || "");
+    setFormDesignerRu(detailRu.designer || "");
+    setFormLocationRu(detailRu.location || "");
+    setFormProjectTypeRu(detailRu.projectType || "");
+    setFormProductClass(detailRu.class || "-");
 
     setFormChallengeRu(detailRu.challenge || "");
     setFormChallengeEn(detailEn.challenge || "");
@@ -443,6 +459,15 @@ export function AdminProductsEditor() {
       const challengeEn = await translateText(formChallengeRu, "en");
       const challengeKg = await translateText(formChallengeRu, "kg");
 
+      const studioEn = await translateText(formStudioRu, "en");
+      const studioKg = await translateText(formStudioRu, "kg");
+      const designerEn = await translateText(formDesignerRu, "en");
+      const designerKg = await translateText(formDesignerRu, "kg");
+      const locationEn = await translateText(formLocationRu, "en");
+      const locationKg = await translateText(formLocationRu, "kg");
+      const projectTypeEn = await translateText(formProjectTypeRu, "en");
+      const projectTypeKg = await translateText(formProjectTypeRu, "kg");
+
       const result1En = await translateText(formResult1Ru, "en");
       const result1Kg = await translateText(formResult1Ru, "kg");
 
@@ -472,6 +497,11 @@ export function AdminProductsEditor() {
         client: formClientRu,
         year: formYear,
         service: formServiceRu,
+        studio: formStudioRu,
+        designer: formDesignerRu,
+        location: formLocationRu,
+        projectType: formProjectTypeRu,
+        class: formProductClass,
         challenge: formChallengeRu,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
@@ -485,6 +515,11 @@ export function AdminProductsEditor() {
         client: clientEn,
         year: formYear,
         service: serviceEn,
+        studio: studioEn,
+        designer: designerEn,
+        location: locationEn,
+        projectType: projectTypeEn,
+        class: formProductClass,
         challenge: challengeEn,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
@@ -498,6 +533,11 @@ export function AdminProductsEditor() {
         client: clientKg,
         year: formYear,
         service: serviceKg,
+        studio: studioKg,
+        designer: designerKg,
+        location: locationKg,
+        projectType: projectTypeKg,
+        class: formProductClass,
         challenge: challengeKg,
         processImages: flattenedImages,
         collageBlocks: cleanBlocks,
@@ -898,6 +938,59 @@ export function AdminProductsEditor() {
                       value={formServiceRu}
                       onChange={(e) => setFormServiceRu(e.target.value)}
                       placeholder="Industrial Design"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6 mt-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Студия</label>
+                    <input
+                      type="text"
+                      value={formStudioRu}
+                      onChange={(e) => setFormStudioRu(e.target.value)}
+                      placeholder="Steel Drake Studio"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Дизайнер</label>
+                    <input
+                      type="text"
+                      value={formDesignerRu}
+                      onChange={(e) => setFormDesignerRu(e.target.value)}
+                      placeholder="Иван Иванов"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Локация</label>
+                    <input
+                      type="text"
+                      value={formLocationRu}
+                      onChange={(e) => setFormLocationRu(e.target.value)}
+                      placeholder="Бишкек, Кыргызстан"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тип проекта</label>
+                    <input
+                      type="text"
+                      value={formProjectTypeRu}
+                      onChange={(e) => setFormProjectTypeRu(e.target.value)}
+                      placeholder="Коммерческий"
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Класс</label>
+                    <input
+                      type="text"
+                      value={formProductClass}
+                      onChange={(e) => setFormProductClass(e.target.value)}
+                      placeholder="-"
                       className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
                     />
                   </div>
