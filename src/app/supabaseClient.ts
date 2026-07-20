@@ -184,40 +184,55 @@ export const supabaseClient = {
   },
 
   async uploadFile(bucketName: string, path: string, file: File) {
-    // Convert to WebP in browser before uploading if it's an image (excluding already WebP images, converting PNG/JPEG to WebP for optimal page performance)
-    if (file.type.startsWith("image/") && file.type !== "image/webp") {
+    // Resize and convert to WebP in browser before uploading for optimal page performance
+    if (file.type.startsWith("image/")) {
       try {
+        const MAX_WIDTH = 1600; // max width for covers and gallery images
+        const needsConversion = file.type !== "image/webp";
+
         file = await new Promise<File>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
               const canvas = document.createElement("canvas");
-              canvas.width = img.naturalWidth;
-              canvas.height = img.naturalHeight;
+              let w = img.naturalWidth;
+              let h = img.naturalHeight;
+
+              // Resize if exceeds max width
+              if (w > MAX_WIDTH) {
+                h = Math.round(h * (MAX_WIDTH / w));
+                w = MAX_WIDTH;
+              }
+
+              canvas.width = w;
+              canvas.height = h;
               const ctx = canvas.getContext("2d");
               if (!ctx) {
                 reject(new Error("Failed to get canvas context"));
                 return;
               }
-              // Clear canvas to ensure alpha transparency of PNGs is preserved perfectly in WebP
+              // Clear canvas for transparency
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-              ctx.drawImage(img, 0, 0);
+              ctx.drawImage(img, 0, 0, w, h);
+
+              const outType = needsConversion ? "image/webp" : file.type;
+              const outQuality = 0.82;
+
               canvas.toBlob(
                 (blob) => {
                   if (!blob) {
-                    reject(new Error("Failed to convert to WebP"));
+                    reject(new Error("Failed to process image"));
                     return;
                   }
-                  const webpFile = new File(
-                    [blob],
-                    file.name.replace(/\.[^/.]+$/, "") + ".webp",
-                    { type: "image/webp" }
-                  );
-                  resolve(webpFile);
+                  const outName = needsConversion
+                    ? file.name.replace(/\.[^/.]+$/, "") + ".webp"
+                    : file.name;
+                  const outFile = new File([blob], outName, { type: outType });
+                  resolve(outFile);
                 },
-                "image/webp",
-                0.90 // 0.90 quality ensures logo details and vector contours remain crisp
+                outType,
+                outQuality
               );
             };
             img.onerror = () => reject(new Error("Failed to load image"));
@@ -226,11 +241,13 @@ export const supabaseClient = {
           reader.onerror = () => reject(new Error("Failed to read file"));
           reader.readAsDataURL(file);
         });
-        
-        // Update path extension to .webp
-        path = path.replace(/\.[^/.]+$/, "") + ".webp";
+
+        // Update path extension to .webp if converted
+        if (needsConversion) {
+          path = path.replace(/\.[^/.]+$/, "") + ".webp";
+        }
       } catch (webpError) {
-        console.warn("WebP client-side conversion failed, uploading original image:", webpError);
+        console.warn("Image processing failed, uploading original:", webpError);
       }
     }
 

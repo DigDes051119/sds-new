@@ -46,7 +46,7 @@ export function ProductDetail() {
       {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[94vh] min-h-[600px] w-[calc(100%+56px)] md:w-[calc(100%+118px)] mx-[-28px] md:mx-[-59px] mt-[-24px] bg-black flex flex-col justify-end px-[28px] md:px-[59px] pb-[40px] md:pb-[60px] overflow-hidden"
+        className="relative h-[94vh] min-h-[600px] w-[calc(100%+80px)] md:w-[calc(100%+160px)] mx-[-40px] md:mx-[-80px] mt-[-24px] bg-black flex flex-col justify-end px-[40px] md:px-[80px] pb-[40px] md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {coverImg && (
@@ -135,7 +135,7 @@ export function ProductDetail() {
 
       {/* Gallery Wall / Image Stack */}
       {blocks.length > 0 && (
-        <section className="w-full flex flex-col gap-[4px] px-[20px] md:px-[50px] reveal-visible">
+        <section className="w-full flex flex-col gap-[4px] reveal-visible">
           {blocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
             
@@ -179,27 +179,50 @@ export function ProductDetail() {
 
       {/* Results Section */}
       {data.results && data.results.length > 0 && (
-        <section className="w-full border-t border-[#808080] pt-[40px] flex flex-col gap-8">
-          <div className="flex justify-between items-baseline border-b border-[#808080] pb-4">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start border-t border-[#808080] pt-[40px] mt-8">
+          {/* Left Column: Heading and Tag */}
+          <div className="lg:col-span-5 flex flex-col">
             <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase text-black m-0 leading-none">
               {locale === "ru" ? "результаты" : locale === "kg" ? "натыйжалар" : "results"}
             </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase">[02/RESULTS]</span>
+            <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[59px] gap-y-12">
-            {data.results.map((result: string, idx: number) => {
-              const parsed = parseResult(result);
-              return (
-                <div key={idx} className="flex flex-col border-t border-[#808080] pt-6 group">
-                  <span className="text-[54px] md:text-[72px] font-normal text-[#0000FF] leading-none tracking-tighter mb-4 group-hover:scale-[1.02] transition-transform origin-left duration-300">
-                    {parsed.stat}
-                  </span>
-                  <p className="text-[17px] leading-[1.44] text-[#808080] group-hover:text-black transition-colors duration-300 m-0">
-                    {parsed.desc}
-                  </p>
-                </div>
-              );
-            })}
+
+          {/* Right Column: 2-column Card Grid */}
+          <div className="lg:col-span-7 flex flex-col gap-8 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+              {data.results.map((result: string, idx: number) => {
+                const parsed = parseResult(result);
+                const isStat = parsed.stat !== "✓";
+                const indexStr = String(idx + 1).padStart(2, "0");
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex flex-col group gap-2"
+                  >
+                    {isStat ? (
+                      <>
+                        <span className="text-[48px] md:text-[60px] font-normal text-black leading-none tracking-tighter group-hover:text-[#0000FF] transition-colors duration-500">
+                          {parsed.stat}
+                        </span>
+                        <p className="text-[16px] md:text-[17px] leading-[1.45] text-[#808080] group-hover:text-black transition-colors duration-500 m-0">
+                          {parsed.desc}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-wider">
+                          [{indexStr}/OUTCOME]
+                        </span>
+                        <p className="text-[18px] md:text-[22px] font-normal leading-[1.4] text-black group-hover:text-[#0000FF] transition-colors duration-500 m-0">
+                          {parsed.desc}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
       )}

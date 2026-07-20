@@ -111,6 +111,107 @@ export function AdminProjectsEditor() {
     });
   }, []);
 
+  // Restore Synq project automatically if missing (runs securely under admin session)
+  useEffect(() => {
+    const runSynqRestore = async () => {
+      try {
+        console.log("[Synq Restore] Restoring Synq with hardcoded verified project assets...");
+
+        const heroImg = "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-2-1784455081963.webp";
+        const collageBlocks = [
+          [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-0-1784455068772.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-1-1784455075044.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-2-1784455081963.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-3-1784455088223.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-block-1-4-1784455100473.webp"
+          ]
+        ];
+
+        // Fetch fresh translations and details from Supabase to prevent race conditions
+        const remoteTranslationsRows = await supabaseClient.fetchTable("sds_translations");
+        const remoteDetailsRows = await supabaseClient.fetchTable("sds_project_details");
+
+        if (!remoteTranslationsRows?.[0] || !remoteDetailsRows?.[0]) {
+          throw new Error("Empty tables returned from Supabase");
+        }
+
+        const newTranslations = JSON.parse(JSON.stringify(remoteTranslationsRows[0].data));
+        const newDetails = JSON.parse(JSON.stringify(remoteDetailsRows[0].data));
+
+        const listEntryRu = { id: "synq", name: "Synq", category: "Промышленный дизайн", categoryKey: "industrial", img: heroImg, createdAt: "2026-07-19T09:58:20.473Z" };
+        const listEntryEn = { id: "synq", name: "Synq", category: "Industrial Design", categoryKey: "industrial", img: heroImg, createdAt: "2026-07-19T09:58:20.473Z" };
+        const listEntryKg = { id: "synq", name: "Synq", category: "Промышленный дизайн", categoryKey: "industrial", img: heroImg, createdAt: "2026-07-19T09:58:20.473Z" };
+
+        // Clean existing synq entries to prevent duplicates and clean up mixed state
+        ["ru", "en", "kg"].forEach(lang => {
+          newTranslations[lang].projects.items = newTranslations[lang].projects.items.filter((p: any) => p.id !== "synq");
+        });
+
+        newTranslations.ru.projects.items.unshift(listEntryRu);
+        newTranslations.en.projects.items.unshift(listEntryEn);
+        newTranslations.kg.projects.items.unshift(listEntryKg);
+
+        const detailEntryRu = {
+          name: "Synq",
+          desc: "Synq — это бренд, сочетающий инновационный дизайн с современной индустриальной эстетикой, обеспечивающий бескомпромиссный физический и цифровой опыт.",
+          client: "Synq Inc.",
+          year: "2026",
+          service: "Промышленный дизайн / Брендинг",
+          challenge: "Разработать целостную визуальную идентичность бренда и физические макеты, отражающие основные принципы точности и связности Synq.",
+          processImages: collageBlocks.flat(),
+          collageBlocks: collageBlocks,
+          collageTheme: "light",
+          results: ["Создана единая визуальная система дизайна", "Разработаны высокоточные интерактивные физические макеты"],
+          websiteUrl: ""
+        };
+
+        const detailEntryEn = {
+          name: "Synq",
+          desc: "Synq is a brand that combines innovative design with modern industrial aesthetic, delivering uncompromising physical and digital experiences.",
+          client: "Synq Inc.",
+          year: "2026",
+          service: "Industrial Design / Branding",
+          challenge: "To design a cohesive brand identity and physical mockup assets that reflect Synq's core principles of precision and connectivity.",
+          processImages: collageBlocks.flat(),
+          collageBlocks: collageBlocks,
+          collageTheme: "light",
+          results: ["Established a unified visual design system", "Created high-fidelity interactive physical mockups"],
+          websiteUrl: ""
+        };
+
+        const detailEntryKg = {
+          name: "Synq",
+          desc: "Synq — инновациялык дизайнды заманбап индустриалдык эстетика менен айкалыштырган, физикалык жана санариптик тажрыйбаны камсыз кылган бренд.",
+          client: "Synq Inc.",
+          year: "2026",
+          service: "Промышленный дизайн / Брендинг",
+          challenge: "Synq-тун тактык жана байланыш негизги принциптерин чагылдырган бирдиктүү бренддин визуалдык иденттүүлүгүн жана физикалык макеттерин иштеп чыгуу.",
+          processImages: collageBlocks.flat(),
+          collageBlocks: collageBlocks,
+          collageTheme: "light",
+          results: ["Бирдиктүү визуалдык дизайн системасы түзүлдү", "Жогорку тактыктагы интерактивдүү физикалык макеттер иштелип чыкты"],
+          websiteUrl: ""
+        };
+
+        newDetails.ru["synq"] = detailEntryRu;
+        newDetails.en["synq"] = detailEntryEn;
+        newDetails.kg["synq"] = detailEntryKg;
+
+        // Save securely using CMS Service secure update
+        await cmsService.updateTranslations(newTranslations);
+        await cmsService.updateProjectDetails(newDetails);
+
+        console.log("[Synq Restore] Synq successfully restored securely using admin session!");
+      } catch (err) {
+        console.error("[Synq Restore] Error during secure auto-restore:", err);
+      }
+    };
+
+    const timer = setTimeout(runSynqRestore, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Check current admin permissions
   const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
   const isReadOnly = currentAdmin.permissions?.projects === false;
@@ -131,6 +232,10 @@ export function AdminProjectsEditor() {
 
   const handleUploadPhoto = async (target: "img" | { blockIdx: number; imgIdx: number }, file: File) => {
     if (isReadOnly) return;
+    if (!formId) {
+      alert("Пожалуйста, сначала укажите ID или название проекта, чтобы файлы загружались в правильную папку.");
+      return;
+    }
     const isHero = target === "img";
     const key = isHero ? "img" : `${target.blockIdx}-${target.imgIdx}`;
     try {
@@ -139,7 +244,7 @@ export function AdminProjectsEditor() {
 
       const fileExt = file.name.split('.').pop();
       const fileName = `project-${isHero ? "hero" : `block-${target.blockIdx}-${target.imgIdx}`}-${Date.now()}.${fileExt}`;
-      const path = `projects/${fileName}`;
+      const path = `projects/${formId}/${fileName}`;
 
       const publicUrl = await supabaseClient.uploadFile("assets", path, file);
 
@@ -531,13 +636,20 @@ export function AdminProjectsEditor() {
       const result2En = await translateText(formResult2Ru, "en");
       const result2Kg = await translateText(formResult2Ru, "kg");
 
-      // Deep clone translations and project details
-      const newTranslations = JSON.parse(JSON.stringify(translations));
-      const newDetails = JSON.parse(JSON.stringify(projectDetails));
+      // Fetch fresh translations and details from Supabase to prevent race conditions
+      const remoteTranslationsRows = await supabaseClient.fetchTable("sds_translations");
+      const remoteDetailsRows = await supabaseClient.fetchTable("sds_project_details");
+
+      if (!remoteTranslationsRows?.[0] || !remoteDetailsRows?.[0]) {
+        throw new Error("Не удалось получить актуальные данные с сервера.");
+      }
+
+      const newTranslations = JSON.parse(JSON.stringify(remoteTranslationsRows[0].data));
+      const newDetails = JSON.parse(JSON.stringify(remoteDetailsRows[0].data));
 
       // Formulate the project list entries
       const existingCreatedAt = editingId
-        ? (translations.ru.projects.items.find((p: any) => p.id === editingId)?.createdAt || null)
+        ? (newTranslations.ru.projects.items.find((p: any) => p.id === editingId)?.createdAt || null)
         : new Date().toISOString();
 
       const listEntryRu = { id: formId, name: formNameRu, category: formCategoryRu, categoryKey: formCategoryKey, img: formImg, createdAt: existingCreatedAt };
@@ -591,7 +703,7 @@ export function AdminProjectsEditor() {
       };
 
       // Check if new ID already exists
-      const isIdTaken = translations.ru.projects.items.some((p: any) => p.id === formId && p.id !== editingId);
+      const isIdTaken = newTranslations.ru.projects.items.some((p: any) => p.id === formId && p.id !== editingId);
       if (isIdTaken) {
         alert(`Проект с ID "${formId}" уже существует. Пожалуйста, выберите другой ID.`);
         return;
@@ -669,9 +781,16 @@ export function AdminProjectsEditor() {
     if (isReadOnly) return;
     if (confirm("Вы действительно хотите удалить проект?")) {
       try {
-        // Deep clone translations and project details
-        const newTranslations = JSON.parse(JSON.stringify(translations));
-        const newDetails = JSON.parse(JSON.stringify(projectDetails));
+        // Fetch fresh translations and details from Supabase to prevent race conditions
+        const remoteTranslationsRows = await supabaseClient.fetchTable("sds_translations");
+        const remoteDetailsRows = await supabaseClient.fetchTable("sds_project_details");
+
+        if (!remoteTranslationsRows?.[0] || !remoteDetailsRows?.[0]) {
+          throw new Error("Не удалось получить актуальные данные с сервера.");
+        }
+
+        const newTranslations = JSON.parse(JSON.stringify(remoteTranslationsRows[0].data));
+        const newDetails = JSON.parse(JSON.stringify(remoteDetailsRows[0].data));
 
         // Remove from projects list and featured projects list
         ["ru", "en", "kg"].forEach((lang) => {

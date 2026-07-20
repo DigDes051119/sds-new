@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Check, Sun, Moon, Star, Users, FolderGit, MapPin, Shield, Briefcase, Package, Inbox } from "lucide-react";
-import logoPng from "../../imports/logo.png";
+import logoPng from "../../imports/logo.webp";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 

@@ -1,5 +1,5 @@
-import projectImg1 from "../imports/image.png";
-import projectImg2 from "../imports/image_2026-06-09_10-31-16.png";
+import projectImg1 from "../imports/image_low.webp";
+import projectImg2 from "../imports/image_2026-06-09_10-31-16_low.webp";
 
 export interface ProjectDetailData {
   name: string;

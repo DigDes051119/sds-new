@@ -1,10 +1,12 @@
 ﻿import { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router";
 import { LanguageContext } from "../i18n";
-import { cmsService } from "../cmsService";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import projectImg1 from "../../imports/image.png";
-import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
+import { cmsService } from "../cmsService";
+import projectImg1 from "../../imports/image_low.webp";
+import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
+import coverMoms from "../../imports/cover_moms.webp";
+import coverTooko from "../../imports/cover_tooko.webp";
 
 export function Home() {
   const { t, locale } = useContext(LanguageContext);
@@ -27,6 +29,7 @@ export function Home() {
     let x = 0;
     let speed = 1.2;
     let animationFrameId: number;
+    let isRunning = false;
 
     const update = () => {
       let targetSpeed = 1.2;
@@ -61,10 +64,42 @@ export function Home() {
       animationFrameId = requestAnimationFrame(update);
     };
 
-    animationFrameId = requestAnimationFrame(update);
+    const startLoop = () => {
+      if (!isRunning) {
+        isRunning = true;
+        animationFrameId = requestAnimationFrame(update);
+      }
+    };
+
+    const stopLoop = () => {
+      if (isRunning) {
+        isRunning = false;
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    // Only animate marquee when visible on screen
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { threshold: 0 }
+    );
+
+    const section = el.closest('section');
+    if (section) {
+      observer.observe(section);
+    } else {
+      startLoop();
+    }
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      stopLoop();
+      observer.disconnect();
     };
   }, []);
 
@@ -77,9 +112,11 @@ export function Home() {
     return {
       id: p.id || String(idx),
       title: p.name || p.title || "",
-      image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
-        ? p.img
-        : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img),
+      image: p.id === "maminy-retsepty" ? coverMoms
+        : p.id === "tooko" ? coverTooko
+        : (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
+          ? p.img
+          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img),
       tags: detail.service || p.category || "Design",
       year: detail.year || "2026",
       desc: detail.desc || p.desc || ""
@@ -135,27 +172,23 @@ export function Home() {
   const brands = t.home.brands || [];
 
   return (
-    <div className="w-full flex flex-col pt-[40px] pb-[150px] gap-[150px]">
+    <div className="w-full flex flex-col pt-[40px] pb-[80px] gap-[80px]">
       
       {/* 1 БЛОК: Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
-        {/* Left Column: Big Display Brand Mark */}
-        <div className="lg:col-span-6 pr-4">
+        {/* Left: Big Display Brand Mark */}
+        <div className="lg:col-span-3 pr-4">
           <h1 className="text-[48px] md:text-[90px] lg:text-[110px] xl:text-[124px] leading-[0.85] tracking-[-0.05em] font-normal uppercase text-black m-0 pt-1">
             AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
           </h1>
-
         </div>
-        
-        {/* Right Column: Studio Description Block */}
-        <div className="lg:col-span-6 pt-4 flex justify-end">
-          <div className="w-full max-w-[680px] xl:max-w-[700px]">
-            <p className="text-[17px] leading-[1.44] text-[#808080] m-0 max-w-[400px]">
-              {locale === "ru" 
-                ? "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь" 
-                : "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."}
-            </p>
-          </div>
+        {/* Right: Description aligned under HOME nav */}
+        <div className="lg:col-span-9 pt-4">
+          <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[560px] lg:ml-[547px]">
+            {locale === "ru"
+              ? "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь"
+              : "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."}
+          </p>
         </div>
       </section>
 
@@ -168,15 +201,16 @@ export function Home() {
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
           {recentProjects.map((project, index) => (
-            <div key={`recent-${project.id}`} className="w-full flex flex-col group">
+            <div key={`recent-${project.id}`} className="w-full flex flex-col group"
+              style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
                 <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
                     src={project.image} 
                     alt={project.title} 
-                    className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
+                    className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
@@ -186,7 +220,7 @@ export function Home() {
                       <span className="font-mono text-[16px] text-[#808080]">
                         0{index + 1} / NEW
                       </span>
-                      <h3 className="text-[21px] font-bold leading-[1.40] tracking-[-0.21px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -301,7 +335,7 @@ export function Home() {
                       <img 
                         src={service.imgUrl} 
                         alt={service.title} 
-                        className="w-full h-full object-cover opacity-90 filter grayscale hover:grayscale-0 transition-all duration-500" 
+                        className="w-full h-full object-cover opacity-90 filter grayscale hover:grayscale-0 transition duration-500" 
                       />
                     </div>
                   )}
@@ -333,19 +367,20 @@ export function Home() {
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/FEATURED]</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
           {featuredProjects.map((project, index) => (
-            <div key={`featured-${project.id}`} className="w-full flex flex-col group">
+            <div key={`featured-${project.id}`} className="w-full flex flex-col group"
+              style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
-                <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition-all duration-500 rounded-[8px] ${
-                  index % 2 === 1 
+                <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition duration-500 rounded-[8px] ${
+                  index % 2 === 1
                     ? 'bg-[#0000FF]/5' 
                     : 'bg-[#191919]'
                 }`}>
-                  <ImageWithFallback 
+                  <ImageWithFallback
                     src={project.image} 
                     alt={project.title} 
-                    className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
+                    className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
@@ -354,7 +389,7 @@ export function Home() {
                       <span className="font-mono text-[16px] text-[#808080]">
                         {String(index + 1).padStart(2, '0')} / WORK
                       </span>
-                      <h3 className="text-[21px] font-bold leading-[1.40] tracking-[-0.21px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -406,7 +441,7 @@ export function Home() {
             onMouseLeave={() => { edgeHoverRef.current = null; }}
           />
 
-          <div ref={marqueeRef} className="flex w-[200%] will-change-transform">
+          <div ref={marqueeRef} className="flex w-[200%]">
             {/* First loop */}
             <div className="flex justify-start items-center shrink-0 gap-[100px] pr-[100px]">
               {brands.map((brand: any, idx: number) => (
@@ -420,7 +455,7 @@ export function Home() {
                     <img 
                       src={brand.logoUrl} 
                       alt={brand.tag} 
-                      className="h-[120px] max-w-[360px] object-contain opacity-50 filter grayscale group-hover:opacity-100 transition-all duration-500 ease-out" 
+                      className="h-[120px] max-w-[360px] object-contain opacity-50 filter grayscale group-hover:opacity-100 transition duration-500 ease-out" 
                     />
                   ) : (
                     <span className="font-mono text-[16px] tracking-[0.04em] uppercase text-[#808080] group-hover:text-black transition-colors duration-500">
@@ -444,7 +479,7 @@ export function Home() {
                     <img 
                       src={brand.logoUrl} 
                       alt={brand.tag} 
-                      className="h-[120px] max-w-[360px] object-contain opacity-50 filter grayscale group-hover:opacity-100 transition-all duration-500 ease-out" 
+                      className="h-[120px] max-w-[360px] object-contain opacity-50 filter grayscale group-hover:opacity-100 transition duration-500 ease-out" 
                     />
                   ) : (
                     <span className="font-mono text-[16px] tracking-[0.04em] uppercase text-[#808080] group-hover:text-black transition-colors duration-500">

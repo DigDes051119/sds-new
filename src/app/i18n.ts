@@ -239,16 +239,16 @@ export const translations = {
       items: [
         { id: "sandyq", name: "Sandyq", category: "Branding & Architecture", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Product Design", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
-        { id: "salkyn", name: "Salkyn", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
-        { id: "one-ordo", name: "One Ordo Resort", category: "Architecture", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
-        { id: "techstart", name: "TechStart", category: "Branding & Web", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
-        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
+        { id: "salkyn", name: "Salkyn", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },
+        { id: "one-ordo", name: "One Ordo Resort", category: "Architecture", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600" },
+        { id: "techstart", name: "TechStart", category: "Branding & Web", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" },
       ],
     },
     products: {
       title: "Studio Products",
       items: [
-        { id: "chyraq", name: "Chyraq", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600" }
+        { id: "chyraq", name: "Chyraq", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
     },
     projectCategories: {
@@ -295,8 +295,8 @@ export const translations = {
           service: "Branding, Architecture",
           challenge: "Create an authentic yet modern identity that works equally well in urban spaces and recreational zones.",
           processImages: [
-            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600",
-            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=1600",
+            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=600",
           ],
           results: ["International market launch", "40% higher audience engagement"],
         },
@@ -308,7 +308,7 @@ export const translations = {
         year: "2025",
         service: "Design",
         challenge: "Develop an innovative approach to a classic challenge.",
-        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600"],
         results: ["Successful launch"],
       },
     },
@@ -340,7 +340,7 @@ export const translations = {
           class: "A",
           challenge: "Design a premium, tactile desk lamp that acts as an art piece while off.",
           processImages: [
-            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"
+            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"
           ],
           results: ["Winner of Interior Design Show 2026"]
         }
@@ -357,7 +357,7 @@ export const translations = {
         projectType: "Concept",
         class: "-",
         challenge: "Develop a premium physical product concept.",
-        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"],
         results: ["Successful launch"],
       },
     },
@@ -591,16 +591,16 @@ export const translations = {
       items: [
         { id: "sandyq", name: "Sandyq", category: "Брендинг & Архитектура", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Продукт дизайны", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
-        { id: "salkyn", name: "Salkyn", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
-        { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
-        { id: "techstart", name: "TechStart", category: "Брендинг", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
-        { id: "auto-concept-x", name: "Auto Concept X", category: "Автомобиль дизайны", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
+        { id: "salkyn", name: "Salkyn", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },
+        { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600" },
+        { id: "techstart", name: "TechStart", category: "Брендинг", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Автомобиль дизайны", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" },
       ],
     },
     products: {
       title: "Студиянын продукциялары",
       items: [
-        { id: "chyraq", name: "Chyraq", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600" }
+        { id: "chyraq", name: "Chyraq", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
     },
     projectCategories: {
@@ -647,8 +647,8 @@ export const translations = {
           service: "Брендинг, Архитектура",
           challenge: "Шаар мейкиндигинде да, эс алуу зонасында да бирдей жакшы иштеген аутентификациялык, бирок заманбап образ түзүү.",
           processImages: [
-            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600",
-            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=1600",
+            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=600",
           ],
           results: ["Эл аралык базарга чыгуу", "Аудиториянын катышуусу 40% жогорулады"],
         },
@@ -660,7 +660,7 @@ export const translations = {
         year: "2025",
         service: "Дизайн",
         challenge: "Классикалык көйгөйгө инновациялык ыкма түзүү.",
-        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600"],
         results: ["Үстүк чыгуу"],
       },
     },
@@ -692,7 +692,7 @@ export const translations = {
           class: "А",
           challenge: "Өчүрүлүп турганда да көркөм чыгарма катары кызмат кылган премиум сенсордук стол лампасын долбоорлоо.",
           processImages: [
-            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"
+            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"
           ],
           results: ["Interior Design Show 2026 жеңүүчүсү"]
         }
@@ -709,7 +709,7 @@ export const translations = {
         projectType: "Концепция",
         class: "-",
         challenge: "Премиум физикалык продукт концептисин түзүү.",
-        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"],
         results: ["Ийгиликтүү баштоо"],
       },
     },
@@ -943,16 +943,16 @@ export const translations = {
       items: [
         { id: "sandyq", name: "Sandyq", category: "Брендинг & Архитектура", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Продукт Дизайн", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
-        { id: "salkyn", name: "Salkyn", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600" },
-        { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600" },
-        { id: "techstart", name: "TechStart", category: "Брендирование", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1600" },
-        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=1600" },
+        { id: "salkyn", name: "Salkyn", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },
+        { id: "one-ordo", name: "One Ordo Resort", category: "Архитектура", categoryKey: "architectural", img: "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600" },
+        { id: "techstart", name: "TechStart", category: "Брендирование", categoryKey: "branding", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600" },
+        { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" },
       ],
     },
     products: {
       title: "Продукты студии",
       items: [
-        { id: "chyraq", name: "Chyraq", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600" }
+        { id: "chyraq", name: "Chyraq", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
     },
     projectCategories: {
@@ -999,8 +999,8 @@ export const translations = {
           service: "Брендинг, Архитектура",
           challenge: "Создать аутентичный, но современный образ, который будет одинаково хорошо работать как в городских пространствах, так и в рекреационных зонах.",
           processImages: [
-            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=1600",
-            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=1600",
+            "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=600",
           ],
           results: ["Выход на международный рынок", "Увеличение вовлеченности аудитории на 40%"],
         },
@@ -1012,7 +1012,7 @@ export const translations = {
         year: "2025",
         service: "Разработка",
         challenge: "Сформировать инновационный подход к классической проблеме.",
-        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600"],
         results: ["Успешный запуск"],
       },
     },
@@ -1044,7 +1044,7 @@ export const translations = {
           class: "А",
           challenge: "Разработать премиальный настольный светильник с сенсорным управлением, выступающий в роли арт-объекта в выключенном состоянии.",
           processImages: [
-            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"
+            "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"
           ],
           results: ["Победитель Interior Design Show 2026"]
         }
@@ -1061,7 +1061,7 @@ export const translations = {
         projectType: "Концепт",
         class: "-",
         challenge: "Сформировать инновационный подход к созданию физического продукта.",
-        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600"],
+        processImages: ["https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"],
         results: ["Успешный запуск"],
       },
     },

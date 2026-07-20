@@ -74,76 +74,26 @@ export function Root() {
     cmsService.initSupabaseSync();
   }, []);
 
+
   // Log analytics visit on every page navigation
   useEffect(() => {
     supabaseClient.logVisit(location.pathname, locale);
   }, [location.pathname, locale]);
 
-    // Custom inertial smooth scroll setup
+    // Scroll tracking — native scroll, no custom animation
     useEffect(() => {
       window.scrollTo(0, 0);
-      let targetY = 0;
-      let currentY = 0;
-      let isMoving = false;
-      let animationFrameId: number;
-      const lerpFactor = 0.11; // faster responsive scroll to avoid dragging tail
       setIsScrolled(false);
-
-      const onWheel = (e: WheelEvent) => {
-        // Ignore wheel events inside map containers to allow zooming
-        const target = e.target as HTMLElement;
-        if (target && target.closest && (
-          target.closest('.maplibregl-map') || 
-          target.closest('.mapboxgl-map') || 
-          target.closest('.map-container')
-        )) {
-          return;
-        }
-
-        e.preventDefault();
-        
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-        targetY = Math.max(0, Math.min(targetY + e.deltaY * 0.9, maxScroll));
-
-        if (!isMoving) {
-          isMoving = true;
-          animationFrameId = requestAnimationFrame(update);
+      let wasScrolled = false;
+      const onScroll = () => {
+        const scrolled = window.scrollY > 80;
+        if (scrolled !== wasScrolled) {
+          wasScrolled = scrolled;
+          setIsScrolled(scrolled);
         }
       };
-
-      const update = () => {
-        const diff = targetY - currentY;
-        
-        if (Math.abs(diff) <= 3.5) {
-          targetY = currentY;
-          isMoving = false;
-        } else {
-          currentY += diff * lerpFactor;
-          window.scrollTo(0, currentY);
-          setIsScrolled(currentY > 80);
-          animationFrameId = requestAnimationFrame(update);
-        }
-      };
-
-
-    const onScroll = () => {
-      if (!isMoving) {
-        targetY = window.scrollY;
-        currentY = window.scrollY;
-      }
-      setIsScrolled(window.scrollY > 80);
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("scroll", onScroll);
-
-    return () => {
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("scroll", onScroll);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => window.removeEventListener("scroll", onScroll);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -242,7 +192,7 @@ export function Root() {
       <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett antialiased overflow-x-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
-        <header className={`w-full grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start lg:items-center pt-[28px] px-[28px] md:px-[59px] z-50 bg-white ${isProjectDetailPage ? 'pb-[28px]' : 'pb-[64px]'}`}>
+        <header className={`w-full grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start lg:items-center pt-[40px] px-[40px] md:px-[80px] z-50 bg-white ${isProjectDetailPage ? 'pb-[28px]' : 'pb-[64px]'}`}>
           {/* Logo */}
           <div className="lg:col-span-3 flex items-center">
             <NavLink to="/" className="flex items-center">
@@ -307,15 +257,16 @@ export function Root() {
         </div>
       </header>
 
+
         {/* Main Content + Footer container */}
         <div className="flex flex-col flex-grow">
           {/* Main Content Area */}
-          <main key={location.pathname} className="w-full flex-grow px-[28px] md:px-[59px] page-transition">
+          <main key={location.pathname} className="w-full flex-grow px-[40px] md:px-[80px] page-transition">
             {outlet}
           </main>
 
           {/* Footer */}
-          <footer className="w-full bg-white text-black pt-20 pb-24 mt-32 border-t border-black/10 font-twk-everett px-[28px] md:px-[59px]">
+          <footer className="w-full bg-white text-black pt-20 pb-24 mt-20 border-t border-black/10 font-twk-everett px-[40px] md:px-[80px]">
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">
@@ -383,7 +334,7 @@ export function Root() {
               </div>
 
               {/* Divider line */}
-              <div className="h-px bg-black/10 -mx-[28px] md:-mx-[59px] mb-10" />
+              <div className="h-px bg-black/10 -mx-[40px] md:-mx-[80px] mb-10" />
 
               {/* Bottom Row: Logo and Copyright */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">

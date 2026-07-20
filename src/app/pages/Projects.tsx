@@ -3,8 +3,10 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
-import projectImg1 from "../../imports/image.png";
-import projectImg2 from "../../imports/image_2026-06-09_10-31-16.png";
+import projectImg1 from "../../imports/image_low.webp";
+import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
+import coverMoms from "../../imports/cover_moms.webp";
+import coverTooko from "../../imports/cover_tooko.webp";
 
 export function Projects() {
   const { t, locale } = useContext(LanguageContext);
@@ -23,9 +25,11 @@ export function Projects() {
       const detail = localizedDetails[project.id] || {};
       return {
         ...project,
-        img: (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
-          ? project.img
-          : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img),
+        img: project.id === "maminy-retsepty" ? coverMoms
+          : project.id === "tooko" ? coverTooko
+          : (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
+            ? project.img
+            : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img),
         tags: detail.service || project.category || "Design",
         year: detail.year || "2026",
         desc: detail.desc || project.desc || ""
@@ -52,9 +56,10 @@ export function Projects() {
       </section>
 
       {/* Projects Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
         {projects.map((project, index) => (
-          <div key={project.id} className="w-full flex flex-col">
+          <div key={project.id} className="w-full flex flex-col"
+            style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
             <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}
@@ -62,36 +67,40 @@ export function Projects() {
                 <ImageWithFallback 
                   src={project.img} 
                   alt={project.name} 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
+                  className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
                   loading="lazy"
                 />
               </div>
 
               {/* Meta information */}
-              <div className="mt-[15px] flex flex-col border-b border-[#808080] pb-[12px] group-hover:border-black transition-colors">
+              <div className="mt-[25px] flex flex-col">
                 <div className="flex justify-between items-start w-full">
-                  <div className="flex flex-col gap-1">
+                  {/* Left block: label + title */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-2">
                     <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080]">
-                      [{String(index + 1).padStart(2, '0')}/PROJECT]
+                      {String(index + 1).padStart(2, '0')} / PROJECT
                     </span>
-                    <h2 className="text-[21px] font-normal leading-[1.40] tracking-[-0.21px] text-black m-0">
+                    <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                       {project.name}
-                    </h2>
+                    </h3>
+                    {project.desc && (
+                      <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                        {project.desc}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-right flex flex-col gap-1">
-                    <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">
+                  {/* Vertical divider */}
+                  <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                  {/* Right block: category + year */}
+                  <div className="text-left flex flex-col gap-1 shrink-0">
+                    <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
                       {project.tags}
                     </span>
-                    <span className="font-mono text-[16px] tracking-[0.04em] text-black">
+                    <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">
                       {project.year}
                     </span>
                   </div>
                 </div>
-                {project.desc && (
-                  <p className="text-[16px] leading-[1.44] text-[#808080] m-0 mt-3 font-normal w-full line-clamp-2">
-                    {project.desc}
-                  </p>
-                )}
               </div>
 
             </Link>
