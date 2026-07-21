@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+﻿import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -38,8 +38,8 @@ export function Products() {
       
       {/* Title Block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
-        <h1 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0 lowercase">
-          {t.products?.title || (locale === "ru" ? "продукты студии" : locale === "kg" ? "студиянын продукциялары" : "studio products")}
+        <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+          {t.products?.title || (locale === "ru" ? "Продукты студии" : locale === "kg" ? "Студиянын продукциялары" : "Studio products")}
         </h1>
         <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
           [PRODUCTS/CATALOGUE]

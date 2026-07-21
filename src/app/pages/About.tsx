@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
 import { Eye, Heart, Zap } from "lucide-react";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 export function About() {
   const { t, locale } = useContext(LanguageContext);
@@ -55,257 +56,19 @@ export function About() {
 
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px]">
-      {/* Team Section */}
-      <section className="mb-24">
-        {/* Top Header: Title and Leader card */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2fr] gap-12 lg:gap-16 items-start border-b border-black/10 pb-16 mb-16">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#0000FF]" />
-              <span className="text-[12px] font-mono tracking-widest text-black/60 uppercase">
-                {locale === "ru" ? "Студия" : locale === "kg" ? "Студия" : "Studio team"}
-              </span>
-            </div>
-            <h2 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-black m-0 lowercase">
-              {locale === "ru" ? "наша команда" : locale === "kg" ? "биздин команда" : "our team"}
-            </h2>
-            <div className="h-[2px] w-12 bg-[#0000FF]" />
-            <p className="text-[17px] leading-[1.44] text-[#808080] max-w-[450px] m-0">
-              {ab.teamIntro || (locale === "ru" 
-                ? "Команда стратегов, дизайнеров, разработчиков и проектировщиков, объединенных любопытством и мастерством." 
-                : locale === "kg"
-                  ? "Кызыгуу жана чеберчилик менен бириккен стратегдердин, дизайнерлердин, иштеп чыгуучулардын жана долбоорлоочулардын командасы."
-                  : "A collective of strategists, designers, developers and problem-solvers united by curiosity and craft.")}
-            </p>
-          </div>
-
-          {/* Oleg's Leadership card */}
-          {(() => {
-            const oleg = team.find((m: any) => m.id === 1 || m.name.toLowerCase().includes("oleg") || m.name.toLowerCase().includes("олег"));
-            if (!oleg) return null;
-            return (
-              <div className="relative overflow-hidden rounded-[24px] bg-[#f9f9f6] border border-black/5 p-8 lg:p-10 flex flex-col justify-between min-h-[380px] sm:min-h-[420px] group transition-all duration-300">
-                <div className="flex justify-between items-start z-10">
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="text-[18px] font-medium text-[#0000FF]">01</span>
-                    <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF]">
-                      {locale === "ru" ? "РУКОВОДСТВО" : locale === "kg" ? "ЖЕТЕКЧИЛИК" : "LEADERSHIP"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute right-0 bottom-0 top-0 w-1/2 overflow-hidden pointer-events-none rounded-r-[24px]">
-                  {oleg.img && (
-                    <img
-                      src={oleg.img}
-                      alt={oleg.name}
-                      className="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#f9f9f6] via-[#f9f9f6]/20 via-[15%] to-transparent" />
-                </div>
-
-                <div className="mt-auto relative z-10">
-                  <h3 className="text-3xl lg:text-4xl font-normal tracking-tight text-black leading-tight max-w-[50%] mb-2">
-                    {oleg.name}
-                  </h3>
-                  <p className="text-[17px] text-black/65 font-light leading-relaxed max-w-[50%] m-0">
-                    {oleg.role}
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* Departments Section */}
-        {(() => {
-          // Helper to group by department
-          const getDeptId = (member: any) => {
-            const role = (member.role || "").toLowerCase();
-            if (role.includes("marketer") || role.includes("маркетолог") || role.includes("marketing")) {
-              return "marketing";
-            }
-            
-            const dept = deptMap[member.id];
-            if (dept === "MANAGEMENT") return "leadership";
-            if (dept === "GRAPHIC DESIGN") return "design";
-            if (dept === "DEVELOPMENT") return "development";
-            if (dept === "VISUAL ART AND MOTION DESIGN") return "motion";
-            if (dept === "OPERATIONS") return "operations";
-            if (dept === "MARKETING") return "marketing";
-            return "design";
-          };
-
-          const restOfTeam = team.filter((m: any) => getDeptId(m) !== "leadership");
-          
-          const departments = [
-            { id: "design", title: locale === "ru" ? "Графический дизайн" : locale === "kg" ? "Графикалык дизайн" : "GRAPHIC DESIGN", num: "02", label: "DESIGN" },
-            { id: "development", title: locale === "ru" ? "Разработка" : locale === "kg" ? "Иштеп чыгуу" : "DEVELOPMENT", num: "03", label: "CODE" },
-            { id: "motion", title: locale === "ru" ? "Visual Art и Моушн-дизайн" : locale === "kg" ? "Visual Art жана Моушн-дизайн" : "Visual Art & Motion Design", num: "04", label: "MOTION" },
-            { id: "operations", title: locale === "ru" ? "Операции" : locale === "kg" ? "Операциялар" : "OPERATIONS", num: "05", label: "OPS" },
-            { id: "marketing", title: locale === "ru" ? "Маркетинг" : locale === "kg" ? "Маркетинг" : "MARKETING", num: "06", label: "MKT" }
-          ];
-
-          const primaryDepts = departments.filter(d => d.id === "design" || d.id === "development");
-          const secondaryDepts = departments.filter(d => d.id !== "design" && d.id !== "development");
-
-          // Helper to chunk secondary departments into rows of 2
-          const chunkedDepts: any[][] = [];
-          for (let i = 0; i < secondaryDepts.length; i += 2) {
-            chunkedDepts.push(secondaryDepts.slice(i, i + 2));
-          }
-
-          return (
-            <div className="space-y-24">
-              {/* Primary Departments (Full width rows) */}
-              {primaryDepts.map((dept) => {
-                const members = restOfTeam.filter(m => getDeptId(m) === dept.id);
-                if (members.length === 0) return null;
-                return (
-                  <div key={dept.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-12 gap-y-6 items-start">
-                    {/* Left Axis Indicator */}
-                    <div className="hidden md:flex flex-col items-center select-none self-stretch pb-2">
-                      <div className="flex items-center justify-center h-7">
-                        <span className="text-[16px] font-medium text-[#0000FF]">{dept.num}</span>
-                      </div>
-                      <div className="w-px bg-black/10 flex-1 mt-4 mb-4" />
-                      <span 
-                        className="text-[14px] font-mono font-bold uppercase tracking-[0.2em] text-black/25 transform rotate-180"
-                        style={{ writingMode: "vertical-rl" }}
-                      >
-                        {dept.label}
-                      </span>
-                    </div>
-
-                    {/* Department Content */}
-                    <div className="space-y-8 flex-1">
-                      <div className="flex items-center gap-4 h-7">
-                        <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF] whitespace-nowrap">
-                          {dept.title}
-                        </span>
-                        <div className="h-px bg-[#0000FF]/15 flex-1 relative">
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#0000FF]" />
-                        </div>
-                      </div>
-
-                      <div className={`grid gap-6 ${members.length === 1 ? "grid-cols-1" : members.length === 2 ? "grid-cols-2" : members.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 lg:grid-cols-4"}`}>
-                        {members.map((member) => (
-                          <div key={member.id} className="flex flex-col group">
-                            <div className="space-y-4">
-                              <div className="relative w-full rounded-[20px] overflow-hidden bg-[#f5f5f5] aspect-[4/5]">
-                                {member.img && (
-                                  <img
-                                    src={member.img}
-                                    alt={member.name}
-                                    className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-[1.02] transition-all duration-500 ease-out"
-                                  />
-                                )}
-                              </div>
-                              <div className="space-y-1">
-                                <h4 className="text-[19px] font-normal text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                                  {member.name}
-                                </h4>
-                                <p className="text-[15px] text-[#808080] font-light leading-relaxed m-0">
-                                  {member.role}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Secondary Departments (Side by side grid) */}
-              {chunkedDepts.map((row, rowIdx) => {
-                // Filter departments in the row that have team members
-                const activeDepts = row.filter(dept => restOfTeam.some(m => getDeptId(m) === dept.id));
-                if (activeDepts.length === 0) return null;
-
-                return (
-                  <div key={rowIdx} className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {activeDepts.map((dept) => {
-                      const members = restOfTeam.filter(m => getDeptId(m) === dept.id);
-                      return (
-                        <div key={dept.id} className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-x-8 gap-y-4 items-start">
-                          {/* Left Axis Indicator */}
-                          <div className="hidden sm:flex flex-col items-center select-none self-stretch pb-2">
-                            <div className="flex items-center justify-center h-7">
-                              <span className="text-[16px] font-medium text-[#0000FF]">{dept.num}</span>
-                            </div>
-                            <div className="w-px bg-black/10 flex-1 mt-4 mb-4" />
-                            <span 
-                              className="text-[14px] font-mono font-bold uppercase tracking-[0.2em] text-black/25 transform rotate-180"
-                              style={{ writingMode: "vertical-rl" }}
-                            >
-                              {dept.label}
-                            </span>
-                          </div>
-
-                          {/* Department Content */}
-                          <div className="space-y-6 flex-1">
-                            <div className="flex items-center gap-3 h-7">
-                              <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF] whitespace-nowrap">
-                                {dept.title}
-                              </span>
-                              <div className="h-px bg-[#0000FF]/15 flex-1 relative">
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#0000FF]" />
-                              </div>
-                            </div>
-
-                            <div className={`grid gap-4 ${members.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                              {members.map((member) => (
-                                <div key={member.id} className="flex flex-col group max-w-[280px]">
-                                  <div className="space-y-4">
-                                    <div className="relative w-full rounded-[20px] overflow-hidden bg-[#f5f5f5] aspect-[4/5]">
-                                      {member.img && (
-                                        <img
-                                          src={member.img}
-                                          alt={member.name}
-                                          className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-[1.02] transition-all duration-500 ease-out"
-                                        />
-                                      )}
-                                    </div>
-                                    <div className="space-y-1">
-                                      <h4 className="text-[19px] font-normal text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                                        {member.name}
-                                      </h4>
-                                      <p className="text-[15px] text-[#808080] font-light leading-relaxed m-0">
-                                        {member.role}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
-      </section>
-
       {/* Our Story Block */}
-      <section className="mt-[100px] border-b border-[#808080]/30 pb-[100px]">
+      <section className="mb-24 border-b border-[#808080]/30 pb-[100px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
           {/* Left Column */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="flex items-center gap-2 select-none">
               <span className="w-2.5 h-2.5 rounded-full bg-[#0000FF]"></span>
               <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                {locale === "ru" ? "кто мы" : locale === "kg" ? "биз кимбиз" : "who we are"}
+                {locale === "ru" ? "Кто мы" : locale === "kg" ? "Биз кимбиз" : "Who we are"}
               </span>
             </div>
-            <h2 className="text-[40px] md:text-[54px] font-normal leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 lowercase">
-              {ab.ourStoryTitle || (locale === "ru" ? "наша история" : locale === "kg" ? "биздин тарых" : "our story")}
+            <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0">
+              {ab.ourStoryTitle || (locale === "ru" ? "Наша история" : locale === "kg" ? "Биздин тарых" : "Our story")}
             </h2>
             <div className="w-[50px] h-[2px] bg-[#0000FF]"></div>
             <p className="text-[17px] leading-[1.5] text-[#808080] max-w-[450px] m-0 font-normal">
@@ -364,18 +127,18 @@ export function About() {
 
       {/* Philosophy Foundation Block */}
       {valuesList.length > 0 && (
-        <section className="mt-[100px] border-b border-[#808080]/30 pb-[100px]">
+        <section className="mb-24 border-b border-[#808080]/30 pb-[100px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
             {/* Left Column */}
             <div className="lg:col-span-5 flex flex-col gap-6">
               <div className="flex items-center gap-2 select-none">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#0000FF]"></span>
                 <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                  {locale === "ru" ? "наша философия" : locale === "kg" ? "биздин философия" : "our philosophy"}
+                  {locale === "ru" ? "Наша философия" : locale === "kg" ? "Биздин философия" : "Our philosophy"}
                 </span>
               </div>
-              <h2 className="text-[40px] md:text-[54px] font-normal leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 lowercase whitespace-pre-line">
-                {ab.valuesSub || "philosophy\nfoundation"}
+              <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 whitespace-pre-line">
+                {ab.valuesSub || "Philosophy\nfoundation"}
               </h2>
               <div className="w-[50px] h-[2px] bg-[#0000FF]"></div>
               <p className="text-[17px] leading-[1.5] text-[#808080] max-w-[450px] m-0 font-normal">
@@ -453,22 +216,179 @@ export function About() {
         </section>
       )}
 
+      {/* Team Section */}
+      <section className="mb-24">
+        {/* Top Header: Title and Leader card */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2.1fr] gap-12 lg:gap-16 items-start border-b border-black/10 pb-16 mb-16">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#0000FF]" />
+              <span className="text-[12px] font-mono tracking-widest text-black/60 uppercase">
+                {locale === "ru" ? "Студия" : locale === "kg" ? "Студия" : "Studio team"}
+              </span>
+            </div>
+            <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-black m-0">
+              {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
+            </h2>
+            <div className="h-[2px] w-12 bg-[#0000FF]" />
+            <p className="text-[17px] leading-[1.44] text-[#808080] max-w-[450px] m-0">
+              {ab.teamIntro || (locale === "ru" 
+                ? "Команда стратегов, дизайнеров, разработчиков и проектировщиков, объединенных любопытством и мастерством." 
+                : locale === "kg"
+                  ? "Кызыгуу жана чеберчилик менен бириккен стратегдердин, дизайнерлердин, иштеп чыгуучулардын жана долбоорлоочулардын командасы."
+                  : "A collective of strategists, designers, developers and problem-solvers united by curiosity and craft.")}
+            </p>
+          </div>
+
+          {/* Oleg's Leadership card */}
+          {(() => {
+            const oleg = team.find((m: any) => m.id === 1 || m.name.toLowerCase().includes("oleg") || m.name.toLowerCase().includes("олег"));
+            if (!oleg) return null;
+            return (
+              <div className="relative overflow-hidden rounded-[24px] bg-[#f9f9f6] border border-black/5 p-8 lg:p-10 flex flex-col justify-between min-h-[380px] sm:min-h-[420px] w-full lg:max-w-[1020px] justify-self-end group transition-all duration-300">
+                <div className="flex justify-between items-start z-10">
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-[18px] font-medium text-[#0000FF]">01</span>
+                    <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF]">
+                      {locale === "ru" ? "РУКОВОДСТВО" : locale === "kg" ? "ЖЕТЕКЧИЛИК" : "LEADERSHIP"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="absolute right-0 bottom-0 top-0 w-1/2 xs:w-[45%] md:w-1/2 overflow-hidden pointer-events-none rounded-r-[24px]">
+                  {oleg.img && (
+                    <img
+                      src={oleg.img}
+                      alt={oleg.name}
+                      className="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#f9f9f6] via-[#f9f9f6]/20 via-[15%] to-transparent" />
+                </div>
+
+                <div className="mt-auto relative z-10">
+                  <h3 className="text-lg xs:text-xl sm:text-2xl lg:text-4xl font-normal tracking-tight text-black leading-tight max-w-[55%] sm:max-w-[50%] mb-2">
+                    {oleg.name}
+                  </h3>
+                  <p className="text-[13px] xs:text-[15px] sm:text-[17px] text-black/65 font-light leading-relaxed max-w-[55%] sm:max-w-[50%] m-0">
+                    {oleg.role}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Departments Section */}
+        {(() => {
+          // Helper to group by department
+          const getDeptId = (member: any) => {
+            const role = (member.role || "").toLowerCase();
+            if (role.includes("marketer") || role.includes("маркетолог") || role.includes("marketing")) {
+              return "marketing";
+            }
+            
+            const dept = deptMap[member.id];
+            if (dept === "MANAGEMENT") return "leadership";
+            if (dept === "GRAPHIC DESIGN") return "design";
+            if (dept === "DEVELOPMENT") return "development";
+            if (dept === "VISUAL ART AND MOTION DESIGN") return "motion";
+            if (dept === "OPERATIONS") return "operations";
+            if (dept === "MARKETING") return "marketing";
+            return "design";
+          };
+
+          const restOfTeam = team.filter((m: any) => getDeptId(m) !== "leadership");
+          
+          const departments = [
+            { id: "Design", title: locale === "ru" ? "Графический дизайн" : locale === "kg" ? "Графикалык дизайн" : "GRAPHIC DESIGN", num: "02", label: "DESIGN" },
+            { id: "Development", title: locale === "ru" ? "Разработка" : locale === "kg" ? "Иштеп чыгуу" : "DEVELOPMENT", num: "03", label: "CODE" },
+            { id: "Motion", title: locale === "ru" ? "Visual Art и Моушн-дизайн" : locale === "kg" ? "Visual Art жана Моушн-дизайн" : "Visual Art & Motion Design", num: "04", label: "MOTION" },
+            { id: "Operations", title: locale === "ru" ? "Операции" : locale === "kg" ? "Операциялар" : "OPERATIONS", num: "05", label: "OPS" },
+            { id: "Marketing", title: locale === "ru" ? "Маркетинг" : locale === "kg" ? "Маркетинг" : "MARKETING", num: "06", label: "MKT" }
+          ];
+
+          return (
+            <div className="space-y-24">
+              {/* All Departments rendered in uniform full-width rows */}
+              {departments.map((dept) => {
+                const members = restOfTeam.filter(m => getDeptId(m).toLowerCase() === dept.id.toLowerCase());
+                if (members.length === 0) return null;
+                return (
+                  <div key={dept.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-12 gap-y-6 items-start">
+                    {/* Left Axis Indicator */}
+                    <div className="hidden md:flex flex-col items-center select-none self-stretch pb-2">
+                      <div className="flex items-center justify-center h-7">
+                        <span className="text-[16px] font-medium text-[#0000FF]">{dept.num}</span>
+                      </div>
+                      <div className="w-px bg-black/10 flex-1 mt-4 mb-4" />
+                      <span 
+                        className="text-[14px] font-mono font-bold uppercase tracking-[0.2em] text-black/25 transform rotate-180"
+                        style={{ writingMode: "Vertical-rl" }}
+                      >
+                        {dept.label}
+                      </span>
+                    </div>
+
+                    {/* Department Content */}
+                    <div className="space-y-8 flex-1">
+                      <div className="flex items-center gap-4 h-7">
+                        <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF] whitespace-nowrap">
+                          {dept.title}
+                        </span>
+                        <div className="h-px bg-[#0000FF]/15 flex-1 relative">
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#0000FF]" />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {members.map((member) => (
+                          <div key={member.id} className="flex flex-col group">
+                            <div className="space-y-4">
+                              <div className="relative w-full rounded-[20px] overflow-hidden bg-[#f5f5f5] aspect-[4/5]">
+                                {member.img && (
+                                  <ImageWithFallback
+                                    src={member.img}
+                                    alt={member.name}
+                                    className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-[1.02] transition-all duration-500 ease-out"
+                                    loading="eager"
+                                  />
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                <h4 className="text-[19px] font-normal text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                                  {member.name}
+                                </h4>
+                                <p className="text-[15px] text-[#808080] font-light leading-relaxed m-0">
+                                  {member.role}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+      </section>
+
       {/* Awards [04/AWARDS] */}
       {awardsList.length > 0 && (
         <section className="mt-[100px]">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start border-b border-[#808080]/30 pb-4 mb-[60px]">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start mb-[40px]">
             <div className="md:col-span-5">
-              <h2 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#191919] m-0 lowercase">
-                {ab.awardsTitle || "recognition & awards"}
+              <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#191919] m-0">
+                {ab.awardsTitle || "Recognition & awards"}
               </h2>
-              <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-4 block">
+            </div>
+            <div className="md:col-span-7 flex md:justify-end md:pl-[59px]">
+              <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 md:mt-4 block">
                 [04/AWARDS]
               </span>
-            </div>
-            <div className="md:col-span-7 md:pl-[59px]">
-              <p className="text-[17px] leading-[1.44] text-[#808080] max-w-[500px] m-0">
-                {ab.awardsSub || ""}
-              </p>
             </div>
           </div>
 
@@ -507,8 +427,8 @@ export function About() {
       <section className="mt-[100px]">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start border-b border-[#808080]/30 pb-4 mb-[60px]">
           <div className="md:col-span-5">
-            <h2 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#191919] m-0 lowercase">
-              {ab.mapTitle || "global footprint"}
+            <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#191919] m-0">
+              {ab.mapTitle || "Global footprint"}
             </h2>
             <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-4 block">
               [05/MAP]
@@ -521,9 +441,9 @@ export function About() {
           </div>
         </div>
 
-        <div className="w-full aspect-[2/1] relative bg-[#f5f5f5] flex items-center justify-center">
-          <div className="text-center max-w-[600px] px-8">
-            <p className="text-[20px] leading-[1.5] text-[#808080] m-0">
+        <div className="w-full min-h-[220px] md:aspect-[2/1] relative bg-[#f5f5f5] flex items-center justify-center py-8 px-4 md:py-0 md:px-0">
+          <div className="text-center max-w-[600px] px-2 sm:px-8">
+            <p className="text-[15px] sm:text-[18px] md:text-[20px] leading-[1.6] text-[#808080] m-0">
               {ab.mapCities || ""}
             </p>
           </div>

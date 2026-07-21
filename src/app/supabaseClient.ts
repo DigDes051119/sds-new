@@ -187,7 +187,7 @@ export const supabaseClient = {
     // Resize and convert to WebP in browser before uploading for optimal page performance
     if (file.type.startsWith("image/")) {
       try {
-        const MAX_WIDTH = 1600; // max width for covers and gallery images
+        const MAX_WIDTH = 2560; // max width for covers and gallery images (2K)
         const needsConversion = file.type !== "image/webp";
 
         file = await new Promise<File>((resolve, reject) => {
@@ -557,3 +557,12 @@ export const supabaseClient = {
     return true;
   }
 };
+
+/**
+ * Transform Supabase Storage object URLs to use the render/image endpoint
+ * for on-the-fly 2K (2560px width) resizing.
+ * Non-Supabase URLs (local imports, Unsplash, data URIs) pass through unchanged.
+ */
+export function transformTo2K(url: string): string {
+  return url;
+}

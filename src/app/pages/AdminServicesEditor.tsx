@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { cmsService } from "../cmsService";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
-import { Save, Check, Globe, Loader2, Briefcase, Plus, Trash2 } from "lucide-react";
+import { Save, Check, Globe, Loader2, Briefcase, Plus, Trash2, Camera } from "lucide-react";
+import { supabaseClient } from "../supabaseClient";
 
 export function AdminServicesEditor() {
   const [translations, setTranslations] = useState(() => cmsService.getTranslations());
@@ -233,21 +234,71 @@ export function AdminServicesEditor() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Ссылка на изображение</label>
-                    <input
-                      type="text"
-                      value={serviceImg}
-                      onChange={(e) => handleHomeServiceFieldChange(idx, 3, e.target.value)}
-                      disabled={isReadOnly}
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2 text-white focus:border-[#0066FF] outline-none text-xs"
-                      placeholder="Вставьте ссылку на картинку"
-                    />
-                    {serviceImg && (
-                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-black/40 border border-white/5 relative">
-                        <img src={serviceImg} alt={serviceTitle} className="w-full h-full object-cover" />
-                      </div>
-                    )}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block">Изображение услуги</label>
+                    <div className="space-y-3">
+                      {serviceImg ? (
+                        <div className="relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 group">
+                          <img src={serviceImg} alt={serviceTitle} className="w-full h-full object-cover group-hover:brightness-50 transition" />
+                          {!isReadOnly && (
+                            <label className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    try {
+                                      const path = `services/service-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+                                      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+                                      handleHomeServiceFieldChange(idx, 3, publicUrl);
+                                    } catch (err: any) {
+                                      alert("Ошибка при загрузке: " + err.message);
+                                    }
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                              <Camera className="w-6 h-6 text-white mb-1" />
+                              <span className="text-[10px] text-white font-bold uppercase tracking-wider">Изменить</span>
+                            </label>
+                          )}
+                        </div>
+                      ) : (
+                        <label className="w-full max-w-xs aspect-video bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer transition text-white/40 hover:text-white/60">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                try {
+                                  const path = `services/service-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+                                  const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+                                  handleHomeServiceFieldChange(idx, 3, publicUrl);
+                                } catch (err: any) {
+                                  alert("Ошибка при загрузке: " + err.message);
+                                }
+                              }
+                            }}
+                            className="hidden"
+                            disabled={isReadOnly}
+                          />
+                          <Camera className="w-6 h-6 mb-2" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">Загрузить изображение</span>
+                        </label>
+                      )}
+                      
+                      {serviceImg && !isReadOnly && (
+                        <button
+                          type="button"
+                          onClick={() => handleHomeServiceFieldChange(idx, 3, "")}
+                          className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 text-xs transition active:scale-95"
+                        >
+                          Удалить изображение
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

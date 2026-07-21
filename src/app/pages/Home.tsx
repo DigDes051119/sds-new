@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -131,17 +131,17 @@ export function Home() {
 
   // Block 3: Advantages list based on i18n about values
   const advantages = locale === "ru" ? [
-    { num: "01", title: "about[01]", desc: "15+ лет настоящего опыта в независимой сфере с 2011 года создаем бренды и направления" },
-    { num: "02", title: "global[02]", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
-    { num: "03", title: "principle[03]", desc: "Who you gonna call?" }
+    { num: "01", title: "About", desc: "15+ лет настоящего опыта в независимой сфере с 2011 года создаем бренды и направления" },
+    { num: "02", title: "Global", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
+    { num: "03", title: "Principle", desc: "Who you gonna call?" }
   ] : locale === "kg" ? [
-    { num: "01", title: "about[01]", desc: "15+ жылдык көз карандысыз тармактагы чыныгы тажрыйба, 2011-жылдан бери бренддерди жана багыттарды түзүп келебиз." },
-    { num: "02", title: "global[02]", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
-    { num: "03", title: "principle[03]", desc: "Who you gonna call?" }
+    { num: "01", title: "About", desc: "15+ жылдык көз карандысыз тармактагы чыныгы тажрыйба, 2011-жылдан бери бренддерди жана багыттарды түзүп келебиз." },
+    { num: "02", title: "Global", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
+    { num: "03", title: "Principle", desc: "Who you gonna call?" }
   ] : [
-    { num: "01", title: "about[01]", desc: "15+ years of real experience in the independent industry, creating brands and directions since 2011." },
-    { num: "02", title: "global[02]", desc: "Projects for Central Asia, Europe and digital-first teams." },
-    { num: "03", title: "principle[03]", desc: "Who you gonna call?" }
+    { num: "01", title: "About", desc: "15+ years of real experience in the independent industry, creating brands and directions since 2011." },
+    { num: "02", title: "Global", desc: "Projects for Central Asia, Europe and digital-first teams." },
+    { num: "03", title: "Principle", desc: "Who you gonna call?" }
   ];
 
   // Block 4: Services list from t.services.items with image references
@@ -178,7 +178,7 @@ export function Home() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
         {/* Left: Big Display Brand Mark */}
         <div className="lg:col-span-3 pr-4">
-          <h1 className="text-[48px] md:text-[90px] lg:text-[110px] xl:text-[124px] leading-[0.85] tracking-[-0.05em] font-normal uppercase text-black m-0 pt-1">
+          <h1 className="text-[40px] xs:text-[48px] md:text-[90px] lg:text-[110px] xl:text-[124px] leading-[0.85] tracking-[-0.05em] font-bold uppercase text-black m-0 pt-1">
             AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
           </h1>
         </div>
@@ -195,16 +195,19 @@ export function Home() {
       {/* 2 БЛОК: Recent Projects (Недавние проекты) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
-          <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase m-0 text-black">
-            {locale === "ru" ? "недавние проекты" : locale === "kg" ? "жакында долбоорлор" : "recent projects"}
-          </h2>
+          <div className="flex flex-col">
+            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+              {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
+            </h2>
+          </div>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
           {recentProjects.map((project, index) => (
             <div key={`recent-${project.id}`} className="w-full flex flex-col group"
-              style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
+              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
                 <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
@@ -214,13 +217,13 @@ export function Home() {
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
-                  <div className="flex justify-between items-start w-full">
+                  <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4 md:gap-0">
                     {/* Left block: label + title */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
                         0{index + 1} / NEW
                       </span>
-                      <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -230,11 +233,11 @@ export function Home() {
                       )}
                     </div>
                     {/* Vertical divider */}
-                    <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                    <div className="hidden md:block w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
                     {/* Right block: category + year */}
-                    <div className="text-left flex flex-col gap-1 shrink-0">
-                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">{project.tags}</span>
-                      <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">{project.year}</span>
+                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%]">
+                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
                   </div>
                 </div>
@@ -248,17 +251,17 @@ export function Home() {
 
       {/* 3 БЛОК: Advantages (Преимущества) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[28px] flex justify-between items-baseline select-none">
-          <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase m-0">
-            {locale === "ru" ? "преимущества" : locale === "kg" ? "артыкчылыктар" : "advantages"}
+        <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 select-none">
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0">
+            {locale === "ru" ? "Преимущества" : locale === "kg" ? "Артыкчылыктар" : "Advantages"}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[03/VALUES]</span>
+          <span className="font-mono text-[14px] xs:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 xs:pb-[15px] shrink-0">[03/VALUES]</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[59px] pt-[28px] items-start">
           {/* Left Column: Big typographic display stat */}
           <div className="lg:col-span-5 flex flex-col select-none">
-            <div className="text-[120px] md:text-[160px] lg:text-[180px] font-normal leading-none tracking-[-0.06em] text-[#0000FF] m-0">
+            <div className="text-[64px] xs:text-[80px] sm:text-[100px] md:text-[160px] lg:text-[180px] font-normal leading-none tracking-[-0.06em] text-[#0000FF] m-0">
               15+
             </div>
           </div>
@@ -266,13 +269,12 @@ export function Home() {
           {/* Right Column: Stacked list rows */}
           <div className="lg:col-span-7 flex flex-col divide-y divide-[#808080] w-full">
             {advantages.map((adv) => (
-              <div key={adv.num} className="grid grid-cols-12 gap-4 py-8 first:pt-0 last:pb-0 items-start group">
-                {/* Index number */}
-                <div className="col-span-1 font-mono text-[16px] text-[#808080] pt-1">
-                  [{adv.num}]
-                </div>
-                {/* Advantage Title */}
-                <div className="col-span-11 md:col-span-4 pt-1">
+              <div key={adv.num} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 py-8 first:pt-0 last:pb-0 items-start group">
+                {/* Title and Index Container */}
+                <div className="md:col-span-5 flex items-start gap-4 pt-1">
+                  <div className="font-mono text-[16px] text-[#808080] shrink-0">
+                    [{adv.num}]
+                  </div>
                   <h3 className="text-[21px] font-normal tracking-[-0.21px] text-black m-0 uppercase group-hover:text-[#0000FF] transition-colors duration-300">
                     {adv.title}
                   </h3>
@@ -294,8 +296,8 @@ export function Home() {
       {/* 4 БЛОК: Services (Услуги) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex justify-between items-baseline select-none">
-          <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase m-0 text-black">
-            {locale === "ru" ? "услуги" : locale === "kg" ? "кызматтар" : "services"}
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+            {locale === "ru" ? "Услуги" : locale === "kg" ? "Кызматтар" : "Services"}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/SERVICES]</span>
         </div>
@@ -304,31 +306,29 @@ export function Home() {
           {servicesList.map((service, index) => (
             <div 
               key={`service-${service.id}`} 
-              className={`grid grid-cols-1 md:grid-cols-12 gap-4 py-8 relative group cursor-pointer items-start ${
+              className={`flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 py-8 relative group cursor-pointer items-start ${
                 index === 0 ? '' : 'border-t border-[#808080]'
               }`}
             >
-              {/* Col 1: Index */}
-              <div className="col-span-1 font-mono text-[16px] text-[#808080] z-10">
-                [0{index + 1}]
-              </div>
-
-              {/* Col 2-5: Title */}
-              <div className="col-span-11 md:col-span-4 z-10">
+              {/* Title and Index Container */}
+              <div className="md:col-span-5 flex items-start gap-4 z-10 pt-1">
+                <div className="font-mono text-[16px] text-[#808080] shrink-0">
+                  [0{index + 1}]
+                </div>
                 <h3 className="text-[21px] font-normal tracking-[-0.21px] text-black m-0 uppercase group-hover:text-[#0000FF] transition-colors duration-300">
                   {service.title}
                 </h3>
               </div>
 
               {/* Col 6-12: Description */}
-              <div className="col-span-11 md:col-span-7 z-10 flex justify-start md:justify-end">
-                <p className="text-[17px] leading-[1.44] text-[#808080] m-0 max-w-[500px] text-left md:text-right group-hover:text-black transition-colors duration-300">
+              <div className="md:col-span-7 z-10 flex justify-start md:justify-end">
+                <p className="text-[15px] sm:text-[17px] leading-[1.44] text-[#808080] m-0 max-w-[500px] text-left md:text-right group-hover:text-black transition-colors duration-300">
                   {service.desc}
                 </p>
               </div>
 
-              {/* Col 12: Full width Accordion Expand Image Wrapper */}
-              <div className="col-span-12 grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-500 ease-out mt-0 group-hover:mt-6 z-0">
+              {/* Full width Accordion Expand Image Wrapper */}
+              <div className="w-full md:col-span-12 grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-500 ease-out mt-0 group-hover:mt-6 z-0">
                 <div className="overflow-hidden transition-all duration-500">
                   {service.imgUrl && (
                     <div className="w-full aspect-[21/6] md:aspect-[32/7] bg-[#191919] overflow-hidden border border-[#808080]/20">
@@ -351,7 +351,7 @@ export function Home() {
             to="/services" 
             className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 select-none text-center"
           >
-            {locale === "ru" ? "смотреть все услуги \u2192" : locale === "kg" ? "бардык кызматтарды көрүү \u2192" : "view all services \u2192"}
+            {locale === "ru" ? "Смотреть все услуги \u2192" : locale === "kg" ? "Бардык кызматтарды көрүү \u2192" : "View all services \u2192"}
           </Link>
         </div>
       </section>
@@ -361,8 +361,8 @@ export function Home() {
       {/* 5 БЛОК: Featured Projects (Избранные проекты) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
-          <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase m-0">
-            {locale === "ru" ? "избранные проекты" : locale === "kg" ? "тандалган иштер" : "featured projects"}
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+            {locale === "ru" ? "Избранные проекты" : locale === "kg" ? "Тандалган долбоорлор" : "Featured projects"}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/FEATURED]</span>
         </div>
@@ -370,7 +370,7 @@ export function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
           {featuredProjects.map((project, index) => (
             <div key={`featured-${project.id}`} className="w-full flex flex-col group"
-              style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
+              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
                 <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition duration-500 rounded-[8px] ${
                   index % 2 === 1
@@ -384,22 +384,22 @@ export function Home() {
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
-                  <div className="flex justify-between items-start w-full">
+                  <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4 md:gap-0">
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
                         {String(index + 1).padStart(2, '0')} / WORK
                       </span>
-                      <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
                         <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">{project.desc}</p>
                       )}
                     </div>
-                    <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
-                    <div className="text-left flex flex-col gap-1 shrink-0">
-                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">{project.tags}</span>
-                      <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">{project.year}</span>
+                    <div className="hidden md:block w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%]">
+                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
                   </div>
                 </div>
@@ -413,8 +413,8 @@ export function Home() {
       <section className="flex flex-col w-full overflow-hidden">
         <div className="pb-4 mb-[59px] select-none">
           <div className="flex justify-between items-baseline">
-            <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase m-0 text-black">
-              {locale === "ru" ? "бренды" : locale === "kg" ? "бренддер" : "selected brands"}
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+              {locale === "ru" ? "Бренды" : locale === "kg" ? "Бренддер" : "Selected brands"}
             </h2>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/BRANDS]</span>
           </div>

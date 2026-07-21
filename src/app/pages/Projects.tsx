@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+﻿import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -47,7 +47,7 @@ export function Projects() {
       
       {/* Title Block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
-        <h1 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0 lowercase">
+        <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
           {t.projects.title}
         </h1>
         <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
@@ -59,7 +59,7 @@ export function Projects() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
         {projects.map((project, index) => (
           <div key={project.id} className="w-full flex flex-col"
-            style={{ contentVisibility: "auto", containIntrinsicSize: "auto 400px" }}>
+            style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
             <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}

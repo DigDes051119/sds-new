@@ -5,7 +5,7 @@ import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
-
+import { Menu, X } from "lucide-react";
 export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
@@ -24,6 +24,9 @@ export function Root() {
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState("");
+  
+  // Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +141,11 @@ export function Root() {
 
   const t = siteTranslations[locale] || translations[locale];
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, locale]);
+
   const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
 
   const navLinks = [
@@ -192,16 +200,16 @@ export function Root() {
       <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett antialiased overflow-x-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
-        <header className={`w-full grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start lg:items-center pt-[40px] px-[40px] md:px-[80px] z-50 bg-white ${isProjectDetailPage ? 'pb-[28px]' : 'pb-[64px]'}`}>
+        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-5 md:px-10 lg:px-[80px] z-50 bg-white ${isProjectDetailPage ? 'pb-[20px] md:pb-[28px]' : 'pb-[30px] md:pb-[64px]'}`}>
           {/* Logo */}
           <div className="lg:col-span-3 flex items-center">
             <NavLink to="/" className="flex items-center">
-              <img src={logo} alt="Steel Drake Studio Team" className="h-[48px] w-auto object-contain" />
+              <img src={logo} alt="Steel Drake Studio Team" className="h-[36px] md:h-[48px] w-auto object-contain" />
             </NavLink>
           </div>
 
-          {/* Navigation Links and Languages */}
-          <div className="lg:col-span-9 flex justify-end">
+          {/* Navigation Links and Languages (Desktop) */}
+          <div className="hidden lg:flex lg:col-span-9 justify-end">
             <div className="flex flex-nowrap items-center gap-[28px] xl:gap-[40px] whitespace-nowrap">
               <nav className="flex flex-nowrap items-center gap-[20px] xl:gap-[28px]">
               {navLinks.map((link) => (
@@ -209,7 +217,7 @@ export function Root() {
                   key={link.path}
                   to={link.path}
                   className={({ isActive }) =>
-                    `text-[16px] font-normal tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
+                    `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
                       isActive ? "text-[#0000FF]" : "text-black"
                     }`
                   }
@@ -255,25 +263,42 @@ export function Root() {
             </div>
           </div>
         </div>
-      </header>
+
+          {/* Mobile Right Side: Language Switcher */}
+          <div className="flex lg:hidden items-center justify-end">
+            <div className="flex gap-2">
+              {['en', 'ru', 'kg'].map((lang) => (
+                <button 
+                  key={lang}
+                  onClick={() => setLocale(lang as Language)}
+                  className={`text-[13px] font-mono tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[2px] ${
+                    locale === lang ? "text-[#0000FF] font-bold" : "text-[#808080] hover:text-black"
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
 
 
         {/* Main Content + Footer container */}
         <div className="flex flex-col flex-grow">
           {/* Main Content Area */}
-          <main key={location.pathname} className="w-full flex-grow px-[40px] md:px-[80px] page-transition">
+          <main key={location.pathname} className="w-full flex-grow px-5 md:px-10 lg:px-[80px] page-transition overflow-hidden">
             {outlet}
           </main>
 
           {/* Footer */}
-          <footer className="w-full bg-white text-black pt-20 pb-24 mt-20 border-t border-black/10 font-twk-everett px-[40px] md:px-[80px]">
+          <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-5 md:px-10 lg:px-[80px]">
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">
                 <button
                   type="button"
                   onClick={() => setIsContactFormOpen(true)}
-                  className="inline-flex items-center justify-center px-6 py-2.5 border border-black/30 !rounded-full text-[14px] font-normal hover:bg-black hover:text-white hover:border-black transition-all duration-300 interactive-element cursor-pointer"
+                  className="inline-flex items-center justify-center px-6 py-2.5 border border-black/30 !rounded-full text-[14px] font-normal hover:bg-[#0000FF] hover:text-white hover:border-[#0000FF] transition-all duration-300 interactive-element cursor-pointer"
                 >
                   {locale === "ru" ? "Давайте обсудим" : locale === "kg" ? "Сүйлөшөлү" : "Let's Talk"}
                 </button>
@@ -302,7 +327,7 @@ export function Root() {
               <div className="mt-8 mb-16">
                 <a
                   href="mailto:contact@steeldrakestudio.com"
-                  className="text-[32px] sm:text-5xl md:text-6xl lg:text-[76px] font-normal tracking-[-0.04em] text-black leading-none hover:opacity-70 transition-opacity interactive-element block w-fit"
+                  className="text-[18px] xs:text-[22px] sm:text-4xl md:text-5xl lg:text-[76px] font-normal tracking-[-0.04em] text-black leading-none hover:opacity-70 transition-opacity interactive-element block w-full break-all"
                 >
                   contact@steeldrakestudio.com
                 </a>
@@ -334,7 +359,7 @@ export function Root() {
               </div>
 
               {/* Divider line */}
-              <div className="h-px bg-black/10 -mx-[40px] md:-mx-[80px] mb-10" />
+              <div className="h-px bg-black/10 -mx-5 md:-mx-10 lg:-mx-[80px] mb-10" />
 
               {/* Bottom Row: Logo and Copyright */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -355,7 +380,30 @@ export function Root() {
           </footer>
         </div>
 
-{/* Sidebar Navigation disabled */}
+        {/* 2-Row Grid Tab Bar (Mobile) */}
+        <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-black/10 z-[900] lg:hidden pb-[env(safe-area-inset-bottom)]">
+          <div className="grid grid-cols-3 w-full">
+            {navLinks.map((link, index) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) =>
+                  `flex items-center justify-center py-3 text-[10px] xs:text-[11px] sm:text-[12px] font-bold font-mono tracking-[0.02em] uppercase transition-colors duration-300 ${
+                    index < 3 ? 'border-b border-black/10' : ''
+                  } ${
+                    (index + 1) % 3 !== 0 ? 'border-r border-black/10' : ''
+                  } ${
+                    isActive 
+                      ? "text-[#0000FF]" 
+                      : "text-black hover:text-[#0000FF]"
+                  }`
+                }
+              >
+                {link.name}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
 
         {/* Contact Form Overlay and Panel */}
         <AnimatePresence>

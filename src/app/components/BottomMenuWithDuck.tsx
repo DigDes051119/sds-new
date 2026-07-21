@@ -57,7 +57,7 @@ export function BottomMenuWithDuck({
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `text-[17px] font-normal tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
+                  `text-[17px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
                     isActive ? "text-[#0000FF]" : "text-black"
                   }`
                 }

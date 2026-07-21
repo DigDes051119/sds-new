@@ -1,4 +1,4 @@
-import { useContext } from "react";
+﻿import { useContext } from "react";
 import { LanguageContext } from "../i18n";
 
 export function Services() {
@@ -11,7 +11,7 @@ export function Services() {
       {/* Title block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start w-auto">
         <div className="md:col-span-5">
-          <h1 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0 lowercase">
+          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.services.title}
           </h1>
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
@@ -39,7 +39,7 @@ export function Services() {
               <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
                 [{String(index + 1).padStart(2, '0')}/SERVICE]
               </span>
-              <h2 className="text-[21px] font-normal leading-[1.40] tracking-[-0.21px] text-[#0000FF] m-0">
+              <h2 className="text-[21px] font-bold leading-[1.40] tracking-[-0.21px] text-[#0000FF] m-0">
                 {service.title}
               </h2>
             </div>

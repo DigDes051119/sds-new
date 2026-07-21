@@ -36,23 +36,13 @@ export function ProjectDetail() {
     ? data.collageBlocks
     : (data.processImages || []).map((img: string) => [img]);
 
-  const parseResult = (text: string) => {
-    const match = text.match(/(\d+%\s*(?:higher|reduction|увеличение|снижение|жогорулоо|төмөндөө)?|\d+\s*х|\d+\s*\+|\b\d+\b)/i);
-    if (match) {
-      const stat = match[0];
-      const desc = text.replace(stat, "").replace(/^[-–—:]\s*/, "").trim();
-      return { stat, desc };
-    }
-    return { stat: "✓", desc: text };
-  };
-
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
       
       {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[94vh] min-h-[600px] w-[calc(100%+80px)] md:w-[calc(100%+160px)] mx-[-40px] md:mx-[-80px] mt-[-24px] bg-black flex flex-col justify-end px-[40px] md:px-[80px] pb-[40px] md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+40px)] md:w-[calc(100%+80px)] lg:w-[calc(100%+160px)] mx-[-20px] md:mx-[-40px] lg:mx-[-80px] mt-[-24px] bg-black flex flex-col justify-end px-5 md:px-10 lg:px-[80px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {coverImg && (
@@ -71,11 +61,11 @@ export function ProjectDetail() {
         {/* Text and Metadata at the bottom, directly on the cover */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-end w-full">
           <div className="lg:col-span-7">
-            <h1 className="text-[48px] md:text-[72px] lg:text-[96px] font-normal leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
+            <h1 className="text-[32px] xs:text-[44px] md:text-[72px] lg:text-[96px] font-bold leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
               {data.name}
             </h1>
           </div>
-          <div className="lg:col-span-5 flex flex-nowrap justify-end gap-8 md:gap-[48px] uppercase tracking-wider font-mono text-white">
+          <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
             <div className="border-l border-white/40 pl-6 md:pl-8">
               <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Клиент" : "Client"}</span>
               <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.client}</span>
@@ -95,8 +85,8 @@ export function ProjectDetail() {
       {/* Challenge Section */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start pt-[10px]">
         <div className="lg:col-span-5 flex flex-col">
-          <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase text-black m-0 leading-none">
-            {locale === "ru" ? "задача и вызов" : locale === "kg" ? "маселе жана чакырык" : "challenge"}
+          <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
+            {locale === "ru" ? "Задача и вызов" : locale === "kg" ? "Маселе жана чакырык" : "Challenge"}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[01/CHALLENGE]</span>
         </div>
@@ -105,7 +95,7 @@ export function ProjectDetail() {
           <p className="text-[20px] md:text-[28px] font-light leading-[1.35] tracking-[-0.03em] text-black m-0">
             {data.challenge}
           </p>
-          <p className="text-[17px] leading-[1.5] text-[#808080] m-0 font-normal">
+          <p className="text-[15px] leading-[1.5] text-[#808080] m-0 font-normal">
             {data.desc}
           </p>
 
@@ -147,9 +137,8 @@ export function ProjectDetail() {
               {block.map((imgUrl: string, imgIdx: number) => {
                 const isVideo = imgUrl?.startsWith("video:");
                 const videoUrl = isVideo ? imgUrl.slice(6) : "";
-
                 return (
-                  <div key={`${blockIdx}-${imgIdx}`} className="w-full overflow-hidden bg-[#fafaf6] border border-[#808080]/10">
+                  <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#fafaf6]">
                     {isVideo ? (
                       <div className="w-full aspect-[16/9]">
                         <InlineVideoPlayer videoUrl={videoUrl} alt={`${data.name} media`} />
@@ -157,7 +146,7 @@ export function ProjectDetail() {
                     ) : (
                       <ImageWithFallback
                         src={imgUrl}
-                        className="w-full block object-contain"
+                        className="w-full h-auto block max-w-full"
                         alt={`${data.name} process`}
                         loading="eager"
                       />
@@ -171,63 +160,53 @@ export function ProjectDetail() {
       </section>
 
       {/* Results Section */}
-      {data.results && data.results.length > 0 && (
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start border-t border-[#808080] pt-[40px] mt-8">
-          {/* Left Column: Heading and Tag */}
-          <div className="lg:col-span-5 flex flex-col">
-            <h2 className="text-[40px] md:text-[54px] font-normal tracking-[-0.04em] lowercase text-black m-0 leading-none">
-              {locale === "ru" ? "результаты" : locale === "kg" ? "натыйжалар" : "results"}
-            </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
+      <section className="mt-8">
+        <div className="border border-[#808080]/30 p-[28px] md:p-[40px]">
+          {/* Top Row: Heading + Link */}
+          <div className="flex justify-between items-start gap-[28px] mb-6">
+            <div className="flex flex-col">
+              <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
+                {locale === "ru" ? "Результаты" : locale === "kg" ? "Натыйжалар" : "Results"}
+              </h2>
+              <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
+            </div>
+            <Link
+              to="/projects"
+              className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
+            >
+              {locale === "ru" ? "Другие проекты" : locale === "kg" ? "Башка долбоорлор" : "View other projects"}
+              <span className="text-[18px] leading-none">&rarr;</span>
+            </Link>
           </div>
 
-          {/* Right Column: 2-column Card Grid */}
-          <div className="lg:col-span-7 flex flex-col gap-8 w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-              {data.results.map((result: string, idx: number) => {
-                const parsed = parseResult(result);
-                const isStat = parsed.stat !== "✓";
-                const indexStr = String(idx + 1).padStart(2, "0");
-                return (
-                  <div 
-                    key={idx} 
-                    className="flex flex-col group gap-2"
-                  >
-                    {isStat ? (
-                      <>
-                        <span className="text-[48px] md:text-[60px] font-normal text-black leading-none tracking-tighter group-hover:text-[#0000FF] transition-colors duration-500">
-                          {parsed.stat}
-                        </span>
-                        <p className="text-[16px] md:text-[17px] leading-[1.45] text-[#808080] group-hover:text-black transition-colors duration-500 m-0">
-                          {parsed.desc}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-wider">
-                          [{indexStr}/OUTCOME]
-                        </span>
-                        <p className="text-[18px] md:text-[22px] font-normal leading-[1.4] text-black group-hover:text-[#0000FF] transition-colors duration-500 m-0">
-                          {parsed.desc}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
+          {/* Left-aligned content */}
+          <div className="flex flex-col gap-6 max-w-[720px]">
             {/* Description */}
-            {data.resultsDesc && (
-              <p className="text-[17px] leading-[1.6] text-[#808080] m-0 font-normal border-t border-[#808080]/20 pt-6 max-w-[600px]">
-                {data.resultsDesc}
+            <p className="text-[15px] leading-[1.5] text-[#808080] font-normal m-0">
+              {data.resultsDesc}
+            </p>
+
+            {/* Main Result */}
+            {data.results && data.results[0] && (
+              <p className="text-[22px] md:text-[28px] leading-[1.3] text-black font-bold m-0">
+                {data.results[0]}
               </p>
             )}
-          </div>
-        </section>
-      )}
 
-      {/* Loop Previous / Next Project Navigation */}
+            {/* Status line */}
+            <div className="flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
+                <circle cx="10" cy="10" r="10" fill="#0000FF" fillOpacity="0.1" />
+                <path d="M6 10l3 3 5-6" stroke="#0000FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="text-[17px] leading-[1.5] text-black font-normal">
+                {locale === "ru" ? "Проект доставлен и успешно развернут" : locale === "kg" ? "Долбоор ийгиликтүү жеткирилди" : "Project delivered and successfully deployed"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+{/* Loop Previous / Next Project Navigation */}
       {(() => {
         const items = t.projects?.items || [];
         const currentIdx = items.findIndex((p: any) => p.id === id);
@@ -274,8 +253,8 @@ export function ProjectDetail() {
                 const cover = getProjCover(project.id);
                 const desc = getProjDesc(project.id);
                 const label = dir === 'prev'
-                  ? (locale === "ru" ? "предыдущий проект" : "previous project")
-                  : (locale === "ru" ? "следующий проект" : "next project");
+                  ? (locale === "ru" ? "Предыдущий проект" : "Previous project")
+                  : (locale === "ru" ? "Следующий проект" : "Next project");
                 return (
                   <Link
                     key={project.id}

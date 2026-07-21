@@ -1,4 +1,4 @@
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .dark, .admin-theme-dark *, .admin-theme-dark));
 
 :root {
   /* Colors */
@@ -108,28 +108,28 @@
 
   h1 {
     font-size: var(--text-display);
-    font-weight: 400;
+    font-weight: 700;
     line-height: var(--leading-display);
     letter-spacing: var(--tracking-display);
   }
 
   h2 {
     font-size: var(--text-heading);
-    font-weight: 400;
+    font-weight: 700;
     line-height: var(--leading-heading);
     letter-spacing: var(--tracking-heading);
   }
 
   h3 {
     font-size: var(--text-subheading);
-    font-weight: 400;
+    font-weight: 700;
     line-height: var(--leading-subheading);
     letter-spacing: var(--tracking-subheading);
   }
 
   h4, h5, h6 {
     font-size: var(--text-body);
-    font-weight: 400;
+    font-weight: 700;
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
   }

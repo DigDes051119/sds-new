@@ -1,4 +1,4 @@
-import { useContext } from "react";
+﻿import { useContext } from "react";
 import { LanguageContext } from "../i18n";
 import { Map, MapMarker, MarkerContent } from "../components/ui/map";
 
@@ -15,7 +15,7 @@ export function Contacts() {
       {/* Title Block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start w-auto">
         <div className="md:col-span-5">
-          <h1 className="text-[40px] md:text-[54px] font-normal leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0 lowercase">
+          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.contacts.title}
           </h1>
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">

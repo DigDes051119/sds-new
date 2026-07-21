@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
 import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -50,7 +50,8 @@ export function AdminProjectsEditor() {
 
   const handleProjectDrop = async (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
-    if (draggedProjectIndex === null || draggedProjectIndex === targetIndex) return;
+    const sourceIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (isNaN(sourceIndex) || sourceIndex === targetIndex) return;
 
     try {
       const newTranslations = JSON.parse(JSON.stringify(translations));
@@ -58,7 +59,7 @@ export function AdminProjectsEditor() {
       const langs = ["ru", "en", "kg"] as const;
       langs.forEach(lang => {
         const items = newTranslations[lang].projects.items;
-        const [movedItem] = items.splice(draggedProjectIndex, 1);
+        const [movedItem] = items.splice(sourceIndex, 1);
         items.splice(targetIndex, 0, movedItem);
       });
 
@@ -1857,38 +1858,49 @@ export function AdminProjectsEditor() {
               {/* Mock Results Showcase */}
               <div className="px-6 py-12 bg-[#fafaf6]">
                 <div className="w-full">
-
-                  {/* Results Panel */}
-                  <div className="bg-white border border-black/[0.04] rounded-[1.8rem] p-6 flex flex-col justify-between shadow-[0_10px_35px_rgba(0,0,0,0.01)] w-full">
-                    <div>
-                      <h2 className="text-sm font-bold tracking-tight mb-6">Результаты</h2>
-
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="border-t border-black/[0.06] pt-3">
-                          <span className="text-2xl font-bold text-[#0000FF] block tracking-tight">
-                            {formResult1Ru ? formResult1Ru.match(/(\d+%\s*(?:увеличение|снижение)?|\d+\s*х|\d+\s*\+|\b\d+\b)/i)?.[0] || "✓" : "✓"}
-                          </span>
-                          <span className="text-[9px] text-black/55 block leading-tight mt-1 truncate">{formResult1Ru || "Показатель 1"}</span>
-                        </div>
-                        <div className="border-t border-black/[0.06] pt-3">
-                          <span className="text-2xl font-bold text-[#0000FF] block tracking-tight">
-                            {formResult2Ru ? formResult2Ru.match(/(\d+%\s*(?:увеличение|снижение)?|\d+\s*х|\d+\s*\+|\b\d+\b)/i)?.[0] || "✓" : "✓"}
-                          </span>
-                          <span className="text-[9px] text-black/55 block leading-tight mt-1 truncate">{formResult2Ru || "Показатель 2"}</span>
-                        </div>
+                  <div className="border border-[#808080]/30 p-[28px] md:p-[40px]">
+                    {/* Top Row: Heading + Link */}
+                    <div className="flex justify-between items-start gap-[28px] mb-6">
+                      <div className="flex flex-col">
+                        <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
+                          Результаты
+                        </h2>
+                        <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
+                        {/* Description (editable) */}
+                        <textarea
+                          value={formResult2Ru}
+                          onChange={(e) => setFormResult2Ru(e.target.value)}
+                          placeholder="Описание результата..."
+                          rows={2}
+                          className="w-full bg-transparent border-b border-[#808080]/50 py-2 outline-none focus:border-[#0000FF] text-[15px] leading-[1.5] text-[#808080] font-normal placeholder:text-[#808080]/40 resize-none mt-3 max-w-[380px]"
+                        />
                       </div>
-                    </div>
-
-                    <div className="mt-8 pt-4 border-t border-black/[0.06] flex items-center gap-2 text-black/70">
-                      <div className="w-5 h-5 rounded-full bg-[#0000FF]/10 flex items-center justify-center text-[#0000FF]">
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <span className="text-[8px] font-medium tracking-tight">
-                        Проект полностью завершен и передан клиенту
+                      <span className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black uppercase tracking-[-0.15px] mt-2">
+                        Другие проекты
+                        <span className="text-[18px] leading-none">&rarr;</span>
                       </span>
                     </div>
-                  </div>
 
+                    {/* Main Result + Status */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
+                      <div className="lg:col-span-5" />
+                      <div className="lg:col-span-7 flex flex-col gap-6">
+                        <input
+                          type="text"
+                          value={formResult1Ru}
+                          onChange={(e) => setFormResult1Ru(e.target.value)}
+                          placeholder="Главный результат"
+                          className="w-full bg-transparent border-b border-[#808080]/50 py-2 outline-none focus:border-[#0000FF] text-[22px] md:text-[28px] leading-[1.3] text-black font-bold placeholder:text-[#808080]/40"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-[#0000FF]" />
+                          <span className="text-[17px] leading-[1.5] text-black font-normal">
+                            Проект доставлен и успешно развернут
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

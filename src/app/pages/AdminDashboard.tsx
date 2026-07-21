@@ -565,9 +565,9 @@ $$ LANGUAGE plpgsql;`;
   const heatmapDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
   return (
-    <div className="space-y-8 font-['Inter',sans-serif] w-full">
+    <div className="space-y-6 font-['Inter',sans-serif] w-full">
       {/* Control Actions Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-2xl p-4 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             onClick={() => loadAnalytics(true)}
@@ -581,7 +581,7 @@ $$ LANGUAGE plpgsql;`;
           <button
             onClick={handleClearAnalytics}
             disabled={refreshing}
-            className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 active:scale-95 disabled:opacity-50"
+            className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 active:scale-95 disabled:opacity-50"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Сбросить логи
@@ -592,8 +592,8 @@ $$ LANGUAGE plpgsql;`;
           onClick={handleToggleAnalytics}
           className={`px-4 py-2.5 font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 border ${
             analyticsEnabled
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"
-              : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+              : "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20"
           }`}
         >
           {analyticsEnabled ? <Activity className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -616,17 +616,17 @@ $$ LANGUAGE plpgsql;`;
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex items-center justify-between shadow-sm"
+              className="bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-2xl p-6 flex items-center justify-between shadow-xs"
             >
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider block">{stat.label}</span>
+                <span className="text-xs font-semibold opacity-50 uppercase tracking-wider block">{stat.label}</span>
                 <span className="text-3xl font-bold tracking-tight block">{stat.value}</span>
-                <span className="text-[10px] text-[#0066FF] font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0066FF] animate-pulse" />
+                <span className="text-[10px] text-[#0000FF] font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0000FF] animate-pulse" />
                   {stat.change}
                 </span>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-white/85">
+              <div className="w-12 h-12 rounded-2xl bg-[#0000FF]/5 border border-[#0000FF]/10 flex items-center justify-center text-[#0000FF]">
                 <Icon className="w-6 h-6" />
               </div>
             </motion.div>
@@ -635,14 +635,14 @@ $$ LANGUAGE plpgsql;`;
       </div>
 
       {/* Row 1: Graph (Full Width) */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm w-full">
+      <div className="bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-3xl p-8 space-y-6 shadow-xs w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h3 className="text-lg font-bold tracking-tight">График активности</h3>
-            <p className="text-xs text-white/40">Распределение посещений по времени</p>
+            <p className="text-xs opacity-50">Распределение посещений по времени</p>
           </div>
           
-          <div className="flex bg-white/[0.03] border border-white/[0.06] p-1 rounded-xl">
+          <div className="flex bg-gray-100 dark:bg-[#1F222A] p-1 rounded-xl">
             {(["week", "month", "year"] as const).map((period) => (
               <button
                 key={period}
