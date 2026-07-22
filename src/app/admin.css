@@ -1,0 +1,97 @@
+/* Ultra-Premium FinnHub & Dribbble SaaS Admin Design System */
+
+.admin-app-scope {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  color-scheme: dark light;
+
+  /* Very Dark Theme Variables (Near-Black #07080B / #13141B + Signature Blue #0000FF) */
+  --admin-bg: #07080B;
+  --admin-sidebar: #0D0E13;
+  --admin-card: #13141B;
+  --admin-card-hover: #191B24;
+  --admin-inner: #0A0B0F;
+  --admin-border: #222430;
+  --admin-border-light: #2C2E3E;
+  --admin-text: #F8FAFC;
+  --admin-muted: #94A3B8;
+  --admin-subtle: #64748B;
+  --admin-accent: #0000FF;
+  --admin-accent-hover: #1A1AFF;
+  --admin-accent-glow: rgba(0, 0, 255, 0.45);
+  --admin-accent-subtle: rgba(0, 0, 255, 0.15);
+}
+
+.admin-app-scope.admin-theme-light,
+.admin-theme-light .admin-app-scope {
+  /* Light Theme Variables (White + Signature Blue #0000FF) */
+  --admin-bg: #F4F5F9;
+  --admin-sidebar: #FFFFFF;
+  --admin-card: #FFFFFF;
+  --admin-card-hover: #F8FAFC;
+  --admin-inner: #F8F9FD;
+  --admin-border: #E2E8F0;
+  --admin-border-light: #CBD5E1;
+  --admin-text: #0F172A;
+  --admin-muted: #64748B;
+  --admin-subtle: #94A3B8;
+  --admin-accent: #0000FF;
+  --admin-accent-hover: #1A1AFF;
+  --admin-accent-glow: rgba(0, 0, 255, 0.25);
+  --admin-accent-subtle: rgba(0, 0, 255, 0.1);
+}
+
+.admin-app-scope * {
+  box-sizing: border-box;
+}
+
+/* Base Card Style */
+.admin-card {
+  background-color: var(--admin-card);
+  border: 1px solid var(--admin-border);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-card:hover {
+  border-color: var(--admin-border-light);
+}
+
+/* Inner Component Slot */
+.admin-inner-slot {
+  background-color: var(--admin-inner);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+}
+
+/* Primary Blue Button */
+.admin-btn-primary {
+  background-color: var(--admin-accent);
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px var(--admin-accent-glow);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-btn-primary:hover {
+  background-color: var(--admin-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--admin-accent-glow);
+}
+
+/* Custom Scrollbar */
+.admin-app-scope ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.admin-app-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-app-scope ::-webkit-scrollbar-thumb {
+  background: var(--admin-border);
+  border-radius: 9999px;
+}
+.admin-app-scope ::-webkit-scrollbar-thumb:hover {
+  background: var(--admin-muted);
+}

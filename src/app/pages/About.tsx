@@ -3,6 +3,22 @@ import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
 import { Eye, Heart, Zap } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Map, MapMarker, MarkerContent, MapPopup } from "../components/ui/map";
+
+const globalLocations = [
+  { name: "Bishkek, Kyrgyzstan (HQ)", lng: 74.6186, lat: 42.8710, isHQ: true },
+  { name: "Miami, USA", lng: -80.1918, lat: 25.7617 },
+  { name: "Washington, USA", lng: -77.0369, lat: 38.8951 },
+  { name: "Brussels, Belgium", lng: 4.3517, lat: 50.8503 },
+  { name: "Almaty, Kazakhstan", lng: 76.8512, lat: 43.2220 },
+  { name: "London, UK", lng: -0.1276, lat: 51.5074 },
+  { name: "Toronto, Canada", lng: -79.3832, lat: 43.6532 },
+  { name: "Beijing, China", lng: 116.4074, lat: 39.9042 },
+  { name: "Tashkent, Uzbekistan", lng: 69.2401, lat: 41.2995 },
+  { name: "Dushanbe, Tajikistan", lng: 68.7870, lat: 38.5598 },
+  { name: "Berlin, Germany", lng: 13.4050, lat: 52.5200 },
+  { name: "Paris, France", lng: 2.3522, lat: 48.8566 },
+];
 
 export function About() {
   const { t, locale } = useContext(LanguageContext);
@@ -441,9 +457,41 @@ export function About() {
           </div>
         </div>
 
-        <div className="w-full min-h-[220px] md:aspect-[2/1] relative bg-[#f5f5f5] flex items-center justify-center py-8 px-4 md:py-0 md:px-0">
-          <div className="text-center max-w-[600px] px-2 sm:px-8">
-            <p className="text-[15px] sm:text-[18px] md:text-[20px] leading-[1.6] text-[#808080] m-0">
+        <div className="w-full border border-[#808080]/30 relative overflow-hidden select-none bg-[#f5f5f5] rounded-xl shadow-inner flex flex-col">
+          <div className="w-full h-[400px] md:h-[500px]">
+            <Map
+              viewport={{
+                center: [20, 25],
+                zoom: 1.6,
+                bearing: 0,
+                pitch: 0
+              }}
+              theme="light"
+            >
+              {globalLocations.map((loc) => (
+                <MapMarker key={loc.name} longitude={loc.lng} latitude={loc.lat}>
+                  <MarkerContent>
+                    <div className="relative group cursor-pointer">
+                      <div 
+                        className={`rounded-full transition-transform duration-300 ${
+                          loc.isHQ 
+                            ? "w-5 h-5 bg-[#0000FF] border-2 border-white ring-4 ring-[#0000FF]/30 animate-pulse" 
+                            : "w-3.5 h-3.5 bg-[#0000FF] border border-white hover:scale-150"
+                        }`} 
+                      />
+                    </div>
+                  </MarkerContent>
+                  <MapPopup permanent={false} className="bg-black text-white px-3 py-1.5 rounded text-[12px] font-mono shadow-md">
+                    {loc.name}
+                  </MapPopup>
+                </MapMarker>
+              ))}
+            </Map>
+          </div>
+
+          {/* Text Summary banner at the bottom of the map */}
+          <div className="w-full bg-white/90 backdrop-blur-md border-t border-[#808080]/20 p-4 md:p-6 text-center">
+            <p className="text-[14px] md:text-[16px] leading-[1.5] text-[#808080] m-0 max-w-[800px] mx-auto font-normal">
               {ab.mapCities || ""}
             </p>
           </div>

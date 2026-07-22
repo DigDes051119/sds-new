@@ -5,7 +5,7 @@ import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowUp, ThumbsUp } from "lucide-react";
 export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
@@ -25,6 +25,7 @@ export function Root() {
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState("");
   
+  const [showScrollTop, setShowScrollTop] = useState(false);
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -56,6 +57,12 @@ export function Root() {
   };
 
   useEffect(() => {
+    const handleOpenModal = () => setIsContactFormOpen(true);
+    window.addEventListener("sds:open-contact-modal", handleOpenModal);
+    return () => window.removeEventListener("sds:open-contact-modal", handleOpenModal);
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setPreloaderActive(false);
       setTimeout(() => {
@@ -83,21 +90,53 @@ export function Root() {
     supabaseClient.logVisit(location.pathname, locale);
   }, [location.pathname, locale]);
 
-    // Scroll tracking — native scroll, no custom animation
-    useEffect(() => {
-      window.scrollTo(0, 0);
-      setIsScrolled(false);
-      let wasScrolled = false;
-      const onScroll = () => {
-        const scrolled = window.scrollY > 80;
-        if (scrolled !== wasScrolled) {
-          wasScrolled = scrolled;
-          setIsScrolled(scrolled);
-        }
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      return () => window.removeEventListener("scroll", onScroll);
+  const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
+  const [showProjectBanner, setShowProjectBanner] = useState(false);
+  const [projectBannerDismissed, setProjectBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    setShowProjectBanner(false);
+    setProjectBannerDismissed(false);
   }, [location.pathname]);
+
+  // Scroll tracking — native scroll, no custom animation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setIsScrolled(false);
+    setShowScrollTop(false);
+    let wasScrolled = false;
+    const onScroll = () => {
+      const scrolled = window.scrollY > 80;
+      if (scrolled !== wasScrolled) {
+        wasScrolled = scrolled;
+        setIsScrolled(scrolled);
+      }
+      setShowScrollTop(window.scrollY > 300);
+
+      // Project detail sticky banner: appears strictly when user reaches middle of page (50% scroll) and disappears when collage section ends
+      if (isProjectDetailPage && !projectBannerDismissed) {
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPct = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+        
+        const collageEl = document.getElementById("project-collage-section");
+        const collageRect = collageEl ? collageEl.getBoundingClientRect() : null;
+        
+        // Collage section has ended when its bottom edge scrolls above 30% of viewport
+        const collageEnded = collageRect ? collageRect.bottom < window.innerHeight * 0.3 : false;
+
+        if (scrollPct >= 48 && !collageEnded) {
+          setShowProjectBanner(true);
+        } else {
+          setShowProjectBanner(false);
+        }
+      } else {
+        setShowProjectBanner(false);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [location.pathname, isProjectDetailPage, projectBannerDismissed]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -145,8 +184,6 @@ export function Root() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname, locale]);
-
-  const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
 
   const navLinks = [
     { name: t.nav.home, path: "/" },
@@ -200,7 +237,7 @@ export function Root() {
       <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett antialiased overflow-x-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
-        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-5 md:px-10 lg:px-[80px] z-50 bg-white ${isProjectDetailPage ? 'pb-[20px] md:pb-[28px]' : 'pb-[30px] md:pb-[64px]'}`}>
+        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-[45px] md:px-[65px] lg:px-[105px] z-50 bg-white ${isProjectDetailPage ? 'pb-[20px] md:pb-[28px]' : 'pb-[30px] md:pb-[64px]'}`}>
           {/* Logo */}
           <div className="lg:col-span-3 flex items-center">
             <NavLink to="/" className="flex items-center">
@@ -286,12 +323,12 @@ export function Root() {
         {/* Main Content + Footer container */}
         <div className="flex flex-col flex-grow">
           {/* Main Content Area */}
-          <main key={location.pathname} className="w-full flex-grow px-5 md:px-10 lg:px-[80px] page-transition overflow-hidden">
+          <main key={location.pathname} className="w-full flex-grow px-[45px] md:px-[65px] lg:px-[105px] page-transition overflow-hidden">
             {outlet}
           </main>
 
           {/* Footer */}
-          <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-5 md:px-10 lg:px-[80px]">
+          <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">
@@ -359,7 +396,7 @@ export function Root() {
               </div>
 
               {/* Divider line */}
-              <div className="h-px bg-black/10 -mx-5 md:-mx-10 lg:-mx-[80px] mb-10" />
+              <div className="h-px bg-black/10 -mx-[45px] md:-mx-[65px] lg:-mx-[105px] mb-10" />
 
               {/* Bottom Row: Logo and Copyright */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -537,6 +574,80 @@ export function Root() {
                 </div>
               </motion.div>
             </>
+          )}
+        </AnimatePresence>
+
+        {/* Scroll To Top Fixed Square Button (Aligned to Site Grid) */}
+        <AnimatePresence>
+          {!isContactFormOpen && showScrollTop && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="fixed bottom-6 md:bottom-10 right-[45px] md:right-[65px] lg:right-[105px] z-50 w-12 h-12 sm:w-14 sm:h-14 bg-white text-black border border-black hover:bg-[#0000FF] hover:text-white hover:border-[#0000FF] active:bg-[#0000FF] active:text-white active:border-[#0000FF] transition-all duration-300 flex items-center justify-center cursor-pointer select-none group"
+              title={locale === "ru" ? "Наверх" : "Scroll to top"}
+            >
+              <ArrowUp className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.25] group-hover:-translate-y-0.5 transition-transform duration-300" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Fixed Sticky Inquiry Banner for Project Detail Pages (Truly Viewport Fixed) */}
+        <AnimatePresence>
+          {!isContactFormOpen && isProjectDetailPage && showProjectBanner && !projectBannerDismissed && (
+            <motion.div
+              initial={{ opacity: 0, y: 35, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 35, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl bg-white text-black border border-black p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center justify-between gap-5 font-mono select-none"
+            >
+              <div 
+                onClick={() => setIsContactFormOpen(true)}
+                className="flex items-center gap-4 sm:gap-5 cursor-pointer group min-w-0 flex-1"
+              >
+                {/* Thumbs Up Button */}
+                <div className="w-11 h-11 sm:w-13 sm:h-13 bg-white text-black border border-black group-hover:bg-[#0000FF] group-hover:border-[#0000FF] group-hover:text-white transition-all duration-300 flex items-center justify-center shrink-0">
+                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] group-hover:scale-110 transition-transform duration-300" />
+                </div>
+
+                <div className="flex flex-col min-w-0">
+                  <span className="font-mono text-[#0000FF] text-[11px] sm:text-[12px] uppercase tracking-[0.06em] block mb-1">
+                    [01/PROJECT INQUIRY]
+                  </span>
+                  <p className="font-sans text-[14px] sm:text-[16px] font-normal leading-snug text-black m-0 group-hover:text-[#0000FF] transition-colors truncate sm:whitespace-normal">
+                    {locale === "ru" 
+                      ? "Понравился проект? Свяжитесь с нами, для обсуждения вашей идеи."
+                      : locale === "kg"
+                        ? "Долбоор жактыбы? Идеяңызды талкуулоо үчүн биз менен байланышыңыз."
+                        : "Like this project? Contact us to discuss your idea."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => setIsContactFormOpen(true)}
+                  className="hidden sm:inline-flex items-center gap-2 border border-black hover:border-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-4 py-2.5 uppercase font-mono text-[12px] tracking-[0.06em] cursor-pointer text-black"
+                >
+                  {locale === "ru" ? "Обсудить" : "Discuss"} &rarr;
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setProjectBannerDismissed(true);
+                  }}
+                  className="text-[#808080] hover:text-black font-mono text-[13px] cursor-pointer p-1"
+                  title={locale === "ru" ? "Закрыть" : "Close"}
+                >
+                  [X]
+                </button>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
 

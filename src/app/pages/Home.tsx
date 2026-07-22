@@ -306,8 +306,8 @@ export function Home() {
           {servicesList.map((service, index) => (
             <div 
               key={`service-${service.id}`} 
-              className={`flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 py-8 relative group cursor-pointer items-start ${
-                index === 0 ? '' : 'border-t border-[#808080]'
+              className={`flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 p-6 md:p-8 relative group cursor-pointer items-start border transition-all duration-300 ${
+                index === 0 ? 'border-transparent hover:border-black' : 'border-t-[#808080]/30 border-x-transparent border-b-transparent hover:border-black'
               }`}
             >
               {/* Title and Index Container */}
@@ -327,18 +327,39 @@ export function Home() {
                 </p>
               </div>
 
-              {/* Full width Accordion Expand Image Wrapper */}
-              <div className="w-full md:col-span-12 grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-500 ease-out mt-0 group-hover:mt-6 z-0">
+              {/* Full width Accordion Expand Work Stages & Order Button */}
+              <div className="w-full md:col-span-12 grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-500 ease-out mt-0 group-hover:mt-6 z-10">
                 <div className="overflow-hidden transition-all duration-500">
-                  {service.imgUrl && (
-                    <div className="w-full aspect-[21/6] md:aspect-[32/7] bg-[#191919] overflow-hidden border border-[#808080]/20">
-                      <img 
-                        src={service.imgUrl} 
-                        alt={service.title} 
-                        className="w-full h-full object-cover opacity-90 filter grayscale hover:grayscale-0 transition duration-500" 
-                      />
+                  <div className="w-full pt-6 border-t border-[#808080]/15 grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                    {/* Workflow steps: 3 columns spanning col-span-9 */}
+                    {service.steps && service.steps.length > 0 && (
+                      <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        {service.steps.map((stepText: string, stepIdx: number) => (
+                          <div key={stepIdx} className="flex flex-col gap-2">
+                            <span className="font-mono text-[13px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
+                              [0{stepIdx + 1}/STAGE]
+                            </span>
+                            <p className="text-[14px] leading-[1.5] text-black m-0 font-normal">
+                              {stepText}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Order Button: aligned in col-span-3 in the same row! */}
+                    <div className="md:col-span-3 flex justify-start md:justify-end items-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.dispatchEvent(new CustomEvent("sds:open-contact-modal"));
+                        }}
+                        className="w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-6 py-3 font-mono text-[13px] uppercase tracking-[0.06em] cursor-pointer select-none text-center"
+                      >
+                        {locale === "ru" ? "Заказать услугу →" : locale === "kg" ? "Кызматты заказ кылуу →" : "Order service →"}
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

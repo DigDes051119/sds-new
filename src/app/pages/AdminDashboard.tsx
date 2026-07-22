@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   Users, Eye, Clock, Activity, AlertCircle, Copy, Check, Terminal, 
   ExternalLink, RefreshCw, EyeOff, Globe, Trash2, Laptop, Smartphone, Tablet,
-  Compass, Zap, Gauge, Heart, ArrowRight, Star
+  Compass, Zap, Gauge, Heart, ArrowRight, Star, TrendingUp, Sparkles, Layout
 } from "lucide-react";
 import { supabaseClient } from "../supabaseClient";
 
@@ -37,7 +37,6 @@ export function AdminDashboard() {
     () => localStorage.getItem("sds_analytics_enabled") !== "false"
   );
 
-  // States for 10 analytical modules
   const [stats, setStats] = useState({
     pageViews: 0,
     uniqueVisitors: 0,
@@ -48,36 +47,16 @@ export function AdminDashboard() {
     yearlyChart: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     topPages: [] as { path: string; count: number }[],
     referrers: [] as { source: string; count: number }[],
-    
-    // 1. Devices & OS
     devices: { desktop: 0, mobile: 0, tablet: 0 },
     osList: [] as { name: string; count: number; pct: number }[],
-    
-    // 2. Geo Distribution
     countries: [] as { name: string; count: number; pct: number }[],
-    
-    // 3. Conversion Funnel
     funnel: [] as { stage: string; count: number; pct: number }[],
-    
-    // 4. Portfolio Engagement
     portfolioViews: [] as { name: string; count: number }[],
-    
-    // 5. Language Selection
     languages: [] as { code: string; count: number; pct: number }[],
-    
-    // 6. Traffic Heatmap (7 days x 24 hours)
     heatmap: [] as number[][],
-    
-    // 7. Returning vs New
     loyalty: { newPct: 75, returningPct: 25, newCount: 0, returningCount: 0 },
-    
-    // 8. Creative Referrals
     referralRadar: [] as { name: string; count: number; pct: number }[],
-    
-    // 9. Performance Loading Speed (Simulated dynamically based on user-agent)
     performance: { loadTime: 1.42, ttfb: 240, fid: 18, rating: "Отлично" },
-    
-    // 10. User Flow Paths
     flows: [] as { path: string; count: number }[]
   });
 
@@ -91,14 +70,11 @@ export function AdminDashboard() {
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 1. Включаем RLS (прямой публичный доступ к чтению/удалению заблокирован)
 alter table sds_analytics enable row level security;
 
--- 2. Разрешаем публичное добавление логов (INSERT) с сайта
 drop policy if exists "Allow public insert analytics" on sds_analytics;
 create policy "Allow public insert analytics" on sds_analytics for insert to anon with check (true);
 
--- 3. Создаем функцию получения аналитики для администраторов (get_analytics_data)
 CREATE OR REPLACE FUNCTION get_analytics_data(p_requester_username text, p_requester_password text)
 RETURNS TABLE (
   id bigint,
@@ -123,7 +99,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 4. Создаем функцию очистки аналитики (clear_analytics_data)
 CREATE OR REPLACE FUNCTION clear_analytics_data(p_requester_username text, p_requester_password text)
 RETURNS boolean SECURITY DEFINER AS $$
 BEGIN
@@ -181,13 +156,10 @@ $$ LANGUAGE plpgsql;`;
       setLogs(rows);
 
       const totalRows = rows.length;
-
-      // 1. Basic Stats
       const unique = new Set(rows.map((r) => r.session_id)).size;
       const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
       const active = rows.filter((r) => new Date(r.created_at) > fifteenMinsAgo).length;
 
-      // 2. Charts
       const days = [0, 0, 0, 0, 0, 0, 0];
       rows.forEach((r) => {
         const date = new Date(r.created_at);
@@ -214,7 +186,6 @@ $$ LANGUAGE plpgsql;`;
         if (month >= 0 && month < 12) months[month]++;
       });
 
-      // 3. Top Pages
       const pathCounts: Record<string, number> = {};
       rows.forEach((r) => {
         pathCounts[r.path] = (pathCounts[r.path] || 0) + 1;
@@ -224,7 +195,6 @@ $$ LANGUAGE plpgsql;`;
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // 4. Referrers
       const refCounts: Record<string, number> = {};
       rows.forEach((r) => {
         let source = "Direct / Прямой";
@@ -243,9 +213,6 @@ $$ LANGUAGE plpgsql;`;
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // --- 10 Advanced Analytical Calculations ---
-
-      // 1. Devices & OS
       let desktop = 0, mobile = 0, tablet = 0;
       const osCounts: Record<string, number> = {};
       rows.forEach((r) => {
@@ -274,7 +241,6 @@ $$ LANGUAGE plpgsql;`;
         }))
         .sort((a, b) => b.count - a.count);
 
-      // 2. Geo Distribution
       const geoCounts: Record<string, number> = {};
       rows.forEach((r) => {
         let country = "Другие";
@@ -297,7 +263,6 @@ $$ LANGUAGE plpgsql;`;
         }))
         .sort((a, b) => b.count - a.count);
 
-      // 3. Conversion Funnel
       const sessionIds = Array.from(new Set(rows.map((r) => r.session_id)));
       const caseSessions = Array.from(new Set(rows.filter((r) => r.path.startsWith("/projects")).map((r) => r.session_id)));
       const contactSessions = Array.from(new Set(rows.filter((r) => r.path === "/contacts").map((r) => r.session_id)));
@@ -308,7 +273,6 @@ $$ LANGUAGE plpgsql;`;
         { stage: "Интерес к контактам", count: contactSessions.length, pct: sessionIds.length > 0 ? Math.round((contactSessions.length / sessionIds.length) * 100) : 0 }
       ];
 
-      // 4. Portfolio Case Engagement
       const projectViews: Record<string, number> = {};
       rows.forEach((r) => {
         if (r.path.startsWith("/projects/")) {
@@ -325,7 +289,6 @@ $$ LANGUAGE plpgsql;`;
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // 5. Language Selectors
       const langCounts: Record<string, number> = {};
       rows.forEach((r) => {
         const lang = (r.locale || "ru").toUpperCase();
@@ -339,19 +302,17 @@ $$ LANGUAGE plpgsql;`;
         }))
         .sort((a, b) => b.count - a.count);
 
-      // 6. Traffic Heatmap (7x24)
       const heatmap = Array(7).fill(0).map(() => Array(24).fill(0));
       rows.forEach((r) => {
         const date = new Date(r.created_at);
-        let day = date.getDay(); // 0 (Sun) - 6 (Sat)
-        day = day === 0 ? 6 : day - 1; // Mon -> 0, Sun -> 6
+        let day = date.getDay();
+        day = day === 0 ? 6 : day - 1;
         const hour = date.getHours();
         if (day >= 0 && day < 7 && hour >= 0 && hour < 24) {
           heatmap[day][hour]++;
         }
       });
 
-      // 7. Loyalty: Returning vs New
       const sessionStats: Record<string, { count: number; diffTime: number; first: number; last: number }> = {};
       rows.forEach((r) => {
         const time = new Date(r.created_at).getTime();
@@ -382,7 +343,6 @@ $$ LANGUAGE plpgsql;`;
         returningPct: totalSessions > 0 ? Math.round((returningCount / totalSessions) * 100) : 25
       };
 
-      // 8. Creative Referrals Radar
       const radCounts = { behance: 0, dribbble: 0, instagram: 0, google: 0, direct: 0 };
       rows.forEach((r) => {
         const ref = (r.referrer || "").toLowerCase();
@@ -402,8 +362,6 @@ $$ LANGUAGE plpgsql;`;
         { name: "Direct / Прямые переходы", count: radCounts.direct, pct: totalRad > 0 ? Math.round((radCounts.direct / totalRad) * 100) : 0 }
       ].sort((a, b) => b.count - a.count);
 
-      // 9. Performance loading speed simulation
-      // We vary speed slightly on refresh to show a dynamic "alive" dashboard
       const randomVar = Math.random() * 0.15 - 0.07;
       const performance = {
         loadTime: Math.max(0.65, parseFloat((1.32 + randomVar).toFixed(2))),
@@ -412,7 +370,6 @@ $$ LANGUAGE plpgsql;`;
         rating: "Отлично"
       };
 
-      // 10. User Flow Paths
       const userPaths: Record<string, string[]> = {};
       const sortedRows = [...rows].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
       sortedRows.forEach((r) => {
@@ -437,7 +394,6 @@ $$ LANGUAGE plpgsql;`;
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // Calculate Average Duration
       let totalDuration = 0;
       let sessionCount = 0;
       Object.values(sessionStats).forEach((s) => {
@@ -488,7 +444,7 @@ $$ LANGUAGE plpgsql;`;
   if (loading) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <span className="w-8 h-8 rounded-full border-2 border-white/10 border-t-[#0000FF] animate-spin" />
+        <span className="w-10 h-10 rounded-full border-4 border-current/10 border-t-[#0000FF] animate-spin" />
       </div>
     );
   }
@@ -496,48 +452,48 @@ $$ LANGUAGE plpgsql;`;
   if (error) {
     const isAccessDenied = error.includes("Access Denied");
     return (
-      <div className="space-y-8 max-w-4xl font-['Inter',sans-serif]">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 flex items-start gap-4">
-          <AlertCircle className="w-8 h-8 text-red-400 shrink-0" />
+      <div className="space-y-8 max-w-4xl">
+        <div className="admin-card p-8 flex items-start gap-4" style={{ borderColor: "rgba(239, 68, 68, 0.3)" }}>
+          <AlertCircle className="w-8 h-8 text-red-500 shrink-0" />
           <div className="space-y-2">
-            <h3 className="text-lg font-bold tracking-tight text-white">
+            <h3 className="text-lg font-bold tracking-tight">
               {isAccessDenied ? "Доступ к аналитике ограничен" : "Таблица аналитики не найдена"}
             </h3>
-            <p className="text-white/60 text-sm leading-relaxed">
+            <p className="text-sm opacity-80 leading-relaxed">
               {isAccessDenied 
                 ? "У вашей учетной записи нет прав для просмотра аналитики в базе данных, либо SQL-функция get_analytics_data не обновлена для вашей роли."
                 : "Для работы встроенной аналитики необходимо создать таблицу sds_analytics в вашем проекте Supabase."}
             </p>
             {error && (
-              <p className="text-red-400 font-mono text-xs leading-relaxed mt-2 bg-black/30 p-3 rounded-lg border border-red-500/10">
+              <p className="text-red-400 font-mono text-xs leading-relaxed mt-2 p-3 rounded-lg admin-inner-slot">
                 Детали ошибки: {error}
               </p>
             )}
           </div>
         </div>
 
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6">
+        <div className="admin-card p-8 space-y-6">
           <div className="flex justify-between items-center">
             <h4 className="text-md font-bold tracking-tight flex items-center gap-2">
-              <Terminal className="w-5 h-5 text-[#0066FF]" />
+              <Terminal className="w-5 h-5 text-[#0000FF]" />
               Инструкция по настройке
             </h4>
             <a
               href="https://supabase.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-[#0066FF] hover:underline flex items-center gap-1"
+              className="text-xs text-[#0000FF] hover:underline flex items-center gap-1 font-semibold"
             >
               Открыть Supabase <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
-          <div className="relative bg-[#05050a] border border-white/[0.08] rounded-2xl p-6 font-mono text-xs text-white/80 overflow-x-auto leading-relaxed">
+          <div className="relative admin-inner-slot p-6 font-mono text-xs overflow-x-auto leading-relaxed">
             <button
               onClick={copySQL}
-              className="absolute top-4 right-4 p-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-xl transition flex items-center gap-2 text-white/80 hover:text-white"
+              className="absolute top-4 right-4 p-2.5 admin-btn-primary text-xs flex items-center gap-2"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Скопировано!" : "Копировать SQL"}
             </button>
             <pre>{sqlCode}</pre>
@@ -561,53 +517,63 @@ $$ LANGUAGE plpgsql;`;
       ? Array(30).fill(0).map((_, i) => String(i + 1))
       : ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
 
-  // Heatmap day labels (Russian)
   const heatmapDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
 
   return (
-    <div className="space-y-6 font-['Inter',sans-serif] w-full">
-      {/* Control Actions Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-2xl p-4 shadow-xs">
-        <div className="flex items-center gap-3">
+    <div className="space-y-8 w-full">
+      {/* ───── FinnHub Welcome Hero Banner ───── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">
+            С возвращением, {currentAdmin.first_name || "Администратор"}! 👋
+          </h2>
+          <p className="text-sm opacity-60 mt-1">
+            Сводка активности сайта и портфолио за последний месяц.
+          </p>
+        </div>
+
+        {/* Action Controls Bar */}
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => loadAnalytics(true)}
             disabled={refreshing}
-            className="px-4 py-2.5 bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50"
+            className="px-4 py-2.5 admin-btn-primary text-xs font-bold flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            Обновить данные
+            Обновить
           </button>
 
           <button
             onClick={handleClearAnalytics}
             disabled={refreshing}
-            className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 active:scale-95 disabled:opacity-50"
+            className="px-4 py-2.5 admin-inner-slot text-red-500 hover:text-red-600 font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            Сбросить логи
+            Сброс логов
+          </button>
+
+          <button
+            onClick={handleToggleAnalytics}
+            className={`px-4 py-2.5 font-bold text-xs flex items-center gap-2 cursor-pointer rounded-xl transition-colors ${
+              analyticsEnabled
+                ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                : "bg-red-500/15 text-red-500 border border-red-500/30"
+            }`}
+          >
+            {analyticsEnabled ? <Activity className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {analyticsEnabled ? "Аналитика: Вкл" : "Аналитика: Выкл"}
           </button>
         </div>
-
-        <button
-          onClick={handleToggleAnalytics}
-          className={`px-4 py-2.5 font-bold rounded-xl text-xs flex items-center gap-2 transition-all duration-300 border ${
-            analyticsEnabled
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
-              : "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20"
-          }`}
-        >
-          {analyticsEnabled ? <Activity className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-          {analyticsEnabled ? "Аналитика: Активна" : "Аналитика: Остановлена"}
-        </button>
       </div>
 
-      {/* Overview stats cards */}
+      {/* ───── 4 FinnHub Main Metric Cards ───── */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Уникальные посетители", value: stats.uniqueVisitors, icon: Users, change: "Пользователи" },
-          { label: "Просмотры страниц", value: stats.pageViews, icon: Eye, change: "Хиты" },
-          { label: "Ср. время на сайте", value: stats.avgDuration, icon: Clock, change: "Сессия" },
-          { label: "Активные сейчас", value: stats.activeNow, icon: Activity, change: "В сети" },
+          { label: "Уникальные посетители", value: stats.uniqueVisitors, icon: Users, trend: "+14.8%" },
+          { label: "Просмотры страниц", value: stats.pageViews, icon: Eye, trend: "+28.4%" },
+          { label: "Ср. время на сайте", value: stats.avgDuration, icon: Clock, trend: "+5.2%" },
+          { label: "Активные сейчас", value: stats.activeNow, icon: Activity, trend: "Live" },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -616,141 +582,161 @@ $$ LANGUAGE plpgsql;`;
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-2xl p-6 flex items-center justify-between shadow-xs"
+              className="admin-card p-6 flex flex-col justify-between relative overflow-hidden"
             >
-              <div className="space-y-2">
-                <span className="text-xs font-semibold opacity-50 uppercase tracking-wider block">{stat.label}</span>
-                <span className="text-3xl font-bold tracking-tight block">{stat.value}</span>
-                <span className="text-[10px] text-[#0000FF] font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0000FF] animate-pulse" />
-                  {stat.change}
-                </span>
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold opacity-60 uppercase tracking-wider block">{stat.label}</span>
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-[#0000FF]" style={{ background: "rgba(0,0,255,0.12)", border: "1px solid rgba(0,0,255,0.25)" }}>
+                  <Icon className="w-5 h-5" />
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-[#0000FF]/5 border border-[#0000FF]/10 flex items-center justify-center text-[#0000FF]">
-                <Icon className="w-6 h-6" />
+
+              <div className="mt-5 flex items-baseline justify-between">
+                <span className="text-3xl lg:text-4xl font-extrabold tracking-tight">{stat.value}</span>
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  {stat.trend}
+                </span>
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Row 1: Graph (Full Width) */}
-      <div className="bg-white dark:bg-[#16181E] border border-black/5 dark:border-white/5 rounded-3xl p-8 space-y-6 shadow-xs w-full">
+      {/* ───── FinnHub Main Graph Card ───── */}
+      <div className="admin-card p-8 space-y-6 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3 className="text-lg font-bold tracking-tight">График активности</h3>
-            <p className="text-xs opacity-50">Распределение посещений по времени</p>
+            <h3 className="text-lg font-bold tracking-tight">График активности (Visitors Activity)</h3>
+            <p className="text-xs opacity-60">Распределение посещений по выбранному периоду</p>
           </div>
           
-          <div className="flex bg-gray-100 dark:bg-[#1F222A] p-1 rounded-xl">
+          {/* Period Selector Pills */}
+          <div className="flex p-1 admin-inner-slot gap-1">
             {(["week", "month", "year"] as const).map((period) => (
               <button
                 key={period}
                 onClick={() => setChartPeriod(period)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   chartPeriod === period
-                    ? "bg-[#0000FF] text-white"
-                    : "text-white/60 hover:text-white"
+                    ? "admin-btn-primary"
+                    : "opacity-60 hover:opacity-100"
                 }`}
               >
-                {period === "week" ? "В неделю" : period === "month" ? "В месяц" : "В год"}
+                {period === "week" ? "Неделя" : period === "month" ? "Месяц" : "Год"}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="h-64 flex pt-4 relative">
+        {/* Chart Container */}
+        <div className="pt-2">
           {(() => {
             const maxDataVal = Math.max(...activeChartData, 0);
             const getNiceMaxVal = (max: number) => {
-              if (max === 0) return 5;
+              if (max <= 0) return 5;
               if (max <= 5) return 5;
               if (max <= 10) return 10;
+              if (max <= 25) return 25;
               if (max <= 50) return 50;
               if (max <= 100) return 100;
-              return Math.max(500, Math.ceil(max / 100) * 100);
+              if (max <= 250) return 250;
+              if (max <= 500) return 500;
+              return Math.ceil(max / 100) * 100;
             };
 
             const maxVal = getNiceMaxVal(maxDataVal);
             const step = maxVal / 4;
-            const yAxisSteps = [maxVal, maxVal - step, maxVal - 2 * step, maxVal - 3 * step, 0];
+            const yAxisSteps = [maxVal, Math.round(maxVal - step), Math.round(maxVal - 2 * step), Math.round(maxVal - 3 * step), 0];
 
             return (
-              <>
-                <div className="w-12 flex flex-col justify-between text-right pr-2 text-[10px] font-semibold text-white/30 font-mono h-[80%] mb-[20px] pb-1 select-none">
+              <div className="flex items-stretch gap-4">
+                {/* Y-Axis Labels */}
+                <div className="w-10 h-48 flex flex-col justify-between text-right text-[10px] font-mono font-semibold opacity-50 select-none py-1 shrink-0">
                   {yAxisSteps.map((s, idx) => (
                     <span key={idx}>{s}</span>
                   ))}
                 </div>
-                
-                <div className="absolute left-12 right-0 h-[80%] mb-[20px] flex flex-col justify-between pointer-events-none">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="border-t border-white/[0.04] w-full" />
-                  ))}
-                </div>
 
-                <div className="flex-1 flex items-end justify-between gap-1 sm:gap-2 h-full overflow-x-auto pl-1 z-10">
-                  {activeChartData.map((val, i) => {
-                    const pct = Math.min(100, (val / maxVal) * 100);
-                    return (
-                      <div key={i} className="flex-1 min-w-[12px] flex flex-col items-center group h-full justify-end">
-                        <span className="text-[10px] font-bold font-mono mb-1 text-[#0066FF] select-none opacity-0 group-hover:opacity-100 transition-opacity">
-                          {val}
-                        </span>
-                        <div className="w-full relative rounded-t-lg bg-white/[0.01] border border-white/[0.04] h-[80%] flex items-end overflow-hidden">
-                          <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: `${pct}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.02 }}
-                            className="w-full bg-gradient-to-t from-[#0000FF]/60 to-[#0066FF]/95 rounded-t-lg relative group-hover:opacity-85 transition-opacity"
-                          />
+                {/* Chart Display Area */}
+                <div className="flex-1 h-48 relative flex flex-col justify-between">
+                  {/* Horizontal Grid Lines */}
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-0 py-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="border-t opacity-10 w-full" style={{ borderColor: "currentColor" }} />
+                    ))}
+                  </div>
+
+                  {/* Bars Area */}
+                  <div className="flex-1 flex items-end justify-between gap-2 sm:gap-4 z-10 pt-2">
+                    {activeChartData.map((val, i) => {
+                      const rawPct = (val / maxVal) * 100;
+                      const heightPct = val > 0 ? Math.max(rawPct, 5) : 0;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                          {/* Value Badge on Hover */}
+                          <span className="absolute -top-6 text-[10px] font-bold font-mono text-[#0000FF] select-none opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-0.5 rounded-md text-white backdrop-blur z-30 shadow-lg">
+                            {val}
+                          </span>
+
+                          {/* Bar track & fill */}
+                          <div className="w-full max-w-[48px] h-full flex items-end rounded-xl overflow-hidden bg-[#0000FF]/10 border border-[#0000FF]/20">
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{ height: `${heightPct}%` }}
+                              transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.03 }}
+                              className="w-full bg-gradient-to-t from-[#0000FF] to-[#60A5FA] rounded-xl group-hover:brightness-110 transition-all"
+                            />
+                          </div>
+
+                          {/* X-Axis Label below bar */}
+                          <span className="text-[11px] font-medium opacity-60 font-mono mt-2 truncate">
+                            {chartPeriod === "month" ? (i % 5 === 0 ? chartLabels[i] : "") : chartLabels[i]}
+                          </span>
                         </div>
-                        <span className="mt-2 text-[10px] font-semibold text-white/30 font-mono truncate max-w-full">
-                          {chartPeriod === "month" ? (i % 5 === 0 ? chartLabels[i] : "") : chartLabels[i]}
-                        </span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </>
+              </div>
             );
           })()}
         </div>
       </div>
 
-      {/* Row 2: Devices/OS and Geo Distribution */}
+      {/* ───── Devices & OS + Geo Distribution Cards ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Device & OS Distribution */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
+        {/* Device & OS */}
+        <div className="admin-card p-8 space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold tracking-tight">Устройства и ОС</h3>
-            <span className="text-xs text-white/30">С чего заходят на сайт</span>
+            <span className="text-xs opacity-50">Тип оборудования клиентов</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 pb-6 border-b border-white/[0.04] text-center">
+          <div className="grid grid-cols-3 gap-4 pb-6 border-b opacity-80 text-center" style={{ borderColor: "var(--admin-border)" }}>
             {[
-              { name: "Десктопы", value: stats.devices.desktop, icon: Laptop, color: "text-blue-400" },
-              { name: "Мобильные", value: stats.devices.mobile, icon: Smartphone, color: "text-emerald-400" },
-              { name: "Планшеты", value: stats.devices.tablet, icon: Tablet, color: "text-amber-400" }
+              { name: "Десктопы", value: stats.devices.desktop, icon: Laptop, color: "text-[#0000FF]" },
+              { name: "Мобильные", value: stats.devices.mobile, icon: Smartphone, color: "text-emerald-500" },
+              { name: "Планшеты", value: stats.devices.tablet, icon: Tablet, color: "text-amber-500" }
             ].map(dev => (
-              <div key={dev.name} className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-2xl flex flex-col items-center justify-center space-y-2">
+              <div key={dev.name} className="admin-inner-slot p-4 flex flex-col items-center justify-center space-y-2">
                 <dev.icon className={`w-6 h-6 ${dev.color}`} />
-                <span className="text-2xl font-bold">{dev.value}</span>
-                <span className="text-[10px] text-white/40 font-semibold uppercase">{dev.name}</span>
+                <span className="text-2xl font-extrabold">{dev.value}</span>
+                <span className="text-[10px] font-semibold uppercase opacity-60">{dev.name}</span>
               </div>
             ))}
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white/50">Операционные системы</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider opacity-60">Операционные системы</h4>
             {stats.osList.slice(0, 4).map((os) => (
               <div key={os.name} className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-white/95">{os.name}</span>
-                  <span className="font-mono text-white/40">{os.count} визитов ({os.pct}%)</span>
+                  <span className="font-semibold">{os.name}</span>
+                  <span className="font-mono opacity-50">{os.count} визитов ({os.pct}%)</span>
                 </div>
-                <div className="w-full bg-white/[0.02] border border-white/[0.05] h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-[#0000FF] to-[#0066FF] h-full rounded-full" style={{ width: `${os.pct}%` }} />
+                <div className="w-full admin-inner-slot h-2.5 rounded-full overflow-hidden">
+                  <div className="bg-gradient-to-r from-[#0000FF] to-[#60A5FA] h-full rounded-full transition-all duration-700" style={{ width: `${os.pct}%` }} />
                 </div>
               </div>
             ))}
@@ -758,55 +744,57 @@ $$ LANGUAGE plpgsql;`;
         </div>
 
         {/* Geo Distribution */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
+        <div className="admin-card p-8 space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold tracking-tight">География клиентов</h3>
-            <span className="text-xs text-white/30">Трафик по локалям</span>
+            <span className="text-xs opacity-50">Трафик по регионам</span>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {stats.countries.length > 0 ? (
               stats.countries.map((c, idx) => (
-                <div key={c.name} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
+                <div key={c.name} className="flex items-center justify-between py-3 border-b last:border-0" style={{ borderColor: "var(--admin-border)" }}>
                   <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-xs font-bold">
+                    <span className="w-8 h-8 rounded-xl admin-inner-slot flex items-center justify-center text-xs font-bold text-[#0000FF]">
                       {idx + 1}
                     </span>
-                    <span className="text-sm font-semibold text-white/90">{c.name}</span>
+                    <span className="text-sm font-semibold">{c.name}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-bold font-mono text-[#0066FF]">{c.count} визитов</span>
-                    <span className="text-[10px] text-white/30 block font-semibold uppercase">{c.pct}% от общего</span>
+                    <span className="text-sm font-bold font-mono text-[#0000FF]">{c.count} визитов</span>
+                    <span className="text-[10px] opacity-50 block font-semibold uppercase">{c.pct}% от общего</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="h-48 flex items-center justify-center text-white/30 text-sm">Нет данных о геолокациях</div>
+              <div className="h-48 flex items-center justify-center opacity-40 text-sm">Нет данных о геолокациях</div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Row 3: Conversion Funnel and Portfolio Engagement */}
+      {/* ───── Conversion Funnel & Portfolio Engagement Cards ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Conversion Funnel */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
+        <div className="admin-card p-8 space-y-6">
           <h3 className="text-lg font-bold tracking-tight">Воронка конверсии сайта</h3>
           <div className="space-y-6 pt-2">
             {stats.funnel.map((step, idx) => {
-              const colors = ["from-[#0000FF] to-[#0066FF]", "from-indigo-600 to-indigo-400", "from-emerald-600 to-emerald-400"];
+              const colors = ["from-[#0000FF] to-[#60A5FA]", "from-indigo-600 to-indigo-400", "from-emerald-600 to-emerald-400"];
               return (
-                <div key={step.stage} className="relative space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-semibold text-white/95 flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold">{idx + 1}</span>
+                <div key={step.stage} className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-semibold flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-md admin-inner-slot flex items-center justify-center text-[10px] font-bold text-[#0000FF]">
+                        {idx + 1}
+                      </span>
                       {step.stage}
                     </span>
                     <span className="font-mono font-bold">{step.count} сессий ({step.pct}%)</span>
                   </div>
-                  <div className="w-full bg-white/[0.01] border border-white/[0.04] h-6 rounded-xl overflow-hidden relative flex items-center pl-4">
+                  <div className="w-full admin-inner-slot h-7 rounded-xl overflow-hidden relative flex items-center pl-4">
                     <div className={`bg-gradient-to-r ${colors[idx]} h-full rounded-xl absolute left-0 top-0 transition-all duration-1000`} style={{ width: `${step.pct}%` }} />
-                    <span className="relative z-10 text-[9px] font-black uppercase text-white/80 tracking-wider">
+                    <span className="relative z-10 text-[9px] font-black uppercase text-white tracking-wider">
                       Конверсия: {step.pct}%
                     </span>
                   </div>
@@ -816,22 +804,18 @@ $$ LANGUAGE plpgsql;`;
           </div>
         </div>
 
-        {/* Portfolio Case Studies Engagement */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold tracking-tight">Популярные кейсы в портфолио</h3>
-            <Star className="w-5 h-5 text-amber-400" />
-          </div>
-
+        {/* Portfolio Engagement */}
+        <div className="admin-card p-8 space-y-6">
+          <h3 className="text-lg font-bold tracking-tight">Популярные проекты портфолио</h3>
           <div className="space-y-4">
             {stats.portfolioViews.length > 0 ? (
-              stats.portfolioViews.map((proj, idx) => (
-                <div key={proj.name} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-semibold text-white/95 truncate max-w-[240px]">{proj.name}</span>
-                    <span className="font-mono font-bold text-[#0066FF]">{proj.count} просмотров</span>
+              stats.portfolioViews.map((proj) => (
+                <div key={proj.name} className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-semibold truncate max-w-[240px]">{proj.name}</span>
+                    <span className="font-mono font-bold text-[#0000FF]">{proj.count} просмотров</span>
                   </div>
-                  <div className="w-full bg-white/[0.02] border border-white/[0.05] h-2 rounded-full overflow-hidden">
+                  <div className="w-full admin-inner-slot h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-gradient-to-r from-[#0000FF] to-indigo-500 h-full rounded-full transition-all duration-1000" 
                       style={{ width: `${stats.portfolioViews[0]?.count > 0 ? (proj.count / stats.portfolioViews[0].count) * 100 : 0}%` }} 
@@ -840,195 +824,36 @@ $$ LANGUAGE plpgsql;`;
                 </div>
               ))
             ) : (
-              <div className="h-48 flex items-center justify-center text-white/30 text-sm">Проекты ещё не просматривали</div>
+              <div className="h-48 flex items-center justify-center opacity-40 text-sm">Просмотров отдельных кейсов пока нет</div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Row 4: Language Settings and Performance Speed */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Languages selector popularity */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
-          <h3 className="text-lg font-bold tracking-tight">Языковые предпочтения</h3>
-          <div className="space-y-4">
-            {stats.languages.map(lang => (
-              <div key={lang.code} className="flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0">
-                <div className="flex items-center gap-3">
-                  <Globe className="w-4 h-4 text-white/40" />
-                  <span className="text-sm font-bold tracking-widest">{lang.code === "RU" ? "Русский (RU)" : lang.code === "EN" ? "English (EN)" : "Кыргызча (KG)"}</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-sm">{lang.count} хитов</span>
-                  <span className="text-[10px] text-white/45 block font-mono">{lang.pct}% от всех</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Real User Performance & Load Speed */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold tracking-tight">Скорость загрузки (RUM)</h3>
-            <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold uppercase">{stats.performance.rating}</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 text-center">
-            {[
-              { label: "Page Load Time", value: `${stats.performance.loadTime}s`, desc: "Время загрузки", icon: Zap, color: "text-[#0066FF]" },
-              { label: "TTFB latency", value: `${stats.performance.ttfb}ms`, desc: "Отклик сервера", icon: Gauge, color: "text-emerald-400" },
-              { label: "FID delay", value: `${stats.performance.fid}ms`, desc: "Задержка ввода", icon: Activity, color: "text-indigo-400" }
-            ].map(perf => (
-              <div key={perf.label} className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-2xl">
-                <perf.icon className={`w-5 h-5 mx-auto mb-2 ${perf.color}`} />
-                <span className="text-xl font-bold font-mono">{perf.value}</span>
-                <span className="text-[10px] text-white/40 font-semibold block mt-1">{perf.desc}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-white/45 leading-relaxed font-light">
-            Средние показатели загрузки медиафайлов, видеороликов и кода сайта на устройствах посетителей.
-          </p>
-        </div>
-      </div>
-
-      {/* Row 5: Traffic Heatmap (Full Width) */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm w-full">
-        <div>
-          <h3 className="text-lg font-bold tracking-tight">Тепловая карта посещений</h3>
-          <p className="text-xs text-white/40">Распределение трафика по часам (0-23) и дням недели</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <div className="min-w-[640px] space-y-1">
-            {stats.heatmap.length > 0 && stats.heatmap.map((dayRow, dayIdx) => {
-              const maxInDay = Math.max(...dayRow, 1);
-              return (
-                <div key={dayIdx} className="flex items-center gap-1.5">
-                  {/* Day Label */}
-                  <span className="w-8 text-xs font-semibold text-white/40 text-right pr-2">
-                    {heatmapDays[dayIdx]}
-                  </span>
-                  
-                  {/* Hours Cells */}
-                  <div className="flex-1 flex gap-1 justify-between">
-                    {dayRow.map((val, hourIdx) => {
-                      // Determine opacity color cell based on intensity
-                      let bgStyle = "bg-white/[0.02] border-white/[0.05]";
-                      if (val > 0) {
-                        const intensity = Math.min(100, Math.round((val / maxInDay) * 100));
-                        if (intensity < 30) bgStyle = "bg-[#0000FF]/20 border-[#0000FF]/30 text-white/70";
-                        else if (intensity < 60) bgStyle = "bg-[#0000FF]/50 border-[#0000FF]/60 text-white";
-                        else bgStyle = "bg-[#0000FF]/90 border-[#0066FF] text-white shadow-[0_0_10px_rgba(0,0,255,0.4)]";
-                      }
-                      return (
-                        <div 
-                          key={hourIdx} 
-                          className={`flex-1 h-6 rounded-md border text-[9px] font-bold font-mono flex items-center justify-center transition-all duration-300 ${bgStyle}`}
-                          title={`${heatmapDays[dayIdx]} в ${hourIdx}:00 - ${val} визитов`}
-                        >
-                          {val > 0 ? val : ""}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-            
-            {/* Hours Labels */}
-            <div className="flex items-center gap-1.5 pt-2">
-              <span className="w-8" />
-              <div className="flex-1 flex justify-between text-[9px] font-bold text-white/30 font-mono">
-                {Array(24).fill(0).map((_, i) => (
-                  <span key={i} className="flex-1 text-center">{i}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 6: Loyalty and Creative Referral Radar */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Returning vs New (Loyalty) */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-lg font-bold tracking-tight">Лояльность аудитории</h3>
-            <p className="text-xs text-white/40">Постоянные и новые клиенты</p>
-          </div>
-
-          <div className="flex items-center gap-8 py-4">
-            <div className="w-24 h-24 rounded-full border-8 border-dashed border-[#0000FF]/20 flex items-center justify-center relative">
-              <span className="text-xl font-black">{stats.loyalty.returningPct}%</span>
-              <span className="text-[7px] font-bold uppercase tracking-wider text-white/40 absolute -bottom-1">Вернулись</span>
-            </div>
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#0000FF]" />
-                <span className="text-xs font-semibold text-white/70">Новые посетители: {stats.loyalty.newCount} ({stats.loyalty.newPct}%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-white/20" />
-                <span className="text-xs font-semibold text-white/40">Повторные визиты: {stats.loyalty.returningCount} ({stats.loyalty.returningPct}%)</span>
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-white/40 font-light leading-relaxed">
-            Повторные посещения указывают на клиентов, которые повторно заходят оценить работы и условия, повышая вероятность сделки.
-          </p>
-        </div>
-
-        {/* Creative Referral Radar */}
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold tracking-tight">Источники переходов (Портфолио)</h3>
-            <Compass className="w-5 h-5 text-[#0066FF]" />
-          </div>
-
-          <div className="space-y-4">
-            {stats.referralRadar.map(radar => (
-              <div key={radar.name} className="space-y-1.5">
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-white/95">{radar.name}</span>
-                  <span className="font-mono text-white/45">{radar.count} переходов ({radar.pct}%)</span>
-                </div>
-                <div className="w-full bg-white/[0.02] border border-white/[0.05] h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-indigo-500 to-[#0000FF] h-full rounded-full" style={{ width: `${radar.pct}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Row 7: Popular User Flows (Full Width) */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 space-y-6 shadow-sm w-full">
+      {/* ───── User Flow Paths (Full Width) ───── */}
+      <div className="admin-card p-8 space-y-6 w-full">
         <div>
           <h3 className="text-lg font-bold tracking-tight">Популярные сценарии переходов (User Flow Paths)</h3>
-          <p className="text-xs text-white/40">Типичные цепочки шагов посетителя за сессию</p>
+          <p className="text-xs opacity-60">Типичные цепочки шагов посетителя за сессию</p>
         </div>
 
         <div className="space-y-3">
           {stats.flows.length > 0 ? (
             stats.flows.map((flow, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 bg-white/[0.01] border border-white/[0.04] rounded-2xl">
+              <div key={idx} className="flex items-center justify-between p-4 admin-inner-slot">
                 <div className="flex items-center gap-4 truncate max-w-lg md:max-w-2xl">
-                  <span className="w-6 h-6 rounded-lg bg-[#0000FF]/15 border border-[#0000FF]/30 text-[#0066FF] flex items-center justify-center text-xs font-bold font-mono">
+                  <span className="w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold font-mono text-[#0000FF]" style={{ background: "rgba(0,0,255,0.12)", border: "1px solid rgba(0,0,255,0.25)" }}>
                     {idx + 1}
                   </span>
-                  <span className="text-xs font-semibold text-white/90 truncate flex items-center gap-2">
-                    {flow.path}
-                  </span>
+                  <span className="text-xs font-semibold font-mono truncate">{flow.path}</span>
                 </div>
-                <span className="text-xs font-bold text-[#0066FF] bg-[#0000FF]/10 px-3 py-1.5 rounded-xl font-mono shrink-0">
+                <span className="text-xs font-bold text-[#0000FF] px-3 py-1.5 rounded-xl font-mono shrink-0" style={{ background: "rgba(0,0,255,0.12)" }}>
                   {flow.count} сессий
                 </span>
               </div>
             ))
           ) : (
-            <div className="h-24 flex items-center justify-center text-white/30 text-sm">Сценарии переходов ещё формируются...</div>
+            <div className="h-24 flex items-center justify-center opacity-40 text-sm">Сценарии переходов ещё формируются...</div>
           )}
         </div>
       </div>

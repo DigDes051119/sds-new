@@ -1,5 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useParams, Link } from "react-router";
+import { motion, AnimatePresence } from "motion/react";
+import { ThumbsUp, X } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
@@ -42,7 +44,7 @@ export function ProjectDetail() {
       {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+40px)] md:w-[calc(100%+80px)] lg:w-[calc(100%+160px)] mx-[-20px] md:mx-[-40px] lg:mx-[-80px] mt-[-24px] bg-black flex flex-col justify-end px-5 md:px-10 lg:px-[80px] pb-8 md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+90px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-45px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-[45px] md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {coverImg && (
@@ -119,7 +121,7 @@ export function ProjectDetail() {
       </section>
 
       {/* Gallery Wall / Image Stack */}
-      <section className="w-full flex flex-col gap-[4px] reveal-visible">
+      <section id="project-collage-section" className="w-full flex flex-col gap-[4px] reveal-visible">
         {blocks.map((block: string[], blockIdx: number) => {
           if (!block || block.length === 0) return null;
           
