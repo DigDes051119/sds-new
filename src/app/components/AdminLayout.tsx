@@ -110,7 +110,7 @@ export function AdminLayout() {
 
   return (
     <div
-      className="admin-app-scope min-h-screen flex transition-colors duration-300"
+      className={`admin-app-scope min-h-screen flex transition-colors duration-300 ${isDark ? 'admin-theme-dark' : 'admin-theme-light'}`}
       style={{ background: t.bg, color: t.text, fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       {/* ───── FinnHub-Style Sidebar ───── */}

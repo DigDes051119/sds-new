@@ -40,6 +40,14 @@
   --admin-accent-subtle: rgba(0, 0, 255, 0.1);
 }
 
+.admin-app-scope,
+.admin-app-scope *,
+.admin-app-scope *::before,
+.admin-app-scope *::after {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+
 .admin-app-scope * {
   box-sizing: border-box;
 }
@@ -95,3 +103,104 @@
 .admin-app-scope ::-webkit-scrollbar-thumb:hover {
   background: var(--admin-muted);
 }
+
+/* ────── Light Theme Automatic High-Contrast Overrides ────── */
+.admin-theme-light {
+  color: #0F172A !important;
+}
+
+/* Typography & Text Visibility */
+.admin-theme-light .text-white,
+.admin-theme-light .text-white\/90,
+.admin-theme-light .text-white\/80 {
+  color: #0F172A !important;
+}
+
+.admin-theme-light .text-white\/75,
+.admin-theme-light .text-white\/70,
+.admin-theme-light .text-white\/60,
+.admin-theme-light .text-white\/50 {
+  color: #334155 !important;
+}
+
+.admin-theme-light .text-white\/40,
+.admin-theme-light .text-white\/30,
+.admin-theme-light .text-white\/20 {
+  color: #64748B !important;
+}
+
+/* Container & Card Backgrounds */
+.admin-theme-light .bg-white\/\[0\.01\],
+.admin-theme-light .bg-white\/\[0\.02\],
+.admin-theme-light .bg-white\/\[0\.03\],
+.admin-theme-light .bg-white\/\[0\.04\],
+.admin-theme-light .bg-white\/\[0\.06\],
+.admin-theme-light .bg-white\/5,
+.admin-theme-light .bg-white\/10 {
+  background-color: #FFFFFF !important;
+}
+
+.admin-theme-light .bg-black\/40,
+.admin-theme-light .bg-black\/50,
+.admin-theme-light .bg-black\/60,
+.admin-theme-light .bg-black\/70,
+.admin-theme-light .bg-black\/80 {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Borders */
+.admin-theme-light .border-white\/\[0\.04\],
+.admin-theme-light .border-white\/\[0\.06\],
+.admin-theme-light .border-white\/10,
+.admin-theme-light .border-white\/20,
+.admin-theme-light .border-white\/5 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Form Inputs, Textareas & Selects */
+.admin-theme-light input:not([type="checkbox"]):not([type="radio"]),
+.admin-theme-light textarea,
+.admin-theme-light select {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+.admin-theme-light input::placeholder,
+.admin-theme-light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.admin-theme-light input:focus,
+.admin-theme-light textarea:focus,
+.admin-theme-light select:focus {
+  border-color: #0000FF !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.1) !important;
+}
+
+/* Hover States */
+.admin-theme-light .hover\:bg-white\/\[0\.08\]:hover,
+.admin-theme-light .hover\:bg-white\/\[0\.04\]:hover {
+  background-color: #F1F5F9 !important;
+}
+
+.admin-theme-light .hover\:bg-white\/10:hover {
+  background-color: #E2E8F0 !important;
+}
+
+/* Maintain crisp white text on primary blue buttons and emerald toasts */
+.admin-theme-light .bg-\[\#0000FF\],
+.admin-theme-light .bg-\[\#0000FF\] *,
+.admin-theme-light .bg-[#0000FF] *,
+.admin-theme-light .bg-emerald-500,
+.admin-theme-light .bg-emerald-500 * {
+  color: #FFFFFF !important;
+}
+
+.admin-theme-light .text-\[\#0066FF\],
+.admin-theme-light .text-\[\#0000FF\] {
+  color: #0044FF !important;
+}
+
