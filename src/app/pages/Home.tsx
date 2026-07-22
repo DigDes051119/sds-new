@@ -183,12 +183,16 @@ export function Home() {
           </h1>
         </div>
         {/* Right: Description aligned under HOME nav */}
-        <div className="lg:col-span-9 pt-4">
-          <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[560px] lg:ml-[547px]">
-            {locale === "ru"
-              ? "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь"
-              : "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."}
-          </p>
+        <div className="lg:col-span-9 pt-4 flex justify-end">
+          <div className="w-[var(--sds-nav-cluster-width,680px)] max-w-full">
+            <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[560px]">
+              {locale === "ru"
+                ? "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь"
+                : locale === "kg"
+                ? "Сиз көргөндөрдүн бардыгы биздин физикалык дүйнөнү кабыл алуубуздун баштапкы муундарынын бири болуп саналат, ошондуктан студиянын философиясы — биринчи кезекте Дизайн."
+                : "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."}
+            </p>
+          </div>
         </div>
       </section>
 

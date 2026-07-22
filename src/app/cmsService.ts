@@ -1,5 +1,6 @@
 import { translations as defaultTranslations } from "./i18n";
 import { projectDetailsTranslations as defaultProjectDetails } from "./projectDetailsData";
+import { archiveItems as defaultArchiveItems, type ArchiveItem } from "./archiveData";
 import { supabaseClient } from "./supabaseClient";
 
 // Simple pub/sub for changes
@@ -45,6 +46,19 @@ export const cmsService = {
       }
     } catch (e) {
       console.warn("Supabase project details sync fallback to local storage:", e);
+    }
+
+    try {
+      // 3. Try syncing archive items
+      const archiveRows = await supabaseClient.fetchTable("sds_archive_items");
+      if (archiveRows && archiveRows.length > 0) {
+        const remoteArchive = archiveRows[0].data;
+        if (remoteArchive) {
+          localStorage.setItem("sds_archive_items", JSON.stringify(remoteArchive));
+        }
+      }
+    } catch (e) {
+      console.warn("Supabase archive items sync fallback to local storage:", e);
     }
 
     this.notify();
@@ -260,17 +274,53 @@ export const cmsService = {
 
 
 
+  // Get archive (Origins) items
+  getArchiveItems(): Record<"ru" | "en" | "kg", ArchiveItem[]> {
+    const stored = localStorage.getItem("sds_archive_items");
+    let data: any;
+    if (!stored) {
+      data = JSON.parse(JSON.stringify(defaultArchiveItems));
+    } else {
+      try {
+        data = JSON.parse(stored);
+      } catch {
+        data = JSON.parse(JSON.stringify(defaultArchiveItems));
+      }
+    }
+    // Ensure all language keys exist
+    ["ru", "en", "kg"].forEach((lang) => {
+      if (!data[lang] || !Array.isArray(data[lang])) {
+        data[lang] = JSON.parse(JSON.stringify(defaultArchiveItems[lang as keyof typeof defaultArchiveItems] || []));
+      }
+    });
+    return data;
+  },
+
+  // Update archive (Origins) items locally & remotely
+  async updateArchiveItems(newArchiveData: Record<"ru" | "en" | "kg", ArchiveItem[]>) {
+    localStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
+    this.notify();
+
+    try {
+      await supabaseClient.upsertTable("sds_archive_items", [{ id: 1, data: newArchiveData }]);
+    } catch (e) {
+      console.warn("Failed to push archive items to Supabase table sds_archive_items:", e);
+    }
+  },
+
   // Reset all to defaults
   async resetToDefaults() {
     localStorage.removeItem("sds_translations");
     localStorage.removeItem("sds_project_details");
     localStorage.removeItem("sds_projects_list");
+    localStorage.removeItem("sds_archive_items");
     this.notify();
 
     try {
       // Clear remotely by pushing defaults
       await supabaseClient.upsertTable("sds_translations", [{ id: 1, data: defaultTranslations }]);
       await supabaseClient.upsertTable("sds_project_details", [{ id: 1, data: defaultProjectDetails }]);
+      await supabaseClient.upsertTable("sds_archive_items", [{ id: 1, data: defaultArchiveItems }]);
     } catch (e) {
       console.error("Failed to reset Supabase tables:", e);
     }

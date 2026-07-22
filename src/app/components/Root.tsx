@@ -1,16 +1,41 @@
 import { NavLink, Link, useLocation, useOutlet } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { LanguageContext, translations, type Language } from "../i18n";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
 import { Menu, X, ArrowUp, ThumbsUp } from "lucide-react";
+import { ArchiveOriginsSection } from "./ArchiveOriginsSection";
 export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
   const [locale, setLocale] = useState<Language>("en");
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+  
+  const navClusterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = navClusterRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const w = el.offsetWidth;
+      if (w > 0) {
+        document.documentElement.style.setProperty('--sds-nav-cluster-width', `${w}px`);
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [locale, location.pathname]);
   
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showPreloader, setShowPreloader] = useState(true);
@@ -24,6 +49,8 @@ export function Root() {
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState("");
+  
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
   
   const [showScrollTop, setShowScrollTop] = useState(false);
   // Mobile Menu State
@@ -58,8 +85,18 @@ export function Root() {
 
   useEffect(() => {
     const handleOpenModal = () => setIsContactFormOpen(true);
+    const handleArchiveOpen = () => setIsArchiveModalOpen(true);
+    const handleArchiveClose = () => setIsArchiveModalOpen(false);
+    
     window.addEventListener("sds:open-contact-modal", handleOpenModal);
-    return () => window.removeEventListener("sds:open-contact-modal", handleOpenModal);
+    window.addEventListener("sds:archive-modal-open", handleArchiveOpen);
+    window.addEventListener("sds:archive-modal-close", handleArchiveClose);
+    
+    return () => {
+      window.removeEventListener("sds:open-contact-modal", handleOpenModal);
+      window.removeEventListener("sds:archive-modal-open", handleArchiveOpen);
+      window.removeEventListener("sds:archive-modal-close", handleArchiveClose);
+    };
   }, []);
 
   useEffect(() => {
@@ -247,7 +284,7 @@ export function Root() {
 
           {/* Navigation Links and Languages (Desktop) */}
           <div className="hidden lg:flex lg:col-span-9 justify-end">
-            <div className="flex flex-nowrap items-center gap-[28px] xl:gap-[40px] whitespace-nowrap">
+            <div ref={navClusterRef} className="flex flex-nowrap items-center gap-[28px] xl:gap-[40px] whitespace-nowrap">
               <nav className="flex flex-nowrap items-center gap-[20px] xl:gap-[28px]">
               {navLinks.map((link) => (
                 <NavLink
@@ -326,6 +363,9 @@ export function Root() {
           <main key={location.pathname} className="w-full flex-grow px-[45px] md:px-[65px] lg:px-[105px] page-transition overflow-hidden">
             {outlet}
           </main>
+
+          {/* Section: Откуда мы начинали (Archives 2005–2020) */}
+          {location.pathname === "/" && <ArchiveOriginsSection />}
 
           {/* Footer */}
           <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
@@ -579,7 +619,7 @@ export function Root() {
 
         {/* Scroll To Top Fixed Square Button (Aligned to Site Grid) */}
         <AnimatePresence>
-          {!isContactFormOpen && showScrollTop && (
+          {!isContactFormOpen && !isArchiveModalOpen && showScrollTop && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

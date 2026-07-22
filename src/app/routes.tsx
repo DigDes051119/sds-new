@@ -20,6 +20,7 @@ import { AdminContactsEditor } from "./pages/AdminContactsEditor";
 import { AdminUsersManager } from "./pages/AdminUsersManager";
 import { AdminServicesEditor } from "./pages/AdminServicesEditor";
 import { AdminBrandsEditor } from "./pages/AdminBrandsEditor";
+import { AdminArchiveEditor } from "./pages/AdminArchiveEditor";
 import { AdminLeads } from "./pages/AdminLeads";
 
 export const router = createBrowserRouter([
@@ -61,6 +62,7 @@ export const router = createBrowserRouter([
       { path: "contacts", Component: AdminContactsEditor },
       { path: "services", Component: AdminServicesEditor },
       { path: "brands", Component: AdminBrandsEditor },
+      { path: "archive", Component: AdminArchiveEditor },
       { path: "leads", Component: AdminLeads },
       { path: "administration", Component: AdminUsersManager },
     ],

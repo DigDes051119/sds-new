@@ -3,9 +3,10 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { 
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Check, Sun, Moon, 
   Star, Users, FolderGit, MapPin, Shield, Briefcase, Package, Inbox, ExternalLink, RefreshCw,
-  Search, Bell, Sparkles
+  Search, Bell, Sparkles, Images
 } from "lucide-react";
 import { cmsService } from "../cmsService";
+import logo from "../../imports/logo__2_.svg";
 import "../admin.css";
 
 /* ─── Ultra-Dark (Near-Black) & Signature Blue (#0000FF) tokens ─── */
@@ -87,6 +88,7 @@ export function AdminLayout() {
     { name: "Контакты и Карта", path: "/admin/contacts", icon: MapPin, permKey: "contacts" },
     { name: "Услуги", path: "/admin/services", icon: Briefcase, permKey: "services" },
     { name: "Бренды", path: "/admin/brands", icon: Star, permKey: "about" },
+    { name: "Управление галереей", path: "/admin/archive", icon: Images, permKey: "about" },
     { name: "Заявки с сайта", path: "/admin/leads", icon: Inbox, permKey: "contacts" },
     { name: "Администрация", path: "/admin/administration", icon: Shield },
   ];
@@ -122,24 +124,18 @@ export function AdminLayout() {
       >
         {/* Logo */}
         <div
-          className="flex items-center justify-center shrink-0"
+          className="flex items-center justify-center shrink-0 px-4"
           style={{ height: 72, borderBottom: `1px solid ${t.border}` }}
         >
-          {isCollapsed ? (
-            <Link to="/admin" className="w-11 h-11 rounded-2xl flex items-center justify-center text-white transition-transform hover:scale-105" style={{ background: t.accent, boxShadow: `0 4px 16px ${t.accentGlow}` }}>
-              <Sparkles size={20} />
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3 px-5 w-full">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: t.accent, boxShadow: `0 4px 16px ${t.accentGlow}` }}>
-                <Sparkles size={20} />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-[14px] font-extrabold tracking-tight leading-tight truncate">Steel Drake</span>
-                <span className="text-[10px] font-medium tracking-wider uppercase" style={{ color: t.muted }}>Admin Panel</span>
-              </div>
-            </div>
-          )}
+          <Link to="/admin" className="flex items-center justify-center w-full overflow-hidden">
+            <img 
+              src={logo} 
+              alt="Steel Drake Studio Team" 
+              className={`w-auto object-contain transition-all duration-300 ${
+                isCollapsed ? "h-6 max-w-[40px]" : "h-7 max-w-full"
+              } ${isDark ? "brightness-0 invert opacity-90 hover:opacity-100" : "opacity-90 hover:opacity-100"}`} 
+            />
+          </Link>
         </div>
 
         {/* Navigation */}
