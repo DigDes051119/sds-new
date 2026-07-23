@@ -10,6 +10,7 @@ export interface ArchiveItem {
   shortDesc: string;
   fullDesc: string;
   highlights: string[];
+  quote?: string;
 }
 
 export const archiveItems: Record<"ru" | "en" | "kg", ArchiveItem[]> = {

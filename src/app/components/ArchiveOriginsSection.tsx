@@ -330,7 +330,7 @@ export function ArchiveOriginsSection({
                   <div className="h-[1px] w-full bg-[#808080]/30 shrink-0" />
 
                   <p className="text-[18px] md:text-[22px] font-light leading-[1.4] tracking-[-0.02em] text-black m-0 italic">
-                    "{colleagueIntroQuote}"
+                    "{currentItem?.quote && currentItem.quote.trim().length > 0 ? currentItem.quote : colleagueIntroQuote}"
                   </p>
 
                   <p className="text-[15px] leading-[1.5] text-[#808080] m-0 font-normal">

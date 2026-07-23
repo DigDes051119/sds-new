@@ -7,7 +7,8 @@ import { supabaseClient } from "../supabaseClient";
 import { type ArchiveItem } from "../archiveData";
 import { 
   Save, Check, Globe, Loader2, Plus, Trash2, Upload, FileImage, 
-  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Images, Sparkles, Layers, Image as ImageIcon
+  ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Images, Sparkles, Layers, Image as ImageIcon,
+  ChevronsUp, ChevronsDown
 } from "lucide-react";
 
 export function AdminArchiveEditor() {
@@ -53,20 +54,27 @@ export function AdminArchiveEditor() {
     setArchiveData(updated);
   };
 
-  // Reorder cards
-  const handleMoveCard = (index: number, direction: "up" | "down") => {
+  // Reorder cards (up, down, top, bottom)
+  const handleMoveCard = (index: number, action: "up" | "down" | "top" | "bottom") => {
     if (isReadOnly) return;
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= currentItems.length) return;
+    const listLen = currentItems.length;
+    if (listLen <= 1) return;
+
+    let targetIndex = index;
+    if (action === "up") targetIndex = index - 1;
+    else if (action === "down") targetIndex = index + 1;
+    else if (action === "top") targetIndex = 0;
+    else if (action === "bottom") targetIndex = listLen - 1;
+
+    if (targetIndex < 0 || targetIndex >= listLen || targetIndex === index) return;
 
     const updated = { ...archiveData };
     // Move for all languages to keep order synchronized
     (["ru", "en", "kg"] as const).forEach((lang) => {
       const list = [...(updated[lang] || [])];
-      if (list[index] && list[targetIndex]) {
-        const temp = list[index];
-        list[index] = list[targetIndex];
-        list[targetIndex] = temp;
+      if (list[index]) {
+        const [movedItem] = list.splice(index, 1);
+        list.splice(targetIndex, 0, movedItem);
         updated[lang] = list;
       }
     });
@@ -93,6 +101,7 @@ export function AdminArchiveEditor() {
       commentsCount: 0,
       shortDesc: "Краткое описание проекта для карточки...",
       fullDesc: "Полное подробное описание проекта для модального окна...",
+      quote: "Некоторые из работ, которые были сделаны с 2005 по 2020 год — проекты, по которым некоторые из наших клиентов нас знают и помнят со дня основания.",
       highlights: ["Ключевое достижение или особенность 1"]
     };
 
@@ -310,11 +319,12 @@ export function AdminArchiveEditor() {
               existing.shortDesc;
 
             // Only translate if missing or if it's a new card
-            const [translatedTitle, translatedCategory, translatedShortDesc, translatedFullDesc, translatedHighlights] = await Promise.all([
+            const [translatedTitle, translatedCategory, translatedShortDesc, translatedFullDesc, translatedQuote, translatedHighlights] = await Promise.all([
               isRuUnchanged && existing.title ? existing.title : translateText(ru.title || "", lang),
               isRuUnchanged && existing.category ? existing.category : translateText(ru.category || "", lang),
               isRuUnchanged && existing.shortDesc ? existing.shortDesc : translateText(ru.shortDesc || "", lang),
               isRuUnchanged && existing.fullDesc ? existing.fullDesc : translateText(ru.fullDesc || "", lang),
+              isRuUnchanged && existing.quote ? existing.quote : (ru.quote ? translateText(ru.quote, lang) : Promise.resolve("")),
               Promise.all(
                 (ru.highlights || []).map((h, hIdx) => {
                   if (isRuUnchanged && existing?.highlights?.[hIdx]) {
@@ -331,6 +341,7 @@ export function AdminArchiveEditor() {
               category: translatedCategory,
               shortDesc: translatedShortDesc,
               fullDesc: translatedFullDesc,
+              quote: translatedQuote,
               highlights: translatedHighlights,
               images: ru.images || []
             };
@@ -457,23 +468,45 @@ export function AdminArchiveEditor() {
                   </div>
 
                   {!isReadOnly && (
-                    <div className="flex items-center gap-2">
-                      {/* Reorder Up / Down */}
+                    <div className="flex items-center gap-1.5">
+                      {/* Move to Top */}
+                      <button
+                        onClick={() => handleMoveCard(cardIdx, "top")}
+                        disabled={cardIdx === 0}
+                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
+                        title="В самый верх"
+                      >
+                        <ChevronsUp className="w-4 h-4 text-[#0066FF]" />
+                      </button>
+
+                      {/* Move Up 1 */}
                       <button
                         onClick={() => handleMoveCard(cardIdx, "up")}
                         disabled={cardIdx === 0}
                         className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="Переместить выше"
+                        title="На 1 позицию выше"
                       >
                         <ArrowUp className="w-4 h-4" />
                       </button>
+
+                      {/* Move Down 1 */}
                       <button
                         onClick={() => handleMoveCard(cardIdx, "down")}
                         disabled={cardIdx === currentItems.length - 1}
                         className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="Переместить ниже"
+                        title="На 1 позицию ниже"
                       >
                         <ArrowDown className="w-4 h-4" />
+                      </button>
+
+                      {/* Move to Bottom */}
+                      <button
+                        onClick={() => handleMoveCard(cardIdx, "bottom")}
+                        disabled={cardIdx === currentItems.length - 1}
+                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
+                        title="В самый низ"
+                      >
+                        <ChevronsDown className="w-4 h-4 text-[#0066FF]" />
                       </button>
 
                       {/* Delete */}
@@ -565,6 +598,18 @@ export function AdminArchiveEditor() {
                         disabled={isReadOnly}
                         className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm resize-none leading-relaxed"
                         placeholder="Развернутый текст с подробностями проекта..."
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Цитата / Эпиграф в модальном окне ({activeLang.toUpperCase()})</label>
+                      <textarea
+                        rows={2}
+                        value={item.quote || ""}
+                        onChange={(e) => handleItemFieldChange(cardIdx, "quote", e.target.value)}
+                        disabled={isReadOnly}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm italic resize-none"
+                        placeholder="Some of the works created between 2005 and 2020 — signature projects..."
                       />
                     </div>
                   </div>
