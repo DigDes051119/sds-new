@@ -50,11 +50,26 @@ export const cmsService = {
 
     try {
       // 3. Try syncing archive items
-      const archiveRows = await supabaseClient.fetchTable("sds_archive_items");
-      if (archiveRows && archiveRows.length > 0) {
-        const remoteArchive = archiveRows[0].data;
-        if (remoteArchive) {
-          localStorage.setItem("sds_archive_items", JSON.stringify(remoteArchive));
+      const archiveRows = await supabaseClient.fetchTable("sds_archive_items").catch(() => null);
+      if (archiveRows && archiveRows.length > 0 && archiveRows[0]?.data) {
+        localStorage.setItem("sds_archive_items", JSON.stringify(archiveRows[0].data));
+      } else {
+        // Fallback: load archive from translations if available
+        const storedTrans = localStorage.getItem("sds_translations");
+        if (storedTrans) {
+          try {
+            const trans = JSON.parse(storedTrans);
+            if (trans?.ru?.archive) {
+              const archiveData = {
+                ru: trans.ru.archive,
+                en: trans.en?.archive || trans.ru.archive,
+                kg: trans.kg?.archive || trans.ru.archive,
+              };
+              localStorage.setItem("sds_archive_items", JSON.stringify(archiveData));
+            }
+          } catch {
+            // ignore
+          }
         }
       }
     } catch (e) {
@@ -278,15 +293,27 @@ export const cmsService = {
   getArchiveItems(): Record<"ru" | "en" | "kg", ArchiveItem[]> {
     const stored = localStorage.getItem("sds_archive_items");
     let data: any;
-    if (!stored) {
-      data = JSON.parse(JSON.stringify(defaultArchiveItems));
-    } else {
+    if (stored) {
       try {
         data = JSON.parse(stored);
       } catch {
+        data = null;
+      }
+    }
+
+    if (!data) {
+      const translations = this.getTranslations();
+      if (translations?.ru?.archive) {
+        data = {
+          ru: translations.ru.archive,
+          en: translations.en?.archive || translations.ru.archive,
+          kg: translations.kg?.archive || translations.ru.archive,
+        };
+      } else {
         data = JSON.parse(JSON.stringify(defaultArchiveItems));
       }
     }
+
     // Ensure all language keys exist
     ["ru", "en", "kg"].forEach((lang) => {
       if (!data[lang] || !Array.isArray(data[lang])) {
@@ -304,7 +331,17 @@ export const cmsService = {
     try {
       await supabaseClient.upsertTable("sds_archive_items", [{ id: 1, data: newArchiveData }]);
     } catch (e) {
-      console.warn("Failed to push archive items to Supabase table sds_archive_items:", e);
+      console.warn("Table sds_archive_items unavailable in Supabase, falling back to sds_translations:", e);
+      try {
+        const translations = this.getTranslations();
+        ["ru", "en", "kg"].forEach((lang) => {
+          if (!translations[lang]) translations[lang] = {};
+          translations[lang].archive = newArchiveData[lang as keyof typeof newArchiveData];
+        });
+        await this.updateTranslations(translations);
+      } catch (transErr) {
+        console.warn("Failed to sync archive into translations:", transErr);
+      }
     }
   },
 

@@ -103,16 +103,16 @@ export function ArchiveOriginsSection() {
         </span>
       </div>
 
-      {/* ───── Projects Grid (Archive Style Cards) ───── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
+      {/* ───── Projects Grid (Archive Style Cards - 4 in a row) ───── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]">
         {items.map((item, index) => (
           <div 
             key={item.id} 
             className="w-full flex flex-col group cursor-pointer"
             onClick={() => openModalAt(index)}
           >
-            {/* Image Band Container - 4:3 Aspect Ratio for Archive Vibe */}
-            <div className="w-full bg-[#191919] overflow-hidden relative aspect-[4/3] flex items-center justify-center rounded-[8px]">
+            {/* Image Band Container - 16:9 Aspect Ratio */}
+            <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center rounded-[8px]">
               <img
                 src={item.images[0]} 
                 alt={item.title} 

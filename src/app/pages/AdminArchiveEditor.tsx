@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { cmsService } from "../cmsService";
 import { translateText } from "../translateHelper";
@@ -17,6 +17,12 @@ export function AdminArchiveEditor() {
   const [translating, setTranslating] = useState(false);
   const [uploadingState, setUploadingState] = useState<{ itemIdx: number } | null>(null);
 
+  useEffect(() => {
+    return cmsService.subscribe(() => {
+      setArchiveData(cmsService.getArchiveItems());
+    });
+  }, []);
+
   const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
   const isReadOnly = currentAdmin.permissions?.about === false;
 
@@ -31,6 +37,19 @@ export function AdminArchiveEditor() {
     const items = [...(updated[activeLang] || [])];
     items[index] = { ...items[index], [key]: value };
     updated[activeLang] = items;
+
+    // If editing on RU (primary language), mirror changes to EN and KG
+    // so switching tabs immediately reflects the current input
+    if (activeLang === "ru") {
+      (["en", "kg"] as const).forEach((lang) => {
+        if (updated[lang]?.[index]) {
+          const list = [...updated[lang]];
+          list[index] = { ...list[index], [key]: value };
+          updated[lang] = list;
+        }
+      });
+    }
+
     setArchiveData(updated);
   };
 
@@ -77,21 +96,8 @@ export function AdminArchiveEditor() {
       highlights: ["Ключевое достижение или особенность 1"]
     };
 
-    const newItemEn: ArchiveItem = {
-      ...newItemRu,
-      title: "New Archive Project",
-      shortDesc: "Short description for the project card...",
-      fullDesc: "Full detailed project description for the modal window...",
-      highlights: ["Key highlight or feature 1"]
-    };
-
-    const newItemKg: ArchiveItem = {
-      ...newItemRu,
-      title: "Жаңы архив долбоору",
-      shortDesc: "Долбоордун карточкасы үчүн кыскача сүрөттөмө...",
-      fullDesc: "Модалдык терезе үчүн долбоордун толук сүрөттөмөсү...",
-      highlights: ["Негизги жетишкендик же өзгөчөлүк 1"]
-    };
+    const newItemEn: ArchiveItem = { ...newItemRu };
+    const newItemKg: ArchiveItem = { ...newItemRu };
 
     const updated = {
       ru: [newItemRu, ...(archiveData.ru || [])],
@@ -207,110 +213,119 @@ export function AdminArchiveEditor() {
   const handleHighlightChange = (cardIdx: number, hlIdx: number, value: string) => {
     if (isReadOnly) return;
     const updated = { ...archiveData };
-    const list = [...(updated[activeLang] || [])];
-    if (list[cardIdx]) {
-      const highlights = [...(list[cardIdx].highlights || [])];
-      highlights[hlIdx] = value;
-      list[cardIdx] = { ...list[cardIdx], highlights };
-      updated[activeLang] = list;
-      setArchiveData(updated);
-    }
+    const langsToUpdate = activeLang === "ru" ? (["ru", "en", "kg"] as const) : ([activeLang] as const);
+
+    langsToUpdate.forEach((lang) => {
+      const list = [...(updated[lang] || [])];
+      if (list[cardIdx]) {
+        const highlights = [...(list[cardIdx].highlights || [])];
+        highlights[hlIdx] = value;
+        list[cardIdx] = { ...list[cardIdx], highlights };
+        updated[lang] = list;
+      }
+    });
+
+    setArchiveData(updated);
   };
 
   const handleAddHighlight = (cardIdx: number) => {
     if (isReadOnly) return;
     const updated = { ...archiveData };
-    const list = [...(updated[activeLang] || [])];
-    if (list[cardIdx]) {
-      const highlights = [...(list[cardIdx].highlights || []), "Новая ключевая особенность"];
-      list[cardIdx] = { ...list[cardIdx], highlights };
-      updated[activeLang] = list;
-      setArchiveData(updated);
-    }
+    const langsToUpdate = activeLang === "ru" ? (["ru", "en", "kg"] as const) : ([activeLang] as const);
+
+    langsToUpdate.forEach((lang) => {
+      const list = [...(updated[lang] || [])];
+      if (list[cardIdx]) {
+        const highlights = [...(list[cardIdx].highlights || []), "Новая ключевая особенность"];
+        list[cardIdx] = { ...list[cardIdx], highlights };
+        updated[lang] = list;
+      }
+    });
+
+    setArchiveData(updated);
   };
 
   const handleDeleteHighlight = (cardIdx: number, hlIdx: number) => {
     if (isReadOnly) return;
     const updated = { ...archiveData };
-    const list = [...(updated[activeLang] || [])];
-    if (list[cardIdx]) {
-      const highlights = [...(list[cardIdx].highlights || [])];
-      highlights.splice(hlIdx, 1);
-      list[cardIdx] = { ...list[cardIdx], highlights };
-      updated[activeLang] = list;
-      setArchiveData(updated);
-    }
+    const langsToUpdate = activeLang === "ru" ? (["ru", "en", "kg"] as const) : ([activeLang] as const);
+
+    langsToUpdate.forEach((lang) => {
+      const list = [...(updated[lang] || [])];
+      if (list[cardIdx]) {
+        const highlights = [...(list[cardIdx].highlights || [])];
+        highlights.splice(hlIdx, 1);
+        list[cardIdx] = { ...list[cardIdx], highlights };
+        updated[lang] = list;
+      }
+    });
+
+    setArchiveData(updated);
   };
 
   const handleMoveHighlight = (cardIdx: number, hlIdx: number, direction: "up" | "down") => {
     if (isReadOnly) return;
     const targetIdx = direction === "up" ? hlIdx - 1 : hlIdx + 1;
     const updated = { ...archiveData };
-    const list = [...(updated[activeLang] || [])];
-    if (list[cardIdx]) {
-      const highlights = [...(list[cardIdx].highlights || [])];
-      if (targetIdx >= 0 && targetIdx < highlights.length) {
-        const temp = highlights[hlIdx];
-        highlights[hlIdx] = highlights[targetIdx];
-        highlights[targetIdx] = temp;
-        list[cardIdx] = { ...list[cardIdx], highlights };
-        updated[activeLang] = list;
-        setArchiveData(updated);
+    const langsToUpdate = activeLang === "ru" ? (["ru", "en", "kg"] as const) : ([activeLang] as const);
+
+    langsToUpdate.forEach((lang) => {
+      const list = [...(updated[lang] || [])];
+      if (list[cardIdx]) {
+        const highlights = [...(list[cardIdx].highlights || [])];
+        if (targetIdx >= 0 && targetIdx < highlights.length) {
+          const temp = highlights[hlIdx];
+          highlights[hlIdx] = highlights[targetIdx];
+          highlights[targetIdx] = temp;
+          list[cardIdx] = { ...list[cardIdx], highlights };
+          updated[lang] = list;
+        }
       }
-    }
+    });
+
+    setArchiveData(updated);
   };
 
-  // Save & Auto-translate
+  // Fast parallel Save & Auto-translate
   const saveChanges = async () => {
     if (isReadOnly) return;
     try {
       setTranslating(true);
       const updated = { ...archiveData };
+      const ruItems = updated.ru || [];
+      const targetLangs = ["en", "kg"] as const;
 
-      // If editing on RU, auto-translate texts to EN and KG if desired
-      if (activeLang === "ru") {
-        const ruItems = updated.ru || [];
-        const targetLangs = ["en", "kg"] as const;
+      for (const lang of targetLangs) {
+        const existingList = updated[lang] || [];
+        
+        const translatedList = await Promise.all(
+          ruItems.map(async (ru, i) => {
+            const existing = existingList.find((item) => item.id === ru.id) || existingList[i];
 
-        for (const lang of targetLangs) {
-          const existingList = updated[lang] || [];
-          const translatedList: ArchiveItem[] = [];
+            // If existing item already has translations, reuse them to save time
+            const isRuUnchanged = existing && 
+              existing.title && 
+              existing.title !== "New Archive Project" &&
+              existing.title !== "Жаңы архив долбоору" &&
+              existing.shortDesc;
 
-          for (let i = 0; i < ruItems.length; i++) {
-            const ru = ruItems[i];
-            const existing = existingList.find(item => item.id === ru.id) || existingList[i];
+            // Only translate if missing or if it's a new card
+            const [translatedTitle, translatedCategory, translatedShortDesc, translatedFullDesc, translatedHighlights] = await Promise.all([
+              isRuUnchanged && existing.title ? existing.title : translateText(ru.title || "", lang),
+              isRuUnchanged && existing.category ? existing.category : translateText(ru.category || "", lang),
+              isRuUnchanged && existing.shortDesc ? existing.shortDesc : translateText(ru.shortDesc || "", lang),
+              isRuUnchanged && existing.fullDesc ? existing.fullDesc : translateText(ru.fullDesc || "", lang),
+              Promise.all(
+                (ru.highlights || []).map((h, hIdx) => {
+                  if (isRuUnchanged && existing?.highlights?.[hIdx]) {
+                    return existing.highlights[hIdx];
+                  }
+                  return translateText(h || "", lang);
+                })
+              )
+            ]);
 
-            // Auto translate text fields if missing or updating
-            const translatedTitle = existing?.title && existing.title !== ru.title 
-              ? existing.title 
-              : await translateText(ru.title || "", lang);
-
-            const translatedShortDesc = existing?.shortDesc && existing.shortDesc !== ru.shortDesc 
-              ? existing.shortDesc 
-              : await translateText(ru.shortDesc || "", lang);
-
-            const translatedFullDesc = existing?.fullDesc && existing.fullDesc !== ru.fullDesc 
-              ? existing.fullDesc 
-              : await translateText(ru.fullDesc || "", lang);
-
-            const translatedCategory = existing?.category && existing.category !== ru.category 
-              ? existing.category 
-              : await translateText(ru.category || "", lang);
-
-            const translatedHighlights: string[] = [];
-            if (ru.highlights && ru.highlights.length > 0) {
-              for (let hIdx = 0; hIdx < ru.highlights.length; hIdx++) {
-                const ruH = ru.highlights[hIdx];
-                const exH = existing?.highlights?.[hIdx];
-                if (exH && exH !== ruH) {
-                  translatedHighlights.push(exH);
-                } else {
-                  translatedHighlights.push(await translateText(ruH, lang));
-                }
-              }
-            }
-
-            translatedList.push({
+            return {
               ...ru,
               title: translatedTitle,
               category: translatedCategory,
@@ -318,11 +333,11 @@ export function AdminArchiveEditor() {
               fullDesc: translatedFullDesc,
               highlights: translatedHighlights,
               images: ru.images || []
-            });
-          }
+            };
+          })
+        );
 
-          updated[lang] = translatedList;
-        }
+        updated[lang] = translatedList;
       }
 
       setArchiveData(updated);
