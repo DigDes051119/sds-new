@@ -123,25 +123,28 @@ export function Home() {
     };
   });
 
-  // Block 2: Recent Projects (first 2 items)
-  const recentProjects = mappedProjects.slice(0, 2);
+  // Block 2: Recent Projects (4 items = 2 rows of 2 cards)
+  const recentProjects = mappedProjects.slice(0, 4);
 
   // Block 5: Selected / Featured Projects (next 4 items or all)
   const featuredProjects = mappedProjects;
 
   // Block 3: Advantages list based on i18n about values
   const advantages = locale === "ru" ? [
-    { num: "01", title: "About", desc: "15+ лет настоящего опыта в независимой сфере с 2011 года создаем бренды и направления" },
-    { num: "02", title: "Global", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
-    { num: "03", title: "Principle", desc: "Who you gonna call?" }
+    { num: "01", title: "Founder", desc: "21 год опыта в дизайне — основатель студии." },
+    { num: "02", title: "Studio", desc: "2011 год — опыт работы как студия." },
+    { num: "03", title: "Global", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
+    { num: "04", title: "Principle", desc: "Who you gonna call?" }
   ] : locale === "kg" ? [
-    { num: "01", title: "About", desc: "15+ жылдык көз карандысыз тармактагы чыныгы тажрыйба, 2011-жылдан бери бренддерди жана багыттарды түзүп келебиз." },
-    { num: "02", title: "Global", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
-    { num: "03", title: "Principle", desc: "Who you gonna call?" }
+    { num: "01", title: "Founder", desc: "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү." },
+    { num: "02", title: "Studio", desc: "2011-жылдан бери — студия катары тажрыйба." },
+    { num: "03", title: "Global", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
+    { num: "04", title: "Principle", desc: "Who you gonna call?" }
   ] : [
-    { num: "01", title: "About", desc: "15+ years of real experience in the independent industry, creating brands and directions since 2011." },
-    { num: "02", title: "Global", desc: "Projects for Central Asia, Europe and digital-first teams." },
-    { num: "03", title: "Principle", desc: "Who you gonna call?" }
+    { num: "01", title: "Founder", desc: "21 year of experience in Design - studio founder." },
+    { num: "02", title: "Studio", desc: "2011 year - experience as studio." },
+    { num: "03", title: "Global", desc: "Projects for Central Asia, Europe and digital-first teams." },
+    { num: "04", title: "Principle", desc: "Who you gonna call?" }
   ];
 
   // Block 4: Services list from t.services.items with image references
@@ -172,7 +175,7 @@ export function Home() {
   const brands = t.home.brands || [];
 
   return (
-    <div className="w-full flex flex-col pt-[40px] pb-[80px] gap-[80px]">
+    <div className="w-full flex flex-col pt-[40px] pb-[120px] gap-[120px] md:gap-[140px] lg:gap-[160px]">
       
       {/* 1 БЛОК: Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
@@ -263,10 +266,36 @@ export function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[59px] pt-[28px] items-start">
-          {/* Left Column: Big typographic display stat */}
-          <div className="lg:col-span-5 flex flex-col select-none">
-            <div className="text-[64px] xs:text-[80px] sm:text-[100px] md:text-[160px] lg:text-[180px] font-normal leading-none tracking-[-0.06em] text-[#0000FF] m-0">
-              15+
+          {/* Left Column: Divided into 2 display stats */}
+          <div className="lg:col-span-5 flex flex-col gap-6 md:gap-8 select-none pr-4">
+            {/* Stat 1: Founder Experience */}
+            <div className="flex flex-col gap-1">
+              <div className="text-[54px] xs:text-[70px] sm:text-[88px] md:text-[100px] font-normal leading-none tracking-[-0.06em] text-[#0000FF] m-0">
+                21+
+              </div>
+              <span className="font-mono text-[12px] md:text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                {locale === "ru" 
+                  ? "Год опыта в дизайне — основатель студии" 
+                  : locale === "kg" 
+                    ? "Дизайндагы 21 жылдык тажрыйба" 
+                    : "Years of experience in Design — studio founder"}
+              </span>
+            </div>
+
+            <div className="h-px w-full bg-[#808080]/20" />
+
+            {/* Stat 2: Studio Experience */}
+            <div className="flex flex-col gap-1">
+              <div className="text-[54px] xs:text-[70px] sm:text-[88px] md:text-[100px] font-normal leading-none tracking-[-0.06em] text-black m-0">
+                2011
+              </div>
+              <span className="font-mono text-[12px] md:text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                {locale === "ru" 
+                  ? "Опыт работы как студия" 
+                  : locale === "kg" 
+                    ? "Студия катары тажрыйба" 
+                    : "Experience as studio"}
+              </span>
             </div>
           </div>
 

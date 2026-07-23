@@ -1,16 +1,30 @@
 import { useState, useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LanguageContext } from "../i18n";
 import { type ArchiveItem } from "../archiveData";
 import { cmsService } from "../cmsService";
 
-export function ArchiveOriginsSection() {
+interface ArchiveOriginsSectionProps {
+  limit?: number;
+  showTitle?: boolean;
+  noPadding?: boolean;
+  showYearFilter?: boolean;
+}
+
+export function ArchiveOriginsSection({ 
+  limit, 
+  showTitle = true, 
+  noPadding = false,
+  showYearFilter = true
+}: ArchiveOriginsSectionProps = {}) {
   const { locale } = useContext(LanguageContext);
   const langKey = (locale === "ru" || locale === "kg" || locale === "en") ? locale : "ru";
 
   const [allArchiveData, setAllArchiveData] = useState(() => cmsService.getArchiveItems());
+  const [selectedYear, setSelectedYear] = useState<string>("ALL");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -18,7 +32,18 @@ export function ArchiveOriginsSection() {
     });
   }, []);
 
-  const items: ArchiveItem[] = allArchiveData[langKey] || allArchiveData.ru || [];
+  const rawItems: ArchiveItem[] = allArchiveData[langKey] || allArchiveData.ru || [];
+  
+  // Extract unique years sorted descending
+  const uniqueYears = Array.from(
+    new Set(rawItems.map((item) => item.year).filter(Boolean))
+  ).sort((a, b) => b.localeCompare(a));
+
+  const filteredRawItems = selectedYear === "ALL" 
+    ? rawItems 
+    : rawItems.filter((item) => item.year === selectedYear);
+
+  const items = limit && limit > 0 ? filteredRawItems.slice(0, limit) : filteredRawItems;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeProjectIdx, setActiveProjectIdx] = useState(0);
@@ -86,22 +111,62 @@ export function ArchiveOriginsSection() {
       ? "2005-жылдан 2020-жылга чейин жасалган айрым иштер — кардарларыбыз негизделген күндөн бери бизди тааныган жана эстеп калган долбоорлор."
       : "Some of the works created between 2005 and 2020 — signature projects by which our long-time clients have known and remembered us.";
 
+  const viewAllText = langKey === "ru"
+    ? "Все старые проекты (2005—2020)"
+    : langKey === "kg"
+      ? "Бардык эски долбоорлор (2005—2020)"
+      : "All Old Projects (2005—2020)";
+
   return (
-    <section className="flex flex-col w-full py-16 md:py-24 px-[45px] md:px-[65px] lg:px-[105px] border-t border-[#808080]/20 font-twk-everett select-none">
+    <section className={`flex flex-col w-full py-16 md:py-24 border-t border-[#808080]/20 font-twk-everett select-none ${
+      noPadding ? "" : "px-[45px] md:px-[65px] lg:px-[105px]"
+    }`}>
       {/* ───── Section Header (Exact Site Hierarchy) ───── */}
-      <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none border-b border-[#808080]/30">
-        <div className="flex flex-col">
-          <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">
-            2005 — 2020
+      {showTitle && (
+        <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none border-b border-[#808080]/30">
+          <div className="flex flex-col">
+            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">
+              2005 — 2020
+            </span>
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+              {sectionHeading}
+            </h2>
+          </div>
+          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">
+            [07/ORIGINS]
           </span>
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
-            {sectionHeading}
-          </h2>
         </div>
-        <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">
-          [07/ORIGINS]
-        </span>
-      </div>
+      )}
+
+      {/* ───── Year Filter Buttons ───── */}
+      {showYearFilter && uniqueYears.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-12 md:mb-14 pb-6 border-b border-[#808080]/15">
+          <button
+            onClick={() => setSelectedYear("ALL")}
+            className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold uppercase transition-all duration-300 cursor-pointer tracking-[0.04em] ${
+              selectedYear === "ALL"
+                ? "bg-[#0000FF] text-white shadow-md shadow-[#0000FF]/20"
+                : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
+            }`}
+          >
+            {langKey === "ru" ? "ВСЕ ГОДА" : langKey === "kg" ? "БАРДЫК ЖЫЛДАР" : "ALL YEARS"}
+          </button>
+
+          {uniqueYears.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold transition-all duration-300 cursor-pointer tracking-[0.04em] ${
+                selectedYear === year
+                  ? "bg-[#0000FF] text-white shadow-md shadow-[#0000FF]/20"
+                  : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ───── Projects Grid (Archive Style Cards - 4 in a row) ───── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]">
@@ -143,6 +208,18 @@ export function ArchiveOriginsSection() {
           </div>
         ))}
       </div>
+
+      {/* Button to view all old projects when limited (Home page) */}
+      {limit && (
+        <div className="mt-[32px] w-full z-10">
+          <Link
+            to="/projects/old"
+            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 select-none text-center"
+          >
+            {langKey === "ru" ? "Смотреть все \u2192" : langKey === "kg" ? "Бардыгын көрүү \u2192" : "View all \u2192"}
+          </Link>
+        </div>
+      )}
 
       {/* ───── Large Interactive Popup Modal (Rendered in document.body via Portal) ───── */}
       {typeof document !== "undefined" && createPortal(

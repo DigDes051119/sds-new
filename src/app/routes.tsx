@@ -4,6 +4,7 @@ import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
 import { Projects } from "./pages/Projects";
+import { OldProjects } from "./pages/OldProjects";
 import { ProjectDetail } from "./pages/ProjectDetail";
 import { Products } from "./pages/Products";
 import { ProductDetail } from "./pages/ProductDetail";
@@ -32,6 +33,8 @@ export const router = createBrowserRouter([
       { path: "about", Component: About },
       { path: "services", Component: Services },
       { path: "projects", Component: Projects },
+      { path: "projects/old", Component: OldProjects },
+      { path: "old-projects", Component: OldProjects },
       { path: "projects/:id", Component: ProjectDetail },
       { path: "products", Component: Products },
       { path: "products/:id", Component: ProductDetail },

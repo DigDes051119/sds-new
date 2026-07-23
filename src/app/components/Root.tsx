@@ -38,8 +38,8 @@ export function Root() {
   }, [locale, location.pathname]);
   
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [showPreloader, setShowPreloader] = useState(true);
-  const [preloaderActive, setPreloaderActive] = useState(true);
+  const [showPreloader, setShowPreloader] = useState(false);
+  const [preloaderActive, setPreloaderActive] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   // Contact form states
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
@@ -286,30 +286,89 @@ export function Root() {
           <div className="hidden lg:flex lg:col-span-9 justify-end">
             <div ref={navClusterRef} className="flex flex-nowrap items-center gap-[28px] xl:gap-[40px] whitespace-nowrap">
               <nav className="flex flex-nowrap items-center gap-[20px] xl:gap-[28px]">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
-                      isActive ? "text-[#0000FF]" : "text-black"
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {link.name}
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeUnderline"
-                          className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
-                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                        />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+              {navLinks.map((link) => {
+                if (link.path === "/projects") {
+                  return (
+                    <div key={link.path} className="relative group/navdropdown">
+                      <NavLink
+                        to={link.path}
+                        className={({ isActive }) =>
+                          `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 group-hover/navdropdown:text-[#0000FF] relative pb-[6px] flex items-center gap-1 ${
+                            isActive ? "text-[#0000FF]" : "text-black"
+                          }`
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            {link.name}
+                            {isActive && (
+                              <motion.div
+                                layoutId="activeUnderline"
+                                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
+                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                              />
+                            )}
+                          </>
+                        )}
+                      </NavLink>
+
+                      {/* Dropdown Menu on Hover */}
+                      <div className="absolute top-full -left-2 pt-3 opacity-0 pointer-events-none group-hover/navdropdown:opacity-100 group-hover/navdropdown:pointer-events-auto transition-all duration-300 ease-out z-[999]">
+                        <div className="bg-white border border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] rounded-2xl p-4 min-w-[280px] flex flex-col gap-2 backdrop-blur-xl">
+                          <NavLink
+                            to="/projects"
+                            end
+                            className={({ isActive }) =>
+                              `px-4 py-3 rounded-xl text-[13px] font-bold uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Актуальные проекты" : locale === "kg" ? "Учурдагы долбоорлор" : "Current Projects"}</span>
+                          </NavLink>
+                          
+                          <NavLink
+                            to="/projects/old"
+                            className={({ isActive }) =>
+                              `px-4 py-3 rounded-xl text-[13px] font-bold uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Старые проекты" : locale === "kg" ? "Эски долбоорлор" : "Old Projects"}</span>
+                            <span className="text-[11px] font-mono text-[#808080] font-normal tracking-normal shrink-0">(2005 — 2020)</span>
+                          </NavLink>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    className={({ isActive }) =>
+                      `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
+                        isActive ? "text-[#0000FF]" : "text-black"
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {link.name}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeUnderline"
+                            className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
+                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
             </nav>
 
             <span className="hidden md:inline text-[#808080] text-[17px]">|</span>
@@ -364,8 +423,8 @@ export function Root() {
             {outlet}
           </main>
 
-          {/* Section: Откуда мы начинали (Archives 2005–2020) */}
-          {location.pathname === "/" && <ArchiveOriginsSection />}
+          {/* Section: Откуда мы начинали (Archives 2005–2020) — Max 9 items on homepage */}
+          {location.pathname === "/" && <ArchiveOriginsSection limit={9} showYearFilter={false} />}
 
           {/* Footer */}
           <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
