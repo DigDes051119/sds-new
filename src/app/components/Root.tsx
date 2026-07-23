@@ -499,13 +499,13 @@ export function Root() {
 
               {/* Bottom Row: Logo and Copyright */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="flex items-center">
+                <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
                   <img
                     src={logo}
                     alt="Steel Drake Studio"
-                    className="block h-10 w-auto object-contain"
+                    className="block h-10 w-auto object-contain cursor-pointer"
                   />
-                </div>
+                </Link>
                 <div className="flex flex-col items-center md:items-end gap-1">
                   <div className="text-[12px] text-black/55 uppercase font-mono tracking-[0.06em]">
                     &copy; 2026 STEEL DRAKE STUDIO TEAM. ALL RIGHT RESERVED

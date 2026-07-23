@@ -134,17 +134,17 @@ export function Home() {
     { num: "01", title: "Founder", desc: "21 год опыта в дизайне — основатель студии." },
     { num: "02", title: "Studio", desc: "2011 год — опыт работы как студия." },
     { num: "03", title: "Global", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
-    { num: "04", title: "Principle", desc: "Who you gonna call?" }
+    { num: "04", title: "Principle", desc: "Становимся частью каждого проекта поэтому переживаем вместе с клиентом и стараемся делать работу по совести. Никаких громких пустых слов, просто делаем как должно быть." }
   ] : locale === "kg" ? [
     { num: "01", title: "Founder", desc: "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү." },
     { num: "02", title: "Studio", desc: "2011-жылдан бери — студия катары тажрыйба." },
     { num: "03", title: "Global", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
-    { num: "04", title: "Principle", desc: "Who you gonna call?" }
+    { num: "04", title: "Principle", desc: "Ар бир долбоордун бир бөлүгү болобуз, ошондуктан кардар менен бирге сарсанаа болуп, ишти абийир менен жасоого аракет кылабыз. Эч кандай куру сөз жок, жөн гана кандай болушу керек болсо, ошондой кылабыз." }
   ] : [
     { num: "01", title: "Founder", desc: "21 year of experience in Design - studio founder." },
     { num: "02", title: "Studio", desc: "2011 year - experience as studio." },
     { num: "03", title: "Global", desc: "Projects for Central Asia, Europe and digital-first teams." },
-    { num: "04", title: "Principle", desc: "Who you gonna call?" }
+    { num: "04", title: "Principle", desc: "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done." }
   ];
 
   // Block 4: Services list from t.services.items with image references

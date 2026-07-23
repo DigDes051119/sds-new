@@ -16,6 +16,8 @@ export function AdminArchiveEditor() {
   const [activeLang, setActiveLang] = useState<"ru" | "en" | "kg">("ru");
   const [success, setSuccess] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [savingCardIdx, setSavingCardIdx] = useState<number | null>(null);
+  const [savedCardIdx, setSavedCardIdx] = useState<number | null>(null);
   const [uploadingState, setUploadingState] = useState<{ itemIdx: number } | null>(null);
 
   useEffect(() => {
@@ -38,19 +40,6 @@ export function AdminArchiveEditor() {
     const items = [...(updated[activeLang] || [])];
     items[index] = { ...items[index], [key]: value };
     updated[activeLang] = items;
-
-    // If editing on RU (primary language), mirror changes to EN and KG
-    // so switching tabs immediately reflects the current input
-    if (activeLang === "ru") {
-      (["en", "kg"] as const).forEach((lang) => {
-        if (updated[lang]?.[index]) {
-          const list = [...updated[lang]];
-          list[index] = { ...list[index], [key]: value };
-          updated[lang] = list;
-        }
-      });
-    }
-
     setArchiveData(updated);
   };
 
@@ -295,7 +284,68 @@ export function AdminArchiveEditor() {
     setArchiveData(updated);
   };
 
-  // Fast parallel Save & Auto-translate
+  // Save & Auto-translate a SINGLE card from activeLang to target languages
+  const saveSingleCard = async (index: number) => {
+    if (isReadOnly) return;
+    try {
+      setSavingCardIdx(index);
+      const updated = { ...archiveData };
+      const sourceCard = (updated[activeLang] || [])[index];
+      if (!sourceCard) return;
+
+      const targetLangs = (["ru", "en", "kg"] as const).filter((l) => l !== activeLang);
+
+      for (const lang of targetLangs) {
+        const existingList = [...(updated[lang] || [])];
+
+        const [translatedTitle, translatedCategory, translatedShortDesc, translatedFullDesc, translatedQuote, translatedHighlights] = await Promise.all([
+          translateText(sourceCard.title || "", lang, activeLang),
+          translateText(sourceCard.category || "", lang, activeLang),
+          translateText(sourceCard.shortDesc || "", lang, activeLang),
+          translateText(sourceCard.fullDesc || "", lang, activeLang),
+          sourceCard.quote ? translateText(sourceCard.quote, lang, activeLang) : Promise.resolve(""),
+          Promise.all((sourceCard.highlights || []).map((h) => translateText(h || "", lang, activeLang)))
+        ]);
+
+        const updatedCard: ArchiveItem = {
+          ...sourceCard,
+          title: translatedTitle,
+          category: translatedCategory,
+          shortDesc: translatedShortDesc,
+          fullDesc: translatedFullDesc,
+          quote: translatedQuote,
+          highlights: translatedHighlights,
+          images: sourceCard.images || []
+        };
+
+        if (existingList[index]) {
+          existingList[index] = updatedCard;
+        } else {
+          existingList.splice(index, 0, updatedCard);
+        }
+
+        updated[lang] = existingList;
+      }
+
+      setArchiveData(updated);
+      await cmsService.updateArchiveItems(updated);
+
+      await logAdminAction(
+        "Управление архивом (Origins)",
+        "Сохранение отдельной карточки",
+        `Сохранена карточка #${index + 1} "${sourceCard.title || ''}"`
+      );
+
+      setSavedCardIdx(index);
+      setTimeout(() => setSavedCardIdx(null), 3000);
+    } catch (err: any) {
+      alert("Ошибка при сохранении карточки: " + err.message);
+    } finally {
+      setSavingCardIdx(null);
+    }
+  };
+
+  // Fast parallel Save & Auto-translate ALL cards
   const saveChanges = async () => {
     if (isReadOnly) return;
     try {
@@ -396,23 +446,6 @@ export function AdminArchiveEditor() {
             ))}
           </div>
         </div>
-
-        {!isReadOnly && (
-          <button
-            onClick={saveChanges}
-            disabled={translating}
-            className="px-6 py-3 bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
-          >
-            {translating ? (
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
-            ) : success ? (
-              <Check className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {translating ? "Перевод и сохранение..." : success ? "Сохранено!" : "Сохранить изменения"}
-          </button>
-        )}
       </div>
 
       {isReadOnly && (
@@ -512,10 +545,39 @@ export function AdminArchiveEditor() {
                       {/* Delete */}
                       <button
                         onClick={() => handleDeleteCard(cardIdx)}
-                        className="p-2 bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 rounded-lg transition cursor-pointer ml-2"
+                        className="p-2 bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 rounded-lg transition cursor-pointer ml-1"
                         title="Удалить карточку"
                       >
                         <Trash2 className="w-4 h-4" />
+                      </button>
+
+                      {/* Individual Save Button */}
+                      <button
+                        onClick={() => saveSingleCard(cardIdx)}
+                        disabled={savingCardIdx === cardIdx}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ml-2 ${
+                          savedCardIdx === cardIdx
+                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                            : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-md shadow-[#0000FF]/20"
+                        }`}
+                        title="Сохранить только эту карточку"
+                      >
+                        {savingCardIdx === cardIdx ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span className="hidden sm:inline">Сохранение...</span>
+                          </>
+                        ) : savedCardIdx === cardIdx ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-green-400" />
+                            <span>Сохранено!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-3.5 h-3.5" />
+                            <span>Сохранить</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   )}
@@ -774,6 +836,42 @@ export function AdminArchiveEditor() {
                     </div>
                   )}
                 </div>
+
+                {/* Bottom Footer Bar with Individual Save Button */}
+                {!isReadOnly && (
+                  <div className="border-t border-white/[0.06] pt-5 mt-4 flex flex-wrap justify-between items-center gap-4">
+                    <span className="text-xs text-white/40 font-mono">
+                      Карточка #{String(cardIdx + 1).padStart(2, '0')} ({item.year}) • {item.title || "Без названия"}
+                    </span>
+
+                    <button
+                      onClick={() => saveSingleCard(cardIdx)}
+                      disabled={savingCardIdx === cardIdx}
+                      className={`px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        savedCardIdx === cardIdx
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-lg shadow-[#0000FF]/25"
+                      }`}
+                    >
+                      {savingCardIdx === cardIdx ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Перевод и сохранение карточки...</span>
+                        </>
+                      ) : savedCardIdx === cardIdx ? (
+                        <>
+                          <Check className="w-4 h-4 text-green-400" />
+                          <span>Карточка успешно сохранена!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>Сохранить эту карточку</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
 
               </div>
             ))}
