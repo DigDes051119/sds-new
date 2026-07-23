@@ -59,7 +59,7 @@ export const cmsService = {
         if (storedTrans) {
           try {
             const trans = JSON.parse(storedTrans);
-            if (trans?.ru?.archive) {
+            if (trans?.ru?.archive && Array.isArray(trans.ru.archive) && trans.ru.archive.length > 0) {
               const archiveData = {
                 ru: trans.ru.archive,
                 en: trans.en?.archive || trans.ru.archive,
@@ -328,20 +328,23 @@ export const cmsService = {
     localStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
     this.notify();
 
+    // 1. Always save inside sds_translations remotely to guarantee persistence in Supabase
+    try {
+      const translations = this.getTranslations();
+      ["ru", "en", "kg"].forEach((lang) => {
+        if (!translations[lang]) translations[lang] = {};
+        translations[lang].archive = newArchiveData[lang as keyof typeof newArchiveData];
+      });
+      await this.updateTranslations(translations);
+    } catch (transErr) {
+      console.warn("Failed to sync archive into translations:", transErr);
+    }
+
+    // 2. Also attempt saving to sds_archive_items if table exists
     try {
       await supabaseClient.upsertTable("sds_archive_items", [{ id: 1, data: newArchiveData }]);
     } catch (e) {
-      console.warn("Table sds_archive_items unavailable in Supabase, falling back to sds_translations:", e);
-      try {
-        const translations = this.getTranslations();
-        ["ru", "en", "kg"].forEach((lang) => {
-          if (!translations[lang]) translations[lang] = {};
-          translations[lang].archive = newArchiveData[lang as keyof typeof newArchiveData];
-        });
-        await this.updateTranslations(translations);
-      } catch (transErr) {
-        console.warn("Failed to sync archive into translations:", transErr);
-      }
+      console.warn("sds_archive_items table fallback active.");
     }
   },
 
