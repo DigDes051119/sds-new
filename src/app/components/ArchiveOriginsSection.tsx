@@ -128,7 +128,7 @@ export function ArchiveOriginsSection({
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">
               2005 — 2020
             </span>
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {sectionHeading}
             </h2>
           </div>
@@ -319,7 +319,7 @@ export function ArchiveOriginsSection({
                     <span className="font-mono text-[14px] text-[#808080] uppercase tracking-[0.04em]">
                       {currentItem.year} — {currentItem.category}
                     </span>
-                    <h3 className="text-[32px] md:text-[40px] font-bold tracking-[-0.04em] text-black m-0 leading-[1.1] uppercase">
+                    <h3 className="text-[32px] md:text-[40px] font-medium tracking-[-0.04em] text-black m-0 leading-[1.1] uppercase">
                       {currentItem.title}
                     </h3>
                     <div className="font-mono text-[14px] text-[#808080] uppercase mt-2">

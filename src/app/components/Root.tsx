@@ -423,8 +423,8 @@ export function Root() {
             {outlet}
           </main>
 
-          {/* Section: Откуда мы начинали (Archives 2005–2020) — Max 9 items on homepage */}
-          {location.pathname === "/" && <ArchiveOriginsSection limit={9} showYearFilter={false} />}
+          {/* Section: Откуда мы начинали (Archives 2005–2020) — Max 8 items on homepage */}
+          {location.pathname === "/" && <ArchiveOriginsSection limit={8} showYearFilter={false} />}
 
           {/* Footer */}
           <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
