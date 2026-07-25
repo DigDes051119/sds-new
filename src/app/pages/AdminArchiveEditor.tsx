@@ -8,7 +8,7 @@ import { type ArchiveItem } from "../archiveData";
 import { 
   Save, Check, Globe, Loader2, Plus, Trash2, Upload, FileImage, 
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Images, Sparkles, Layers, Image as ImageIcon,
-  ChevronsUp, ChevronsDown
+  ChevronsUp, ChevronsDown, GripVertical, Search, Edit2, X, ChevronUp, ChevronDown
 } from "lucide-react";
 
 export function AdminArchiveEditor() {
@@ -18,7 +18,11 @@ export function AdminArchiveEditor() {
   const [translating, setTranslating] = useState(false);
   const [savingCardIdx, setSavingCardIdx] = useState<number | null>(null);
   const [savedCardIdx, setSavedCardIdx] = useState<number | null>(null);
-  const [uploadingState, setUploadingState] = useState<{ itemIdx: number } | null>(null);
+  const [uploadingState, setUploadingState] = useState<{ itemIdx: number; progress?: string } | null>(null);
+  const [draggedCardIndex, setDraggedCardIndex] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editingCardIdx, setEditingCardIdx] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -31,7 +35,89 @@ export function AdminArchiveEditor() {
 
   const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
-  const currentItems: ArchiveItem[] = archiveData[activeLang] || [];
+  const allItems: ArchiveItem[] = archiveData[activeLang] || [];
+  const currentItems = allItems.filter(item => 
+    !searchQuery || 
+    (item.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.year || "").includes(searchQuery) ||
+    (item.category || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Drag and Drop card reordering
+  const handleCardDragStart = (e: React.DragEvent, index: number) => {
+    if (isReadOnly) return;
+    setDraggedCardIndex(index);
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleCardDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const sourceIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (isNaN(sourceIndex) || sourceIndex === targetIndex) return;
+
+    try {
+      const updated = { ...archiveData };
+      (["ru", "en", "kg"] as const).forEach((lang) => {
+        const list = [...(updated[lang] || [])];
+        if (list[sourceIndex]) {
+          const [movedItem] = list.splice(sourceIndex, 1);
+          list.splice(targetIndex, 0, movedItem);
+          updated[lang] = list;
+        }
+      });
+
+      setArchiveData(updated);
+      await cmsService.updateArchiveItems(updated);
+      await logAdminAction(
+        "Управление галереей (Origins)",
+        "Сортировка карточек",
+        `Перемещена карточка с позиции ${sourceIndex + 1} на позицию ${targetIndex + 1}`
+      );
+    } catch (err: any) {
+      alert("Ошибка при сохранении порядка: " + err.message);
+    } finally {
+      setDraggedCardIndex(null);
+    }
+  };
+
+  // Multiple Images Upload preserving selection order
+  const handleMultipleImagesUpload = async (cardIdx: number, files: FileList | File[]) => {
+    if (isReadOnly) return;
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    try {
+      setUploadingState({ itemIdx: cardIdx, progress: `0/${fileArray.length}` });
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i];
+        setUploadingState({ itemIdx: cardIdx, progress: `${i + 1}/${fileArray.length}` });
+
+        const fileExt = file.name.split(".").pop();
+        const path = `archive/item_${Date.now()}_${cardIdx}_${i}.${fileExt}`;
+        const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+        uploadedUrls.push(publicUrl);
+      }
+
+      const updated = { ...archiveData };
+      (["ru", "en", "kg"] as const).forEach((lang) => {
+        const list = [...(updated[lang] || [])];
+        if (list[cardIdx]) {
+          const images = [...(list[cardIdx].images || []), ...uploadedUrls];
+          list[cardIdx] = { ...list[cardIdx], images };
+          updated[lang] = list;
+        }
+      });
+
+      setArchiveData(updated);
+      await cmsService.updateArchiveItems(updated);
+    } catch (err: any) {
+      alert("Ошибка при загрузке фотографий: " + err.message);
+    } finally {
+      setUploadingState(null);
+    }
+  };
 
   // Update item field for current language
   const handleItemFieldChange = (index: number, key: keyof ArchiveItem, value: any) => {
@@ -104,6 +190,7 @@ export function AdminArchiveEditor() {
     };
 
     setArchiveData(updated);
+    setEditingCardIdx(0);
   };
 
   // Delete card
@@ -419,9 +506,20 @@ export function AdminArchiveEditor() {
     }
   };
 
+  // Extract unique categories for filter pills
+  const archiveCategories = Array.from(
+    new Set(allItems.map((item) => item.category).filter(Boolean))
+  );
+  const categoryFilters = ["all", ...archiveCategories];
+
+  const filteredArchiveItems = currentItems.filter((item) => {
+    if (selectedCategory === "all") return true;
+    return item.category === selectedCategory;
+  });
+
   return (
     <div className="space-y-8 max-w-[1720px] mx-auto font-['Inter',sans-serif]">
-      {/* Save bar & Language Switcher */}
+      {/* Top Header Bar & Language Switcher */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2 text-white/50 text-xs font-semibold pl-2">
@@ -446,6 +544,18 @@ export function AdminArchiveEditor() {
             ))}
           </div>
         </div>
+
+        {/* Search Bar */}
+        <div className="relative w-full md:w-64">
+          <Search className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Поиск по названию или году..."
+            className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#0066FF] outline-none transition"
+          />
+        </div>
       </div>
 
       {isReadOnly && (
@@ -454,461 +564,530 @@ export function AdminArchiveEditor() {
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/[0.06] pb-6">
-          <div>
-            <h3 className="text-lg font-bold tracking-tight flex items-center gap-2 text-[#0066FF]">
-              <Sparkles className="w-5 h-5" />
-              Карточки архива ({activeLang.toUpperCase()})
-            </h3>
-            <p className="text-xs text-white/40 mt-1">
-              Управляйте порядком, текстами, галереей изображений и ключевыми особенностями карточек.
-            </p>
-          </div>
+      {/* STATE 1: GRID VIEW (Identical to AdminProjectsEditor) */}
+      {editingCardIdx === null && (
+        <div className="w-full space-y-6">
+          <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 select-none">
+            {/* Action buttons header */}
+            {!isReadOnly && (
+              <div className="flex justify-end items-center pb-4 border-b border-black/[0.06] mb-6 gap-2">
+                <button
+                  onClick={handleAddCard}
+                  className="px-4 py-2 bg-[#0000FF] hover:bg-[#0000FF]/90 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md"
+                >
+                  <Plus className="w-4 h-4" />
+                  Добавить карточку
+                </button>
+              </div>
+            )}
 
-          {!isReadOnly && (
-            <div className="flex gap-2">
+            {/* Grid of Archive Cards */}
+            {filteredArchiveItems.length === 0 ? (
+              <div className="text-center py-16 text-black/40 text-sm border-2 border-dashed border-black/10 rounded-2xl">
+                Ничего не найдено. Нажмите «Добавить карточку» выше.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
+                {filteredArchiveItems.map((item) => {
+                  const realIdx = allItems.findIndex((i) => i.id === item.id);
+                  const heroImg = item.images?.[0] || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=1000";
+
+                  return (
+                    <div
+                      key={item.id || realIdx}
+                      draggable={!isReadOnly}
+                      onDragStart={(e) => handleCardDragStart(e, realIdx)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleCardDrop(e, realIdx)}
+                      className={`flex flex-col group/card p-3.5 rounded-2xl transition duration-200 relative border cursor-grab active:cursor-grabbing ${
+                        draggedCardIndex === realIdx
+                          ? "bg-[#0000FF]/5 border-[#0000FF] shadow-xl"
+                          : "hover:bg-black/[0.02] border-transparent hover:border-black/[0.04]"
+                      }`}
+                      title="Зажмите и перетащите мышкой для изменения порядка"
+                    >
+                      {/* Image Preview & Hover Actions */}
+                      <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#eeeee9] mb-3 border border-black/5 relative">
+                        <img src={heroImg} alt={item.title} className="w-full h-full object-cover" />
+
+                        {/* Image count badge */}
+                        <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[10px] font-mono px-2 py-0.5 rounded-md flex items-center gap-1 font-bold">
+                          <ImageIcon className="w-3 h-3 text-[#0066FF]" />
+                          {item.images?.length || 0} фото
+                        </div>
+
+                        {/* Drag Handle Indicator */}
+                        <div className="absolute top-2 right-2 bg-black/60 text-white/80 p-1.5 rounded-md opacity-0 group-hover/card:opacity-100 transition">
+                          <GripVertical className="w-4 h-4" />
+                        </div>
+
+                        {/* Hover Action Overlay */}
+                        {!isReadOnly && (
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center gap-2 opacity-0 group-hover/card:opacity-100 transition duration-200">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingCardIdx(realIdx);
+                              }}
+                              className="p-2.5 bg-white hover:bg-[#eeeee9] text-black rounded-xl shadow-lg transition cursor-pointer flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider"
+                            >
+                              <Edit2 className="w-3.5 h-3.5 text-[#0000FF]" />
+                              Изменить
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCard(realIdx);
+                              }}
+                              className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-lg transition cursor-pointer"
+                              title="Удалить"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <div className="flex flex-col gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveCard(realIdx, "up");
+                                }}
+                                disabled={realIdx === 0}
+                                className="p-1.5 bg-white/90 hover:bg-white disabled:opacity-30 text-black rounded-md shadow-md transition cursor-pointer"
+                                title="Вверх"
+                              >
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveCard(realIdx, "down");
+                                }}
+                                disabled={realIdx === allItems.length - 1}
+                                className="p-1.5 bg-white/90 hover:bg-white disabled:opacity-30 text-black rounded-md shadow-md transition cursor-pointer"
+                                title="Вниз"
+                              >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Meta & Titles */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-[12px] text-[#0000FF] font-bold uppercase tracking-wider">
+                          {item.category || "Concept Design"}
+                        </span>
+                        <span className="text-[12px] font-mono text-black/50 font-semibold">
+                          {item.year}
+                        </span>
+                      </div>
+                      <h3 className="text-[18px] font-bold tracking-tight text-black mt-1 leading-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-[13px] text-black/60 line-clamp-2 mt-1 leading-relaxed font-light">
+                        {item.shortDesc || item.fullDesc}
+                      </p>
+                    </div>
+                  );
+                })}
+
+                {/* Add Card item at end of grid */}
+                {!isReadOnly && (
+                  <div
+                    onClick={handleAddCard}
+                    className="flex flex-col group/add p-3.5 rounded-2xl hover:bg-black/[0.01] transition duration-200 cursor-pointer"
+                  >
+                    <div className="w-full aspect-[16/10] rounded-xl border-2 border-dashed border-black/15 hover:border-[#0000FF]/40 hover:bg-[#0000FF]/5 flex flex-col items-center justify-center gap-2 transition duration-200 mb-3 bg-black/[0.01]">
+                      <Plus className="w-8 h-8 text-black/30 group-hover/add:text-[#0000FF]/60 transition" />
+                    </div>
+                    <span className="text-[12px] text-[#0000FF] font-semibold uppercase tracking-wider">Новая работа</span>
+                    <h3 className="text-[18px] font-bold tracking-tight text-black mt-1 leading-tight">Добавить карточку</h3>
+                    <p className="text-[13px] text-black/40 line-clamp-2 mt-1 leading-relaxed font-light">Нажмите для создания нового проекта в галерее</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* STATE 2: FOCUSED CARD EDITOR (When a card is being edited) */}
+      {editingCardIdx !== null && currentItems[editingCardIdx] && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8"
+        >
+          {/* Header row with Back button */}
+          <div className="flex justify-between items-center pb-6 border-b border-white/[0.06]">
+            <div className="flex items-center gap-3">
               <button
-                onClick={async () => {
-                  if (confirm("Вы уверены, что хотите восстановить все старые проекты из исходного кода? Это добавит недостающие проекты (включая 3 пропавших) в конец списка.")) {
-                    const current = { ...archiveData };
-                    let changed = false;
-                    const { archiveItems } = await import("../archiveData");
-                    (["ru", "en", "kg"] as const).forEach(lang => {
-                      if (!current[lang]) current[lang] = [];
-                      archiveItems[lang].forEach(defItem => {
-                        if (!current[lang].find(i => i.id === defItem.id)) {
-                          current[lang].push(defItem);
-                          changed = true;
-                        }
-                      });
-                    });
-                    if (changed) {
-                      setArchiveData(current);
-                      await cmsService.updateArchiveItems(current);
-                      alert("Проекты успешно восстановлены!");
-                    } else {
-                      alert("Все проекты уже есть в списке.");
-                    }
-                  }
-                }}
-                className="px-5 py-2.5 bg-green-500/15 hover:bg-green-500/25 border border-green-500/40 rounded-xl text-xs font-bold transition flex items-center gap-2 text-green-400"
+                type="button"
+                onClick={() => setEditingCardIdx(null)}
+                className="px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white/80 rounded-xl transition text-xs font-bold flex items-center gap-2 cursor-pointer"
               >
-                <Globe className="w-4 h-4" />
-                Восстановить пропавшие
+                ← Назад к сетке галереи
+              </button>
+              <span className="text-white/30">|</span>
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">
+                Редактирование: {currentItems[editingCardIdx].title || "Карточка"}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => saveSingleCard(editingCardIdx)}
+                disabled={savingCardIdx === editingCardIdx}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                  savedCardIdx === editingCardIdx
+                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                    : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-lg shadow-[#0000FF]/25"
+                }`}
+              >
+                {savingCardIdx === editingCardIdx ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Перевод и сохранение...</span>
+                  </>
+                ) : savedCardIdx === editingCardIdx ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-400" />
+                    <span>Сохранено!</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Сохранить карточку</span>
+                  </>
+                )}
               </button>
               <button
-                onClick={handleAddCard}
-                className="px-5 py-2.5 bg-[#0000FF]/15 hover:bg-[#0000FF]/25 border border-[#0000FF]/40 rounded-xl text-xs font-bold transition flex items-center gap-2 text-[#0066FF]"
+                type="button"
+                onClick={() => setEditingCardIdx(null)}
+                className="p-2.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/60 hover:text-white rounded-xl transition"
               >
-                <Plus className="w-4 h-4" />
-                Добавить новую карточку
+                <X className="w-5 h-5" />
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Cards List */}
-        {currentItems.length === 0 ? (
-          <div className="text-center py-12 text-white/40 text-sm border border-dashed border-white/10 rounded-3xl">
-            Список карточек пуст. Нажмите «Добавить новую карточку» выше.
           </div>
-        ) : (
-          <div className="space-y-6">
-            {currentItems.map((item, cardIdx) => (
-              <div 
-                key={item.id || cardIdx}
-                className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 lg:p-8 space-y-6 relative group"
-              >
-                {/* Header Row: Index & Quick Controls */}
-                <div className="flex flex-wrap justify-between items-center gap-4 border-b border-white/[0.06] pb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-bold text-[#0066FF] bg-[#0066FF]/10 border border-[#0066FF]/20 px-2.5 py-1 rounded-lg">
-                      [{String(cardIdx + 1).padStart(2, '0')}]
-                    </span>
-                    <span className="text-sm font-bold text-white uppercase">{item.title || "Без названия"}</span>
-                    <span className="text-xs text-white/40 font-mono">({item.year})</span>
-                  </div>
 
-                  {!isReadOnly && (
-                    <div className="flex items-center gap-1.5">
-                      {/* Move to Top */}
-                      <button
-                        onClick={() => handleMoveCard(cardIdx, "top")}
-                        disabled={cardIdx === 0}
-                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="В самый верх"
-                      >
-                        <ChevronsUp className="w-4 h-4 text-[#0066FF]" />
-                      </button>
-
-                      {/* Move Up 1 */}
-                      <button
-                        onClick={() => handleMoveCard(cardIdx, "up")}
-                        disabled={cardIdx === 0}
-                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="На 1 позицию выше"
-                      >
-                        <ArrowUp className="w-4 h-4" />
-                      </button>
-
-                      {/* Move Down 1 */}
-                      <button
-                        onClick={() => handleMoveCard(cardIdx, "down")}
-                        disabled={cardIdx === currentItems.length - 1}
-                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="На 1 позицию ниже"
-                      >
-                        <ArrowDown className="w-4 h-4" />
-                      </button>
-
-                      {/* Move to Bottom */}
-                      <button
-                        onClick={() => handleMoveCard(cardIdx, "bottom")}
-                        disabled={cardIdx === currentItems.length - 1}
-                        className="p-2 bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 rounded-lg text-white transition cursor-pointer"
-                        title="В самый низ"
-                      >
-                        <ChevronsDown className="w-4 h-4 text-[#0066FF]" />
-                      </button>
-
-                      {/* Delete */}
-                      <button
-                        onClick={() => handleDeleteCard(cardIdx)}
-                        className="p-2 bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 rounded-lg transition cursor-pointer ml-1"
-                        title="Удалить карточку"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      {/* Individual Save Button */}
-                      <button
-                        onClick={() => saveSingleCard(cardIdx)}
-                        disabled={savingCardIdx === cardIdx}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ml-2 ${
-                          savedCardIdx === cardIdx
-                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-md shadow-[#0000FF]/20"
-                        }`}
-                        title="Сохранить только эту карточку"
-                      >
-                        {savingCardIdx === cardIdx ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span className="hidden sm:inline">Сохранение...</span>
-                          </>
-                        ) : savedCardIdx === cardIdx ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-green-400" />
-                            <span>Сохранено!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Save className="w-3.5 h-3.5" />
-                            <span>Сохранить</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Form Fields Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  {/* Left Metadata Column */}
-                  <div className="md:col-span-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Год</label>
-                        <input
-                          type="text"
-                          value={item.year || ""}
-                          onChange={(e) => handleItemFieldChange(cardIdx, "year", e.target.value)}
-                          disabled={isReadOnly}
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm font-mono"
-                          placeholder="2014"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Клиент</label>
-                        <input
-                          type="text"
-                          value={item.client || ""}
-                          onChange={(e) => handleItemFieldChange(cardIdx, "client", e.target.value)}
-                          disabled={isReadOnly}
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm"
-                          placeholder="Steel Drake R&D"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Заголовок проекта ({activeLang.toUpperCase()})</label>
-                      <input
-                        type="text"
-                        value={item.title || ""}
-                        onChange={(e) => handleItemFieldChange(cardIdx, "title", e.target.value)}
-                        disabled={isReadOnly}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm font-bold"
-                        placeholder="iPhone 8 Viral Concept"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Категория ({activeLang.toUpperCase()})</label>
-                      <input
-                        type="text"
-                        value={item.category || ""}
-                        onChange={(e) => handleItemFieldChange(cardIdx, "category", e.target.value)}
-                        disabled={isReadOnly}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm"
-                        placeholder="Concept Design / R&D"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right Descriptions Column */}
-                  <div className="md:col-span-8 space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Краткое описание на карточке ({activeLang.toUpperCase()})</label>
-                      <textarea
-                        rows={2}
-                        value={item.shortDesc || ""}
-                        onChange={(e) => handleItemFieldChange(cardIdx, "shortDesc", e.target.value)}
-                        disabled={isReadOnly}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm resize-none"
-                        placeholder="Краткий анонс для плитки в сетке..."
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Полное описание в модальном окне ({activeLang.toUpperCase()})</label>
-                      <textarea
-                        rows={4}
-                        value={item.fullDesc || ""}
-                        onChange={(e) => handleItemFieldChange(cardIdx, "fullDesc", e.target.value)}
-                        disabled={isReadOnly}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm resize-none leading-relaxed"
-                        placeholder="Развернутый текст с подробностями проекта..."
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Цитата / Эпиграф в модальном окне ({activeLang.toUpperCase()})</label>
-                      <textarea
-                        rows={2}
-                        value={item.quote || ""}
-                        onChange={(e) => handleItemFieldChange(cardIdx, "quote", e.target.value)}
-                        disabled={isReadOnly}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm italic resize-none"
-                        placeholder="Some of the works created between 2005 and 2020 — signature projects..."
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Images Manager */}
-                <div className="border-t border-white/[0.06] pt-6 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/60 flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-[#0066FF]" />
-                      Галерея изображений ({item.images?.length || 0} шт.)
-                    </label>
-
-                    {!isReadOnly && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => fileInputRefs.current[cardIdx]?.click()}
-                          disabled={uploadingState?.itemIdx === cardIdx}
-                          className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-xs font-semibold text-white transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                        >
-                          {uploadingState?.itemIdx === cardIdx ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0066FF]" />
-                          ) : (
-                            <Upload className="w-3.5 h-3.5 text-[#0066FF]" />
-                          )}
-                          Загрузить фото
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleAddImageUrl(cardIdx)}
-                          className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-xs font-semibold text-white transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5 text-[#0066FF]" />
-                          Добавить URL
-                        </button>
-                      </div>
-                    )}
-
+          {/* Card Editing Form */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 lg:p-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {/* Left Metadata Column */}
+              <div className="md:col-span-4 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Год</label>
                     <input
-                      type="file"
-                      ref={(el) => { fileInputRefs.current[cardIdx] = el; }}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleImageUpload(cardIdx, file);
-                      }}
-                      accept="image/*"
-                      className="hidden"
+                      type="text"
+                      value={currentItems[editingCardIdx].year || ""}
+                      onChange={(e) => handleItemFieldChange(editingCardIdx, "year", e.target.value)}
+                      disabled={isReadOnly}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm font-mono"
+                      placeholder="2014"
                     />
                   </div>
-
-                  {/* Image Thumbnails Strip */}
-                  {(!item.images || item.images.length === 0) ? (
-                    <div className="text-xs text-white/30 italic p-4 border border-dashed border-white/5 rounded-xl text-center">
-                      Нет изображений в этой карточке.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {item.images.map((imgUrl, imgIdx) => (
-                        <div key={imgIdx} className="relative group/img aspect-[4/3] rounded-xl bg-black/40 border border-white/10 overflow-hidden">
-                          <img src={imgUrl} alt={`View ${imgIdx + 1}`} className="w-full h-full object-cover" />
-                          <div className="absolute top-1 left-1 bg-black/70 text-[10px] font-mono px-1.5 py-0.5 rounded text-white/70">
-                            #{imgIdx + 1}
-                          </div>
-
-                          {!isReadOnly && (
-                            <div className="absolute inset-0 bg-black/75 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1 p-1">
-                              <button
-                                onClick={() => handleMoveImage(cardIdx, imgIdx, "left")}
-                                disabled={imgIdx === 0}
-                                className="p-1 bg-white/10 hover:bg-white/25 disabled:opacity-20 rounded text-white cursor-pointer"
-                                title="Сдвинуть влево"
-                              >
-                                <ArrowLeft className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleMoveImage(cardIdx, imgIdx, "right")}
-                                disabled={imgIdx === item.images.length - 1}
-                                className="p-1 bg-white/10 hover:bg-white/25 disabled:opacity-20 rounded text-white cursor-pointer"
-                                title="Сдвинуть вправо"
-                              >
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteImage(cardIdx, imgIdx)}
-                                className="p-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded cursor-pointer ml-1"
-                                title="Удалить фото"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Highlights List Manager ([KEY HIGHLIGHTS]) */}
-                <div className="border-t border-white/[0.06] pt-6 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/60 flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-[#0066FF]" />
-                      Ключевые особенности / Достижения ([KEY HIGHLIGHTS]) ({activeLang.toUpperCase()})
-                    </label>
-                    {!isReadOnly && (
-                      <button
-                        onClick={() => handleAddHighlight(cardIdx)}
-                        className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-xs font-semibold text-white transition flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5 text-[#0066FF]" />
-                        Добавить пункт
-                      </button>
-                    )}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Клиент</label>
+                    <input
+                      type="text"
+                      value={currentItems[editingCardIdx].client || ""}
+                      onChange={(e) => handleItemFieldChange(editingCardIdx, "client", e.target.value)}
+                      disabled={isReadOnly}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                      placeholder="Steel Drake R&D"
+                    />
                   </div>
-
-                  {(!item.highlights || item.highlights.length === 0) ? (
-                    <div className="text-xs text-white/30 italic p-3 border border-dashed border-white/5 rounded-xl text-center">
-                      Список особенностей пуст. Нажмите «Добавить пункт».
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {item.highlights.map((hlText, hlIdx) => (
-                        <div key={hlIdx} className="flex items-center gap-2 bg-white/[0.02] border border-white/[0.04] p-2 rounded-xl">
-                          <span className="text-xs font-mono text-[#0066FF] font-bold px-2">
-                            0{hlIdx + 1}
-                          </span>
-                          <input
-                            type="text"
-                            value={hlText}
-                            onChange={(e) => handleHighlightChange(cardIdx, hlIdx, e.target.value)}
-                            disabled={isReadOnly}
-                            className="flex-1 bg-transparent border-none outline-none text-xs text-white p-1"
-                            placeholder="Описание особенности..."
-                          />
-                          {!isReadOnly && (
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleMoveHighlight(cardIdx, hlIdx, "up")}
-                                disabled={hlIdx === 0}
-                                className="p-1 text-white/40 hover:text-white disabled:opacity-20 transition"
-                              >
-                                <ArrowUp className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleMoveHighlight(cardIdx, hlIdx, "down")}
-                                disabled={hlIdx === item.highlights.length - 1}
-                                className="p-1 text-white/40 hover:text-white disabled:opacity-20 transition"
-                              >
-                                <ArrowDown className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteHighlight(cardIdx, hlIdx)}
-                                className="p-1 text-red-400/60 hover:text-red-400 transition"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Bottom Footer Bar with Individual Save Button */}
-                {!isReadOnly && (
-                  <div className="border-t border-white/[0.06] pt-5 mt-4 flex flex-wrap justify-between items-center gap-4">
-                    <span className="text-xs text-white/40 font-mono">
-                      Карточка #{String(cardIdx + 1).padStart(2, '0')} ({item.year}) • {item.title || "Без названия"}
-                    </span>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Заголовок проекта ({activeLang.toUpperCase()})</label>
+                  <input
+                    type="text"
+                    value={currentItems[editingCardIdx].title || ""}
+                    onChange={(e) => handleItemFieldChange(editingCardIdx, "title", e.target.value)}
+                    disabled={isReadOnly}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm font-bold"
+                    placeholder="iPhone 8 Viral Concept"
+                  />
+                </div>
 
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Категория ({activeLang.toUpperCase()})</label>
+                  <input
+                    type="text"
+                    value={currentItems[editingCardIdx].category || ""}
+                    onChange={(e) => handleItemFieldChange(editingCardIdx, "category", e.target.value)}
+                    disabled={isReadOnly}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                    placeholder="Concept Design / R&D"
+                  />
+                </div>
+              </div>
+
+              {/* Right Descriptions Column */}
+              <div className="md:col-span-8 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Краткое описание на карточке ({activeLang.toUpperCase()})</label>
+                  <textarea
+                    rows={2}
+                    value={currentItems[editingCardIdx].shortDesc || ""}
+                    onChange={(e) => handleItemFieldChange(editingCardIdx, "shortDesc", e.target.value)}
+                    disabled={isReadOnly}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm resize-none"
+                    placeholder="Краткий анонс для плитки в сетке..."
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Полное описание в модальном окне ({activeLang.toUpperCase()})</label>
+                  <textarea
+                    rows={4}
+                    value={currentItems[editingCardIdx].fullDesc || ""}
+                    onChange={(e) => handleItemFieldChange(editingCardIdx, "fullDesc", e.target.value)}
+                    disabled={isReadOnly}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm resize-none leading-relaxed"
+                    placeholder="Развернутый текст с подробностями проекта..."
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/40">Цитата / Эпиграф в модальном окне ({activeLang.toUpperCase()})</label>
+                  <textarea
+                    rows={2}
+                    value={currentItems[editingCardIdx].quote || ""}
+                    onChange={(e) => handleItemFieldChange(editingCardIdx, "quote", e.target.value)}
+                    disabled={isReadOnly}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg p-2.5 text-white focus:border-[#0066FF] outline-none text-sm italic resize-none"
+                    placeholder="Some of the works created between 2005 and 2020 — signature projects..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Images Manager */}
+            <div className="border-t border-white/[0.06] pt-6 space-y-4">
+              <div className="flex justify-between items-center flex-wrap gap-3">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/60 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#0066FF]" />
+                  Галерея изображений ({currentItems[editingCardIdx].images?.length || 0} шт.)
+                </label>
+
+                {!isReadOnly && (
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => saveSingleCard(cardIdx)}
-                      disabled={savingCardIdx === cardIdx}
-                      className={`px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                        savedCardIdx === cardIdx
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-lg shadow-[#0000FF]/25"
-                      }`}
+                      type="button"
+                      onClick={() => fileInputRefs.current[editingCardIdx]?.click()}
+                      disabled={uploadingState?.itemIdx === editingCardIdx}
+                      className="px-4 py-2 bg-[#0000FF]/15 hover:bg-[#0000FF]/25 border border-[#0000FF]/40 rounded-xl text-xs font-bold text-[#0066FF] transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                     >
-                      {savingCardIdx === cardIdx ? (
+                      {uploadingState?.itemIdx === editingCardIdx ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Перевод и сохранение карточки...</span>
-                        </>
-                      ) : savedCardIdx === cardIdx ? (
-                        <>
-                          <Check className="w-4 h-4 text-green-400" />
-                          <span>Карточка успешно сохранена!</span>
+                          <Loader2 className="w-4 h-4 animate-spin text-[#0066FF]" />
+                          <span>Загрузка {uploadingState.progress}...</span>
                         </>
                       ) : (
                         <>
-                          <Save className="w-4 h-4" />
-                          <span>Сохранить эту карточку</span>
+                          <Upload className="w-4 h-4 text-[#0066FF]" />
+                          <span>Загрузить фото (несколько)</span>
                         </>
                       )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAddImageUrl(editingCardIdx)}
+                      className="px-4 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-xl text-xs font-semibold text-white transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4 text-[#0066FF]" />
+                      Добавить URL
                     </button>
                   </div>
                 )}
 
+                <input
+                  type="file"
+                  ref={(el) => { fileInputRefs.current[editingCardIdx] = el; }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleMultipleImagesUpload(editingCardIdx, e.target.files);
+                    }
+                  }}
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                />
               </div>
-            ))}
+
+              {/* Image Thumbnails Strip */}
+              {(!currentItems[editingCardIdx].images || currentItems[editingCardIdx].images.length === 0) ? (
+                <div className="text-xs text-white/30 italic p-6 border border-dashed border-white/10 rounded-2xl text-center">
+                  Нет изображений в этой карточке. Нажмите «Загрузить фото (несколько)».
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {currentItems[editingCardIdx].images.map((imgUrl, imgIdx) => (
+                    <div key={imgIdx} className="relative group/img aspect-[4/3] rounded-xl bg-black/40 border border-white/10 overflow-hidden">
+                      <img src={imgUrl} alt={`View ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute top-1 left-1 bg-black/70 text-[10px] font-mono px-1.5 py-0.5 rounded text-white/70">
+                        #{imgIdx + 1}
+                      </div>
+
+                      {!isReadOnly && (
+                        <div className="absolute inset-0 bg-black/75 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1 p-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveImage(editingCardIdx, imgIdx, "left")}
+                            disabled={imgIdx === 0}
+                            className="p-1 bg-white/10 hover:bg-white/25 disabled:opacity-20 rounded text-white cursor-pointer"
+                            title="Сдвинуть влево"
+                          >
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveImage(editingCardIdx, imgIdx, "right")}
+                            disabled={imgIdx === currentItems[editingCardIdx].images.length - 1}
+                            className="p-1 bg-white/10 hover:bg-white/25 disabled:opacity-20 rounded text-white cursor-pointer"
+                            title="Сдвинуть вправо"
+                          >
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage(editingCardIdx, imgIdx)}
+                            className="p-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded cursor-pointer ml-1"
+                            title="Удалить фото"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Key Highlights Manager */}
+            <div className="border-t border-white/[0.06] pt-6 space-y-3">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/60 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#0066FF]" />
+                  Ключевые особенности / Достижения ({activeLang.toUpperCase()})
+                </label>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => handleAddHighlight(editingCardIdx)}
+                    className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-xs font-semibold text-white transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#0066FF]" />
+                    Добавить пункт
+                  </button>
+                )}
+              </div>
+
+              {(!currentItems[editingCardIdx].highlights || currentItems[editingCardIdx].highlights.length === 0) ? (
+                <div className="text-xs text-white/30 italic p-3 border border-dashed border-white/5 rounded-xl text-center">
+                  Список особенностей пуст. Нажмите «Добавить пункт».
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {currentItems[editingCardIdx].highlights.map((hlText, hlIdx) => (
+                    <div key={hlIdx} className="flex items-center gap-2 bg-white/[0.02] border border-white/[0.04] p-2 rounded-xl">
+                      <span className="text-xs font-mono text-[#0066FF] font-bold px-2">
+                        0{hlIdx + 1}
+                      </span>
+                      <input
+                        type="text"
+                        value={hlText}
+                        onChange={(e) => handleHighlightChange(editingCardIdx, hlIdx, e.target.value)}
+                        disabled={isReadOnly}
+                        className="flex-1 bg-transparent border-none outline-none text-xs text-white p-1"
+                        placeholder="Описание особенности..."
+                      />
+                      {!isReadOnly && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveHighlight(editingCardIdx, hlIdx, "up")}
+                            disabled={hlIdx === 0}
+                            className="p-1 text-white/40 hover:text-white disabled:opacity-20 transition"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveHighlight(editingCardIdx, hlIdx, "down")}
+                            disabled={hlIdx === currentItems[editingCardIdx].highlights.length - 1}
+                            className="p-1 text-white/40 hover:text-white disabled:opacity-20 transition"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteHighlight(editingCardIdx, hlIdx)}
+                            className="p-1 text-red-400/60 hover:text-red-400 transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Footer Bar */}
+            {!isReadOnly && (
+              <div className="border-t border-white/[0.06] pt-6 flex flex-wrap justify-between items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingCardIdx(null)}
+                  className="px-5 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white/80 rounded-xl transition text-xs font-bold cursor-pointer"
+                >
+                  ← Назад к сетке галереи
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => saveSingleCard(editingCardIdx)}
+                  disabled={savingCardIdx === editingCardIdx}
+                  className={`px-6 py-3 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                    savedCardIdx === editingCardIdx
+                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                      : "bg-[#0000FF] hover:bg-[#0000FF]/85 text-white shadow-xl shadow-[#0000FF]/25"
+                  }`}
+                >
+                  {savingCardIdx === editingCardIdx ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Перевод и сохранение...</span>
+                    </>
+                  ) : savedCardIdx === editingCardIdx ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-400" />
+                      <span>Карточка успешно сохранена!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Сохранить эту карточку</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {success && (

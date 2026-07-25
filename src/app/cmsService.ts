@@ -7,6 +7,9 @@ import { supabaseClient } from "./supabaseClient";
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
+let lastRemoteTranslationsStr: string | null = null;
+let lastRemoteProjectDetailsStr: string | null = null;
+
 export const cmsService = {
   subscribe(listener: Listener) {
     listeners.add(listener);
@@ -28,6 +31,7 @@ export const cmsService = {
         // Assume single row containing the translations JSON
         const remoteTranslations = translationRows[0].data;
         if (remoteTranslations) {
+          lastRemoteTranslationsStr = JSON.stringify(remoteTranslations);
           localStorage.setItem("sds_translations", JSON.stringify(remoteTranslations));
         }
       }
@@ -41,6 +45,7 @@ export const cmsService = {
       if (projectDetailsRows && projectDetailsRows.length > 0) {
         const remoteDetails = projectDetailsRows[0].data;
         if (remoteDetails) {
+          lastRemoteProjectDetailsStr = JSON.stringify(remoteDetails);
           localStorage.setItem("sds_project_details", JSON.stringify(remoteDetails));
         }
       }
@@ -216,7 +221,26 @@ export const cmsService = {
   },
 
   // Update translations locally & remotely
-  async updateTranslations(newTranslations: any) {
+  async updateTranslations(newTranslations: any, forceOverride = false) {
+    if (!forceOverride) {
+      try {
+        const translationRows = await supabaseClient.fetchTable("sds_translations");
+        if (translationRows && translationRows.length > 0 && translationRows[0].data) {
+          const currentRemoteStr = JSON.stringify(translationRows[0].data);
+          if (lastRemoteTranslationsStr && currentRemoteStr !== lastRemoteTranslationsStr) {
+            const confirmOverride = window.confirm(
+              "ВНИМАНИЕ! База данных была изменена другим администратором с момента загрузки вами этой страницы.\n\nЕсли вы нажмете 'ОК', вы сотрете их изменения навсегда!\nЕсли нажмете 'Отмена', сохранение будет прервано. Рекомендуется скопировать свои тексты в Word, обновить страницу (F5) и внести их заново."
+            );
+            if (!confirmOverride) {
+              return false;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not check collision:", e);
+      }
+    }
+
     localStorage.setItem("sds_translations", JSON.stringify(newTranslations));
     this.notify();
 
@@ -227,11 +251,13 @@ export const cmsService = {
         const currentAdmin = JSON.parse(currentAdminStr);
         const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
         await supabaseClient.updateTranslationsSecure(currentAdmin.username, requesterPassword, newTranslations);
+        lastRemoteTranslationsStr = JSON.stringify(newTranslations);
       }
     } catch (e) {
       console.error("Failed to push translations to Supabase:", e);
       throw e;
     }
+    return true;
   },
 
   // Get project details
@@ -249,7 +275,26 @@ export const cmsService = {
   },
 
   // Update project details locally & remotely
-  async updateProjectDetails(newDetails: any) {
+  async updateProjectDetails(newDetails: any, forceOverride = false) {
+    if (!forceOverride) {
+      try {
+        const rows = await supabaseClient.fetchTable("sds_project_details");
+        if (rows && rows.length > 0 && rows[0].data) {
+          const currentRemoteStr = JSON.stringify(rows[0].data);
+          if (lastRemoteProjectDetailsStr && currentRemoteStr !== lastRemoteProjectDetailsStr) {
+            const confirmOverride = window.confirm(
+              "ВНИМАНИЕ! Проекты были изменены другим администратором с момента загрузки вами этой страницы.\n\nЕсли вы нажмете 'ОК', вы сотрете их изменения навсегда!\nЕсли нажмете 'Отмена', сохранение будет прервано."
+            );
+            if (!confirmOverride) {
+              return false;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not check collision:", e);
+      }
+    }
+
     localStorage.setItem("sds_project_details", JSON.stringify(newDetails));
     this.notify();
 
@@ -259,11 +304,13 @@ export const cmsService = {
         const currentAdmin = JSON.parse(currentAdminStr);
         const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
         await supabaseClient.updateProjectDetailsSecure(currentAdmin.username, requesterPassword, newDetails);
+        lastRemoteProjectDetailsStr = JSON.stringify(newDetails);
       }
     } catch (e) {
       console.error("Failed to push project details to Supabase:", e);
       throw e;
     }
+    return true;
   },
 
   // Get product details
@@ -291,27 +338,30 @@ export const cmsService = {
 
   // Get archive (Origins) items
   getArchiveItems(): Record<"ru" | "en" | "kg", ArchiveItem[]> {
-    const stored = localStorage.getItem("sds_archive_items");
-    let data: any;
-    if (stored) {
-      try {
-        data = JSON.parse(stored);
-      } catch {
-        data = null;
+    let data: any = null;
+
+    // ALways prefer the central translations DB (where we just merged 24 projects)
+    const translations = this.getTranslations();
+    if (translations?.ru?.archive && Array.isArray(translations.ru.archive) && translations.ru.archive.length > 0) {
+      data = {
+        ru: translations.ru.archive,
+        en: translations.en?.archive || translations.ru.archive,
+        kg: translations.kg?.archive || translations.ru.archive,
+      };
+    } else {
+      // Fallback to local storage if translations somehow empty
+      const stored = localStorage.getItem("sds_archive_items");
+      if (stored) {
+        try {
+          data = JSON.parse(stored);
+        } catch {
+          data = null;
+        }
       }
     }
 
     if (!data) {
-      const translations = this.getTranslations();
-      if (translations?.ru?.archive) {
-        data = {
-          ru: translations.ru.archive,
-          en: translations.en?.archive || translations.ru.archive,
-          kg: translations.kg?.archive || translations.ru.archive,
-        };
-      } else {
-        data = JSON.parse(JSON.stringify(defaultArchiveItems));
-      }
+      data = JSON.parse(JSON.stringify(defaultArchiveItems));
     }
 
     // Ensure all language keys exist
@@ -325,9 +375,7 @@ export const cmsService = {
 
   // Update archive (Origins) items locally & remotely
   async updateArchiveItems(newArchiveData: Record<"ru" | "en" | "kg", ArchiveItem[]>) {
-    localStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
-    this.notify();
-
+    let success = true;
     // 1. Always save inside sds_translations remotely to guarantee persistence in Supabase
     try {
       const translations = this.getTranslations();
@@ -335,10 +383,17 @@ export const cmsService = {
         if (!translations[lang]) translations[lang] = {};
         translations[lang].archive = newArchiveData[lang as keyof typeof newArchiveData];
       });
-      await this.updateTranslations(translations);
+      success = await this.updateTranslations(translations) ?? true;
     } catch (transErr) {
       console.warn("Failed to sync archive into translations:", transErr);
     }
+    
+    if (success === false) {
+      return; // aborted by user due to collision
+    }
+
+    localStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
+    this.notify();
 
     // 2. Also attempt saving to sds_archive_items if table exists
     try {
