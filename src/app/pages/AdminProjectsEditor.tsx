@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
 import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -81,25 +81,30 @@ export function AdminProjectsEditor() {
   const handleMoveProject = async (index: number, direction: "up" | "down") => {
     if (isReadOnly) return;
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    const items = translations.ru.projects.items;
-    if (targetIndex < 0 || targetIndex >= items.length) return;
+    if (targetIndex < 0 || targetIndex >= filteredProjects.length) return;
 
     try {
       const newTranslations = JSON.parse(JSON.stringify(translations));
       const langs = ["ru", "en", "kg"] as const;
-      langs.forEach(lang => {
-        const arr = newTranslations[lang].projects.items;
-        const temp = arr[index];
-        arr[index] = arr[targetIndex];
-        arr[targetIndex] = temp;
-      });
-      await cmsService.updateTranslations(newTranslations);
-      setTranslations(newTranslations);
-      await logAdminAction(
-        "Управление проектами",
-        "Сортировка проектов",
-        `Изменен порядок: проект сдвинут ${direction === "up" ? "вверх" : "вниз"}`
-      );
+      
+      const realSourceIdx = projectsList.findIndex((p: any) => p.id === filteredProjects[index].id);
+      const realTargetIdx = projectsList.findIndex((p: any) => p.id === filteredProjects[targetIndex].id);
+
+      if (realSourceIdx !== -1 && realTargetIdx !== -1) {
+        langs.forEach(lang => {
+          const arr = newTranslations[lang].projects.items;
+          const temp = arr[realSourceIdx];
+          arr[realSourceIdx] = arr[realTargetIdx];
+          arr[realTargetIdx] = temp;
+        });
+        await cmsService.updateTranslations(newTranslations);
+        setTranslations(newTranslations);
+        await logAdminAction(
+          "Управление проектами",
+          "Сортировка проектов",
+          `Изменен порядок: проект сдвинут ${direction === "up" ? "вверх" : "вниз"}`
+        );
+      }
     } catch (err: any) {
       alert("Ошибка при сохранении порядка: " + err.message);
     }
@@ -1720,21 +1725,28 @@ export function AdminProjectsEditor() {
                                 id={`add-photo-input-${blockIdx}`}
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 className="hidden"
                                 onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
+                                  const files = e.target.files;
+                                  if (!files || files.length === 0) return;
                                   const key = `${blockIdx}-add`;
                                   try {
                                     setUploadingBlocks(prev => ({ ...prev, [key]: true }));
-                                    const fileExt = file.name.split('.').pop();
-                                    const nextIdx = block.length;
-                                    const path = `projects/project-block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
-                                    const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+                                    const uploadedUrls: string[] = [];
+                                    
+                                    for (let i = 0; i < files.length; i++) {
+                                      const file = files[i];
+                                      const fileExt = file.name.split('.').pop();
+                                      const nextIdx = block.length + i;
+                                      const path = `projects/project-block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
+                                      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+                                      uploadedUrls.push(publicUrl);
+                                    }
 
                                     setFormCollageBlocks(prev => {
                                       return prev.map((b, bIdx) => {
-                                        if (bIdx === blockIdx) return [...b, publicUrl];
+                                        if (bIdx === blockIdx) return [...b, ...uploadedUrls];
                                         return b;
                                       });
                                     });

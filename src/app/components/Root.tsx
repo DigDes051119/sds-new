@@ -293,7 +293,7 @@ export function Root() {
                       <NavLink
                         to={link.path}
                         className={({ isActive }) =>
-                          `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 group-hover/navdropdown:text-[#0000FF] relative pb-[6px] flex items-center gap-1 ${
+                          `text-[16px] font-medium tracking-[-0.15px] uppercase transition-colors duration-300 group-hover/navdropdown:text-[#0000FF] relative pb-[6px] flex items-center gap-1 ${
                             isActive ? "text-[#0000FF]" : "text-black"
                           }`
                         }
@@ -319,7 +319,7 @@ export function Root() {
                             to="/projects"
                             end
                             className={({ isActive }) =>
-                              `px-4 py-3 rounded-xl text-[13px] font-bold uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                              `px-4 py-3 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
                                 isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
                               }`
                             }
@@ -330,7 +330,7 @@ export function Root() {
                           <NavLink
                             to="/projects/old"
                             className={({ isActive }) =>
-                              `px-4 py-3 rounded-xl text-[13px] font-bold uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
+                              `px-4 py-3 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
                                 isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
                               }`
                             }
@@ -349,7 +349,7 @@ export function Root() {
                     key={link.path}
                     to={link.path}
                     className={({ isActive }) =>
-                      `text-[16px] font-bold tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
+                      `text-[16px] font-medium tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
                         isActive ? "text-[#0000FF]" : "text-black"
                       }`
                     }

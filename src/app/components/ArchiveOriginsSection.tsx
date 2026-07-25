@@ -196,7 +196,7 @@ export function ArchiveOriginsSection({
                   {item.category}
                 </span>
               </div>
-              <h3 className="text-[22px] xs:text-[26px] font-bold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+              <h3 className="text-[22px] xs:text-[26px] font-medium leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                 {item.title}
               </h3>
               {item.shortDesc && (

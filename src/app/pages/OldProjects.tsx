@@ -24,7 +24,7 @@ export function OldProjects() {
         <span className="font-mono text-sm text-[#0000FF] uppercase tracking-[0.06em]">
           [07/ORIGINS ARCHIVE]
         </span>
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-black m-0 uppercase">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-tight text-black m-0 uppercase">
           {title}
         </h1>
         <p className="text-base md:text-lg text-[#808080] max-w-3xl m-0 leading-relaxed font-normal">

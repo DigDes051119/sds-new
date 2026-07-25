@@ -237,6 +237,22 @@ export const translations = {
     projects: {
       title: "Projects",
       items: [
+        {
+            "id": "maminy-retsepty",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/maminy-retsepty/project-hero-1784560948544.webp",
+            "name": "Мамины рецепты",
+            "category": "Брендинг",
+            "createdAt": "2026-07-19T10:41:45.380Z",
+            "categoryKey": "branding"
+        },
+        {
+            "id": "tooko",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-hero-1784395034213.webp",
+            "name": "Tooko",
+            "category": "Брендинг",
+            "createdAt": "2026-07-18T17:10:14.147Z",
+            "categoryKey": "branding"
+        },
         { id: "sandyq", name: "Sandyq", category: "Branding & Architecture", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Product Design", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },
@@ -589,6 +605,22 @@ export const translations = {
     projects: {
       title: "Проекттер",
       items: [
+        {
+            "id": "maminy-retsepty",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/maminy-retsepty/project-hero-1784560948544.webp",
+            "name": "Мамины рецепты",
+            "category": "Брендинг",
+            "createdAt": "2026-07-19T10:41:45.380Z",
+            "categoryKey": "branding"
+        },
+        {
+            "id": "tooko",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-hero-1784395034213.webp",
+            "name": "Tooko",
+            "category": "Брендинг",
+            "createdAt": "2026-07-18T17:10:14.147Z",
+            "categoryKey": "branding"
+        },
         { id: "sandyq", name: "Sandyq", category: "Брендинг & Архитектура", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Продукт дизайны", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },
@@ -941,6 +973,22 @@ export const translations = {
     projects: {
       title: "Проекты",
       items: [
+        {
+            "id": "maminy-retsepty",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/maminy-retsepty/project-hero-1784560948544.webp",
+            "name": "Мамины рецепты",
+            "category": "Брендинг",
+            "createdAt": "2026-07-19T10:41:45.380Z",
+            "categoryKey": "branding"
+        },
+        {
+            "id": "tooko",
+            "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-hero-1784395034213.webp",
+            "name": "Tooko",
+            "category": "Брендинг",
+            "createdAt": "2026-07-18T17:10:14.147Z",
+            "categoryKey": "branding"
+        },
         { id: "sandyq", name: "Sandyq", category: "Брендинг & Архитектура", categoryKey: "branding", img: "image.png" },
         { id: "ala-too", name: "Ala-Too", category: "Продукт Дизайн", categoryKey: "web", img: "image_2026-06-09_10-31-16.png" },
         { id: "salkyn", name: "Salkyn", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1752524722694-e0976575a993?auto=format&fit=crop&q=80&w=600" },

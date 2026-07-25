@@ -66,10 +66,10 @@ export function Services() {
                 <div className="pt-8 mt-2 border-t border-[#808080]/15 grid grid-cols-1 sm:grid-cols-3 gap-6">
                   {service.steps.map((stepText: string, stepIdx: number) => (
                     <div key={stepIdx} className="flex flex-col gap-4">
-                      <span className="font-mono text-[13px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
+                      <span className="font-mono text-[15px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
                         [0{stepIdx + 1}/STAGE]
                       </span>
-                      <p className="text-[15px] leading-[1.5] text-black m-0 font-normal pr-4">
+                      <p className="text-[16px] leading-[1.5] text-black m-0 font-normal pr-4">
                         {stepText}
                       </p>
                     </div>

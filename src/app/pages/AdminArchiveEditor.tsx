@@ -468,13 +468,44 @@ export function AdminArchiveEditor() {
           </div>
 
           {!isReadOnly && (
-            <button
-              onClick={handleAddCard}
-              className="px-5 py-2.5 bg-[#0000FF]/15 hover:bg-[#0000FF]/25 border border-[#0000FF]/40 rounded-xl text-xs font-bold transition flex items-center gap-2 text-[#0066FF]"
-            >
-              <Plus className="w-4 h-4" />
-              Добавить новую карточку
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  if (confirm("Вы уверены, что хотите восстановить все старые проекты из исходного кода? Это добавит недостающие проекты (включая 3 пропавших) в конец списка.")) {
+                    const current = { ...archiveData };
+                    let changed = false;
+                    const { archiveItems } = await import("../archiveData");
+                    (["ru", "en", "kg"] as const).forEach(lang => {
+                      if (!current[lang]) current[lang] = [];
+                      archiveItems[lang].forEach(defItem => {
+                        if (!current[lang].find(i => i.id === defItem.id)) {
+                          current[lang].push(defItem);
+                          changed = true;
+                        }
+                      });
+                    });
+                    if (changed) {
+                      setArchiveData(current);
+                      await cmsService.updateArchiveItems(current);
+                      alert("Проекты успешно восстановлены!");
+                    } else {
+                      alert("Все проекты уже есть в списке.");
+                    }
+                  }
+                }}
+                className="px-5 py-2.5 bg-green-500/15 hover:bg-green-500/25 border border-green-500/40 rounded-xl text-xs font-bold transition flex items-center gap-2 text-green-400"
+              >
+                <Globe className="w-4 h-4" />
+                Восстановить пропавшие
+              </button>
+              <button
+                onClick={handleAddCard}
+                className="px-5 py-2.5 bg-[#0000FF]/15 hover:bg-[#0000FF]/25 border border-[#0000FF]/40 rounded-xl text-xs font-bold transition flex items-center gap-2 text-[#0066FF]"
+              >
+                <Plus className="w-4 h-4" />
+                Добавить новую карточку
+              </button>
+            </div>
           )}
         </div>
 

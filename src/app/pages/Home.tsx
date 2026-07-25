@@ -126,8 +126,25 @@ export function Home() {
   // Block 2: Recent Projects (4 items = 2 rows of 2 cards)
   const recentProjects = mappedProjects.slice(0, 4);
 
-  // Block 5: Selected / Featured Projects (next 4 items or all)
-  const featuredProjects = mappedProjects;
+  // Block 5: Selected / Featured Projects (from t.home.projects)
+  const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
+    ? t.home.projects
+    : allProjects.slice(0, 6);
+
+  const featuredProjects = featuredProjectsRaw.map((fp: any) => {
+    const matched = allProjects.find((p: any) => p.id === fp.id);
+    const detail = localizedDetails[fp.id] || {};
+    return {
+      id: fp.id,
+      title: fp.title || fp.name || matched?.name || "",
+      image: fp.id === "maminy-retsepty" ? coverMoms
+        : fp.id === "tooko" ? coverTooko
+        : (fp.img || fp.image || matched?.img || ""),
+      tags: fp.category || fp.tag || detail.service || matched?.category || "Design",
+      year: detail.year || "2026",
+      desc: detail.desc || matched?.desc || ""
+    };
+  });
 
   // Block 3: Advantages list based on i18n about values
   const advantages = locale === "ru" ? [
@@ -204,7 +221,7 @@ export function Home() {
         <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
             </h2>
           </div>
@@ -230,7 +247,7 @@ export function Home() {
                       <span className="font-mono text-[16px] text-[#808080]">
                         0{index + 1} / NEW
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -259,7 +276,7 @@ export function Home() {
       {/* 3 БЛОК: Advantages (Преимущества) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 select-none">
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0">
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0">
             {locale === "ru" ? "Преимущества" : locale === "kg" ? "Артыкчылыктар" : "Advantages"}
           </h2>
           <span className="font-mono text-[14px] xs:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 xs:pb-[15px] shrink-0">[03/VALUES]</span>
@@ -329,7 +346,7 @@ export function Home() {
       {/* 4 БЛОК: Services (Услуги) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex justify-between items-baseline select-none">
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {locale === "ru" ? "Услуги" : locale === "kg" ? "Кызматтар" : "Services"}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/SERVICES]</span>
@@ -369,10 +386,10 @@ export function Home() {
                       <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-6">
                         {service.steps.map((stepText: string, stepIdx: number) => (
                           <div key={stepIdx} className="flex flex-col gap-2">
-                            <span className="font-mono text-[13px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
+                            <span className="font-mono text-[15px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
                               [0{stepIdx + 1}/STAGE]
                             </span>
-                            <p className="text-[14px] leading-[1.5] text-black m-0 font-normal">
+                            <p className="text-[16px] leading-[1.5] text-black m-0 font-normal">
                               {stepText}
                             </p>
                           </div>
@@ -415,7 +432,7 @@ export function Home() {
       {/* 5 БЛОК: Featured Projects (Избранные проекты) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {locale === "ru" ? "Избранные проекты" : locale === "kg" ? "Тандалган долбоорлор" : "Featured projects"}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/FEATURED]</span>
@@ -443,7 +460,7 @@ export function Home() {
                       <span className="font-mono text-[16px] text-[#808080]">
                         {String(index + 1).padStart(2, '0')} / WORK
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -467,7 +484,7 @@ export function Home() {
       <section className="flex flex-col w-full overflow-hidden">
         <div className="pb-4 mb-[59px] select-none">
           <div className="flex justify-between items-baseline">
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-bold tracking-[-0.04em] m-0 text-black">
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {locale === "ru" ? "Бренды" : locale === "kg" ? "Бренддер" : "Selected brands"}
             </h2>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/BRANDS]</span>

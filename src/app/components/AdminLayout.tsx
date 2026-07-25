@@ -204,19 +204,7 @@ export function AdminLayout() {
             </div>
           )}
           <div className="flex gap-2">
-            <button
-              onClick={handleReset}
-              title="Сбросить к дефолту"
-              className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-              style={{
-                border: `1px solid ${resetSuccess ? "#10B981" : t.border}`,
-                color: resetSuccess ? "#10B981" : t.muted,
-                background: resetSuccess ? "#10B98115" : "transparent",
-              }}
-            >
-              {resetSuccess ? <Check size={14} /> : <RefreshCw size={14} />}
-              {!isCollapsed && (resetSuccess ? "Сброшено!" : "Сброс")}
-            </button>
+            {/* Кнопка сброса была скрыта по запросу, чтобы предотвратить случайное удаление данных */}
             <button
               onClick={handleLogout}
               title="Выйти"

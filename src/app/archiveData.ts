@@ -180,6 +180,57 @@ export const archiveItems: Record<"ru" | "en" | "kg", ArchiveItem[]> = {
         "Интерьер-трансформер для работы в пути",
         "Символ перехода студии к масштабным экосистемам"
       ]
+    },
+    {
+      id: "vaum-watch-2013",
+      year: "2013",
+      title: "Vaum wrist watch",
+      category: "Industrial Design",
+      client: "Vaum Concept",
+      images: [ "/assets/archive/vaum.png" ],
+      likesCount: 5200,
+      commentsCount: 310,
+      shortDesc: "Минимализм, удобство, простота и лаконичность. Цифровой черный корпус.",
+      fullDesc: "Наручные часы Vaum с цифровым черным корпусом. Дизайн с акцентом на минимализм, удобство, простоту и лаконичность.",
+      highlights: [
+        "Цифровой черный корпус",
+        "Минималистичная эстетика",
+        "Чистый функциональный интерфейс"
+      ]
+    },
+    {
+      id: "umai-terminal-2015",
+      year: "2015",
+      title: "Платежный терминал UMAI",
+      category: "Product Design",
+      client: "UMAI",
+      images: [ "/assets/archive/umai.png" ],
+      likesCount: 3400,
+      commentsCount: 150,
+      shortDesc: "Гладкий и эргономичный дизайн платежного терминала для UMAI.",
+      fullDesc: "Полный редизайн платежного терминала UMAI с упором на эргономику, современную эстетику и удобство взаимодействия с пользователем.",
+      highlights: [
+        "Эргономичный экран под углом",
+        "Современная металлическая отделка",
+        "Удобство для пользователя"
+      ]
+    },
+    {
+      id: "bird-logo-2016",
+      year: "2016",
+      title: "Абстрактный логотип Птица",
+      category: "Branding",
+      client: "Logo Concept",
+      images: [ "/assets/archive/bird.png" ],
+      likesCount: 4100,
+      commentsCount: 220,
+      shortDesc: "Яркий и динамичный абстрактный логотип.",
+      fullDesc: "Красочный абстрактный логотип, напоминающий птицу в полете. Создан с использованием ярких градиентов и плавных пересекающихся форм.",
+      highlights: [
+        "Яркие цветовые градиенты",
+        "Динамичные плавные формы",
+        "Универсальное применение"
+      ]
     }
   ],
   en: [
@@ -348,6 +399,57 @@ export const archiveItems: Record<"ru" | "en" | "kg", ArchiveItem[]> = {
         "Reconfigurable work-lounge interior",
         "Symbol of studio shift into ecosystems"
       ]
+    },
+    {
+      id: "vaum-watch-2013",
+      year: "2013",
+      title: "Vaum wrist watch",
+      category: "Industrial Design",
+      client: "Vaum Concept",
+      images: [ "/assets/archive/vaum.png" ],
+      likesCount: 5200,
+      commentsCount: 310,
+      shortDesc: "Minimalism, convenience, simplicity and conciseness. Digital Black housing.",
+      fullDesc: "Vaum wrist watch with digital black housing. A design focused on minimalism, convenience, simplicity, and conciseness.",
+      highlights: [
+        "Digital black housing",
+        "Minimalist aesthetic",
+        "Clean functional interface"
+      ]
+    },
+    {
+      id: "umai-terminal-2015",
+      year: "2015",
+      title: "UMAI Payment Terminal",
+      category: "Product Design",
+      client: "UMAI",
+      images: [ "/assets/archive/umai.png" ],
+      likesCount: 3400,
+      commentsCount: 150,
+      shortDesc: "Sleek, ergonomic payment terminal design for UMAI.",
+      fullDesc: "A complete redesign of the UMAI payment terminal with an emphasis on ergonomics, modern aesthetics, and user-friendly interaction.",
+      highlights: [
+        "Ergonomic angled screen",
+        "Modern metallic finish",
+        "User-centric interaction"
+      ]
+    },
+    {
+      id: "bird-logo-2016",
+      year: "2016",
+      title: "Abstract Bird Logo",
+      category: "Branding",
+      client: "Logo Concept",
+      images: [ "/assets/archive/bird.png" ],
+      likesCount: 4100,
+      commentsCount: 220,
+      shortDesc: "Vibrant, dynamic abstract bird logo design.",
+      fullDesc: "A colorful, sweeping abstract logo design resembling a bird in flight. Created using vibrant gradients and flowing intersecting shapes.",
+      highlights: [
+        "Vibrant color gradients",
+        "Dynamic flowing shapes",
+        "Versatile branding application"
+      ]
     }
   ],
   kg: [
@@ -515,6 +617,57 @@ export const archiveItems: Record<"ru" | "en" | "kg", ArchiveItem[]> = {
         "Автономдук шаардык капсула концепти",
         "Жолдо иштөө үчүн трансформер-интерьер",
         "Студиянын ири экосистемаларга өтүү белгиси"
+      ]
+    },
+    {
+      id: "vaum-watch-2013",
+      year: "2013",
+      title: "Vaum wrist watch",
+      category: "Industrial Design",
+      client: "Vaum Concept",
+      images: [ "/assets/archive/vaum.png" ],
+      likesCount: 5200,
+      commentsCount: 310,
+      shortDesc: "Минимализм, ыңгайлуулук, жөнөкөйлүк жана лаконизм. Санариптик кара корпус.",
+      fullDesc: "Санариптик кара корпусу бар Vaum кол сааты. Минимализм, ыңгайлуулук, жөнөкөйлүк жана лаконизмге басым жасалган дизайн.",
+      highlights: [
+        "Санариптик кара корпус",
+        "Минималисттик эстетика",
+        "Таза функционалдык интерфейс"
+      ]
+    },
+    {
+      id: "umai-terminal-2015",
+      year: "2015",
+      title: "UMAI төлөм терминалы",
+      category: "Product Design",
+      client: "UMAI",
+      images: [ "/assets/archive/umai.png" ],
+      likesCount: 3400,
+      commentsCount: 150,
+      shortDesc: "UMAI үчүн саркеч жана эргономикалык төлөм терминалынын дизайны.",
+      fullDesc: "Эргономика, заманбап эстетика жана колдонуучу менен ыңгайлуу иштешүүгө басым жасоо менен UMAI төлөм терминалынын толук редизайны.",
+      highlights: [
+        "Бурчтагы эргономикалык экран",
+        "Заманбап металлдык жасалга",
+        "Колдонуучуга ыңгайлуулук"
+      ]
+    },
+    {
+      id: "bird-logo-2016",
+      year: "2016",
+      title: "Абстракттуу Куш логотиби",
+      category: "Branding",
+      client: "Logo Concept",
+      images: [ "/assets/archive/bird.png" ],
+      likesCount: 4100,
+      commentsCount: 220,
+      shortDesc: "Ачык жана динамикалык абстракттуу логотип.",
+      fullDesc: "Учуп бараткан кушту элестеткен түстүү абстракттуу логотип. Ачык градиенттерди жана жылмакай кесилишкен формаларды колдонуу менен түзүлгөн.",
+      highlights: [
+        "Ачык түстүү градиенттер",
+        "Динамикалык жылмакай формалар",
+        "Ар тараптуу колдонуу"
       ]
     }
   ]

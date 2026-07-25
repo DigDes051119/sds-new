@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router";
+import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -34,12 +34,6 @@ export function Projects() {
         year: detail.year || "2026",
         desc: detail.desc || project.desc || ""
       };
-    })
-    .sort((a: any, b: any) => {
-      if (!a.createdAt && !b.createdAt) return 0;
-      if (!a.createdAt) return 1;
-      if (!b.createdAt) return -1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
   return (
@@ -47,7 +41,7 @@ export function Projects() {
       
       {/* Title Block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
-        <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+        <h1 className="text-[40px] md:text-[54px] font-medium leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
           {t.projects.title}
         </h1>
         <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
@@ -80,7 +74,7 @@ export function Projects() {
                     <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080]">
                       {String(index + 1).padStart(2, '0')} / PROJECT
                     </span>
-                    <h3 className="text-[28px] font-bold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                    <h3 className="text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                       {project.name}
                     </h3>
                     {project.desc && (
