@@ -38,14 +38,14 @@ export function InlineVideoPlayer({ videoUrl, alt }: { videoUrl: string; alt?: s
 
   if (isDirectVideo) {
     return (
-      <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
+      <div className="w-full flex items-center justify-center relative">
         <video
           src={videoUrl}
           autoPlay
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          className="w-full h-auto block max-w-full pointer-events-none"
           title={alt || "Video Player"}
         />
       </div>
@@ -55,17 +55,10 @@ export function InlineVideoPlayer({ videoUrl, alt }: { videoUrl: string; alt?: s
   if (isInstagram) {
     return (
       <div className="relative w-full h-full bg-[#111] overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 w-full h-full" style={{ overflow: "hidden" }}>
+        <div className="w-full h-full relative" style={{ overflow: "hidden" }}>
           <iframe
             src={`${embedUrl}?autoplay=1&mute=1`}
-            className="absolute border-0"
-            style={{
-              top: "-45px",
-              left: "0",
-              width: "100%",
-              height: "calc(100% + 90px)",
-              pointerEvents: "none",
-            }}
+            className="w-full h-full border-0"
             allowFullScreen
             scrolling="no"
             title="Instagram Reel"
@@ -76,7 +69,6 @@ export function InlineVideoPlayer({ videoUrl, alt }: { videoUrl: string; alt?: s
   }
 
   // YouTube player: autoplay and loop immediately, hide all UI (controls=0, pointer-events-none)
-  // We use scale(1.5) to push black bars and overlays out of bounds
   const finalEmbedUrl = embedUrl.includes("?") 
     ? `${embedUrl}&autoplay=1&mute=1&controls=0&playsinline=1&showinfo=0&rel=0&enablejsapi=1`
     : `${embedUrl}?autoplay=1&mute=1&controls=0&playsinline=1&showinfo=0&rel=0&enablejsapi=1`;
@@ -86,13 +78,7 @@ export function InlineVideoPlayer({ videoUrl, alt }: { videoUrl: string; alt?: s
       <iframe
         ref={iframeRef}
         src={finalEmbedUrl}
-        className="absolute border-0 pointer-events-none"
-        style={{
-          width: "100%",
-          height: "100%",
-          transform: "scale(1.5)",
-          transformOrigin: "center center",
-        }}
+        className="w-full h-full border-0 pointer-events-none"
         allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
         title={alt || "Video Player"}
       />

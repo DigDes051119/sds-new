@@ -4,6 +4,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
+import { motion } from "motion/react";
 
 export function ProductDetail() {
   const { t, locale } = useContext(LanguageContext);
@@ -26,9 +27,24 @@ export function ProductDetail() {
   const productListItem = productsList.find((p: any) => p.id === id);
   const coverImg = productListItem?.img || data.collageBlocks?.[0]?.[0] || "";
 
+  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
+
   const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
     ? data.collageBlocks
     : [];
+
+  const hasVideos = blocks.some((block) => block.some((item) => item?.startsWith("video:") || item?.endsWith(".webm")));
+
+  const filteredBlocks = hasVideos
+    ? blocks
+        .map((block) =>
+          block.filter((item) => {
+            const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
+            return activeTab === "video" ? isVid : !isVid;
+          })
+        )
+        .filter((block) => block.length > 0)
+    : blocks;
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
@@ -123,10 +139,52 @@ export function ProductDetail() {
         </div>
       </section>
 
+      {/* Gallery / Video Toggle */}
+      {hasVideos && (
+        <div className="flex justify-center border-b border-black/10 pb-4 mb-2">
+          <div className="flex gap-8">
+            <button
+              onClick={() => setActiveTab("gallery")}
+              className={`text-[16px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-2 ${
+                activeTab === "gallery"
+                  ? "text-[#0000FF]"
+                  : "text-[#808080] hover:text-black"
+              }`}
+            >
+              {locale === "ru" ? "Галерея" : locale === "kg" ? "Галерея" : "Gallery"}
+              {activeTab === "gallery" && (
+                <motion.div
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("video")}
+              className={`text-[16px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-2 ${
+                activeTab === "video"
+                  ? "text-[#0000FF]"
+                  : "text-[#808080] hover:text-black"
+              }`}
+            >
+              {locale === "ru" ? "Видео" : locale === "kg" ? "Видео" : "Video"}
+              {activeTab === "video" && (
+                <motion.div
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Gallery Wall / Image Stack */}
-      {blocks.length > 0 && (
+      {filteredBlocks.length > 0 && (
         <section className="w-full flex flex-col gap-[4px] reveal-visible">
-          {blocks.map((block: string[], blockIdx: number) => {
+          {filteredBlocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
             
             return (
@@ -147,7 +205,7 @@ export function ProductDetail() {
                   return (
                     <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#fafaf6]">
                       {isVideo ? (
-                        <div className="w-full aspect-[16/9]">
+                        <div className="w-full">
                           <InlineVideoPlayer videoUrl={videoUrl} alt={`${data.name || "Product"} media`} />
                         </div>
                       ) : (

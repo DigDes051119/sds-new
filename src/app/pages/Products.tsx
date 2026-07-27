@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router";
+import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -53,11 +53,11 @@ export function Products() {
             <Link to={`/products/${product.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}
-              <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+              <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                 <ImageWithFallback 
                   src={product.img} 
                   alt={product.name} 
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-75"
+                  className="w-full h-full object-cover scale-[1.02] transition-all duration-500 group-hover:brightness-75"
                   loading="lazy"
                 />
               </div>
@@ -109,8 +109,8 @@ export function Products() {
                     </p>
                   )}
                 </div>
-                {/* Vertical divider */}
-                <div className="w-[1px] bg-[#D0D0D0] shrink-0"></div>
+                {/* Vertical divider stretching to end of description */}
+                <div className="w-[1px] bg-black/60 shrink-0 self-stretch my-0.5"></div>
                 {/* Right column: index + metadata */}
                 <div className="flex-[2] min-w-0 flex flex-col pl-5">
 

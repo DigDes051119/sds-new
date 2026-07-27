@@ -81,6 +81,37 @@ export function AdminServicesEditor() {
     setTranslations(updated);
   };
 
+  const handleAddService = () => {
+    if (isReadOnly) return;
+    const updated = { ...translations };
+    if (!updated.ru) updated.ru = {};
+    if (!updated.ru.services) updated.ru.services = {};
+    if (!updated.ru.services.items) updated.ru.services.items = [];
+
+    const num = updated.ru.services.items.length + 1;
+    const nextId = num < 10 ? `0${num}` : `${num}`;
+    const newService = {
+      id: nextId,
+      title: "Новая услуга",
+      desc: "Описание новой услуги",
+      steps: ["Первый этап работы"]
+    };
+
+    updated.ru.services.items = [...updated.ru.services.items, newService];
+    setTranslations(updated);
+  };
+
+  const handleDeleteService = (index: number) => {
+    if (isReadOnly) return;
+    const updated = { ...translations };
+    if (!updated.ru || !updated.ru.services || !updated.ru.services.items) return;
+
+    const items = [...updated.ru.services.items];
+    items.splice(index, 1);
+    updated.ru.services.items = items;
+    setTranslations(updated);
+  };
+
   const saveChanges = async () => {
     if (isReadOnly) return;
     try {
@@ -233,73 +264,6 @@ export function AdminServicesEditor() {
                       placeholder="Краткое описание на главной странице"
                     />
                   </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block">Изображение услуги</label>
-                    <div className="space-y-3">
-                      {serviceImg ? (
-                        <div className="relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 group">
-                          <img src={serviceImg} alt={serviceTitle} className="w-full h-full object-cover group-hover:brightness-50 transition" />
-                          {!isReadOnly && (
-                            <label className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    try {
-                                      const path = `services/service-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-                                      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
-                                      handleHomeServiceFieldChange(idx, 3, publicUrl);
-                                    } catch (err: any) {
-                                      alert("Ошибка при загрузке: " + err.message);
-                                    }
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                              <Camera className="w-6 h-6 text-white mb-1" />
-                              <span className="text-[10px] text-white font-bold uppercase tracking-wider">Изменить</span>
-                            </label>
-                          )}
-                        </div>
-                      ) : (
-                        <label className="w-full max-w-xs aspect-video bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer transition text-white/40 hover:text-white/60">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                try {
-                                  const path = `services/service-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-                                  const publicUrl = await supabaseClient.uploadFile("assets", path, file);
-                                  handleHomeServiceFieldChange(idx, 3, publicUrl);
-                                } catch (err: any) {
-                                  alert("Ошибка при загрузке: " + err.message);
-                                }
-                              }
-                            }}
-                            className="hidden"
-                            disabled={isReadOnly}
-                          />
-                          <Camera className="w-6 h-6 mb-2" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">Загрузить изображение</span>
-                        </label>
-                      )}
-                      
-                      {serviceImg && !isReadOnly && (
-                        <button
-                          type="button"
-                          onClick={() => handleHomeServiceFieldChange(idx, 3, "")}
-                          className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 text-xs transition active:scale-95"
-                        >
-                          Удалить изображение
-                        </button>
-                      )}
-                    </div>
-                  </div>
                 </div>
               );
             })}
@@ -309,20 +273,43 @@ export function AdminServicesEditor() {
 
       {/* Services List Editor */}
       <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8">
-        <h3 className="text-lg font-bold tracking-tight mb-4 flex items-center gap-2 text-[#0066FF]">
-          <Briefcase className="w-5 h-5" />
-          Управление услугами (RU)
-        </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h3 className="text-lg font-bold tracking-tight flex items-center gap-2 text-[#0066FF]">
+            <Briefcase className="w-5 h-5" />
+            Управление услугами (RU)
+          </h3>
+          {!isReadOnly && (
+            <button
+              type="button"
+              onClick={handleAddService}
+              className="px-4 py-2.5 bg-[#0000FF] hover:bg-[#0022FF] text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md"
+            >
+              <Plus className="w-4 h-4" />
+              Добавить услугу
+            </button>
+          )}
+        </div>
 
         {servicesList.length === 0 ? (
           <div className="text-center py-12 text-white/40 text-sm border border-dashed border-white/10 rounded-3xl">
-            Список услуг пуст в исходных переводах.
+            Список услуг пуст. Нажмите «Добавить услугу», чтобы создать первую.
           </div>
         ) : (
           <div className="space-y-8">
             {servicesList.map((service: any, sIdx: number) => (
-              <div key={service.id} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
-                <div className="flex items-center gap-3">
+              <div key={service.id || sIdx} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4 relative">
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteService(sIdx)}
+                    className="absolute top-4 right-4 p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 hover:text-red-300 transition-all"
+                    title="Удалить услугу"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+
+                <div className="flex items-center gap-3 pr-10">
                   <span className="text-2xl font-light text-[#0000FF]">{service.id}</span>
                   <input
                     type="text"

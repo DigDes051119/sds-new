@@ -652,7 +652,7 @@ $$ LANGUAGE plpgsql;`;
             return (
               <div className="flex items-stretch gap-4">
                 {/* Y-Axis Labels */}
-                <div className="w-10 h-48 flex flex-col justify-between text-right text-[10px] font-mono font-semibold opacity-50 select-none py-1 shrink-0">
+                <div className="w-10 h-48 flex flex-col justify-between text-right text-[10px] font-mono font-semibold opacity-50  py-1 shrink-0">
                   {yAxisSteps.map((s, idx) => (
                     <span key={idx}>{s}</span>
                   ))}
@@ -675,7 +675,7 @@ $$ LANGUAGE plpgsql;`;
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
                           {/* Value Badge on Hover */}
-                          <span className="absolute -top-6 text-[10px] font-bold font-mono text-[#0000FF] select-none opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-0.5 rounded-md text-white backdrop-blur z-30 shadow-lg">
+                          <span className="absolute -top-6 text-[10px] font-bold font-mono text-[#0000FF]  opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-0.5 rounded-md text-white backdrop-blur z-30 shadow-lg">
                             {val}
                           </span>
 

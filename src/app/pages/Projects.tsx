@@ -57,21 +57,21 @@ export function Projects() {
             <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}
-              <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+              <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                 <ImageWithFallback 
                   src={project.img} 
                   alt={project.name} 
-                  className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
+                  className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
                   loading="lazy"
                 />
               </div>
 
               {/* Meta information */}
               <div className="mt-[25px] flex flex-col">
-                <div className="flex justify-between items-start w-full">
-                  {/* Left block: label + title */}
+                <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                  {/* Left block: label + title + description */}
                   <div className="flex-1 min-w-0 flex flex-col gap-2">
-                    <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080]">
+                    <span className="font-mono text-[16px] text-[#808080]">
                       {String(index + 1).padStart(2, '0')} / PROJECT
                     </span>
                     <h3 className="text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
@@ -83,10 +83,10 @@ export function Projects() {
                       </p>
                     )}
                   </div>
-                  {/* Vertical divider */}
-                  <div className="w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                  {/* Vertical divider stretching to end of description */}
+                  <div className="w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                   {/* Right block: category + year */}
-                  <div className="text-left flex flex-col gap-1 shrink-0">
+                  <div className="text-left flex flex-col gap-1 shrink-0 self-start">
                     <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
                       {project.tags}
                     </span>

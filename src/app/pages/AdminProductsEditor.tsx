@@ -6,6 +6,7 @@ import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
 import { supabaseClient } from "../supabaseClient";
 import { getEmbedUrl, getAspectClass } from "../videoHelper";
+import { convertToWebM } from "../videoConverter";
 
 const slugify = (text: string) => {
   const ruToEn: Record<string, string> = {
@@ -34,6 +35,9 @@ export function AdminProductsEditor() {
   const [translating, setTranslating] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadingBlocks, setUploadingBlocks] = useState<Record<string, boolean>>({});
+  const [conversionProgress, setConversionProgress] = useState<number | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
+  const [previewActiveTab, setPreviewActiveTab] = useState<"gallery" | "video">("gallery");
 
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(null);
 
@@ -674,7 +678,7 @@ export function AdminProductsEditor() {
       {!editingId && !isAdding && (
         <div className="w-full space-y-6">
           {/* Scale/Mockup container with page content */}
-          <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 select-none">
+          <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
 
             {/* Products Grid Replica with drag & drop */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-10 pt-4 border-t border-black/[0.04]">
@@ -1088,7 +1092,7 @@ export function AdminProductsEditor() {
               {/* Mock Hero Section */}
               <div
                 onClick={() => document.getElementById("file-input-img")?.click()}
-                className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white select-none"
+                className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white "
                 title="Нажмите, чтобы сменить главное превью"
               >
                 <input
@@ -1166,8 +1170,36 @@ export function AdminProductsEditor() {
                 </div>
               </div>
 
+              {/* Mock Gallery / Video Toggle (Always visible in Admin preview) */}
+              <div className="flex justify-center border-b border-black/[0.06] pb-4 bg-[#fafaf6] pt-4">
+                <div className="flex gap-6">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewActiveTab("gallery")}
+                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                      previewActiveTab === "gallery"
+                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                        : "text-black/55 hover:text-black"
+                    }`}
+                  >
+                    Галерея
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewActiveTab("video")}
+                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                      previewActiveTab === "video"
+                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                        : "text-black/55 hover:text-black"
+                    }`}
+                  >
+                    Видео
+                  </button>
+                </div>
+              </div>
+
               {/* Mock Collage Gallery Section (Vertically Stacked with layout-drag support) */}
-              <div className="px-6 py-10 bg-[#fafaf6] space-y-10 select-none">
+              <div className="px-6 py-10 bg-[#fafaf6] space-y-10 ">
                 {/* Кнопка добавления блока в начало, если блоков много */}
                 {formCollageBlocks.length > 1 && (
                   <button
@@ -1212,7 +1244,7 @@ export function AdminProductsEditor() {
                       <div key={blockIdx} className="space-y-3 bg-[#fafaf6] p-4 rounded-3xl border border-black/[0.04] w-full">
                         {/* Block Header with Controls */}
                         <div className="flex justify-between items-center px-1">
-                          <span className="text-[11px] text-black/50 font-bold uppercase select-none flex items-center gap-1.5">
+                          <span className="text-[11px] text-black/50 font-bold uppercase  flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-[#0000FF]" />
                             Видео-блок {blockIdx + 1} (Зажмите блок ниже для сортировки ↑↓)
                           </span>
@@ -1307,9 +1339,12 @@ export function AdminProductsEditor() {
                     );
                   }
 
-                  const validElements = block.filter(Boolean);
-                  const hasAddSlot = validElements.length < 5;
-                  const totalGridElements = validElements.length + (hasAddSlot ? 2 : 0);
+                  const visibleItems = block.filter(item => {
+                    const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
+                    return previewActiveTab === "video" ? isVid : !isVid;
+                  });
+                  const hasAddSlot = block.filter(Boolean).length < 5;
+                  const totalGridElements = visibleItems.length + (hasAddSlot ? 1 : 0);
                   if (totalGridElements === 0) return null;
 
                   const getGridColsClass = (c: number) => {
@@ -1331,7 +1366,7 @@ export function AdminProductsEditor() {
                     <div key={blockIdx} className="space-y-3 bg-[#fafaf6] p-4 rounded-3xl border border-black/[0.04] w-full">
                       {/* Block Header with Controls */}
                       <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] text-black/50 font-bold uppercase select-none flex items-center gap-1.5">
+                        <span className="text-[11px] text-black/50 font-bold uppercase  flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-[#0000FF]" />
                           Блок {blockIdx + 1} (Зажмите блок ниже для сортировки ↑↓)
                         </span>
@@ -1380,8 +1415,10 @@ export function AdminProductsEditor() {
                       >
                         <div className={`grid gap-3 ${getGridColsClass(totalGridElements)}`}>
                           {block.map((imgUrl, imgIdx) => {
-                            const isVideo = imgUrl?.startsWith("video:");
-                            const videoUrl = isVideo ? imgUrl.slice(6) : "";
+                            const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm");
+                            const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
+                            const matchesTab = previewActiveTab === "video" ? isVideo : !isVideo;
+                            if (!matchesTab) return null;
 
                             if (isVideo) {
                               return (
@@ -1396,27 +1433,62 @@ export function AdminProductsEditor() {
                                   onDragLeave={() => setDraggedOverZone(null)}
                                   onDrop={(e) => handlePhotoDropOnPhoto(e, blockIdx, imgIdx)}
                                   onClick={() => {
-                                    const newLink = prompt("Редактировать ссылку на видео с YouTube или Instagram:", videoUrl);
-                                    if (newLink !== null) {
-                                      setFormCollageBlocks(prev => prev.map((b, bIdx) => {
-                                        if (bIdx === blockIdx) {
-                                          return b.map((item, iIdx) => iIdx === imgIdx ? `video:${newLink}` : item);
-                                        }
-                                        return b;
-                                      }));
-                                    }
+                                    if (!isReadOnly) document.getElementById(`replace-video-input-${blockIdx}-${imgIdx}`)?.click();
                                   }}
                                   whileHover={{ scale: 1.02 }}
-                                  className={`relative rounded-[1.2rem] overflow-hidden bg-black cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo select-none ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
-                                    ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,255,0,0.25)] opacity-85"
+                                  className={`relative rounded-[1.2rem] overflow-hidden bg-black cursor-pointer border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
+                                    ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
                                     : "border-black/5"
                                     } ${getImageAspectClass(totalGridElements)} flex flex-col items-center justify-center`}
-                                  title="Кликните для редактирования ссылки • Зажмите для переноса"
+                                  title="Кликните для выбора/замены видеофайла • Зажмите для переноса"
                                 >
+                                  <input
+                                    id={`replace-video-input-${blockIdx}-${imgIdx}`}
+                                    type="file"
+                                    accept="video/mp4,video/quicktime,video/webm"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const key = `${blockIdx}-${imgIdx}`;
+                                      try {
+                                        setUploadingBlocks(prev => ({ ...prev, [key]: true }));
+                                        setIsConverting(true);
+                                        setConversionProgress(0);
+
+                                        const convertedFile = await convertToWebM(file, (progress) => {
+                                          setConversionProgress(progress);
+                                        });
+
+                                        setIsConverting(false);
+                                        setConversionProgress(null);
+
+                                        const path = `products/product-block-video-${blockIdx}-${imgIdx}-${Date.now()}.webm`;
+                                        const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
+
+                                        setFormCollageBlocks(prev => prev.map((b, bIdx) => {
+                                          if (bIdx === blockIdx) {
+                                            return b.map((item, iIdx) => iIdx === imgIdx ? `video:${publicUrl}` : item);
+                                          }
+                                          return b;
+                                        }));
+                                      } catch (err: any) {
+                                        alert("Ошибка при замене видео: " + err.message);
+                                      } finally {
+                                        setIsConverting(false);
+                                        setConversionProgress(null);
+                                        setUploadingBlocks(prev => ({ ...prev, [key]: false }));
+                                      }
+                                    }}
+                                  />
                                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/75 text-white p-2 text-center">
-                                    <span className="text-[14px] mb-1">🎬</span>
-                                    <span className="text-[8px] font-bold uppercase text-white/50 tracking-wider">Видео-ссылка</span>
-                                    <span className="text-[6px] opacity-75 truncate max-w-full mt-1 px-1.5">{videoUrl}</span>
+                                    {uploadingBlocks[`${blockIdx}-${imgIdx}`] ? (
+                                      <Loader2 className="w-5 h-5 text-white animate-spin mb-1" />
+                                    ) : (
+                                      <span className="text-[14px] mb-1">🎬</span>
+                                    )}
+                                    <span className="text-[8px] font-bold uppercase text-white/50 tracking-wider">Видеофайл</span>
+                                    <span className="text-[6px] opacity-75 truncate max-w-full mt-1 px-1.5">{videoUrl.split("/").pop()}</span>
                                   </div>
                                   <button
                                     type="button"
@@ -1432,7 +1504,7 @@ export function AdminProductsEditor() {
                                       });
                                     }}
                                     className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md z-20 cursor-pointer"
-                                    title="Удалить ссылку"
+                                    title="Удалить видео"
                                   >
                                     <X className="w-2.5 h-2.5" />
                                   </button>
@@ -1455,7 +1527,7 @@ export function AdminProductsEditor() {
                                 document.getElementById(`file-input-${blockIdx}-${imgIdx}`)?.click();
                               }}
                               whileHover={{ scale: 1.02 }}
-                              className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo select-none ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
+                              className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
                                 ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
                                 : "border-black/5"
                                 }`}
@@ -1519,7 +1591,7 @@ export function AdminProductsEditor() {
                           })}
 
                           {/* Add Photo slot directly inside the block grid */}
-                          {hasAddSlot && (
+                          {hasAddSlot && previewActiveTab === "gallery" && (
                             <div
                               onClick={() => {
                                 document.getElementById(`add-photo-input-${blockIdx}`)?.click();
@@ -1567,23 +1639,57 @@ export function AdminProductsEditor() {
                             </div>
                           )}
 
-                          {/* Add Video Link slot directly inside the block grid */}
-                          {hasAddSlot && (
+                          {/* Add Video slot directly inside the block grid */}
+                          {hasAddSlot && previewActiveTab === "video" && (
                             <div
                               onClick={() => {
-                                const link = prompt("Введите ссылку на видео с YouTube или Instagram:");
-                                if (link) {
-                                  setFormCollageBlocks(prev => prev.map((b, bIdx) => {
-                                    if (bIdx === blockIdx) return [...b, `video:${link}`];
-                                    return b;
-                                  }));
-                                }
+                                if (!isReadOnly) document.getElementById(`add-video-input-${blockIdx}`)?.click();
                               }}
                               className={`rounded-[1.2rem] border border-dashed border-[#0000FF]/30 hover:border-[#0000FF]/60 hover:bg-[#0000FF]/5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors ${getImageAspectClass(totalGridElements)}`}
-                              title="Добавить ссылку на видео с YouTube или Instagram в этот блок"
+                              title="Загрузить видеофайл (MP4/MOV/WebM) в этот блок"
                             >
-                              <Plus className="w-3.5 h-3.5 text-[#0000FF]" />
-                              <span className="text-[6px] uppercase font-bold text-[#0000FF]/85">Добавить ссылку</span>
+                              <input
+                                id={`add-video-input-${blockIdx}`}
+                                type="file"
+                                accept="video/mp4,video/quicktime,video/webm"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const key = `${blockIdx}-add-video`;
+                                  try {
+                                    setUploadingBlocks(prev => ({ ...prev, [key]: true }));
+                                    const fileExt = file.name.split('.').pop();
+                                    const nextIdx = block.length;
+                                    const path = `products/product-block-video-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
+                                    setIsConverting(true);
+                                    setConversionProgress(0);
+                                    const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
+                                    setIsConverting(false);
+                                    setConversionProgress(null);
+                                    const publicUrl = await supabaseClient.uploadFile("assets", path.replace("." + fileExt, ".webm"), convertedFile);
+
+                                    setFormCollageBlocks(prev => {
+                                      return prev.map((b, bIdx) => {
+                                        if (bIdx === blockIdx) return [...b, `video:${publicUrl}`];
+                                        return b;
+                                      });
+                                    });
+                                  } catch (err: any) {
+                                    alert("Ошибка при загрузке: " + err.message);
+                                  } finally {
+                                    setUploadingBlocks(prev => ({ ...prev, [key]: false }));
+                                  }
+                                }}
+                              />
+                              {uploadingBlocks[`${blockIdx}-add-video`] ? (
+                                <Loader2 className="w-3.5 h-3.5 text-[#0000FF] animate-spin" />
+                              ) : (
+                                <>
+                                  <Plus className="w-3.5 h-3.5 text-[#0000FF]" />
+                                  <span className="text-[6px] uppercase font-bold text-[#0000FF]/85">Добавить видео</span>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1715,6 +1821,32 @@ className = {`py-3 border-2 border-dashed rounded-xl transition duration-200 tex
     </motion.div>
   )}
 </AnimatePresence>
+
+      {/* Video conversion progress overlay */}
+      <AnimatePresence>
+        {isConverting && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <div className="bg-[#161622] border border-white/[0.08] rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl">
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-white/5" />
+                <div 
+                  className="absolute inset-0 rounded-full border-4 border-[#0000FF] border-t-transparent animate-spin" 
+                  style={{ animationDuration: "1.5s" }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
+                  {conversionProgress ?? 0}%
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-lg font-bold text-white font-semibold">Конвертация видео...</h4>
+                <p className="text-xs text-white/60 leading-relaxed font-light">
+                  Оптимизируем видеофайл в формат WebM для быстрой и плавной загрузки на сайте. Не закрывайте вкладку.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </div >
   );
 }

@@ -215,7 +215,65 @@ export function Root() {
     };
   }, [location.pathname]);
 
-  const t = siteTranslations[locale] || translations[locale];
+  const getResolvedTranslations = (loc: any) => {
+    const siteT = siteTranslations[loc];
+    const defT = translations[loc];
+    if (!siteT) return defT;
+    if (loc === "ru") return siteT;
+
+    const ruT = siteTranslations.ru || translations.ru;
+
+    const resolveDeep = (s: any, d: any, r: any, currentKey?: string): any => {
+      if (typeof s === "string") {
+        if (currentKey === "img" || currentKey === "image" || currentKey === "video" || s.startsWith("http") || s.startsWith("/")) {
+          return s || d;
+        }
+        return (s === r && s !== d) ? (d || s) : (s || d);
+      }
+      if (Array.isArray(s)) {
+        return s.map((item, idx) => resolveDeep(item, d?.[idx], r?.[idx], currentKey));
+      }
+      if (s && typeof s === "object") {
+        const res: any = {};
+        for (const key of Object.keys(s)) {
+          res[key] = resolveDeep(s[key], d?.[key], r?.[key], key);
+        }
+        if (d && typeof d === "object") {
+          for (const key of Object.keys(d)) {
+            if (!(key in s)) res[key] = d[key];
+          }
+        }
+        return res;
+      }
+      return s ?? d;
+    };
+
+    const resolved = resolveDeep(siteT, defT, ruT);
+
+    if (resolved && resolved.projects && Array.isArray(resolved.projects.items) && ruT?.projects?.items) {
+      resolved.projects.items = ruT.projects.items.map((ruItem: any, idx: number) => {
+        const siteItem = siteT?.projects?.items?.find((item: any) => item.id === ruItem.id) || siteT?.projects?.items?.[idx];
+        
+        let resolvedName = siteItem?.name;
+        if (!resolvedName || (ruItem.name !== "Ala-Too" && resolvedName === "Ala-Too")) {
+          resolvedName = ruItem.name;
+        }
+
+        return {
+          ...ruItem,
+          ...siteItem,
+          id: ruItem.id,
+          name: resolvedName,
+          img: ruItem.img || siteItem?.img,
+          categoryKey: ruItem.categoryKey || siteItem?.categoryKey
+        };
+      });
+    }
+
+    return resolved;
+  };
+
+  const t = getResolvedTranslations(locale);
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -241,7 +299,7 @@ export function Root() {
           }`}
         >
           {/* Giant Brand Symbol cropped on the right */}
-          <div className="absolute right-[-15%] top-0 h-full w-auto flex items-center justify-end z-0 pointer-events-none select-none">
+          <div className="absolute right-[-15%] top-0 h-full w-auto flex items-center justify-end z-0 pointer-events-none ">
             <svg 
               viewBox="0 0 302 237" 
               className="h-full w-auto text-white opacity-100"
@@ -492,6 +550,20 @@ export function Root() {
                     +996 702 507888
                   </a>
                 </div>
+
+                <div className="md:col-span-4 flex flex-col gap-3">
+                  <span className="text-[12px] font-mono tracking-[0.08em] text-black/40 uppercase">
+                    {locale === "ru" ? "Behance portfolio" : locale === "kg" ? "Behance portfolio" : "Behance portfolio"}
+                  </span>
+                  <a
+                    href="https://www.behance.net/steeldrake"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[15px] text-black hover:opacity-80 transition-opacity interactive-element font-normal"
+                  >
+                    behance.net/steeldrake
+                  </a>
+                </div>
               </div>
 
               {/* Divider line */}
@@ -561,7 +633,7 @@ export function Root() {
                 animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
                 exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
                 transition={{ type: "spring", stiffness: 240, damping: 28 }}
-                className="fixed top-1/2 left-1/2 bg-white border border-black p-8 md:p-10 z-45 select-none w-full max-w-[95vw] md:max-w-[760px]"
+                className="fixed top-1/2 left-1/2 bg-white border border-black p-8 md:p-10 z-45  w-full max-w-[95vw] md:max-w-[760px]"
               >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                   {/* Left Column: Bold Typographic Accent */}

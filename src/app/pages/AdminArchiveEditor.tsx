@@ -5,6 +5,7 @@ import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
 import { supabaseClient } from "../supabaseClient";
 import { type ArchiveItem } from "../archiveData";
+import { convertToWebM } from "../videoConverter";
 import { 
   Save, Check, Globe, Loader2, Plus, Trash2, Upload, FileImage, 
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Images, Sparkles, Layers, Image as ImageIcon,
@@ -23,6 +24,8 @@ export function AdminArchiveEditor() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingCardIdx, setEditingCardIdx] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [conversionProgress, setConversionProgress] = useState<number | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -94,10 +97,23 @@ export function AdminArchiveEditor() {
         const file = fileArray[i];
         setUploadingState({ itemIdx: cardIdx, progress: `${i + 1}/${fileArray.length}` });
 
+        const isVideoFile = file.type.startsWith("video/") || file.name.endsWith(".mp4") || file.name.endsWith(".mov") || file.name.endsWith(".webm");
         const fileExt = file.name.split(".").pop();
         const path = `archive/item_${Date.now()}_${cardIdx}_${i}.${fileExt}`;
-        const publicUrl = await supabaseClient.uploadFile("assets", path, file);
-        uploadedUrls.push(publicUrl);
+
+        let publicUrl = "";
+        if (isVideoFile) {
+          setIsConverting(true);
+          setConversionProgress(0);
+          const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
+          setIsConverting(false);
+          setConversionProgress(null);
+          publicUrl = await supabaseClient.uploadFile("assets", path.replace("." + fileExt, ".webm"), convertedFile);
+          uploadedUrls.push(`video:${publicUrl}`);
+        } else {
+          publicUrl = await supabaseClient.uploadFile("assets", path, file);
+          uploadedUrls.push(publicUrl);
+        }
       }
 
       const updated = { ...archiveData };
@@ -919,7 +935,7 @@ export function AdminArchiveEditor() {
                     }
                   }}
                   multiple
-                  accept="image/*"
+                  accept="image/*,video/*"
                   className="hidden"
                 />
               </div>
@@ -933,7 +949,14 @@ export function AdminArchiveEditor() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {currentItems[editingCardIdx].images.map((imgUrl, imgIdx) => (
                     <div key={imgIdx} className="relative group/img aspect-[4/3] rounded-xl bg-black/40 border border-white/10 overflow-hidden">
-                      <img src={imgUrl} alt={`View ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                      {imgUrl.startsWith("video:") || imgUrl.endsWith(".webm") ? (
+                        <div className="w-full h-full bg-black flex flex-col items-center justify-center text-[10px] text-white/50 font-bold uppercase gap-1">
+                          <span>🎬</span>
+                          <span className="text-[7px]">Video</span>
+                        </div>
+                      ) : (
+                        <img src={imgUrl} alt={`View ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                      )}
                       <div className="absolute top-1 left-1 bg-black/70 text-[10px] font-mono px-1.5 py-0.5 rounded text-white/70">
                         #{imgIdx + 1}
                       </div>
@@ -1100,6 +1123,32 @@ export function AdminArchiveEditor() {
             <Check className="w-5 h-5" />
             Карточки архива успешно сохранены!
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Video conversion progress overlay */}
+      <AnimatePresence>
+        {isConverting && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <div className="bg-[#161622] border border-white/[0.08] rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl">
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-white/5" />
+                <div 
+                  className="absolute inset-0 rounded-full border-4 border-[#0000FF] border-t-transparent animate-spin" 
+                  style={{ animationDuration: "1.5s" }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
+                  {conversionProgress ?? 0}%
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-lg font-bold text-white font-semibold">Конвертация видео...</h4>
+                <p className="text-xs text-white/60 leading-relaxed font-light">
+                  Оптимизируем видеофайл в формат WebM для быстрой и плавной загрузки на сайте. Не закрывайте вкладку.
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </div>

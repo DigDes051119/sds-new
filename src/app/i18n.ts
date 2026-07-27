@@ -55,6 +55,7 @@ export const translations = {
         ["03", "Industrial Design", "Developing aesthetic, functional, and technological physical products for serial production.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/industrial.png"],
         ["09", "Marketing", "Strategic product promotion and launch campaigns in digital environments.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/marketing.png"],
         ["06", "Concept Design", "Creating bold concepts for film, games, presentations, and R&D research.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/concept.png"],
+        ["13", "Game Dev", "Developing 3D worlds, game environments, mechanics, and interactive game art.", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },
@@ -112,6 +113,16 @@ export const translations = {
       title: "Services",
       stepsTitle: "Work stages",
       items: [
+        {
+          id: "13",
+          title: "Game Dev",
+          desc: "Developing 3D worlds, game environments, mechanics, and interactive game art.",
+          steps: [
+            "Game design document & concept art creation.",
+            "3D modeling, texturing & environment design.",
+            "Engine setup, mechanics programming & optimization.",
+          ],
+        },
         {
           id: "01",
           title: "Branding",
@@ -423,6 +434,7 @@ export const translations = {
         ["03", "Industrial Design", "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык физикалык объекттерди иштеп чыгуу.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/industrial.png"],
         ["09", "Marketing", "Продуктту жана брендди санариптик мейкиндикте стратегиялык илгерилетүү.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/marketing.png"],
         ["06", "Concept Design", "Кино, оюн, презентация жана R&D үчүн келечектүү жана эрктүү концепттерди түзүү.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/concept.png"],
+        ["13", "Game Dev", "3D-дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү концепт-артты иштеп чыгуу.", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600"],
       ],
       projects: [
         { title: "Sandyq", tag: "Гостиница / Айдентика" },
@@ -480,6 +492,16 @@ export const translations = {
       title: "Кызматтар",
       stepsTitle: "Иш этаптары",
       items: [
+        {
+          id: "13",
+          title: "Game Dev",
+          desc: "3D-дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү концепт-артты иштеп чыгуу.",
+          steps: [
+            "Геймдизайн документ жана концепт-арт түзүү.",
+            "3D-моделдөө, текстуралоо жана деңгээл дизайны.",
+            "Оюн кыймылдаткычында жөндөө, механиканы программалоо жана оптимизациялоо.",
+          ],
+        },
         {
           id: "01",
           title: "Брендинг",
@@ -791,6 +813,7 @@ export const translations = {
         ["03", "Industrial Design", "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/industrial.png"],
         ["09", "Marketing", "Стратегическое продвижение продуктов и брендов в цифровой среде.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/marketing.png"],
         ["06", "Concept Design", "Создание футуристических и смелых концептов для кино, игр, презентаций и R&D-исследований.", "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/services/concept.png"],
+        ["13", "Game Dev", "Разработка 3D-миров, игровых окружений, механик и интерактивного концепт-арта.", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600"],
       ],
       projects: [
         { title: "Sandyq", tag: "Hospitality / Identity" },
@@ -848,6 +871,16 @@ export const translations = {
       title: "Услуги",
       stepsTitle: "Этапы работы",
       items: [
+        {
+          id: "13",
+          title: "Game Dev",
+          desc: "Разработка 3D-миров, игровых окружений, механик и интерактивного концепт-арта.",
+          steps: [
+            "Создание геймдизайн-документа и концепт-арта.",
+            "3D-моделирование, текстурирование и дизайн уровней.",
+            "Настройка в игровом движке, программирование механик и оптимизация.",
+          ],
+        },
         {
           id: "01",
           title: "Брендирование",

@@ -118,12 +118,12 @@ export function ArchiveOriginsSection({
       : "All Old Projects (2005—2020)";
 
   return (
-    <section className={`flex flex-col w-full py-16 md:py-24 border-t border-[#808080]/20 font-twk-everett select-none ${
+    <section className={`flex flex-col w-full py-16 md:py-24 border-t border-[#808080]/20 font-twk-everett  ${
       noPadding ? "" : "px-[45px] md:px-[65px] lg:px-[105px]"
     }`}>
       {/* ───── Section Header (Exact Site Hierarchy) ───── */}
       {showTitle && (
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none border-b border-[#808080]/30">
+        <div className="pb-4 mb-[59px] flex justify-between items-baseline  border-b border-[#808080]/30">
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">
               2005 — 2020
@@ -176,23 +176,33 @@ export function ArchiveOriginsSection({
             className="w-full flex flex-col group cursor-pointer"
             onClick={() => openModalAt(index)}
           >
-            {/* Image Band Container - 16:9 Aspect Ratio */}
             <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center rounded-[8px]">
-              <img
-                src={item.images[0]} 
-                alt={item.title} 
-                className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-75"
-                loading="lazy"
-              />
+              {item.images[0]?.startsWith("video:") || item.images[0]?.endsWith(".webm") ? (
+                <video
+                  src={item.images[0]?.startsWith("video:") ? item.images[0].slice(6) : item.images[0]}
+                  className="w-full h-full object-contain"
+                  muted
+                  playsInline
+                  autoPlay
+                  loop
+                />
+              ) : (
+                <img
+                  src={item.images[0]} 
+                  alt={item.title} 
+                  className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:brightness-75"
+                  loading="lazy"
+                />
+              )}
             </div>
 
             {/* Meta Information Container - Catalog Style */}
             <div className="mt-[20px] flex flex-col">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[14px] text-[#808080] uppercase tracking-[0.04em]">
+                <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
                   [{String(index + 1).padStart(2, '0')}] — {item.year}
                 </span>
-                <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
+                <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
                   {item.category}
                 </span>
               </div>
@@ -214,7 +224,7 @@ export function ArchiveOriginsSection({
         <div className="mt-[32px] w-full z-10">
           <Link
             to="/projects/old"
-            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 select-none text-center"
+            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300  text-center"
           >
             {langKey === "ru" ? "Смотреть все \u2192" : langKey === "kg" ? "Бардыгын көрүү \u2192" : "View all \u2192"}
           </Link>
@@ -250,23 +260,44 @@ export function ArchiveOriginsSection({
               <div className="w-full lg:w-[65%] flex flex-col bg-[#fafaf6] relative border-r border-[#808080]/20">
                 {/* Slide counter at the top */}
                 <div className="w-full pt-[30px] px-[30px] md:pt-[40px] md:px-[40px] shrink-0">
-                  <span className="font-mono text-[14px] text-[#808080] uppercase tracking-[0.04em]">
+                  <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
                     [{String(activeImageIdx + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}]
                   </span>
                 </div>
 
                 <div className="flex-1 relative flex items-center justify-center px-[30px] py-[20px] md:px-[40px] md:py-[30px] overflow-hidden group">
                   <AnimatePresence mode="wait">
-                    <motion.img
-                      key={`${currentItem.id}-${activeImageIdx}`}
-                      src={images[activeImageIdx]}
-                      alt={`${currentItem.title} - view ${activeImageIdx + 1}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="max-w-full max-h-full object-contain"
-                    />
+                    {images[activeImageIdx]?.startsWith("video:") || images[activeImageIdx]?.endsWith(".webm") ? (
+                      <motion.div
+                        key={`${currentItem.id}-${activeImageIdx}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full h-full flex items-center justify-center"
+                      >
+                        <video
+                          src={images[activeImageIdx].startsWith("video:") ? images[activeImageIdx].slice(6) : images[activeImageIdx]}
+                          className="max-w-full max-h-full object-contain"
+                          controls
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.img
+                        key={`${currentItem.id}-${activeImageIdx}`}
+                        src={images[activeImageIdx]}
+                        alt={`${currentItem.title} - view ${activeImageIdx + 1}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    )}
                   </AnimatePresence>
 
                   {/* Navigation arrows (only show if multiple images) */}
@@ -299,7 +330,14 @@ export function ArchiveOriginsSection({
                           activeImageIdx === idx ? "opacity-100 ring-1 ring-black ring-offset-2 ring-offset-[#fafaf6]" : "opacity-40 hover:opacity-100"
                         }`}
                       >
-                        <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        {img.startsWith("video:") || img.endsWith(".webm") ? (
+                          <div className="w-full h-full bg-black flex flex-col items-center justify-center text-[10px] text-white/50 font-bold uppercase gap-1">
+                            <span>🎬</span>
+                            <span className="text-[7px]">Video</span>
+                          </div>
+                        ) : (
+                          <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -316,7 +354,7 @@ export function ArchiveOriginsSection({
 
                 <div className="flex flex-col gap-6 w-full max-w-[500px]">
                   <div className="flex flex-col gap-2">
-                    <span className="font-mono text-[14px] text-[#808080] uppercase tracking-[0.04em]">
+                    <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
                       {currentItem.year} — {currentItem.category}
                     </span>
                     <h3 className="text-[32px] md:text-[40px] font-medium tracking-[-0.04em] text-black m-0 leading-[1.1] uppercase">

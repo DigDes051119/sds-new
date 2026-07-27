@@ -38,6 +38,7 @@ export function AdminProjectsEditor() {
   const [uploadingBlocks, setUploadingBlocks] = useState<Record<string, boolean>>({});
   const [conversionProgress, setConversionProgress] = useState<number | null>(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [previewActiveTab, setPreviewActiveTab] = useState<"gallery" | "video">("gallery");
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
@@ -865,7 +866,7 @@ export function AdminProjectsEditor() {
       {!editingId && !isAdding && (
         <div className="w-full space-y-6">
           {/* Scale/Mockup container with page content */}
-          <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 select-none">
+          <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
 
             {/* Category Pills replica */}
             <div className="flex overflow-x-auto scrollbar-none flex-nowrap gap-1.5 pb-4 border-b border-black/[0.04] mb-6">
@@ -1247,7 +1248,7 @@ export function AdminProjectsEditor() {
               {/* Mock Hero Section */}
               <div
                 onClick={() => document.getElementById("file-input-img")?.click()}
-                className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white select-none"
+                className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white "
                 title="Нажмите, чтобы сменить главное превью"
               >
                 <input
@@ -1325,8 +1326,36 @@ export function AdminProjectsEditor() {
                 </div>
               </div>
 
+              {/* Mock Gallery / Video Toggle (Always visible in Admin preview) */}
+              <div className="flex justify-center border-b border-black/[0.06] pb-4 bg-[#fafaf6] pt-4">
+                <div className="flex gap-6">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewActiveTab("gallery")}
+                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                      previewActiveTab === "gallery"
+                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                        : "text-black/55 hover:text-black"
+                    }`}
+                  >
+                    Галерея
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewActiveTab("video")}
+                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                      previewActiveTab === "video"
+                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                        : "text-black/55 hover:text-black"
+                    }`}
+                  >
+                    Видео
+                  </button>
+                </div>
+              </div>
+
               {/* Mock Collage Gallery Section (Vertically Stacked with layout-drag support) */}
-              <div className="px-6 py-10 bg-[#fafaf6] space-y-10 select-none">
+              <div className="px-6 py-10 bg-[#fafaf6] space-y-10 ">
                 {/* Кнопка добавления блока в начало, если блоков много */}
                 {formCollageBlocks.length > 1 && (
                   <button
@@ -1371,7 +1400,7 @@ export function AdminProjectsEditor() {
                       <div key={blockIdx} className="space-y-3 bg-[#fafaf6] p-4 rounded-3xl border border-black/[0.04] w-full">
                         {/* Block Header with Controls */}
                         <div className="flex justify-between items-center px-1">
-                          <span className="text-[11px] text-black/50 font-bold uppercase select-none flex items-center gap-1.5">
+                          <span className="text-[11px] text-black/50 font-bold uppercase  flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-[#0000FF]" />
                             Видео-блок {blockIdx + 1} (Зажмите блок ниже для сортировки ↑↓)
                           </span>
@@ -1466,9 +1495,12 @@ export function AdminProjectsEditor() {
                     );
                   }
 
-                  const validElements = block.filter(Boolean);
-                  const hasAddSlot = validElements.length < 5;
-                  const totalGridElements = validElements.length + (hasAddSlot ? 2 : 0);
+                  const visibleItems = block.filter(item => {
+                    const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
+                    return previewActiveTab === "video" ? isVid : !isVid;
+                  });
+                  const hasAddSlot = block.filter(Boolean).length < 5;
+                  const totalGridElements = visibleItems.length + (hasAddSlot ? 1 : 0);
                   if (totalGridElements === 0) return null;
 
                   const getGridColsClass = (c: number) => {
@@ -1490,7 +1522,7 @@ export function AdminProjectsEditor() {
                     <div key={blockIdx} className="space-y-3 bg-[#fafaf6] p-4 rounded-3xl border border-black/[0.04] w-full">
                       {/* Block Header with Controls */}
                       <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] text-black/50 font-bold uppercase select-none flex items-center gap-1.5">
+                        <span className="text-[11px] text-black/50 font-bold uppercase  flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-[#0000FF]" />
                           Блок {blockIdx + 1} (Зажмите блок ниже для сортировки ↑↓)
                         </span>
@@ -1539,8 +1571,10 @@ export function AdminProjectsEditor() {
                       >
                         <div className={`grid gap-3 ${getGridColsClass(totalGridElements)}`}>
                           {block.map((imgUrl, imgIdx) => {
-                            const isVideo = imgUrl?.startsWith("video:");
-                            const videoUrl = isVideo ? imgUrl.slice(6) : "";
+                            const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm");
+                            const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
+                            const matchesTab = previewActiveTab === "video" ? isVideo : !isVideo;
+                            if (!matchesTab) return null;
 
                             if (isVideo) {
                               return (
@@ -1558,7 +1592,7 @@ export function AdminProjectsEditor() {
                                     if (!isReadOnly) document.getElementById(`replace-video-input-${blockIdx}-${imgIdx}`)?.click();
                                   }}
                                   whileHover={{ scale: 1.02 }}
-                                  className={`relative rounded-[1.2rem] overflow-hidden bg-black cursor-pointer border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo select-none ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
+                                  className={`relative rounded-[1.2rem] overflow-hidden bg-black cursor-pointer border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
                                     ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
                                     : "border-black/5"
                                     } ${getImageAspectClass(totalGridElements)} flex flex-col items-center justify-center`}
@@ -1649,7 +1683,7 @@ export function AdminProjectsEditor() {
                                   document.getElementById(`file-input-${blockIdx}-${imgIdx}`)?.click();
                                 }}
                                 whileHover={{ scale: 1.02 }}
-                                className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo select-none ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
+                                className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
                                   ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
                                   : "border-black/5"
                                   }`}
@@ -1713,7 +1747,7 @@ export function AdminProjectsEditor() {
                           })}
 
                           {/* Add Photo slot directly inside the block grid */}
-                          {hasAddSlot && (
+                          {hasAddSlot && previewActiveTab === "gallery" && (
                             <div
                               onClick={() => {
                                 document.getElementById(`add-photo-input-${blockIdx}`)?.click();
@@ -1769,7 +1803,7 @@ export function AdminProjectsEditor() {
                           )}
 
                            {/* Add Video slot directly inside the block grid */}
-                           {hasAddSlot && (
+                           {hasAddSlot && previewActiveTab === "video" && (
                              <div
                                onClick={() => {
                                  if (!isReadOnly) document.getElementById(`add-video-input-${blockIdx}`)?.click();

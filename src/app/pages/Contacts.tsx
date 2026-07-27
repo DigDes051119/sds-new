@@ -1,4 +1,4 @@
-﻿import { useContext } from "react";
+import { useContext } from "react";
 import { LanguageContext } from "../i18n";
 import { Map, MapMarker, MarkerContent } from "../components/ui/map";
 
@@ -33,7 +33,7 @@ export function Contacts() {
 
       {/* Contact Channels (Tabular Layout) */}
       <section className="grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start mb-[100px]">
-        <div className="md:col-span-5 select-none">
+        <div className="md:col-span-5 ">
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
             [DIRECTORY]
           </span>
@@ -87,7 +87,7 @@ export function Contacts() {
       </section>
 
       {/* Map Section */}
-      <section className="w-full border border-[#808080] relative select-none">
+      <section className="w-full border border-[#808080] relative ">
         <div className="w-full h-[450px]">
           <Map
             viewport={{

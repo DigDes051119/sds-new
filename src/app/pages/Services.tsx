@@ -56,7 +56,7 @@ export function Services() {
                 </p>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent("sds:open-contact-modal"))}
-                  className="shrink-0 w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-5 py-3 font-mono text-[12px] uppercase tracking-[0.06em] cursor-pointer select-none text-center md:-mt-1"
+                  className="shrink-0 w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-5 py-3 font-mono text-[12px] uppercase tracking-[0.06em] cursor-pointer  text-center md:-mt-1"
                 >
                   {locale === "ru" ? "Заказать услугу →" : locale === "kg" ? "Кызматка буйрутма берүү →" : "Order service →"}
                 </button>

@@ -67,7 +67,7 @@ export function LogoLoader({ onComplete }: LogoLoaderProps) {
       onAnimationComplete={() => {
         if (phase === "exit") onComplete();
       }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none overflow-hidden"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center  overflow-hidden"
       style={{ backgroundColor: "#f7f7f3" }}
     >
       {/* Subtle radial glow behind logo */}

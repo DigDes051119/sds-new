@@ -99,7 +99,7 @@ export function About() {
                 {timeline.map((item: any, idx: number) => (
                   <div key={idx} className="flex flex-col">
                     {/* Header */}
-                    <div className="mb-4 min-h-[50px] flex flex-col justify-end">
+                    <div className="mb-4 h-[84px] flex flex-col justify-start">
                       <span className="font-mono text-[14px] font-bold text-[#0000FF] uppercase block mb-1">
                         {item.year}
                       </span>
@@ -176,53 +176,56 @@ export function About() {
                   return (
                     <div
                       key={idx}
-                      className="relative flex flex-col p-6 bg-white border border-[#808080]/20 min-h-[380px] overflow-hidden"
+                      className="relative flex flex-col p-8 md:p-9 lg:p-10 bg-white rounded-[32px] border border-[#808080]/20 min-h-[490px] md:min-h-[520px] overflow-hidden group transition-colors duration-300 hover:border-[#0000FF]"
                     >
                       {/* Top Row: Number & Icon */}
-                      <div className="flex justify-between items-center mb-6">
-                        <span className="font-mono text-[16px] font-bold text-[#0000FF]">
+                      <div className="flex justify-between items-center mb-12 md:mb-14">
+                        <span className="font-mono text-[17px] font-bold text-[#0000FF] tracking-wider">
                           {v.num}
                         </span>
-                        <div className="w-10 h-10 rounded-full border border-[#808080]/20 flex items-center justify-center text-[#0000FF] bg-[#fdfdfd] shadow-sm">
-                          {v.num === "01" ? (
-                            <Eye className="w-5 h-5" />
-                          ) : v.num === "02" ? (
-                            <Heart className="w-5 h-5" />
+                        <div className="w-[52px] h-[52px] rounded-full border border-[#0000FF]/20 flex items-center justify-center text-[#0000FF] bg-[#f4f7ff]">
+                          {v.num === "01" || idx === 0 ? (
+                            <Eye className="w-6 h-6 stroke-[1.8]" />
+                          ) : v.num === "02" || idx === 1 ? (
+                            <Heart className="w-6 h-6 stroke-[1.8]" />
                           ) : (
-                            <Zap className="w-5 h-5" />
+                            <Zap className="w-6 h-6 stroke-[1.8]" />
                           )}
                         </div>
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-[22px] font-normal leading-[1.3] text-[#191919] mb-4 whitespace-pre-line">
+                      <h3 className="text-[24px] md:text-[26px] font-bold leading-[1.2] text-[#191919] m-0 whitespace-pre-line tracking-[-0.02em]">
                         {v.title}
                       </h3>
 
+                      {/* Short Blue Line under title */}
+                      <div className="w-7 h-[2.5px] bg-[#0000FF] mt-6 mb-7 rounded-full"></div>
+
                       {/* Description */}
-                      <p className="text-[14px] leading-[1.6] text-[#808080] m-0 font-normal">
+                      <p className="text-[14px] md:text-[15px] leading-[1.75] text-[#808080] m-0 font-normal">
                         {v.desc}
                       </p>
 
-                      {/* Connecting Line and Dot Node (on desktop, between Card 1 -> 2 -> 3) */}
-                      {idx < 2 && (
-                        <>
-                          <div className="absolute top-1/2 -right-[28px] w-[28px] h-[1px] bg-[#808080]/30 -translate-y-1/2 z-10 hidden md:block"></div>
-                          <div className="absolute top-1/2 -right-[5px] -translate-y-1/2 z-20 hidden md:flex w-[10px] h-[10px] rounded-full border border-[#0000FF] bg-white items-center justify-center">
-                            <div className="w-1 h-1 rounded-full bg-[#0000FF]"></div>
+                      {/* Connecting Line and Dot Node (between Card 1 -> 2 -> 3 at line level) */}
+                      {idx < valuesList.length - 1 && (
+                        <div className="absolute top-[215px] md:top-[225px] -right-[28px] w-[28px] h-[1px] bg-[#0000FF]/25 z-20 hidden md:block">
+                          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-[#0000FF] bg-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#0000FF]" />
                           </div>
-                        </>
+                        </div>
                       )}
 
                       {/* Faint Wave Decoration at the bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-20 overflow-hidden select-none">
-                        <svg className="w-full h-full" viewBox="0 0 100 20" preserveAspectRatio="none">
-                          <path d="M0,10 C30,20 70,0 100,10 L100,20 L0,20 Z" fill="#0000FF" />
+                      <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none opacity-[0.14] overflow-hidden select-none">
+                        <svg className="w-full h-full" viewBox="0 0 100 25" preserveAspectRatio="none">
+                          <path d="M0,15 C30,25 70,5 100,15 L100,25 L0,25 Z" fill="#0000FF" />
+                          <path d="M0,8 C35,18 65,2 100,10 L100,25 L0,25 Z" fill="none" stroke="#0000FF" strokeWidth="0.5" />
                         </svg>
                       </div>
                       
                       {/* Tiny Blue Dot at the bottom center */}
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#0000FF] opacity-40"></div>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0000FF] opacity-60"></div>
                     </div>
                   );
                 })}

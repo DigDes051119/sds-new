@@ -11,10 +11,12 @@ import coverTooko from "../../imports/cover_tooko.webp";
 export function Home() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
+  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
 
   useEffect(() => {
     return cmsService.subscribe(() => {
       setProjectDetails(cmsService.getProjectDetails());
+      setProductDetails(cmsService.getProductDetails());
     });
   }, []);
 
@@ -126,6 +128,22 @@ export function Home() {
   // Block 2: Recent Projects (4 items = 2 rows of 2 cards)
   const recentProjects = mappedProjects.slice(0, 4);
 
+  // Recent Products (4 items = 2 rows of 2 cards)
+  const localizedProductDetails = productDetails[locale] || productDetails["ru"] || {};
+  const allProducts = t.products?.items || [];
+  const mappedProducts = allProducts.map((p: any, idx: number) => {
+    const detail = localizedProductDetails[p.id] || {};
+    return {
+      id: p.id || String(idx),
+      title: p.name || p.title || "",
+      image: p.img || (p.images && p.images[0]) || "",
+      tags: detail.service || p.category || "Product",
+      year: detail.year || "2026",
+      desc: detail.desc || p.desc || ""
+    };
+  });
+  const recentProducts = mappedProducts.slice(0, 4);
+
   // Block 5: Selected / Featured Projects (from t.home.projects)
   const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
     ? t.home.projects
@@ -136,7 +154,7 @@ export function Home() {
     const detail = localizedDetails[fp.id] || {};
     return {
       id: fp.id,
-      title: fp.title || fp.name || matched?.name || "",
+      title: (matched?.name && (fp.title === "Ala-Too" || fp.name === "Ala-Too")) ? matched.name : (matched?.name || fp.title || fp.name || ""),
       image: fp.id === "maminy-retsepty" ? coverMoms
         : fp.id === "tooko" ? coverTooko
         : (fp.img || fp.image || matched?.img || ""),
@@ -164,8 +182,17 @@ export function Home() {
     { num: "04", title: "Principle", desc: "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done." }
   ];
 
-  // Block 4: Services list from t.services.items with image references
-  const servicesList = (t.services?.items?.slice(0, 4) || []).map((service: any) => {
+  // Block 4: Services list (Top 5 main services: Branding, Industrial Design, Marketing, Concept Design, Game Dev)
+  const mainServiceIds = ["01", "03", "09", "06", "13"];
+  const allItems = t.services?.items || [];
+  
+  const filteredServices = mainServiceIds
+    .map(id => allItems.find((s: any) => s.id === id))
+    .filter(Boolean);
+
+  const finalItems = filteredServices.length === 5 ? filteredServices : allItems.slice(0, 5);
+
+  const servicesList = finalItems.map((service: any) => {
     const match = t.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
     let imgUrl = match ? match[3] : "";
     
@@ -175,8 +202,10 @@ export function Home() {
         imgUrl = "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=600";
       } else if (service.id === "03") {
         imgUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600";
-      } else if (service.id === "09" || service.id === "05") {
+      } else if (service.id === "09") {
         imgUrl = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600";
+      } else if (service.id === "13") {
+        imgUrl = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600";
       } else {
         imgUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=600";
       }
@@ -218,7 +247,7 @@ export function Home() {
 
       {/* 2 БЛОК: Recent Projects (Недавние проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
+        <div className="pb-4 mb-[30px] flex justify-between items-baseline ">
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
@@ -228,20 +257,28 @@ export function Home() {
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
         </div>
 
+        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal mb-[40px] max-w-[650px]">
+          {locale === "ru" 
+            ? "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов" 
+            : locale === "kg" 
+              ? "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр"
+              : "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts"}
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
           {recentProjects.map((project, index) => (
             <div key={`recent-${project.id}`} className="w-full flex flex-col group"
               style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
-                <div className="w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
                     src={project.image} 
                     alt={project.title} 
-                    className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
+                    className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
-                  <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4 md:gap-0">
+                  <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                     {/* Left block: label + title */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
@@ -256,10 +293,10 @@ export function Home() {
                         </p>
                       )}
                     </div>
-                    {/* Vertical divider */}
-                    <div className="hidden md:block w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
+                    {/* Vertical divider stretching to end of description */}
+                    <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                     {/* Right block: category + year */}
-                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%]">
+                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
                       <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
                       <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
@@ -275,7 +312,7 @@ export function Home() {
 
       {/* 3 БЛОК: Advantages (Преимущества) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 select-none">
+        <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0">
             {locale === "ru" ? "Преимущества" : locale === "kg" ? "Артыкчылыктар" : "Advantages"}
           </h2>
@@ -284,7 +321,7 @@ export function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-[59px] pt-[28px] items-start">
           {/* Left Column: Divided into 2 display stats */}
-          <div className="lg:col-span-5 flex flex-col gap-6 md:gap-8 select-none pr-4">
+          <div className="lg:col-span-5 flex flex-col gap-6 md:gap-8  pr-4">
             {/* Stat 1: Founder Experience */}
             <div className="flex flex-col gap-1">
               <div className="text-[54px] xs:text-[70px] sm:text-[88px] md:text-[100px] font-normal leading-none tracking-[-0.06em] text-[#0000FF] m-0">
@@ -343,13 +380,68 @@ export function Home() {
 
 
 
-      {/* 4 БЛОК: Services (Услуги) */}
+      {/* 4 БЛОК: Recent Products (Недавние продукты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[28px] flex justify-between items-baseline select-none">
+        <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+          <div className="flex flex-col">
+            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+              {locale === "ru" ? "Недавние продукты" : locale === "kg" ? "Жакында өнүмдөр" : "Recent products"}
+            </h2>
+          </div>
+          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/PRODUCTS]</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+          {recentProducts.map((product, index) => (
+            <div key={`recent-prod-${product.id}`} className="w-full flex flex-col group"
+              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+              <Link to={`/products/${product.id}`} className="group flex flex-col flex-1">
+                <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                  <ImageWithFallback 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
+                  />
+                </div>
+                <div className="mt-[25px] flex flex-col">
+                  <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                    {/* Left block: label + title */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-2">
+                      <span className="font-mono text-[16px] text-[#808080]">
+                        0{index + 1} / PRODUCT
+                      </span>
+                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                        {product.title}
+                      </h3>
+                      {product.desc && (
+                        <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                          {product.desc}
+                        </p>
+                      )}
+                    </div>
+                    {/* Vertical divider stretching to end of description */}
+                    <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                    {/* Right block: category + year */}
+                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{product.tags}</span>
+                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{product.year}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5 БЛОК: Services (Услуги) */}
+      <section className="flex flex-col w-full">
+        <div className="pb-4 mb-[28px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {locale === "ru" ? "Услуги" : locale === "kg" ? "Кызматтар" : "Services"}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/SERVICES]</span>
+          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/SERVICES]</span>
         </div>
 
         <div className="flex flex-col w-full">
@@ -404,7 +496,7 @@ export function Home() {
                           e.stopPropagation();
                           window.dispatchEvent(new CustomEvent("sds:open-contact-modal"));
                         }}
-                        className="w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-6 py-3 font-mono text-[13px] uppercase tracking-[0.06em] cursor-pointer select-none text-center"
+                        className="w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-6 py-3 font-mono text-[13px] uppercase tracking-[0.06em] cursor-pointer  text-center"
                       >
                         {locale === "ru" ? "Заказать услугу →" : locale === "kg" ? "Кызматты заказ кылуу →" : "Order service →"}
                       </button>
@@ -420,7 +512,7 @@ export function Home() {
         <div className="mt-[12px] w-full z-10">
           <Link 
             to="/services" 
-            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 select-none text-center"
+            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300  text-center"
           >
             {locale === "ru" ? "Смотреть все услуги \u2192" : locale === "kg" ? "Бардык кызматтарды көрүү \u2192" : "View all services \u2192"}
           </Link>
@@ -429,13 +521,13 @@ export function Home() {
 
 
 
-      {/* 5 БЛОК: Featured Projects (Избранные проекты) */}
+      {/* 6 БЛОК: Featured Projects (Избранные проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline select-none">
+        <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {locale === "ru" ? "Избранные проекты" : locale === "kg" ? "Тандалган долбоорлор" : "Featured projects"}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/FEATURED]</span>
+          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/FEATURED]</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
@@ -443,19 +535,15 @@ export function Home() {
             <div key={`featured-${project.id}`} className="w-full flex flex-col group"
               style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
-                <div className={`w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition duration-500 rounded-[8px] ${
-                  index % 2 === 1
-                    ? 'bg-[#0000FF]/5' 
-                    : 'bg-[#191919]'
-                }`}>
+                <div className="w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition duration-500 rounded-[8px] bg-transparent">
                   <ImageWithFallback
                     src={project.image} 
                     alt={project.title} 
-                    className="w-full h-full object-cover transition duration-500 group-hover:brightness-75"
+                    className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
                   />
                 </div>
                 <div className="mt-[25px] flex flex-col">
-                  <div className="flex flex-col md:flex-row justify-between items-start w-full gap-4 md:gap-0">
+                  <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
                       <span className="font-mono text-[16px] text-[#808080]">
                         {String(index + 1).padStart(2, '0')} / WORK
@@ -467,8 +555,8 @@ export function Home() {
                         <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">{project.desc}</p>
                       )}
                     </div>
-                    <div className="hidden md:block w-[1px] bg-[#808080] mx-6 shrink-0 self-stretch"></div>
-                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%]">
+                    <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
                       <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
                       <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
@@ -480,14 +568,14 @@ export function Home() {
         </div>
       </section>
 
-      {/* 6 БЛОК: Brands (Бренды) */}
+      {/* 7 БЛОК: Brands (Бренды) */}
       <section className="flex flex-col w-full overflow-hidden">
-        <div className="pb-4 mb-[59px] select-none">
+        <div className="pb-4 mb-[59px] ">
           <div className="flex justify-between items-baseline">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {locale === "ru" ? "Бренды" : locale === "kg" ? "Бренддер" : "Selected brands"}
             </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/BRANDS]</span>
+            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07/BRANDS]</span>
           </div>
           <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal mt-2 max-w-[600px]">
             {locale === "ru" 
@@ -499,7 +587,7 @@ export function Home() {
         </div>
 
         {/* Marquee slider container */}
-        <div className="relative w-full overflow-hidden py-6 select-none">
+        <div className="relative w-full overflow-hidden py-6 ">
           {/* Edge Hover Speedup Triggers */}
           <div 
             className="absolute left-0 top-0 bottom-0 w-[15%] z-20 cursor-w-resize"

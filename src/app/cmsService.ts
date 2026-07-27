@@ -222,25 +222,6 @@ export const cmsService = {
 
   // Update translations locally & remotely
   async updateTranslations(newTranslations: any, forceOverride = false) {
-    if (!forceOverride) {
-      try {
-        const translationRows = await supabaseClient.fetchTable("sds_translations");
-        if (translationRows && translationRows.length > 0 && translationRows[0].data) {
-          const currentRemoteStr = JSON.stringify(translationRows[0].data);
-          if (lastRemoteTranslationsStr && currentRemoteStr !== lastRemoteTranslationsStr) {
-            const confirmOverride = window.confirm(
-              "ВНИМАНИЕ! База данных была изменена другим администратором с момента загрузки вами этой страницы.\n\nЕсли вы нажмете 'ОК', вы сотрете их изменения навсегда!\nЕсли нажмете 'Отмена', сохранение будет прервано. Рекомендуется скопировать свои тексты в Word, обновить страницу (F5) и внести их заново."
-            );
-            if (!confirmOverride) {
-              return false;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Could not check collision:", e);
-      }
-    }
-
     localStorage.setItem("sds_translations", JSON.stringify(newTranslations));
     this.notify();
 
@@ -276,25 +257,6 @@ export const cmsService = {
 
   // Update project details locally & remotely
   async updateProjectDetails(newDetails: any, forceOverride = false) {
-    if (!forceOverride) {
-      try {
-        const rows = await supabaseClient.fetchTable("sds_project_details");
-        if (rows && rows.length > 0 && rows[0].data) {
-          const currentRemoteStr = JSON.stringify(rows[0].data);
-          if (lastRemoteProjectDetailsStr && currentRemoteStr !== lastRemoteProjectDetailsStr) {
-            const confirmOverride = window.confirm(
-              "ВНИМАНИЕ! Проекты были изменены другим администратором с момента загрузки вами этой страницы.\n\nЕсли вы нажмете 'ОК', вы сотрете их изменения навсегда!\nЕсли нажмете 'Отмена', сохранение будет прервано."
-            );
-            if (!confirmOverride) {
-              return false;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Could not check collision:", e);
-      }
-    }
-
     localStorage.setItem("sds_project_details", JSON.stringify(newDetails));
     this.notify();
 
