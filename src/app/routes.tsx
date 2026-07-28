@@ -6,6 +6,8 @@ import { Services } from "./pages/Services";
 import { Projects } from "./pages/Projects";
 import { OldProjects } from "./pages/OldProjects";
 import { ProjectDetail } from "./pages/ProjectDetail";
+import { WebUiUx } from "./pages/WebUiUx";
+import { WebUiUxDetail } from "./pages/WebUiUxDetail";
 import { Products } from "./pages/Products";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Contacts } from "./pages/Contacts";
@@ -14,6 +16,7 @@ import { AdminLayout } from "./components/AdminLayout";
 import { AdminLogin } from "./pages/AdminLogin";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminProjectsEditor } from "./pages/AdminProjectsEditor";
+import { AdminWebUiUxEditor } from "./pages/AdminWebUiUxEditor";
 import { AdminProductsEditor } from "./pages/AdminProductsEditor";
 import { AdminFeaturedProjects } from "./pages/AdminFeaturedProjects";
 import { AdminAboutEditor } from "./pages/AdminAboutEditor";
@@ -36,6 +39,8 @@ export const router = createBrowserRouter([
       { path: "projects/old", Component: OldProjects },
       { path: "old-projects", Component: OldProjects },
       { path: "projects/:id", Component: ProjectDetail },
+      { path: "web-ui-ux", Component: WebUiUx },
+      { path: "web-ui-ux/:id", Component: WebUiUxDetail },
       { path: "products", Component: Products },
       { path: "products/:id", Component: ProductDetail },
       { path: "contacts", Component: Contacts },
@@ -61,6 +66,7 @@ export const router = createBrowserRouter([
       { path: "featured", Component: AdminFeaturedProjects },
       { path: "about", Component: AdminAboutEditor },
       { path: "projects", Component: AdminProjectsEditor },
+      { path: "web-ui-ux", Component: AdminWebUiUxEditor },
       { path: "products", Component: AdminProductsEditor },
       { path: "contacts", Component: AdminContactsEditor },
       { path: "services", Component: AdminServicesEditor },

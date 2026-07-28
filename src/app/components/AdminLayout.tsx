@@ -84,6 +84,7 @@ export function AdminLayout() {
     { name: "Избранные проекты", path: "/admin/featured", icon: Star, permKey: "featured" },
     { name: "О нас и Команда", path: "/admin/about", icon: Users, permKey: "about" },
     { name: "Проекты", path: "/admin/projects", icon: FolderGit, permKey: "projects" },
+    { name: "WEB / UI UX", path: "/admin/web-ui-ux", icon: FolderGit, permKey: "projects" },
     { name: "Продукты", path: "/admin/products", icon: Package, permKey: "projects" },
     { name: "Контакты и Карта", path: "/admin/contacts", icon: MapPin, permKey: "contacts" },
     { name: "Услуги", path: "/admin/services", icon: Briefcase, permKey: "services" },

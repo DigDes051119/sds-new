@@ -212,12 +212,16 @@ export const supabaseClient = {
                 reject(new Error("Failed to get canvas context"));
                 return;
               }
+              // Enable high-quality image smoothing
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = "high";
+
               // Clear canvas for transparency
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               ctx.drawImage(img, 0, 0, w, h);
 
               const outType = needsConversion ? "image/webp" : file.type;
-              const outQuality = 0.82;
+              const outQuality = 0.94; // Higher quality for sharper portfolio images
 
               canvas.toBlob(
                 (blob) => {

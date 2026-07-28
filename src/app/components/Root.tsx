@@ -285,6 +285,7 @@ export function Root() {
     { name: t.nav.about, path: "/about" },
     { name: t.nav.services, path: "/services" },
     { name: t.nav.projects, path: "/projects" },
+    { name: t.nav.webUiUx || "WEB / UI UX", path: "/web-ui-ux" },
     { name: t.nav.products, path: "/products" },
     { name: t.nav.contacts, path: "/contacts" },
   ];

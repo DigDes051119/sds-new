@@ -207,6 +207,25 @@ export const cmsService = {
         data[lang].contacts.markerLabel = "Steel Drake Studio Team";
         modified = true;
       }
+      
+      if (!data[lang].webUiUx) {
+        data[lang].webUiUx = { title: "WEB / UI UX", items: [] };
+        modified = true;
+      } else if (!data[lang].webUiUx.items) {
+        data[lang].webUiUx.items = [];
+        modified = true;
+      } else if (data[lang].webUiUx.items.length > 0) {
+        // Automatically clear copied projects (e.g., tooko, one-ordo) to break the "link" 
+        // that the user was seeing.
+        if (data[lang].webUiUx.items.some((p: any) => p.categoryKey === 'branding' || p.categoryKey === 'industrial' || p.categoryKey === 'architectural' || p.id === 'synq')) {
+            data[lang].webUiUx.items = [];
+            modified = true;
+        }
+      }
+      if (!data[lang].nav.webUiUx) {
+        data[lang].nav.webUiUx = "WEB / UI UX";
+        modified = true;
+      }
     }
 
     if (modified) {

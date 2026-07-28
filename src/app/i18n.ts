@@ -17,6 +17,7 @@ export const translations = {
       services: "Services",
       projects: "Projects",
       products: "Products",
+      webUiUx: "WEB / UI UX",
       contacts: "Contacts",
     },
     home: {
@@ -272,6 +273,10 @@ export const translations = {
         { id: "auto-concept-x", name: "Auto Concept X", category: "Automotive Design", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" },
       ],
     },
+    webUiUx: {
+      title: "WEB / UI UX",
+      items: [],
+    },
     products: {
       title: "Studio Products",
       items: [
@@ -396,6 +401,7 @@ export const translations = {
       services: "Кызматтар",
       projects: "Долбоор",
       products: "Продукциялар",
+      webUiUx: "WEB / UI UX",
       contacts: "Байланыш",
     },
     home: {
@@ -651,6 +657,10 @@ export const translations = {
         { id: "auto-concept-x", name: "Auto Concept X", category: "Автомобиль дизайны", categoryKey: "automotive", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600" },
       ],
     },
+    webUiUx: {
+      title: "WEB / UI UX",
+      items: [],
+    },
     products: {
       title: "Студиянын продукциялары",
       items: [
@@ -775,6 +785,7 @@ export const translations = {
       services: "Услуги",
       projects: "Проекты",
       products: "Продукты",
+      webUiUx: "WEB / UI UX",
       contacts: "Контакты",
     },
     home: {
