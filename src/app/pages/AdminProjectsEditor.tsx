@@ -748,10 +748,10 @@ export function AdminProjectsEditor() {
         newDetails.en[formId] = detailEntryEn;
         newDetails.kg[formId] = detailEntryKg;
       } else {
-        // Add new entries to translations — insert at the top (index 0)
-        newTranslations.ru.projects.items.unshift(listEntryRu);
-        newTranslations.en.projects.items.unshift(listEntryEn);
-        newTranslations.kg.projects.items.unshift(listEntryKg);
+        // Add new entries to translations — insert at the end
+        newTranslations.ru.projects.items.push(listEntryRu);
+        newTranslations.en.projects.items.push(listEntryEn);
+        newTranslations.kg.projects.items.push(listEntryKg);
 
         // Add to details
         newDetails.ru[formId] = detailEntryRu;
