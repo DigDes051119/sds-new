@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { useParams, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ExternalLink } from "lucide-react";
 import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
 import { projectDetailsTranslations } from "../projectDetailsData";
@@ -83,6 +84,17 @@ export function WebUiUxDetail() {
             <h1 className="text-[32px] xs:text-[44px] md:text-[72px] lg:text-[96px] font-bold leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
               {data.name}
             </h1>
+            {data.websiteUrl && (
+              <a
+                href={data.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-transparent text-white hover:bg-white hover:text-black hover:border-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 interactive-element"
+              >
+                {locale === "ru" ? "Посмотреть сайт" : locale === "kg" ? "Сайтты көрүү" : "View Website"}
+                <ExternalLink size={14} />
+              </a>
+            )}
           </div>
           <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
             <div className="border-l border-white/40 pl-6 md:pl-8">

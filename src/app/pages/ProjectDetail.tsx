@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { useParams, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { ThumbsUp, X } from "lucide-react";
+import { ThumbsUp, X, ExternalLink } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext } from "../i18n";
 import { cmsService } from "../cmsService";
@@ -22,13 +22,24 @@ export function ProjectDetail() {
     });
   }, []);
 
-  const data = (id && projectDetails[locale]?.[id])
+  let data = (id && projectDetails[locale]?.[id])
     || (id && projectDetails.ru?.[id])
     || (id && projectDetails.kg?.[id])
     || (id && projectDetailsTranslations[locale]?.[id])
     || (id && projectDetailsTranslations.ru?.[id])
     || (id && projectDetailsTranslations.en?.[id])
     || t.projectDetail.defaultProject;
+
+  if (id === "one-ordo" || id === "one-ordo-resort") {
+    if (!data || data.service === "WEBDESIGN" || data.service === "webdesign" || (data.desc && data.desc.includes("Website for"))) {
+      data = projectDetailsTranslations[locale]?.["one-ordo-resort"]
+        || projectDetailsTranslations[locale]?.["one-ordo"]
+        || projectDetailsTranslations.ru?.["one-ordo-resort"]
+        || projectDetailsTranslations.ru?.["one-ordo"]
+        || projectDetailsTranslations.en?.["one-ordo-resort"]
+        || data;
+    }
+  }
 
   const projectListItem = t.projects?.items?.find((p: any) => p.id === id);
   const coverImg = projectListItem
@@ -84,6 +95,17 @@ export function ProjectDetail() {
             <h1 className="text-[32px] xs:text-[44px] md:text-[72px] lg:text-[96px] font-bold leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
               {data.name}
             </h1>
+            {data.websiteUrl && (
+              <a
+                href={data.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-transparent text-white hover:bg-white hover:text-black hover:border-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 interactive-element"
+              >
+                {locale === "ru" ? "Посмотреть сайт" : locale === "kg" ? "Сайтты көрүү" : "View Website"}
+                <ExternalLink size={14} />
+              </a>
+            )}
           </div>
           <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
             <div className="border-l border-white/40 pl-6 md:pl-8">

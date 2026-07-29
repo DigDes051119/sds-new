@@ -121,7 +121,7 @@ export function Home() {
           : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img),
       tags: detail.service || p.category || "Design",
       year: detail.year || "2026",
-      desc: detail.desc || p.desc || ""
+      desc: detail.desc || detail.challenge || p.desc || ""
     };
   });
 
@@ -139,7 +139,7 @@ export function Home() {
       image: p.img || (p.images && p.images[0]) || "",
       tags: detail.service || p.category || "Product",
       year: detail.year || "2026",
-      desc: detail.desc || p.desc || ""
+      desc: detail.desc || detail.challenge || p.desc || ""
     };
   });
   const recentProducts = mappedProducts.slice(0, 4);
@@ -160,7 +160,7 @@ export function Home() {
         : (fp.img || fp.image || matched?.img || ""),
       tags: fp.category || fp.tag || detail.service || matched?.category || "Design",
       year: detail.year || "2026",
-      desc: detail.desc || matched?.desc || ""
+      desc: detail.desc || detail.challenge || matched?.desc || ""
     };
   });
 
@@ -281,10 +281,10 @@ export function Home() {
                   <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                     {/* Left block: label + title */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
-                      <span className="font-mono text-[16px] text-[#808080]">
+                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                         0{index + 1} / NEW
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -297,8 +297,8 @@ export function Home() {
                     <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                     {/* Right block: category + year */}
                     <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
-                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
+                      <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                      <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
                   </div>
                 </div>
@@ -408,10 +408,10 @@ export function Home() {
                   <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                     {/* Left block: label + title */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
-                      <span className="font-mono text-[16px] text-[#808080]">
+                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                         0{index + 1} / PRODUCT
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {product.title}
                       </h3>
                       {product.desc && (
@@ -424,8 +424,8 @@ export function Home() {
                     <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                     {/* Right block: category + year */}
                     <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{product.tags}</span>
-                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{product.year}</span>
+                      <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{product.tags}</span>
+                      <span className="font-mono text-[13px] tracking-[0.04em] text-black">{product.year}</span>
                     </div>
                   </div>
                 </div>
@@ -545,10 +545,10 @@ export function Home() {
                 <div className="mt-[25px] flex flex-col">
                   <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                     <div className="flex-1 min-w-0 flex flex-col gap-2">
-                      <span className="font-mono text-[16px] text-[#808080]">
+                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                         {String(index + 1).padStart(2, '0')} / WORK
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                         {project.title}
                       </h3>
                       {project.desc && (
@@ -557,8 +557,8 @@ export function Home() {
                     </div>
                     <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                     <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                      <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
-                      <span className="font-mono text-[16px] tracking-[0.04em] text-black">{project.year}</span>
+                      <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                      <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
                     </div>
                   </div>
                 </div>

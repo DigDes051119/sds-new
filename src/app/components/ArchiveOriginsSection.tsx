@@ -145,7 +145,7 @@ export function ArchiveOriginsSection({
             onClick={() => setSelectedYear("ALL")}
             className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold uppercase transition-all duration-300 cursor-pointer tracking-[0.04em] ${
               selectedYear === "ALL"
-                ? "bg-[#0000FF] text-white shadow-md shadow-[#0000FF]/20"
+                ? "bg-[#0000FF] text-white"
                 : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
             }`}
           >
@@ -158,7 +158,7 @@ export function ArchiveOriginsSection({
               onClick={() => setSelectedYear(year)}
               className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold transition-all duration-300 cursor-pointer tracking-[0.04em] ${
                 selectedYear === year
-                  ? "bg-[#0000FF] text-white shadow-md shadow-[#0000FF]/20"
+                  ? "bg-[#0000FF] text-white"
                   : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
               }`}
             >
@@ -199,14 +199,14 @@ export function ArchiveOriginsSection({
             {/* Meta Information Container - Catalog Style */}
             <div className="mt-[20px] flex flex-col">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
+                <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                   [{String(index + 1).padStart(2, '0')}] — {item.year}
                 </span>
-                <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
+                <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
                   {item.category}
                 </span>
               </div>
-              <h3 className="text-[22px] xs:text-[26px] font-medium leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+              <h3 className="text-[22px] xs:text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                 {item.title}
               </h3>
               {item.shortDesc && (
@@ -253,14 +253,14 @@ export function ArchiveOriginsSection({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full h-full bg-white text-black shadow-2xl overflow-hidden flex flex-col lg:flex-row rounded-[8px]"
+                className="w-full h-full bg-white text-black overflow-hidden flex flex-col lg:flex-row rounded-[8px]"
               >
               
               {/* Left Side: Image Slider */}
               <div className="w-full lg:w-[65%] flex flex-col bg-[#fafaf6] relative border-r border-[#808080]/20">
                 {/* Slide counter at the top */}
                 <div className="w-full pt-[30px] px-[30px] md:pt-[40px] md:px-[40px] shrink-0">
-                  <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
+                  <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                     [{String(activeImageIdx + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}]
                   </span>
                 </div>
@@ -354,13 +354,13 @@ export function ArchiveOriginsSection({
 
                 <div className="flex flex-col gap-6 w-full max-w-[500px]">
                   <div className="flex flex-col gap-2">
-                    <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em]">
+                    <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
                       {currentItem.year} — {currentItem.category}
                     </span>
                     <h3 className="text-[32px] md:text-[40px] font-medium tracking-[-0.04em] text-black m-0 leading-[1.1] uppercase">
                       {currentItem.title}
                     </h3>
-                    <div className="font-mono text-[14px] text-[#808080] uppercase mt-2">
+                    <div className="font-mono text-[13px] text-[#808080] uppercase mt-2">
                       Client: <span className="text-black">{currentItem.client}</span>
                     </div>
                   </div>

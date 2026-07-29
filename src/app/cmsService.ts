@@ -214,17 +214,25 @@ export const cmsService = {
       } else if (!data[lang].webUiUx.items) {
         data[lang].webUiUx.items = [];
         modified = true;
-      } else if (data[lang].webUiUx.items.length > 0) {
-        // Automatically clear copied projects (e.g., tooko, one-ordo) to break the "link" 
-        // that the user was seeing.
-        if (data[lang].webUiUx.items.some((p: any) => p.categoryKey === 'branding' || p.categoryKey === 'industrial' || p.categoryKey === 'architectural' || p.id === 'synq')) {
-            data[lang].webUiUx.items = [];
-            modified = true;
-        }
       }
       if (!data[lang].nav.webUiUx) {
         data[lang].nav.webUiUx = "WEB / UI UX";
         modified = true;
+      }
+
+      // Auto-migrate one-ordo and one-ordo-resort list items in projects.items
+      if (data[lang]?.projects?.items && Array.isArray(data[lang].projects.items)) {
+        data[lang].projects.items.forEach((item: any) => {
+          if (item.id === "one-ordo" || item.id === "one-ordo-resort") {
+            const expectedCat = lang === "en" ? "Branding" : "Брендинг";
+            if (item.category !== expectedCat || item.categoryKey !== "branding") {
+              item.category = expectedCat;
+              item.categoryKey = "branding";
+              item.img = "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp";
+              modified = true;
+            }
+          }
+        });
       }
     }
 
@@ -263,15 +271,39 @@ export const cmsService = {
   // Get project details
   getProjectDetails() {
     const stored = localStorage.getItem("sds_project_details");
+    let data: any;
     if (!stored) {
-      localStorage.setItem("sds_project_details", JSON.stringify(defaultProjectDetails));
-      return defaultProjectDetails;
+      data = JSON.parse(JSON.stringify(defaultProjectDetails));
+    } else {
+      try {
+        data = JSON.parse(stored);
+      } catch {
+        data = JSON.parse(JSON.stringify(defaultProjectDetails));
+      }
     }
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return defaultProjectDetails;
+
+    // Auto-migrate one-ordo and one-ordo-resort if they contain legacy WEBDESIGN data or lack collageBlocks
+    let modified = false;
+    ["ru", "en", "kg"].forEach((lang) => {
+      if (!data[lang]) data[lang] = {};
+      ["one-ordo", "one-ordo-resort"].forEach((key) => {
+        const item = data[lang][key];
+        const defaultItem = (defaultProjectDetails as any)[lang]?.[key] || (defaultProjectDetails as any).ru?.[key];
+        if (!item || item.service === "WEBDESIGN" || item.service === "webdesign" || (item.desc && item.desc.includes("Website for")) || !item.collageBlocks || item.collageBlocks.length < 5) {
+          if (defaultItem) {
+            data[lang][key] = JSON.parse(JSON.stringify(defaultItem));
+            modified = true;
+          }
+        }
+      });
+    });
+
+    if (modified) {
+      localStorage.setItem("sds_project_details", JSON.stringify(data));
+      supabaseClient.upsertTable("sds_project_details", [{ id: 1, data }]).catch(() => {});
     }
+
+    return data;
   },
 
   // Update project details locally & remotely

@@ -100,7 +100,7 @@ export function Contacts() {
           >
             <MapMarker longitude={longitude} latitude={latitude}>
               <MarkerContent>
-                <div className="w-6 h-6 rounded-full bg-[#0000FF] border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
+                <div className="w-6 h-6 rounded-full bg-[#0000FF] border-2 border-white flex items-center justify-center animate-pulse">
                   <div className="w-2.5 h-2.5 bg-white rounded-full" />
                 </div>
               </MarkerContent>

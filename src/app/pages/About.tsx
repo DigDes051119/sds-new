@@ -460,7 +460,7 @@ export function About() {
           </div>
         </div>
 
-        <div className="w-full border border-[#808080]/30 relative overflow-hidden select-none bg-[#f5f5f5] rounded-xl shadow-inner flex flex-col">
+        <div className="w-full border border-[#808080]/30 relative overflow-hidden select-none bg-[#f5f5f5] rounded-xl flex flex-col">
           <div className="w-full h-[400px] md:h-[500px]">
             <Map
               viewport={{
@@ -484,7 +484,7 @@ export function About() {
                       />
                     </div>
                   </MarkerContent>
-                  <MapPopup permanent={false} className="bg-black text-white px-3 py-1.5 rounded text-[12px] font-mono shadow-md">
+                  <MapPopup permanent={false} className="bg-black text-white px-3 py-1.5 rounded text-[12px] font-mono">
                     {loc.name}
                   </MapPopup>
                 </MapMarker>

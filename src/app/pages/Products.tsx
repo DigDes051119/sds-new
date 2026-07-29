@@ -23,7 +23,7 @@ export function Products() {
       ...product,
       tags: detail.service || "Product",
       year: detail.year || "2026",
-      desc: detail.desc || "",
+      desc: detail.desc || detail.challenge || "",
       client: detail.client || "",
       studio: detail.studio || "-",
       designer: detail.designer || "-",
@@ -66,7 +66,7 @@ export function Products() {
               <div className="mt-[20px] flex justify-between items-stretch gap-0">
                 {/* Left column: title + tags + desc */}
                 <div className="flex-[3] min-w-0 flex flex-col pr-5">
-                  <h2 className="text-[28px] md:text-[34px] font-medium leading-[1.2] tracking-[-0.03em] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                  <h2 className="text-[28px] md:text-[34px] font-semibold leading-[1.2] tracking-[-0.03em] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                     {product.name}
                   </h2>
                   {product.category && (
@@ -83,14 +83,6 @@ export function Products() {
                       </span>
                       <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
                         {product.tags}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
-                        {locale === "ru" ? "КЛАСС" : locale === "kg" ? "КЛАСС" : "CLASS"}
-                      </span>
-                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
-                        {product.class}
                       </span>
                     </div>
                     <div className="flex flex-col">

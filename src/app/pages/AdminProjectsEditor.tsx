@@ -710,9 +710,11 @@ export function AdminProjectsEditor() {
       };
 
       // Check if new ID already exists
-      const isIdTaken = newTranslations.ru.projects.items.some((p: any) => p.id === formId && p.id !== editingId);
+      const isIdTaken = 
+        newTranslations.ru.projects.items.some((p: any) => p.id === formId && p.id !== editingId) ||
+        (newTranslations.ru.webUiUx?.items || []).some((p: any) => p.id === formId && p.id !== editingId);
       if (isIdTaken) {
-        alert(`Проект с ID "${formId}" уже существует. Пожалуйста, выберите другой ID.`);
+        alert(`Проект с ID "${formId}" уже существует (в Проектах или WEB / UI UX). Пожалуйста, выберите другой ID.`);
         return;
       }
 

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
 import { Menu, X, ArrowUp, ThumbsUp } from "lucide-react";
 import { ArchiveOriginsSection } from "./ArchiveOriginsSection";
+
 export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
@@ -130,6 +131,7 @@ export function Root() {
   const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
   const [showProjectBanner, setShowProjectBanner] = useState(false);
   const [projectBannerDismissed, setProjectBannerDismissed] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setShowProjectBanner(false);
@@ -259,6 +261,18 @@ export function Root() {
           resolvedName = ruItem.name;
         }
 
+        if (ruItem.id === "one-ordo-resort" || ruItem.id === "one-ordo") {
+          return {
+            ...ruItem,
+            ...siteItem,
+            id: ruItem.id,
+            name: ruItem.name || siteItem?.name || "One Ordo Resort",
+            category: ruItem.category || "Брендинг",
+            categoryKey: ruItem.categoryKey || "branding",
+            img: ruItem.img || siteItem?.img || "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp"
+          };
+        }
+
         return {
           ...ruItem,
           ...siteItem,
@@ -285,8 +299,8 @@ export function Root() {
     { name: t.nav.about, path: "/about" },
     { name: t.nav.services, path: "/services" },
     { name: t.nav.projects, path: "/projects" },
-    { name: t.nav.webUiUx || "WEB / UI UX", path: "/web-ui-ux" },
     { name: t.nav.products, path: "/products" },
+    { name: t.nav.webUiUx || "WEB / UI UX", path: "/web-ui-ux" },
     { name: t.nav.contacts, path: "/contacts" },
   ];
 
@@ -330,7 +344,7 @@ export function Root() {
         </div>
       )}
 
-      <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett antialiased overflow-x-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
+      <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett overflow-x-hidden">
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
         <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-[45px] md:px-[65px] lg:px-[105px] z-50 bg-white ${isProjectDetailPage ? 'pb-[20px] md:pb-[28px]' : 'pb-[30px] md:pb-[64px]'}`}>
@@ -373,7 +387,7 @@ export function Root() {
 
                       {/* Dropdown Menu on Hover */}
                       <div className="absolute top-full -left-2 pt-3 opacity-0 pointer-events-none group-hover/navdropdown:opacity-100 group-hover/navdropdown:pointer-events-auto transition-all duration-300 ease-out z-[999]">
-                        <div className="bg-white border border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] rounded-2xl p-4 min-w-[280px] flex flex-col gap-2 backdrop-blur-xl">
+                        <div className="bg-white border border-black/10 rounded-2xl p-4 min-w-[280px] flex flex-col gap-2 backdrop-blur-xl">
                           <NavLink
                             to="/projects"
                             end
@@ -522,7 +536,7 @@ export function Root() {
               <div className="mt-8 mb-16">
                 <a
                   href="mailto:contact@steeldrakestudio.com"
-                  className="text-[18px] xs:text-[22px] sm:text-4xl md:text-5xl lg:text-[76px] font-normal tracking-[-0.04em] text-black leading-none hover:opacity-70 transition-opacity interactive-element block w-full break-all"
+                  className="text-[18px] xs:text-[22px] sm:text-4xl md:text-5xl lg:text-[76px] font-normal tracking-[-0.04em] text-black leading-none hover:text-[#0000FF] transition-colors duration-300 interactive-element block w-full break-all"
                 >
                   contact@steeldrakestudio.com
                 </a>
@@ -770,11 +784,12 @@ export function Root() {
         <AnimatePresence>
           {!isContactFormOpen && isProjectDetailPage && showProjectBanner && !projectBannerDismissed && (
             <motion.div
+              ref={bannerRef}
               initial={{ opacity: 0, y: 35, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 35, scale: 0.96 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl bg-white text-black border border-black p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center justify-between gap-5 font-mono select-none"
+              className="fixed bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl bg-white text-black border border-black p-5 sm:p-6 flex items-center justify-between gap-5 font-mono select-none"
             >
               <div 
                 onClick={() => setIsContactFormOpen(true)}
@@ -822,6 +837,8 @@ export function Root() {
             </motion.div>
           )}
         </AnimatePresence>
+
+
 
       </div>
     </LanguageContext.Provider>

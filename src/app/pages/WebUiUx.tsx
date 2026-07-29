@@ -74,7 +74,7 @@ export function WebUiUx() {
                     <span className="font-mono text-[16px] text-[#808080]">
                       {String(index + 1).padStart(2, '0')} / PROJECT
                     </span>
-                    <h3 className="text-[28px] font-medium leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                    <h3 className="text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                       {project.name}
                     </h3>
                     {project.desc && (

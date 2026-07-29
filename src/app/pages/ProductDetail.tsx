@@ -84,18 +84,38 @@ export function ProductDetail() {
               {data.name || productListItem?.name}
             </h1>
           </div>
-          <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
-            <div className="border-l border-white/40 pl-6 md:pl-8">
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Студия" : "Brand"}</span>
-              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.client || "STEEL DRAKE"}</span>
+          <div className="lg:col-span-5 flex flex-col uppercase tracking-wider font-mono text-white mt-6 lg:mt-0 w-full lg:max-w-[420px] text-right lg:ml-auto">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t border-white/20">
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.studio || "STUDIO"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.studio || "-"}</span>
+              </div>
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.designer || "DESIGNER"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.designer || "-"}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Год" : "Year"}</span>
-              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.year || "2026"}</span>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20">
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.location || "LOCATION"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.location || "-"}</span>
+              </div>
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.projectType || "PROJECT TYPE"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.projectType || "-"}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Категория" : "Category"}</span>
-              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.service || "Product"}</span>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20 pb-4 border-b">
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{locale === "ru" ? "ГОД" : locale === "kg" ? "ЖЫЛ" : "YEAR"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.year || "2026"}</span>
+              </div>
+              <div className="flex flex-col text-right">
+                <span className="text-white/50 text-[11px] mb-1">{locale === "ru" ? "КАТЕГОРИЯ" : locale === "kg" ? "КАТЕГОРИЯ" : "CATEGORY"}</span>
+                <span className="font-normal text-[15px] leading-tight">{data.service || "PRODUCT DESIGN"}</span>
+              </div>
             </div>
           </div>
         </div>

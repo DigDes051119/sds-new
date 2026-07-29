@@ -103,7 +103,8 @@
     font-weight: 400;
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
   h1 {
@@ -200,17 +201,14 @@ html {
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Scroll Reveal Animation Styles - Highly Optimized for GPU */
+/* Scroll Reveal Animation Styles */
 .reveal-hidden {
   opacity: 0;
-  transform: translate3d(0, 40px, 0);
+  transform: translateY(40px);
   transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .reveal-visible {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: none;
 }
