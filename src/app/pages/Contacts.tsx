@@ -5,9 +5,9 @@ import { Map, MapMarker, MarkerContent } from "../components/ui/map";
 export function Contacts() {
   const { t, locale } = useContext(LanguageContext);
 
-  // IT Hub Technopark coordinates: Bishkek, 74.6186, 42.8710
-  const longitude = 74.6186;
-  const latitude = 42.8710;
+  // IT Hub Technopark coordinates: Bishkek, 74.634200, 42.857150
+  const longitude = 74.634200;
+  const latitude = 42.857150;
 
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px]">
@@ -97,6 +97,7 @@ export function Contacts() {
               pitch: 0
             }}
             theme="light"
+            locale={locale}
           >
             <MapMarker longitude={longitude} latitude={latitude}>
               <MarkerContent>

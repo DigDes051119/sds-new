@@ -25,11 +25,11 @@ export function WebUiUx() {
       const detail = localizedDetails[project.id] || {};
       return {
         ...project,
-        img: project.id === "maminy-retsepty" ? coverMoms
-          : project.id === "tooko" ? coverTooko
-          : (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
-            ? project.img
-            : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img),
+        img: (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
+          ? project.img
+          : (project.id === "maminy-retsepty" ? coverMoms
+            : project.id === "tooko" ? coverTooko
+            : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img)),
         tags: detail.service || project.category || "Design",
         year: detail.year || "2026",
         desc: detail.desc || project.desc || ""

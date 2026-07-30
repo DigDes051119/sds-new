@@ -38,12 +38,21 @@ export function Products() {
       
       {/* Title Block */}
       <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
-        <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
-          {t.products?.title || (locale === "ru" ? "Продукты студии" : locale === "kg" ? "Студиянын продукциялары" : "Studio products")}
-        </h1>
-        <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
-          [PRODUCTS/CATALOGUE]
-        </span>
+        <div className="flex justify-between items-baseline gap-4 mb-4">
+          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+            {t.products?.title || (locale === "ru" ? "Продукты студии" : locale === "kg" ? "Студиянын продукциялары" : "Studio products")}
+          </h1>
+          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
+            [PRODUCTS/CATALOGUE]
+          </span>
+        </div>
+        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
+          {locale === "ru" 
+            ? "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов" 
+            : locale === "kg" 
+              ? "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр"
+              : "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts"}
+        </p>
       </section>
 
       {/* Products Grid */}

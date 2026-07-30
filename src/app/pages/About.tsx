@@ -109,12 +109,16 @@ export function About() {
                     </div>
 
                     {/* Image Card */}
-                    <div className="aspect-square w-full bg-[#f5f5f5] border border-[#808080]/20 flex items-center justify-center overflow-hidden">
+                    <div 
+                      className="aspect-square w-full bg-[#f5f5f5] flex items-center justify-center overflow-hidden"
+                      style={{ borderRadius: "50%" }}
+                    >
                       {item.img ? (
                         <img
                           src={item.img}
                           alt={item.title}
                           className="w-full h-full object-cover"
+                          style={{ borderRadius: "50%" }}
                         />
                       ) : (
                         <svg className="w-8 h-8 text-[#808080]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -395,8 +399,8 @@ export function About() {
         })()}
       </section>
 
-      {/* Awards [04/AWARDS] */}
-      {awardsList.length > 0 && (
+      {/* Awards [04/AWARDS] - DISABLED (see Блок Признание и награды.txt) */}
+      {false && awardsList.length > 0 && (
         <section className="mt-[100px]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start mb-[40px]">
             <div className="md:col-span-5">
@@ -470,6 +474,7 @@ export function About() {
                 pitch: 0
               }}
               theme="light"
+              locale={locale}
             >
               {globalLocations.map((loc) => (
                 <MapMarker key={loc.name} longitude={loc.lng} latitude={loc.lat}>

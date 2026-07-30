@@ -118,8 +118,8 @@ export function ArchiveOriginsSection({
       : "All Old Projects (2005—2020)";
 
   return (
-    <section className={`flex flex-col w-full py-16 md:py-24 border-t border-[#808080]/20 font-twk-everett  ${
-      noPadding ? "" : "px-[45px] md:px-[65px] lg:px-[105px]"
+    <section className={`flex flex-col w-full font-twk-everett  ${
+      noPadding ? "" : "py-16 md:py-24 border-t border-[#808080]/20 px-[45px] md:px-[65px] lg:px-[105px]"
     }`}>
       {/* ───── Section Header (Exact Site Hierarchy) ───── */}
       {showTitle && (
@@ -133,7 +133,7 @@ export function ArchiveOriginsSection({
             </h2>
           </div>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">
-            [07/ORIGINS]
+            [08/ORIGINS]
           </span>
         </div>
       )}

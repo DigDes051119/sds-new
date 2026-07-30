@@ -53,6 +53,7 @@ type MapProps = {
   children?: ReactNode;
   className?: string;
   theme?: Theme;
+  locale?: string;
   styles?: {
     light?: MapStyleOption;
     dark?: MapStyleOption;
@@ -90,6 +91,7 @@ export const Map = forwardRef<MapRef, MapProps>(function Map(
     children,
     className,
     theme = "light",
+    locale,
     styles,
     projection,
     viewport,
@@ -217,6 +219,37 @@ export const Map = forwardRef<MapRef, MapProps>(function Map(
 
     mapInstance.setStyle(newStyle, { diff: true });
   }, [mapInstance, theme, mapStyles, clearStyleTimeout]);
+
+  // Apply map labels language based on locale
+  useEffect(() => {
+    if (!mapInstance || !isStyleLoaded || !locale) return;
+
+    const applyLanguage = () => {
+      try {
+        const style = mapInstance.getStyle();
+        if (!style || !style.layers) return;
+
+        // OpenMapTiles / Carto Streets vector tile language settings
+        const langKey = locale === "kg" ? "name:kg" : locale === "en" ? "name:en" : "name:ru";
+        const fallbackKey = locale === "kg" ? "name:ru" : "name";
+
+        style.layers.forEach((layer) => {
+          if (layer.type === "symbol" && layer.layout && layer.layout["text-field"]) {
+            mapInstance.setLayoutProperty(layer.id, "text-field", [
+              "coalesce",
+              ["get", langKey],
+              ["get", fallbackKey],
+              ["get", "name"]
+            ]);
+          }
+        });
+      } catch (err) {
+        console.warn("Failed to apply map language:", err);
+      }
+    };
+
+    applyLanguage();
+  }, [mapInstance, isStyleLoaded, locale]);
 
   const contextValue = useMemo(
     () => ({

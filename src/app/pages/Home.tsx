@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, translations } from "../i18n";
+import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import projectImg1 from "../../imports/image_low.webp";
@@ -114,11 +115,11 @@ export function Home() {
     return {
       id: p.id || String(idx),
       title: p.name || p.title || "",
-      image: p.id === "maminy-retsepty" ? coverMoms
-        : p.id === "tooko" ? coverTooko
-        : (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
-          ? p.img
-          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img),
+      image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
+        ? p.img
+        : (p.id === "maminy-retsepty" ? coverMoms
+          : p.id === "tooko" ? coverTooko
+          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
       tags: detail.service || p.category || "Design",
       year: detail.year || "2026",
       desc: detail.desc || detail.challenge || p.desc || ""
@@ -144,6 +145,25 @@ export function Home() {
   });
   const recentProducts = mappedProducts.slice(0, 4);
 
+  // Recent WEB / UI UX Projects (4 items = 2 rows of 2 cards)
+  const allWebUiUx = t.webUiUx?.items || [];
+  const mappedWebUiUx = allWebUiUx.map((p: any, idx: number) => {
+    const detail = localizedDetails[p.id] || {};
+    return {
+      id: p.id || String(idx),
+      title: p.name || p.title || "",
+      image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
+        ? p.img
+        : (p.id === "maminy-retsepty" ? coverMoms
+          : p.id === "tooko" ? coverTooko
+          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
+      tags: detail.service || p.category || "WEB / UI UX",
+      year: detail.year || "2026",
+      desc: detail.desc || detail.challenge || p.desc || ""
+    };
+  });
+  const recentWebUiUx = mappedWebUiUx.slice(0, 4);
+
   // Block 5: Selected / Featured Projects (from t.home.projects)
   const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
     ? t.home.projects
@@ -155,9 +175,11 @@ export function Home() {
     return {
       id: fp.id,
       title: (matched?.name && (fp.title === "Ala-Too" || fp.name === "Ala-Too")) ? matched.name : (matched?.name || fp.title || fp.name || ""),
-      image: fp.id === "maminy-retsepty" ? coverMoms
-        : fp.id === "tooko" ? coverTooko
-        : (fp.img || fp.image || matched?.img || ""),
+      image: (fp.img && (fp.img.startsWith("http") || fp.img.startsWith("data:") || fp.img.startsWith("/")))
+        ? fp.img
+        : (fp.id === "maminy-retsepty" ? coverMoms
+          : fp.id === "tooko" ? coverTooko
+          : (fp.img || fp.image || matched?.img || "")),
       tags: fp.category || fp.tag || detail.service || matched?.category || "Design",
       year: detail.year || "2026",
       desc: detail.desc || detail.challenge || matched?.desc || ""
@@ -184,7 +206,13 @@ export function Home() {
 
   // Block 4: Services list (Top 5 main services: Branding, Industrial Design, Marketing, Concept Design, Game Dev)
   const mainServiceIds = ["01", "03", "09", "06", "13"];
-  const allItems = t.services?.items || [];
+
+  const hasRussian = (text: string) => /[а-яА-ЯёЁ]/.test(text);
+  let servicesSource = t;
+  if (locale !== "ru" && t.services?.items?.some((s: any) => s.id === "01" && hasRussian(s.title))) {
+    servicesSource = translations[locale];
+  }
+  const allItems = servicesSource.services?.items || [];
   
   const filteredServices = mainServiceIds
     .map(id => allItems.find((s: any) => s.id === id))
@@ -193,7 +221,11 @@ export function Home() {
   const finalItems = filteredServices.length === 5 ? filteredServices : allItems.slice(0, 5);
 
   const servicesList = finalItems.map((service: any) => {
-    const match = t.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
+    let homeSource = t;
+    if (locale !== "ru" && t.home?.services?.some((s: any) => s[0] === "01" && hasRussian(s[1]))) {
+      homeSource = translations[locale];
+    }
+    const match = homeSource.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
     let imgUrl = match ? match[3] : "";
     
     // Use high-quality Unsplash design placeholders for immediate presentation
@@ -257,13 +289,7 @@ export function Home() {
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
         </div>
 
-        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal mb-[40px] max-w-[650px]">
-          {locale === "ru" 
-            ? "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов" 
-            : locale === "kg" 
-              ? "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр"
-              : "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts"}
-        </p>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
           {recentProjects.map((project, index) => (
@@ -569,7 +595,7 @@ export function Home() {
       </section>
 
       {/* 7 БЛОК: Brands (Бренды) */}
-      <section className="flex flex-col w-full overflow-hidden">
+      <section className="flex flex-col w-full overflow-hidden mb-[100px]">
         <div className="pb-4 mb-[59px] ">
           <div className="flex justify-between items-baseline">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
@@ -651,6 +677,63 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      {/* 8 БЛОК: Откуда мы начинали (Archives 2005–2020) */}
+      <ArchiveOriginsSection limit={8} showYearFilter={false} noPadding={true} />
+
+      {/* 9 БЛОК: Recent WEB / UI UX Projects (Недавние проекты WEB / UI UX) */}
+      {recentWebUiUx.length > 0 && (
+        <section className="flex flex-col w-full">
+          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+              {locale === "ru" ? "Недавние проекты WEB / UI UX" : locale === "kg" ? "Акыркы WEB / UI UX долбоорлору" : "Recent WEB / UI UX projects"}
+            </h2>
+            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[09/WEB-UI-UX]</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+            {recentWebUiUx.map((project, index) => (
+              <div key={`recent-web-${project.id}`} className="w-full flex flex-col group"
+                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+                <Link to={`/web-ui-ux/${project.id}`} className="group flex flex-col flex-1">
+                  <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                    <ImageWithFallback 
+                      src={project.image} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
+                    />
+                  </div>
+                  <div className="mt-[25px] flex flex-col">
+                    <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                      {/* Left block: label + title */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                          0{index + 1} / WEB UI UX
+                        </span>
+                        <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                          {project.title}
+                        </h3>
+                        {project.desc && (
+                          <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                            {project.desc}
+                          </p>
+                        )}
+                      </div>
+                      {/* Vertical divider */}
+                      <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                      {/* Right block: category + year */}
+                      <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
     </div>
   );

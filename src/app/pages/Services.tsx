@@ -1,9 +1,15 @@
 import { useContext } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, translations } from "../i18n";
 
 export function Services() {
   const { t, locale } = useContext(LanguageContext);
-  const services = t.services.items;
+  
+  const hasRussian = (text: string) => /[а-яА-ЯёЁ]/.test(text);
+  let servicesSource = t;
+  if (locale !== "ru" && t.services?.items?.some((s: any) => s.id === "01" && hasRussian(s.title))) {
+    servicesSource = translations[locale];
+  }
+  const services = servicesSource.services.items;
 
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px]">

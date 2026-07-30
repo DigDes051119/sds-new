@@ -6,7 +6,7 @@ import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
 import { Menu, X, ArrowUp, ThumbsUp } from "lucide-react";
-import { ArchiveOriginsSection } from "./ArchiveOriginsSection";
+
 
 export function Root() {
   const location = useLocation();
@@ -236,13 +236,15 @@ export function Root() {
         return s.map((item, idx) => resolveDeep(item, d?.[idx], r?.[idx], currentKey));
       }
       if (s && typeof s === "object") {
+        const matchesDefault = !s.id || !d || s.id === d.id;
+        const actualD = matchesDefault ? d : undefined;
         const res: any = {};
         for (const key of Object.keys(s)) {
-          res[key] = resolveDeep(s[key], d?.[key], r?.[key], key);
+          res[key] = resolveDeep(s[key], actualD?.[key], r?.[key], key);
         }
-        if (d && typeof d === "object") {
-          for (const key of Object.keys(d)) {
-            if (!(key in s)) res[key] = d[key];
+        if (actualD && typeof actualD === "object") {
+          for (const key of Object.keys(actualD)) {
+            if (!(key in s)) res[key] = actualD[key];
           }
         }
         return res;
@@ -496,8 +498,7 @@ export function Root() {
             {outlet}
           </main>
 
-          {/* Section: Откуда мы начинали (Archives 2005–2020) — Max 8 items on homepage */}
-          {location.pathname === "/" && <ArchiveOriginsSection limit={8} showYearFilter={false} />}
+
 
           {/* Footer */}
           <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
