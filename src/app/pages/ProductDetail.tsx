@@ -135,7 +135,7 @@ export function ProductDetail() {
             {data.challenge || data.desc}
           </p>
           {data.challenge && (
-            <p className="text-[17px] leading-[1.5] text-[#808080] m-0 font-normal">
+            <p className="text-[17px] leading-[1.5] text-black m-0 font-normal subpixel-antialiased">
               {data.desc}
             </p>
           )}
@@ -143,11 +143,11 @@ export function ProductDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-[#808080] pt-8 mt-4">
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[01/SCOPE]</span>
-              <span className="text-[17px] text-black font-normal">{data.service || "Product Design & R&D"}</span>
+              <span className="text-[17px] text-black font-normal subpixel-antialiased">{data.service || "Product Design & R&D"}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>
-              <span className="text-[17px] text-black font-normal">
+              <span className="text-[17px] text-black font-normal subpixel-antialiased">
                 {locale === "ru" 
                   ? "Удовлетворение потребностей рынка и создание нового пользовательского опыта." 
                   : locale === "kg" 

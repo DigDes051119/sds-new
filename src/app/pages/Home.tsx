@@ -162,7 +162,7 @@ export function Home() {
       desc: detail.desc || detail.challenge || p.desc || ""
     };
   });
-  const recentWebUiUx = mappedWebUiUx.slice(0, 4);
+  const recentWebUiUx = mappedWebUiUx.slice(0, 3);
 
   // Block 5: Selected / Featured Projects (from t.home.projects)
   const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
@@ -253,7 +253,7 @@ export function Home() {
   const brands = t.home.brands || [];
 
   return (
-    <div className="w-full flex flex-col pt-[40px] pb-[120px] gap-[120px] md:gap-[140px] lg:gap-[160px]">
+    <div className="w-full flex flex-col pt-[80px] md:pt-[120px] lg:pt-[160px] pb-[120px] gap-[120px] md:gap-[140px] lg:gap-[160px]">
       
       {/* 1 БЛОК: Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
@@ -691,7 +691,7 @@ export function Home() {
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[09/WEB-UI-UX]</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
             {recentWebUiUx.map((project, index) => (
               <div key={`recent-web-${project.id}`} className="w-full flex flex-col group"
                 style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>

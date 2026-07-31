@@ -128,7 +128,10 @@ export function Root() {
     supabaseClient.logVisit(location.pathname, locale);
   }, [location.pathname, locale]);
 
-  const isProjectDetailPage = location.pathname.startsWith("/projects/") && location.pathname !== "/projects";
+  const isProjectDetailPage = 
+    (location.pathname.startsWith("/projects/") && location.pathname !== "/projects") ||
+    (location.pathname.startsWith("/products/") && location.pathname !== "/products") ||
+    (location.pathname.startsWith("/web-ui-ux/") && location.pathname !== "/web-ui-ux");
   const [showProjectBanner, setShowProjectBanner] = useState(false);
   const [projectBannerDismissed, setProjectBannerDismissed] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
