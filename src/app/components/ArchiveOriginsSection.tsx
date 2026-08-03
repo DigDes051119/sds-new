@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { type ArchiveItem } from "../archiveData";
 import { cmsService } from "../cmsService";
 
@@ -21,7 +21,6 @@ export function ArchiveOriginsSection({
   showYearFilter = true
 }: ArchiveOriginsSectionProps = {}) {
   const { locale } = useContext(LanguageContext);
-  const langKey = (locale === "ru" || locale === "kg" || locale === "en") ? locale : "ru";
 
   const [allArchiveData, setAllArchiveData] = useState(() => cmsService.getArchiveItems());
   const [selectedYear, setSelectedYear] = useState<string>("ALL");
@@ -32,7 +31,7 @@ export function ArchiveOriginsSection({
     });
   }, []);
 
-  const rawItems: ArchiveItem[] = allArchiveData[langKey] || allArchiveData.ru || [];
+  const rawItems: ArchiveItem[] = (allArchiveData as any)[locale] || allArchiveData.en || allArchiveData.ru || [];
   
   // Extract unique years sorted descending
   const uniqueYears = Array.from(
@@ -72,16 +71,11 @@ export function ArchiveOriginsSection({
 
   // Keyboard navigation when modal open
   useEffect(() => {
-    if (!isModalOpen) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeModal();
-      } else if (e.key === "ArrowRight") {
-        nextSlide();
-      } else if (e.key === "ArrowLeft") {
-        prevSlide();
-      }
+      if (!isModalOpen) return;
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowRight") nextSlide();
+      if (e.key === "ArrowLeft") prevSlide();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -99,23 +93,21 @@ export function ArchiveOriginsSection({
     }
   }, [isModalOpen]);
 
-  const sectionHeading = langKey === "ru" 
-    ? "Откуда мы начинали" 
-    : langKey === "kg" 
-      ? "Биз кайдан баштаганбыз" 
-      : "Where we started";
+  const sectionHeading = getLocText(locale, "Откуда мы начинали", "Where we started", "Биз кайдан баштаганбыз");
 
-  const colleagueIntroQuote = langKey === "ru"
-    ? "Некоторые из работ, которые были сделаны с 2005 по 2020 год — проекты, по которым некоторые из наших клиентов нас знают и помнят со дня основания."
-    : langKey === "kg"
-      ? "2005-жылдан 2020-жылга чейин жасалган айрым иштер — кардарларыбыз негизделген күндөн бери бизди тааныган жана эстеп калган долбоорлор."
-      : "Some of the works created between 2005 and 2020 — signature projects by which our long-time clients have known and remembered us.";
+  const colleagueIntroQuote = getLocText(
+    locale,
+    "Некоторые из работ, которые были сделаны с 2005 по 2020 год — проекты, по которым некоторые из наших клиентов нас знают и помнят со дня основания.",
+    "Some of the works created between 2005 and 2020 — signature projects by which our long-time clients have known and remembered us.",
+    "2005-жылдан 2020-жылга чейин жасалган айрым иштер — кардарларыбыз негизделген күндөн бери бизди тааныган жана эстеп калган долбоорлор."
+  );
 
-  const viewAllText = langKey === "ru"
-    ? "Все старые проекты (2005—2020)"
-    : langKey === "kg"
-      ? "Бардык эски долбоорлор (2005—2020)"
-      : "All Old Projects (2005—2020)";
+  const viewAllText = getLocText(
+    locale,
+    "Все старые проекты (2005—2020)",
+    "All Old Projects (2005—2020)",
+    "Бардык эски долбоорлор (2005—2020)"
+  );
 
   return (
     <section className={`flex flex-col w-full font-twk-everett  ${
@@ -143,13 +135,13 @@ export function ArchiveOriginsSection({
         <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-12 md:mb-14 pb-6 border-b border-[#808080]/15">
           <button
             onClick={() => setSelectedYear("ALL")}
-            className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold uppercase transition-all duration-300 cursor-pointer tracking-[0.04em] ${
+            className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold transition-all duration-300 cursor-pointer tracking-[0.04em] ${
               selectedYear === "ALL"
                 ? "bg-[#0000FF] text-white"
                 : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
             }`}
           >
-            {langKey === "ru" ? "ВСЕ ГОДА" : langKey === "kg" ? "БАРДЫК ЖЫЛДАР" : "ALL YEARS"}
+            {getLocText(locale, "ВСЕ ГОДА", "ALL YEARS", "БАРДЫК ЖЫЛДАР")}
           </button>
 
           {uniqueYears.map((year) => (
@@ -203,7 +195,7 @@ export function ArchiveOriginsSection({
                   [{String(index + 1).padStart(2, '0')}] — {item.year}
                 </span>
                 <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
-                  {item.category}
+                  {getLocText(locale, item.category, item.category)}
                 </span>
               </div>
               <h3 className="text-[22px] xs:text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
@@ -226,7 +218,7 @@ export function ArchiveOriginsSection({
             to="/projects/old"
             className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300  text-center"
           >
-            {langKey === "ru" ? "Смотреть все \u2192" : langKey === "kg" ? "Бардыгын көрүү \u2192" : "View all \u2192"}
+            {getLocText(locale, "Смотреть все \u2192", "View all \u2192", "Бардыгын көрүү \u2192")}
           </Link>
         </div>
       )}
@@ -253,11 +245,11 @@ export function ArchiveOriginsSection({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full h-full bg-white text-black overflow-hidden flex flex-col lg:flex-row rounded-[8px]"
+                className="w-full h-full bg-[#f0f0f0] text-black overflow-hidden flex flex-col lg:flex-row rounded-[8px]"
               >
               
               {/* Left Side: Image Slider */}
-              <div className="w-full lg:w-[65%] flex flex-col bg-[#fafaf6] relative border-r border-[#808080]/20">
+              <div className="w-full lg:w-[65%] flex flex-col bg-[#f0f0f0] relative border-r border-[#808080]/20">
                 {/* Slide counter at the top */}
                 <div className="w-full pt-[30px] px-[30px] md:pt-[40px] md:px-[40px] shrink-0">
                   <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
@@ -345,7 +337,7 @@ export function ArchiveOriginsSection({
               </div>
 
               {/* Right Side: Information */}
-              <div className="w-full lg:w-[35%] flex flex-col p-[30px] md:p-[50px] lg:p-[60px] bg-white overflow-y-auto">
+              <div className="w-full lg:w-[35%] flex flex-col p-[30px] md:p-[50px] lg:p-[60px] bg-[#f0f0f0] overflow-y-auto">
                 <div className="flex justify-end mb-8 md:mb-12 shrink-0">
                   <button onClick={closeModal} className="font-mono text-[14px] text-[#808080] hover:text-black transition-colors uppercase flex items-center gap-2 cursor-pointer">
                     [CLOSE / X]
@@ -355,7 +347,7 @@ export function ArchiveOriginsSection({
                 <div className="flex flex-col gap-6 w-full max-w-[500px]">
                   <div className="flex flex-col gap-2">
                     <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                      {currentItem.year} — {currentItem.category}
+                      {currentItem.year} — {getLocText(locale, currentItem.category, currentItem.category)}
                     </span>
                     <h3 className="text-[32px] md:text-[40px] font-medium tracking-[-0.04em] text-black m-0 leading-[1.1] uppercase">
                       {currentItem.title}
@@ -400,7 +392,7 @@ export function ArchiveOriginsSection({
                       }}
                       className="group inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px]"
                     >
-                      {langKey === "ru" ? "Обсудить проект" : langKey === "kg" ? "Долбоорду талкуулоо" : "Discuss Project"}
+                      {getLocText(locale, "Обсудить проект", "Discuss Project", "Долбоорду талкуулоо")}
                       <span className="text-[18px] leading-none group-hover:translate-x-1 transition-transform">&rarr;</span>
                     </button>
                   </div>

@@ -11,6 +11,12 @@ import { WebUiUxDetail } from "./pages/WebUiUxDetail";
 import { Products } from "./pages/Products";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Contacts } from "./pages/Contacts";
+import { ConceptsAndVision } from "./pages/ConceptsAndVision";
+import { ConceptsAndVisionDetail } from "./pages/ConceptsAndVisionDetail";
+import { ArchitectProjects } from "./pages/ArchitectProjects";
+import { ArchitectProjectsDetail } from "./pages/ArchitectProjectsDetail";
+import { GameDev } from "./pages/GameDev";
+import { GameDevDetail } from "./pages/GameDevDetail";
 
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminLogin } from "./pages/AdminLogin";
@@ -18,6 +24,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminProjectsEditor } from "./pages/AdminProjectsEditor";
 import { AdminWebUiUxEditor } from "./pages/AdminWebUiUxEditor";
 import { AdminProductsEditor } from "./pages/AdminProductsEditor";
+import { AdminConceptsEditor, AdminArchitectsEditor, AdminGameDevEditor } from "./pages/AdminCatalogEditor";
 import { AdminFeaturedProjects } from "./pages/AdminFeaturedProjects";
 import { AdminAboutEditor } from "./pages/AdminAboutEditor";
 import { AdminContactsEditor } from "./pages/AdminContactsEditor";
@@ -43,6 +50,12 @@ export const router = createBrowserRouter([
       { path: "web-ui-ux/:id", Component: WebUiUxDetail },
       { path: "products", Component: Products },
       { path: "products/:id", Component: ProductDetail },
+      { path: "concepts-and-vision", Component: ConceptsAndVision },
+      { path: "concepts-and-vision/:id", Component: ConceptsAndVisionDetail },
+      { path: "architect-projects", Component: ArchitectProjects },
+      { path: "architect-projects/:id", Component: ArchitectProjectsDetail },
+      { path: "gamedev", Component: GameDev },
+      { path: "gamedev/:id", Component: GameDevDetail },
       { path: "contacts", Component: Contacts },
     ],
   },
@@ -68,6 +81,9 @@ export const router = createBrowserRouter([
       { path: "projects", Component: AdminProjectsEditor },
       { path: "web-ui-ux", Component: AdminWebUiUxEditor },
       { path: "products", Component: AdminProductsEditor },
+      { path: "concepts", Component: AdminConceptsEditor },
+      { path: "architects", Component: AdminArchitectsEditor },
+      { path: "gamedev", Component: AdminGameDevEditor },
       { path: "contacts", Component: AdminContactsEditor },
       { path: "services", Component: AdminServicesEditor },
       { path: "brands", Component: AdminBrandsEditor },

@@ -11,6 +11,7 @@ import coverTooko from "../../imports/cover_tooko.webp";
 export function Projects() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -21,7 +22,7 @@ export function Projects() {
   const localizedDetails = projectDetails[locale] || projectDetails["ru"] || {};
 
   const projects = t.projects.items
-    .map((project) => {
+    .map((project: any) => {
       const detail = localizedDetails[project.id] || {};
       return {
         ...project,
@@ -36,11 +37,27 @@ export function Projects() {
       };
     });
 
+  // Filter out category items that are in the header dropdown (concepts, architects, web-uiux, gamedev)
+  const categories = Object.entries(t.projectCategories || {})
+    .filter(([key]) => 
+      key !== "all" && 
+      key !== "concept" && 
+      key !== "architectural" && 
+      key !== "web" && 
+      key !== "uiux" && 
+      key !== "gamedev"
+    )
+    .map(([key, label]) => ({ key, label: String(label) }));
+
+  const filteredProjects = selectedCategory === "ALL"
+    ? projects
+    : projects.filter((p: any) => p.categoryKey === selectedCategory);
+
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
+      <section className="border-b border-[#808080] pb-4 mb-[40px] w-auto">
         <h1 className="text-[40px] md:text-[54px] font-medium leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
           {t.projects.title}
         </h1>
@@ -49,9 +66,37 @@ export function Projects() {
         </span>
       </section>
 
+      {/* Category Filter Buttons */}
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-12 md:mb-14 pb-6 border-b border-[#808080]/15">
+        <button
+          onClick={() => setSelectedCategory("ALL")}
+          className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold uppercase transition-all duration-300 cursor-pointer tracking-[0.04em] ${
+            selectedCategory === "ALL"
+              ? "bg-[#0000FF] text-white"
+              : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
+          }`}
+        >
+          {locale === "ru" ? "ВСЕ ПРОЕКТЫ" : locale === "kg" ? "БАРДЫК ДОЛБООРЛОР" : "ALL PROJECTS"}
+        </button>
+
+        {categories.map((cat) => (
+          <button
+            key={cat.key}
+            onClick={() => setSelectedCategory(cat.key)}
+            className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-mono font-bold uppercase transition-all duration-300 cursor-pointer tracking-[0.04em] ${
+              selectedCategory === cat.key
+                ? "bg-[#0000FF] text-white"
+                : "bg-black/[0.04] text-black/70 hover:bg-black/10 hover:text-black"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
       {/* Projects Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
-        {projects.map((project, index) => (
+        {filteredProjects.map((project: any, index: number) => (
           <div key={project.id} className="w-full flex flex-col"
             style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
             <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">

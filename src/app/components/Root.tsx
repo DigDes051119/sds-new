@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet } from "react-router";
 import { useEffect, useState, useRef } from "react";
-import { LanguageContext, translations, type Language } from "../i18n";
+import { LanguageContext, translations, type Language, languageOptions } from "../i18n";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
@@ -129,9 +129,12 @@ export function Root() {
   }, [location.pathname, locale]);
 
   const isProjectDetailPage = 
-    (location.pathname.startsWith("/projects/") && location.pathname !== "/projects") ||
+    (location.pathname.startsWith("/projects/") && location.pathname !== "/projects/old" && location.pathname !== "/projects") ||
     (location.pathname.startsWith("/products/") && location.pathname !== "/products") ||
-    (location.pathname.startsWith("/web-ui-ux/") && location.pathname !== "/web-ui-ux");
+    (location.pathname.startsWith("/web-ui-ux/") && location.pathname !== "/web-ui-ux") ||
+    (location.pathname.startsWith("/concepts-and-vision/") && location.pathname !== "/concepts-and-vision") ||
+    (location.pathname.startsWith("/architect-projects/") && location.pathname !== "/architect-projects") ||
+    (location.pathname.startsWith("/gamedev/") && location.pathname !== "/gamedev");
   const [showProjectBanner, setShowProjectBanner] = useState(false);
   const [projectBannerDismissed, setProjectBannerDismissed] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -305,7 +308,6 @@ export function Root() {
     { name: t.nav.services, path: "/services" },
     { name: t.nav.projects, path: "/projects" },
     { name: t.nav.products, path: "/products" },
-    { name: t.nav.webUiUx || "WEB / UI UX", path: "/web-ui-ux" },
     { name: t.nav.contacts, path: "/contacts" },
   ];
 
@@ -349,10 +351,10 @@ export function Root() {
         </div>
       )}
 
-      <div className="min-h-screen bg-white text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett overflow-x-hidden">
+      <div className={`min-h-screen text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett overflow-x-hidden ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
-        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-[45px] md:px-[65px] lg:px-[105px] z-50 bg-white ${isProjectDetailPage ? 'pb-[20px] md:pb-[28px]' : 'pb-[30px] md:pb-[64px]'}`}>
+        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-[45px] md:px-[65px] lg:px-[105px] z-50 transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0] pb-[20px] md:pb-[28px]' : 'bg-white pb-[30px] md:pb-[64px]'}`}>
           {/* Logo */}
           <div className="lg:col-span-3 flex items-center">
             <NavLink to="/" className="flex items-center">
@@ -392,29 +394,73 @@ export function Root() {
 
                       {/* Dropdown Menu on Hover */}
                       <div className="absolute top-full -left-2 pt-3 opacity-0 pointer-events-none group-hover/navdropdown:opacity-100 group-hover/navdropdown:pointer-events-auto transition-all duration-300 ease-out z-[999]">
-                        <div className="bg-white border border-black/10 rounded-2xl p-4 min-w-[280px] flex flex-col gap-2 backdrop-blur-xl">
+                        <div className="bg-white border border-black/10 rounded-2xl p-4 min-w-[290px] flex flex-col gap-1 backdrop-blur-xl">
                           <NavLink
                             to="/projects"
                             end
                             className={({ isActive }) =>
-                              `px-4 py-3 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
                                 isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
                               }`
                             }
                           >
-                            <span>{locale === "ru" ? "Актуальные проекты" : locale === "kg" ? "Учурдагы долбоорлор" : "Current Projects"}</span>
+                            <span>{locale === "ru" ? "Current projects" : locale === "kg" ? "Учурдагы долбоорлор" : "Current projects"}</span>
                           </NavLink>
                           
                           <NavLink
                             to="/projects/old"
                             className={({ isActive }) =>
-                              `px-4 py-3 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
                                 isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
                               }`
                             }
                           >
-                            <span>{locale === "ru" ? "Старые проекты" : locale === "kg" ? "Эски долбоорлор" : "Old Projects"}</span>
+                            <span>{locale === "ru" ? "Old projects" : locale === "kg" ? "Эски долбоорлор" : "Old projects"}</span>
                             <span className="text-[11px] font-mono text-[#808080] font-normal tracking-normal shrink-0">(2005 — 2020)</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/concepts-and-vision"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Concepts and vision" : locale === "kg" ? "Концепциялар жана көрүнүш" : "Concepts and vision"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/architect-projects"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Architect projects" : locale === "kg" ? "Архитектуралык долбоорлор" : "Architect projects"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/web-ui-ux"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Web and UI UX" : locale === "kg" ? "Web жана UI UX" : "Web and UI UX"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/gamedev"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "GameDev" : locale === "kg" ? "GameDev" : "GameDev"}</span>
                           </NavLink>
                         </div>
                       </div>
@@ -453,16 +499,16 @@ export function Root() {
 
             {/* Language Switcher */}
             <div className="flex gap-3">
-              {['en', 'ru', 'kg'].map((lang) => (
+              {languageOptions.map((opt) => (
                 <button 
-                  key={lang}
-                  onClick={() => setLocale(lang as Language)}
+                  key={opt.code}
+                  onClick={() => setLocale(opt.code)}
                   className={`text-[17px] font-normal tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[6px] ${
-                    locale === lang ? "text-black" : "text-[#808080] hover:text-black"
+                    locale === opt.code ? "text-black" : "text-[#808080] hover:text-black"
                   }`}
                 >
-                  {lang}
-                  {locale === lang && (
+                  {opt.label}
+                  {locale === opt.code && (
                     <motion.div
                       layoutId="activeLanguage"
                       className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black"
@@ -478,15 +524,15 @@ export function Root() {
           {/* Mobile Right Side: Language Switcher */}
           <div className="flex lg:hidden items-center justify-end">
             <div className="flex gap-2">
-              {['en', 'ru', 'kg'].map((lang) => (
+              {languageOptions.map((opt) => (
                 <button 
-                  key={lang}
-                  onClick={() => setLocale(lang as Language)}
+                  key={opt.code}
+                  onClick={() => setLocale(opt.code)}
                   className={`text-[13px] font-mono tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[2px] ${
-                    locale === lang ? "text-[#0000FF] font-bold" : "text-[#808080] hover:text-black"
+                    locale === opt.code ? "text-[#0000FF] font-bold" : "text-[#808080] hover:text-black"
                   }`}
                 >
-                  {lang}
+                  {opt.label}
                 </button>
               ))}
             </div>
@@ -504,7 +550,7 @@ export function Root() {
 
 
           {/* Footer */}
-          <footer className="w-full bg-white text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px]">
+          <footer className={`w-full text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px] transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">

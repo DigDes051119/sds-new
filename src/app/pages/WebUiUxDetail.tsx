@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ExternalLink } from "lucide-react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
@@ -23,11 +23,12 @@ export function WebUiUxDetail() {
   }, []);
 
   const data = (id && projectDetails[locale]?.[id])
+    || (id && projectDetails.en?.[id])
     || (id && projectDetails.ru?.[id])
     || (id && projectDetails.kg?.[id])
     || (id && projectDetailsTranslations[locale]?.[id])
-    || (id && projectDetailsTranslations.ru?.[id])
     || (id && projectDetailsTranslations.en?.[id])
+    || (id && projectDetailsTranslations.ru?.[id])
     || t.projectDetail.defaultProject;
 
   const projectListItem = t.webUiUx?.items?.find((p: any) => p.id === id);
@@ -37,24 +38,19 @@ export function WebUiUxDetail() {
         : (projectListItem.id === "sandyq" ? projectImg1 : projectListItem.id === "ala-too" ? projectImg2 : projectListItem.img))
     : (data.processImages?.[0] || "");
 
-  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
-
-  const blocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
+  const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
     ? data.collageBlocks
     : (data.processImages || []).map((img: string) => [img]);
 
-  const hasVideos = blocks.some((block) => block.some((item) => item?.startsWith("video:") || item?.endsWith(".webm")));
+  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
 
-  const filteredBlocks = hasVideos
-    ? blocks
-        .map((block) =>
-          block.filter((item) => {
-            const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
-            return activeTab === "video" ? isVid : !isVid;
-          })
-        )
-        .filter((block) => block.length > 0)
-    : blocks;
+  const hasVideos = collageBlocks.some((block: string[]) => 
+    block?.some((url: string) => url?.startsWith("video:"))
+  );
+
+  const filteredBlocks = activeTab === "video" 
+    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:"))).filter((block: string[]) => block.length > 0)
+    : collageBlocks.map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:"))).filter((block: string[]) => block.length > 0);
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
@@ -91,23 +87,23 @@ export function WebUiUxDetail() {
                 rel="noopener noreferrer"
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-transparent text-white hover:bg-white hover:text-black hover:border-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-300 interactive-element"
               >
-                {locale === "ru" ? "Посмотреть сайт" : locale === "kg" ? "Сайтты көрүү" : "View Website"}
+                {getLocText(locale, "Посмотреть сайт", "View Website", "Сайтты көрүү")}
                 <ExternalLink size={14} />
               </a>
             )}
           </div>
           <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
             <div className="border-l border-white/40 pl-6 md:pl-8">
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Клиент" : "Client"}</span>
+              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{getLocText(locale, "Клиент", "Client", "Кардар")}</span>
               <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.client}</span>
             </div>
             <div>
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Год" : "Year"}</span>
+              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{getLocText(locale, "Год", "Year", "Жыл")}</span>
               <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.year}</span>
             </div>
             <div>
-              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{locale === "ru" ? "Услуги" : "Services"}</span>
-              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.service}</span>
+              <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{getLocText(locale, "Услуги", "Services", "Кызматтар")}</span>
+              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{getLocText(locale, data.service, data.service)}</span>
             </div>
           </div>
         </div>
@@ -117,7 +113,7 @@ export function WebUiUxDetail() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start pt-[10px]">
         <div className="lg:col-span-5 flex flex-col">
           <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
-            {locale === "ru" ? "Задача и вызов" : locale === "kg" ? "Маселе жана чакырык" : "Challenge"}
+            {getLocText(locale, "Задача и вызов", "Challenge", "Маселе жана чакырык")}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[01/CHALLENGE]</span>
         </div>
@@ -138,11 +134,7 @@ export function WebUiUxDetail() {
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>
               <span className="text-[17px] text-black font-normal subpixel-antialiased">
-                {locale === "ru" 
-                  ? "Удовлетворение потребностей рынка и создание нового пользовательского опыта." 
-                  : locale === "kg" 
-                    ? "Рыноктун муктаждыктарын канааттандыруу жана жаңы колдонуучу тажрыйбасын түзүү."
-                    : "Addressing market needs and developing next-generation physical or digital user journeys."}
+                {getLocText(locale, "Удовлетворение потребностей рынка и создание нового пользовательского опыта.", "Addressing market needs and developing next-generation physical or digital user journeys.", "Рыноктун муктаждыктарын канааттандыруу жана жаңы колдонуучу тажрыйбасын түзүү.")}
               </span>
             </div>
           </div>
@@ -161,7 +153,7 @@ export function WebUiUxDetail() {
                   : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Галерея" : locale === "kg" ? "Галерея" : "Gallery"}
+              {getLocText(locale, "Галерея", "Gallery", "Галерея")}
               {activeTab === "gallery" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -178,7 +170,7 @@ export function WebUiUxDetail() {
                   : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Видео" : locale === "kg" ? "Видео" : "Video"}
+              {getLocText(locale, "Видео", "Video", "Видео")}
               {activeTab === "video" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -192,7 +184,7 @@ export function WebUiUxDetail() {
       )}
 
       {/* Gallery Wall / Image Stack */}
-      <section id="project-collage-section" className="w-full flex flex-col gap-[4px] reveal-visible">
+      <section id="project-collage-section" className="max-w-[1600px] mx-auto w-full flex flex-col gap-[4px] reveal-visible">
         {filteredBlocks.map((block: string[], blockIdx: number) => {
           if (!block || block.length === 0) return null;
           
@@ -239,15 +231,15 @@ export function WebUiUxDetail() {
           <div className="flex justify-between items-start gap-[28px] mb-6">
             <div className="flex flex-col">
               <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
-                {locale === "ru" ? "Результаты" : locale === "kg" ? "Натыйжалар" : "Results"}
+                {getLocText(locale, "Результаты", "Results", "Натыйжалар")}
               </h2>
               <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
             </div>
             <Link
               to="/web-ui-ux"
-              className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
+              className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-[#0000FF] hover:underline transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
             >
-              {locale === "ru" ? "Другие проекты" : locale === "kg" ? "Башка долбоорлор" : "View other projects"}
+              {getLocText(locale, "Другие проекты", "View other projects", "Башка долбоорлор")}
               <span className="text-[18px] leading-none">&rarr;</span>
             </Link>
           </div>
@@ -273,13 +265,14 @@ export function WebUiUxDetail() {
                 <path d="M6 10l3 3 5-6" stroke="#0000FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span className="text-[17px] leading-[1.5] text-black font-normal">
-                {locale === "ru" ? "Проект доставлен и успешно развернут" : locale === "kg" ? "Долбоор ийгиликтүү жеткирилди" : "Project delivered and successfully deployed"}
+                {getLocText(locale, "Проект доставлен и успешно развернут", "Project delivered and successfully deployed", "Долбоор ийгиликтүү жеткирилди")}
               </span>
             </div>
           </div>
         </div>
       </section>
-{/* Loop Previous / Next Project Navigation */}
+
+      {/* Loop Previous / Next Project Navigation */}
       {(() => {
         const items = t.webUiUx?.items || [];
         const currentIdx = items.findIndex((p: any) => p.id === id);
@@ -293,11 +286,12 @@ export function WebUiUxDetail() {
 
         const getProjDetail = (pid: string) => {
           return (projectDetails[locale]?.[pid])
+            || (projectDetails.en?.[pid])
             || (projectDetails.ru?.[pid])
             || (projectDetails.kg?.[pid])
             || (projectDetailsTranslations[locale]?.[pid])
-            || (projectDetailsTranslations.ru?.[pid])
-            || (projectDetailsTranslations.en?.[pid]);
+            || (projectDetailsTranslations.en?.[pid])
+            || (projectDetailsTranslations.ru?.[pid]);
         };
 
         const getProjCover = (pid: string) => {
@@ -317,7 +311,6 @@ export function WebUiUxDetail() {
           return detail?.desc || detail?.challenge || '';
         };
 
-        // Get 4 surrounding projects (2 prev + 2 next)
         const tiles = [];
         for (let i = 2; i >= 1; i--) {
           const idx = (currentIdx - i + items.length) % items.length;
@@ -335,15 +328,14 @@ export function WebUiUxDetail() {
                 const cover = getProjCover(project.id);
                 const desc = getProjDesc(project.id);
                 const label = dir === 'prev'
-                  ? (locale === "ru" ? "Предыдущий проект" : "Previous project")
-                  : (locale === "ru" ? "Следующий проект" : "Next project");
+                  ? getLocText(locale, "Предыдущий проект", "Previous project", "Мурунку долбоор")
+                  : getLocText(locale, "Следующий проект", "Next project", "Кийинки долбоор");
                 return (
                   <Link
                     key={project.id}
                     to={`/web-ui-ux/${project.id}`}
                     className="group w-full border border-[#808080]/30 hover:border-black transition-colors flex flex-col"
                   >
-                    {/* Cover Image */}
                     {cover && (
                       <div className="w-full aspect-[16/9] overflow-hidden bg-[#fafaf6]">
                         <ImageWithFallback
@@ -355,24 +347,19 @@ export function WebUiUxDetail() {
                     )}
 
                     <div className={`flex flex-grow flex-col gap-1.5 p-6 ${dir === 'next' ? 'items-end text-right' : 'items-start text-left'}`}>
-                      {/* Label */}
                       <span className="font-mono text-[14px] tracking-[0.04em] text-[#808080] uppercase">
                         {label}
                       </span>
 
-                      {/* Title */}
                       <h3 className="text-[28px] font-normal leading-[1.3] tracking-[-0.28px] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300 uppercase">
                         {project.name}
                       </h3>
 
-                      {/* Description */}
                       {desc && (
                         <p className={`text-[15px] leading-[1.44] text-[#808080] m-0 line-clamp-2 max-w-[400px] mt-1 ${dir === 'next' ? 'text-right' : 'text-left'}`}>
                           {desc}
                         </p>
                       )}
-
-
                     </div>
                   </Link>
                 );

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { Eye, Heart, Zap } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -34,7 +34,6 @@ export function About() {
   const ab = t.about || {};
   const team = ab.team || [];
 
-  // Department ID → display name mapping (from screenshots)
   const deptMap: Record<number, string> = {
     1: "MANAGEMENT",                    // Oleg
     2: "VISUAL ART AND MOTION DESIGN",  // Zulfiya
@@ -48,7 +47,6 @@ export function About() {
     10: "DEVELOPMENT",                   // Mikhail
   };
 
-  // Group by department
   const grouped: Record<string, any[]> = {};
   for (const p of team) {
     const d = deptMap[p.id] || "Other";
@@ -56,7 +54,6 @@ export function About() {
     grouped[d].push(p);
   }
 
-  // Fixed department order from screenshots
   const deptOrder = [
     "MANAGEMENT",
     "GRAPHIC DESIGN",
@@ -80,11 +77,11 @@ export function About() {
             <div className="flex items-center gap-2 select-none">
               <span className="w-2.5 h-2.5 rounded-full bg-[#0000FF]"></span>
               <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                {locale === "ru" ? "Кто мы" : locale === "kg" ? "Биз кимбиз" : "Who we are"}
+                {getLocText(locale, "Кто мы", "Who we are", "Биз кимбиз")}
               </span>
             </div>
             <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0">
-              {ab.ourStoryTitle || (locale === "ru" ? "Наша история" : locale === "kg" ? "Биздин тарых" : "Our story")}
+              {ab.ourStoryTitle || getLocText(locale, "Наша история", "Our story", "Биздин тарых")}
             </h2>
             <div className="w-[50px] h-[2px] bg-[#0000FF]"></div>
             <p className="text-[17px] leading-[1.5] text-[#808080] max-w-[450px] m-0 font-normal">
@@ -154,7 +151,7 @@ export function About() {
               <div className="flex items-center gap-2 select-none">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#0000FF]"></span>
                 <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase">
-                  {locale === "ru" ? "Наша философия" : locale === "kg" ? "Биздин философия" : "Our philosophy"}
+                  {getLocText(locale, "Наша философия", "Our philosophy", "Биздин философия")}
                 </span>
               </div>
               <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 whitespace-pre-line">
@@ -211,7 +208,7 @@ export function About() {
                         {v.desc}
                       </p>
 
-                      {/* Connecting Line and Dot Node (between Card 1 -> 2 -> 3 at line level) */}
+                      {/* Connecting Line and Dot Node */}
                       {idx < valuesList.length - 1 && (
                         <div className="absolute top-[215px] md:top-[225px] -right-[28px] w-[28px] h-[1px] bg-[#0000FF]/25 z-20 hidden md:block">
                           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-[#0000FF] bg-white flex items-center justify-center">
@@ -247,19 +244,15 @@ export function About() {
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-[#0000FF]" />
               <span className="text-[12px] font-mono tracking-widest text-black/60 uppercase">
-                {locale === "ru" ? "Студия" : locale === "kg" ? "Студия" : "Studio team"}
+                {getLocText(locale, "Студия", "Studio team", "Студия")}
               </span>
             </div>
             <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-black m-0">
-              {locale === "ru" ? "Наша команда" : locale === "kg" ? "Биздин команда" : "Our team"}
+              {getLocText(locale, "Наша команда", "Our team", "Биздин команда")}
             </h2>
             <div className="h-[2px] w-12 bg-[#0000FF]" />
             <p className="text-[17px] leading-[1.44] text-[#808080] max-w-[450px] m-0">
-              {ab.teamIntro || (locale === "ru" 
-                ? "Команда стратегов, дизайнеров, разработчиков и проектировщиков, объединенных любопытством и мастерством." 
-                : locale === "kg"
-                  ? "Кызыгуу жана чеберчилик менен бириккен стратегдердин, дизайнерлердин, иштеп чыгуучулардын жана долбоорлоочулардын командасы."
-                  : "A collective of strategists, designers, developers and problem-solvers united by curiosity and craft.")}
+              {ab.teamIntro || getLocText(locale, "Команда стратегов, дизайнеров, разработчиков и проектировщиков, объединенных любопытством и мастерством.", "A collective of strategists, designers, developers and problem-solvers united by curiosity and craft.", "Кызыгуу жана чеберчилик менен бириккен стратегдердин, дизайнерлердин, иштеп чыгуучулардын жана долбоорлоочулардын командасы.")}
             </p>
           </div>
 
@@ -273,7 +266,7 @@ export function About() {
                   <div className="flex flex-col items-start gap-1">
                     <span className="text-[18px] font-medium text-[#0000FF]">01</span>
                     <span className="text-[14px] font-mono font-bold uppercase tracking-wider text-[#0000FF]">
-                      {locale === "ru" ? "РУКОВОДСТВО" : locale === "kg" ? "ЖЕТЕКЧИЛИК" : "LEADERSHIP"}
+                      {getLocText(locale, "РУКОВОДСТВО", "LEADERSHIP", "ЖЕТЕКЧИЛИК")}
                     </span>
                   </div>
                 </div>
@@ -304,7 +297,6 @@ export function About() {
 
         {/* Departments Section */}
         {(() => {
-          // Helper to group by department
           const getDeptId = (member: any) => {
             const role = (member.role || "").toLowerCase();
             if (role.includes("marketer") || role.includes("маркетолог") || role.includes("marketing")) {
@@ -324,11 +316,11 @@ export function About() {
           const restOfTeam = team.filter((m: any) => getDeptId(m) !== "leadership");
           
           const departments = [
-            { id: "Design", title: locale === "ru" ? "Графический дизайн" : locale === "kg" ? "Графикалык дизайн" : "GRAPHIC DESIGN", num: "02", label: "DESIGN" },
-            { id: "Development", title: locale === "ru" ? "Разработка" : locale === "kg" ? "Иштеп чыгуу" : "DEVELOPMENT", num: "03", label: "CODE" },
-            { id: "Motion", title: locale === "ru" ? "Visual Art и Моушн-дизайн" : locale === "kg" ? "Visual Art жана Моушн-дизайн" : "Visual Art & Motion Design", num: "04", label: "MOTION" },
-            { id: "Operations", title: locale === "ru" ? "Операции" : locale === "kg" ? "Операциялар" : "OPERATIONS", num: "05", label: "OPS" },
-            { id: "Marketing", title: locale === "ru" ? "Маркетинг" : locale === "kg" ? "Маркетинг" : "MARKETING", num: "06", label: "MKT" }
+            { id: "Design", title: getLocText(locale, "Графический дизайн", "GRAPHIC DESIGN", "Графикалык дизайн"), num: "02", label: "DESIGN" },
+            { id: "Development", title: getLocText(locale, "Разработка", "DEVELOPMENT", "Иштеп чыгуу"), num: "03", label: "CODE" },
+            { id: "Motion", title: getLocText(locale, "Visual Art и Моушн-дизайн", "Visual Art & Motion Design", "Visual Art жана Моушн-дизайн"), num: "04", label: "MOTION" },
+            { id: "Operations", title: getLocText(locale, "Операции", "OPERATIONS", "Операциялар"), num: "05", label: "OPS" },
+            { id: "Marketing", title: getLocText(locale, "Маркетинг", "MARKETING", "Маркетинг"), num: "06", label: "MKT" }
           ];
 
           return (

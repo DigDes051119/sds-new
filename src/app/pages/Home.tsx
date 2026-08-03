@@ -145,6 +145,39 @@ export function Home() {
   });
   const recentProducts = mappedProducts.slice(0, 4);
 
+  // Recent Concepts (4 items = 2 rows of 2 cards)
+  const allConcepts = t.concepts?.items || [];
+  const mappedConcepts = allConcepts.map((p: any, idx: number) => {
+    const detail = localizedProductDetails[p.id] || {};
+    return {
+      id: p.id || String(idx),
+      title: p.name || p.title || "",
+      image: p.img || (p.images && p.images[0]) || "",
+      tags: detail.service || p.category || "Concept",
+      year: detail.year || "2026",
+      desc: detail.desc || detail.challenge || p.desc || ""
+    };
+  });
+  const recentConcepts = mappedConcepts.slice(0, 4);
+
+  // Selected / Featured Concepts (from t.home.featuredConcepts)
+  const featuredConceptsRaw = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
+    ? t.home.featuredConcepts
+    : allConcepts.slice(0, 2);
+
+  const featuredConcepts = featuredConceptsRaw.map((fc: any) => {
+    const matched = allConcepts.find((c: any) => c.id === fc.id);
+    const detail = localizedProductDetails[fc.id] || {};
+    return {
+      id: fc.id,
+      title: matched?.name || fc.title || fc.name || "",
+      image: fc.image || fc.img || matched?.img || "",
+      tags: detail.service || matched?.category || fc.tag || "Concept",
+      year: detail.year || "2026",
+      desc: detail.desc || detail.challenge || fc.desc || ""
+    };
+  });
+
   // Recent WEB / UI UX Projects (4 items = 2 rows of 2 cards)
   const allWebUiUx = t.webUiUx?.items || [];
   const mappedWebUiUx = allWebUiUx.map((p: any, idx: number) => {
@@ -461,6 +494,63 @@ export function Home() {
         </div>
       </section>
 
+      {/* 4.5 БЛОК: Recent Concepts (Недавние концепты) */}
+      {recentConcepts.length > 0 && (
+        <section className="flex flex-col w-full">
+          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+            <div className="flex flex-col">
+              <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+              <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+                {locale === "ru" ? "Недавние концепты" : locale === "kg" ? "Акыркы концепциялар" : "Recent concepts"}
+              </h2>
+            </div>
+            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04.5/CONCEPTS]</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+            {recentConcepts.map((concept, index) => (
+              <div key={`recent-concept-${concept.id}`} className="w-full flex flex-col group"
+                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+                <Link to={`/concepts-and-vision/${concept.id}`} className="group flex flex-col flex-1">
+                  <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                    <ImageWithFallback 
+                      src={concept.image} 
+                      alt={concept.title} 
+                      className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
+                    />
+                  </div>
+                  <div className="mt-[25px] flex flex-col">
+                    <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                      {/* Left block: label + title */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                          0{index + 1} / CONCEPT
+                        </span>
+                        <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                          {concept.title}
+                        </h3>
+                        {concept.desc && (
+                          <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                            {concept.desc}
+                          </p>
+                        )}
+                      </div>
+                      {/* Vertical divider stretching to end of description */}
+                      <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                      {/* Right block: category + year */}
+                      <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{concept.tags}</span>
+                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{concept.year}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 5 БЛОК: Services (Услуги) */}
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex justify-between items-baseline ">
@@ -581,7 +671,6 @@ export function Home() {
                         <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">{project.desc}</p>
                       )}
                     </div>
-                    <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                     <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
                       <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
                       <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
@@ -677,6 +766,60 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      {/* 7.5 БЛОК: Featured Concepts (Избранные концепты на Главной - 2 в ряд) */}
+      {featuredConcepts.length > 0 && (
+        <section className="flex flex-col w-full">
+          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+              {locale === "ru" ? "Концепты и видение" : locale === "kg" ? "Концепциялар жана көрүнүш" : "Concepts & Vision"}
+            </h2>
+            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07.5/FEATURED-CONCEPTS]</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+            {featuredConcepts.map((concept, index) => (
+              <div key={`feat-concept-${concept.id}`} className="w-full flex flex-col group"
+                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+                <Link to={`/concepts-and-vision/${concept.id}`} className="group flex flex-col flex-1">
+                  <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                    <ImageWithFallback 
+                      src={concept.image} 
+                      alt={concept.title} 
+                      className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
+                    />
+                  </div>
+                  <div className="mt-[25px] flex flex-col">
+                    <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                      {/* Left block: label + title */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                          0{index + 1} / CONCEPT
+                        </span>
+                        <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                          {concept.title}
+                        </h3>
+                        {concept.desc && (
+                          <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                            {concept.desc}
+                          </p>
+                        )}
+                      </div>
+                      {/* Vertical divider stretching to end of description */}
+                      <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                      {/* Right block: category + year */}
+                      <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{concept.tags}</span>
+                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{concept.year}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 8 БЛОК: Откуда мы начинали (Archives 2005–2020) */}
       <ArchiveOriginsSection limit={8} showYearFilter={false} noPadding={true} />

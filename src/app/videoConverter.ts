@@ -15,13 +15,13 @@ export async function convertToWebMNative(
     video.src = videoUrl;
 
     video.onloadedmetadata = () => {
-      let width = video.videoWidth || 1280;
-      let height = video.videoHeight || 720;
+      let width = video.videoWidth || 1920;
+      let height = video.videoHeight || 1080;
 
-      // Scale to max 1280px width for fast hardware encoding & optimal WebM size
-      if (width > 1280) {
-        height = Math.round((height * 1280) / width);
-        width = 1280;
+      // Scale to max 1920px width for fast hardware encoding & optimal high-quality WebM size
+      if (width > 1920) {
+        height = Math.round((height * 1920) / width);
+        width = 1920;
       }
       // Dimensions must be even numbers
       width = width - (width % 2);
@@ -31,13 +31,17 @@ export async function convertToWebMNative(
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+      }
 
       const fps = 30;
       const stream = canvas.captureStream(fps);
 
-      let mimeType = "video/webm;codecs=vp8";
+      let mimeType = "video/webm;codecs=vp9";
       if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = "video/webm;codecs=vp9";
+        mimeType = "video/webm;codecs=vp8";
       }
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         mimeType = "video/webm";
@@ -47,7 +51,7 @@ export async function convertToWebMNative(
       try {
         recorder = new MediaRecorder(stream, {
           mimeType,
-          videoBitsPerSecond: 2000000 // 2 Mbps crisp WebM
+          videoBitsPerSecond: 16000000 // 16 Mbps ultra-high quality WebM
         });
       } catch (e) {
         recorder = new MediaRecorder(stream);
@@ -240,7 +244,7 @@ export async function convertToWebM(
       "-c:v",
       "libvpx",
       "-crf",
-      "33",
+      "20",
       "-b:v",
       "0",
       "-speed",

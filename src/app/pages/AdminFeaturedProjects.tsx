@@ -10,7 +10,6 @@ export function AdminFeaturedProjects() {
   const [success, setSuccess] = useState(false);
   const [translating, setTranslating] = useState(false);
 
-  // Get user role
   const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
   const isReadOnly = currentAdmin.role === "limited";
 
@@ -55,6 +54,47 @@ export function AdminFeaturedProjects() {
     setTranslations(updated);
   };
 
+  const handleAddFeaturedConcept = (conceptId: string) => {
+    if (isReadOnly) return;
+    const updated = { ...translations };
+    if (!updated.ru) updated.ru = {};
+    if (!updated.ru.home) updated.ru.home = {};
+    if (!updated.ru.home.featuredConcepts) updated.ru.home.featuredConcepts = [];
+
+    if (updated.ru.home.featuredConcepts.length >= 2) {
+      alert("Максимальное количество избранных концептов - 2 штуки.");
+      return;
+    }
+
+    const allConcepts = updated.ru.concepts?.items || [];
+    const conceptToAdd = allConcepts.find((c: any) => c.id === conceptId);
+    if (!conceptToAdd) return;
+
+    updated.ru.home.featuredConcepts = [
+      ...updated.ru.home.featuredConcepts,
+      {
+        id: conceptToAdd.id,
+        title: conceptToAdd.name,
+        tag: conceptToAdd.category,
+        image: conceptToAdd.img
+      }
+    ];
+
+    setTranslations(updated);
+  };
+
+  const handleRemoveFeaturedConcept = (index: number) => {
+    if (isReadOnly) return;
+    const updated = { ...translations };
+    if (!updated.ru || !updated.ru.home || !updated.ru.home.featuredConcepts) return;
+
+    const featured = [...updated.ru.home.featuredConcepts];
+    featured.splice(index, 1);
+    updated.ru.home.featuredConcepts = featured;
+
+    setTranslations(updated);
+  };
+
   const saveChanges = async () => {
     if (isReadOnly) return;
     try {
@@ -80,18 +120,30 @@ export function AdminFeaturedProjects() {
             }
             updated[lang].home.projects = featuredList;
           }
+
+          if (updated.ru.home.featuredConcepts) {
+            const featuredConceptsList: any[] = [];
+            for (const fc of updated.ru.home.featuredConcepts) {
+              const matchedConcept = updated[lang].concepts?.items?.find((c: any) => c.id === fc.id);
+              featuredConceptsList.push({
+                id: fc.id,
+                title: matchedConcept ? matchedConcept.name : await translateText(fc.title, lang),
+                tag: matchedConcept ? matchedConcept.category : await translateText(fc.tag, lang),
+                image: fc.image || fc.img
+              });
+            }
+            updated[lang].home.featuredConcepts = featuredConceptsList;
+          }
         }
       }
       
       setTranslations(updated);
       await cmsService.updateTranslations(updated);
 
-      // Log action
       await logAdminAction(
         "Избранные проекты",
         "Сохранение списка",
-        `Сохранен список избранных проектов (${updated.ru.home?.projects?.length || 0} шт.): ` + 
-        (updated.ru.home?.projects || []).map((p: any) => p.id).join(", ")
+        `Сохранен список избранных проектов (${updated.ru.home?.projects?.length || 0} шт.) и избранных концептов (${updated.ru.home?.featuredConcepts?.length || 0} шт.)`
       );
 
       setSuccess(true);
@@ -104,10 +156,17 @@ export function AdminFeaturedProjects() {
   };
 
   const currentData = translations.ru || {};
+  
   const featuredProjects = currentData.home?.projects || [];
   const allProjects = currentData.projects?.items || [];
   const availableProjects = allProjects.filter((p: any) => 
     !featuredProjects.some((fp: any) => fp.id === p.id)
+  );
+
+  const featuredConcepts = currentData.home?.featuredConcepts || [];
+  const allConcepts = currentData.concepts?.items || [];
+  const availableConcepts = allConcepts.filter((c: any) => 
+    !featuredConcepts.some((fc: any) => fc.id === c.id)
   );
 
   return (
@@ -137,7 +196,7 @@ export function AdminFeaturedProjects() {
         )}
       </div>
 
-      {/* Main Container */}
+      {/* BLOCK 1: Featured Projects */}
       <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-6">
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -145,18 +204,12 @@ export function AdminFeaturedProjects() {
               <Star className="w-5 h-5" />
               Избранные проекты на Главной (макс. 6)
             </h3>
-            <p className="text-xs text-white/40 mt-1">Отображаются в самом последнем блоке на главной странице.</p>
+            <p className="text-xs text-white/40 mt-1">Отображаются в блоке "Featured projects" на главной странице.</p>
           </div>
           <span className="text-xs font-mono font-bold bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.06]">
             {featuredProjects.length} / 6
           </span>
         </div>
-
-        {isReadOnly && (
-          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs p-4 rounded-xl">
-            У вас роль с укороченным доступом. Вы можете просматривать избранные проекты, но изменять их список нельзя.
-          </div>
-        )}
 
         {featuredProjects.length === 0 ? (
           <div className="text-center py-12 text-white/40 text-sm border border-dashed border-white/10 rounded-3xl">
@@ -222,6 +275,91 @@ export function AdminFeaturedProjects() {
             ) : (
               <div className="text-xs text-white/30 text-center py-4 border-t border-white/[0.06]">
                 Достигнут лимит в 6 избранных проектов. Чтобы добавить новый, удалите какой-то из текущих.
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* BLOCK 2: Featured Concepts */}
+      <div className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-[#0066FF] flex items-center gap-2">
+              <Star className="w-5 h-5" />
+              Избранные концепты на Главной (макс. 2)
+            </h3>
+            <p className="text-xs text-white/40 mt-1">Отображаются в новом блоке "Concepts" (две карточки в ряд) на главной странице.</p>
+          </div>
+          <span className="text-xs font-mono font-bold bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.06]">
+            {featuredConcepts.length} / 2
+          </span>
+        </div>
+
+        {featuredConcepts.length === 0 ? (
+          <div className="text-center py-12 text-white/40 text-sm border border-dashed border-white/10 rounded-3xl">
+            Список избранных концептов пуст.
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-6">
+            {featuredConcepts.map((concept: any, idx: number) => (
+              <div
+                key={concept.id || idx}
+                className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between relative group"
+              >
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFeaturedConcept(idx)}
+                    className="absolute top-3 right-3 p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 hover:text-red-300 transition-all active:scale-95 z-10"
+                    title="Убрать из избранных"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                <div>
+                  <div className="aspect-video w-full rounded-xl overflow-hidden bg-black/40 border border-white/5 mb-3 relative">
+                    <img src={concept.image || concept.img} alt={concept.title} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-mono text-[#0066FF] uppercase tracking-wider font-semibold">{concept.tag}</span>
+                    <h4 className="text-base font-bold text-white/90 truncate">{concept.title}</h4>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isReadOnly && (
+          <>
+            {featuredConcepts.length < 2 ? (
+              <div className="space-y-2 pt-4 border-t border-white/[0.06]">
+                <label className="text-xs font-bold uppercase tracking-wider text-white/50 block">
+                  Добавить концепт в избранные (Доступно мест: {2 - featuredConcepts.length})
+                </label>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleAddFeaturedConcept(e.target.value);
+                      e.target.value = "";
+                    }
+                  }}
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                  defaultValue=""
+                >
+                  <option value="" className="bg-[#080810] text-white/40">-- Выберите концепт из списка --</option>
+                  {availableConcepts.map((c: any) => (
+                    <option key={c.id} value={c.id} className="bg-[#080810] text-white">
+                      {c.name} ({c.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="text-xs text-white/30 text-center py-4 border-t border-white/[0.06]">
+                Достигнут лимит в 2 избранных концепта. Чтобы добавить новый, удалите какой-то из текущих.
               </div>
             )}
           </>

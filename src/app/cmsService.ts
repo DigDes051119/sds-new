@@ -99,40 +99,71 @@ export const cmsService = {
 
     // Auto-migration/sync: If the translations fetched from Supabase/localStorage have
     // an empty team or the old 4-member mock team, replace it with the real 10-member team list.
-    const langs = ["ru", "en", "kg"] as const;
+    const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
     let modified = false;
+
+    // Ensure base language objects exist
     for (const lang of langs) {
-      if (!data[lang]) data[lang] = {};
-      if (!data[lang].nav) data[lang].nav = {};
-      if (!data[lang].nav.products) {
-        data[lang].nav.products = defaultTranslations[lang].nav.products;
+      if (!data[lang]) {
+        data[lang] = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations] || defaultTranslations.en));
         modified = true;
       }
-      if (!data[lang].products) {
-        data[lang].products = JSON.parse(JSON.stringify(defaultTranslations[lang].products));
+    }
+
+    // Ensure catalog arrays have fallbacks so items never vanish on zh, ar, de
+    const fallbackLang = "en";
+    for (const lang of langs) {
+      if (!data[lang].projects || !Array.isArray(data[lang].projects.items) || data[lang].projects.items.length === 0) {
+        data[lang].projects = JSON.parse(JSON.stringify(data[fallbackLang]?.projects || data.ru?.projects || { title: "Projects", items: [] }));
+        modified = true;
+      }
+      if (!data[lang].products || !Array.isArray(data[lang].products.items) || data[lang].products.items.length === 0) {
+        data[lang].products = JSON.parse(JSON.stringify(data[fallbackLang]?.products || data.ru?.products || { title: "Products", items: [] }));
+        modified = true;
+      }
+      if (!data[lang].concepts || !Array.isArray(data[lang].concepts.items) || data[lang].concepts.items.length === 0) {
+        data[lang].concepts = JSON.parse(JSON.stringify(data[fallbackLang]?.concepts || data.ru?.concepts || { title: "Concepts & Vision", items: [] }));
+        modified = true;
+      }
+      if (!data[lang].architects || !Array.isArray(data[lang].architects.items) || data[lang].architects.items.length === 0) {
+        data[lang].architects = JSON.parse(JSON.stringify(data[fallbackLang]?.architects || data.ru?.architects || { title: "Architect Projects", items: [] }));
+        modified = true;
+      }
+      if (!data[lang].gamedev || !Array.isArray(data[lang].gamedev.items) || data[lang].gamedev.items.length === 0) {
+        data[lang].gamedev = JSON.parse(JSON.stringify(data[fallbackLang]?.gamedev || data.ru?.gamedev || { title: "GameDev", items: [] }));
+        modified = true;
+      }
+      if (!data[lang].webUiUx || !Array.isArray(data[lang].webUiUx.items) || data[lang].webUiUx.items.length === 0) {
+        data[lang].webUiUx = JSON.parse(JSON.stringify(data[fallbackLang]?.webUiUx || data.ru?.webUiUx || { title: "WEB / UI UX", items: [] }));
+        modified = true;
+      }
+
+      if (!data[lang].nav) data[lang].nav = {};
+      if (!data[lang].nav.products) {
+        data[lang].nav.products = defaultTranslations[lang as keyof typeof defaultTranslations]?.nav?.products || defaultTranslations.en.nav.products;
         modified = true;
       }
       if (!data[lang].productDetail) {
-        data[lang].productDetail = JSON.parse(JSON.stringify(defaultTranslations[lang].productDetail));
+        data[lang].productDetail = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations]?.productDetail || defaultTranslations.en.productDetail));
         modified = true;
       }
 
       if (!data[lang].home) data[lang].home = {};
 
       if (data[lang].home.heroDescription === undefined) {
-        data[lang].home.heroDescription = defaultTranslations[lang].home.heroDescription;
+        data[lang].home.heroDescription = defaultTranslations[lang as keyof typeof defaultTranslations]?.home?.heroDescription || defaultTranslations.en.home.heroDescription;
         modified = true;
       }
       if (data[lang].home.heroTag === undefined) {
-        data[lang].home.heroTag = defaultTranslations[lang].home.heroTag;
+        data[lang].home.heroTag = defaultTranslations[lang as keyof typeof defaultTranslations]?.home?.heroTag || defaultTranslations.en.home.heroTag;
         modified = true;
       }
       if (data[lang].home.statsYears === undefined) {
-        data[lang].home.statsYears = defaultTranslations[lang].home.statsYears;
+        data[lang].home.statsYears = defaultTranslations[lang as keyof typeof defaultTranslations]?.home?.statsYears || defaultTranslations.en.home.statsYears;
         modified = true;
       }
       if (data[lang].home.statsLabel === undefined) {
-        data[lang].home.statsLabel = defaultTranslations[lang].home.statsLabel;
+        data[lang].home.statsLabel = defaultTranslations[lang as keyof typeof defaultTranslations]?.home?.statsLabel || defaultTranslations.en.home.statsLabel;
         modified = true;
       }
       if (data[lang].home.principleLabel !== "Who you\ngonna call?") {
@@ -141,41 +172,40 @@ export const cmsService = {
       }
 
       if (!data[lang].home.brands || !Array.isArray(data[lang].home.brands) || data[lang].home.brands.length === 0) {
-        data[lang].home.brands = JSON.parse(JSON.stringify(defaultTranslations[lang].home.brands));
+        data[lang].home.brands = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations]?.home?.brands || defaultTranslations.en.home.brands));
         modified = true;
       }
 
       if (!data[lang].about) data[lang].about = {};
 
       if (data[lang].about.mapSub === undefined) {
-        data[lang].about.mapSub = defaultTranslations[lang].about.mapSub;
+        data[lang].about.mapSub = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.mapSub || defaultTranslations.en.about.mapSub;
         modified = true;
       }
       if (data[lang].about.mapCities === undefined) {
-        data[lang].about.mapCities = defaultTranslations[lang].about.mapCities;
+        data[lang].about.mapCities = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.mapCities || defaultTranslations.en.about.mapCities;
         modified = true;
       }
       if (data[lang].about.valuesSub === undefined) {
-        data[lang].about.valuesSub = defaultTranslations[lang].about.valuesSub;
+        data[lang].about.valuesSub = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.valuesSub || defaultTranslations.en.about.valuesSub;
         modified = true;
       }
       if (data[lang].about.teamIntro === undefined) {
-        data[lang].about.teamIntro = defaultTranslations[lang].about.teamIntro;
+        data[lang].about.teamIntro = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.teamIntro || defaultTranslations.en.about.teamIntro;
         modified = true;
       }
       if (data[lang].about.whoWeAre === undefined) {
-        data[lang].about.whoWeAre = defaultTranslations[lang].about.whoWeAre;
+        data[lang].about.whoWeAre = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.whoWeAre || defaultTranslations.en.about.whoWeAre;
         modified = true;
       }
       if (data[lang].about.ourStoryTitle === undefined) {
-        data[lang].about.ourStoryTitle = defaultTranslations[lang].about.ourStoryTitle;
+        data[lang].about.ourStoryTitle = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.ourStoryTitle || defaultTranslations.en.about.ourStoryTitle;
         modified = true;
       }
       if (!data[lang].about.timeline || !Array.isArray(data[lang].about.timeline) || data[lang].about.timeline.length === 0) {
-        data[lang].about.timeline = JSON.parse(JSON.stringify(defaultTranslations[lang].about.timeline));
+        data[lang].about.timeline = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.timeline || defaultTranslations.en.about.timeline));
         modified = true;
       } else {
-        // Auto-migrate old Unsplash image URLs to the new local paths
         data[lang].about.timeline.forEach((step: any, sIdx: number) => {
           if (step.img && (step.img.includes("unsplash.com") || step.img.includes("images.unsplash.com"))) {
             step.img = `/about/story_${sIdx + 1}.png`;
@@ -185,18 +215,17 @@ export const cmsService = {
       }
       
       if (!data[lang].about.valuesList || !Array.isArray(data[lang].about.valuesList) || data[lang].about.valuesList.length === 0) {
-        data[lang].about.valuesList = JSON.parse(JSON.stringify(defaultTranslations[lang].about.valuesList));
+        data[lang].about.valuesList = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.valuesList || defaultTranslations.en.about.valuesList));
         modified = true;
       }
       
-      // Sync awards list changes
       if (!data[lang].about.awardsList || !Array.isArray(data[lang].about.awardsList) || data[lang].about.awardsList.length === 0) {
-        data[lang].about.awardsList = JSON.parse(JSON.stringify(defaultTranslations[lang].about.awardsList));
+        data[lang].about.awardsList = JSON.parse(JSON.stringify(defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.awardsList || defaultTranslations.en.about.awardsList));
         modified = true;
       }
 
       const team = data[lang].about.team;
-      const realTeam = defaultTranslations[lang]?.about?.team;
+      const realTeam = defaultTranslations[lang as keyof typeof defaultTranslations]?.about?.team || defaultTranslations.en.about.team;
 
       if (!team || !Array.isArray(team) || team.length === 0 || (team.length <= 4 && team[0] && !team[0].img)) {
         data[lang].about.team = JSON.parse(JSON.stringify(realTeam));
@@ -207,38 +236,10 @@ export const cmsService = {
         data[lang].contacts.markerLabel = "Steel Drake Studio Team";
         modified = true;
       }
-      
-      if (!data[lang].webUiUx) {
-        data[lang].webUiUx = { title: "WEB / UI UX", items: [] };
-        modified = true;
-      } else if (!data[lang].webUiUx.items) {
-        data[lang].webUiUx.items = [];
-        modified = true;
-      }
-      if (!data[lang].nav.webUiUx) {
-        data[lang].nav.webUiUx = "WEB / UI UX";
-        modified = true;
-      }
-
-      // Auto-migrate one-ordo and one-ordo-resort list items in projects.items
-      if (data[lang]?.projects?.items && Array.isArray(data[lang].projects.items)) {
-        data[lang].projects.items.forEach((item: any) => {
-          if (item.id === "one-ordo" || item.id === "one-ordo-resort") {
-            const expectedCat = lang === "en" ? "Branding" : "Брендинг";
-            if (item.category !== expectedCat || item.categoryKey !== "branding") {
-              item.category = expectedCat;
-              item.categoryKey = "branding";
-              item.img = "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp";
-              modified = true;
-            }
-          }
-        });
-      }
     }
 
     if (modified) {
       localStorage.setItem("sds_translations", JSON.stringify(data));
-      // Save to Supabase to synchronize database as well
       supabaseClient.upsertTable("sds_translations", [{ id: 1, data }]).catch((e) => {
         console.error("Failed to push migrated translations to Supabase:", e);
       });
@@ -252,7 +253,6 @@ export const cmsService = {
     localStorage.setItem("sds_translations", JSON.stringify(newTranslations));
     this.notify();
 
-    // Push to Supabase if possible
     try {
       const currentAdminStr = localStorage.getItem("sds_current_admin");
       if (currentAdminStr) {
@@ -282,10 +282,12 @@ export const cmsService = {
       }
     }
 
-    // Auto-migrate one-ordo and one-ordo-resort if they contain legacy WEBDESIGN data or lack collageBlocks
     let modified = false;
-    ["ru", "en", "kg"].forEach((lang) => {
-      if (!data[lang]) data[lang] = {};
+    ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
+      if (!data[lang]) {
+        data[lang] = JSON.parse(JSON.stringify(data.en || data.ru || {}));
+        modified = true;
+      }
       ["one-ordo", "one-ordo-resort"].forEach((key) => {
         const item = data[lang][key];
         const defaultItem = (defaultProjectDetails as any)[lang]?.[key] || (defaultProjectDetails as any).ru?.[key];
@@ -329,9 +331,9 @@ export const cmsService = {
   // Get product details
   getProductDetails() {
     const translations = this.getTranslations();
-    const res: any = { ru: {}, en: {}, kg: {} };
-    ["ru", "en", "kg"].forEach((lang) => {
-      res[lang] = translations[lang]?.productDetail?.products || {};
+    const res: any = {};
+    ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
+      res[lang] = translations[lang]?.productDetail?.products || translations.en?.productDetail?.products || translations.ru?.productDetail?.products || {};
     });
     return res;
   },
@@ -339,7 +341,7 @@ export const cmsService = {
   // Update product details locally & remotely
   async updateProductDetails(newDetails: any) {
     const translations = this.getTranslations();
-    ["ru", "en", "kg"].forEach((lang) => {
+    ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
       if (!translations[lang]) translations[lang] = {};
       if (!translations[lang].productDetail) translations[lang].productDetail = {};
       translations[lang].productDetail.products = newDetails[lang] || {};
@@ -347,22 +349,17 @@ export const cmsService = {
     await this.updateTranslations(translations);
   },
 
-
-
   // Get archive (Origins) items
-  getArchiveItems(): Record<"ru" | "en" | "kg", ArchiveItem[]> {
+  getArchiveItems(): Record<string, ArchiveItem[]> {
     let data: any = null;
 
-    // ALways prefer the central translations DB (where we just merged 24 projects)
     const translations = this.getTranslations();
     if (translations?.ru?.archive && Array.isArray(translations.ru.archive) && translations.ru.archive.length > 0) {
-      data = {
-        ru: translations.ru.archive,
-        en: translations.en?.archive || translations.ru.archive,
-        kg: translations.kg?.archive || translations.ru.archive,
-      };
+      data = {};
+      ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
+        data[lang] = translations[lang]?.archive || translations.en?.archive || translations.ru.archive;
+      });
     } else {
-      // Fallback to local storage if translations somehow empty
       const stored = localStorage.getItem("sds_archive_items");
       if (stored) {
         try {
@@ -377,10 +374,9 @@ export const cmsService = {
       data = JSON.parse(JSON.stringify(defaultArchiveItems));
     }
 
-    // Ensure all language keys exist
-    ["ru", "en", "kg"].forEach((lang) => {
+    ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
       if (!data[lang] || !Array.isArray(data[lang])) {
-        data[lang] = JSON.parse(JSON.stringify(defaultArchiveItems[lang as keyof typeof defaultArchiveItems] || []));
+        data[lang] = JSON.parse(JSON.stringify(data.en || data.ru || []));
       }
     });
     return data;
