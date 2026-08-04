@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
 import { LanguageContext } from "../i18n";
+import { ProjectsNav } from "../components/ProjectsNav";
 
 export function OldProjects() {
   const { locale } = useContext(LanguageContext);
@@ -18,19 +19,24 @@ export function OldProjects() {
       : "Complete archive of conceptual, branding, and industrial design projects by Steel Drake Studio since day one.";
 
   return (
-    <div className="w-full min-h-screen py-12 md:py-16 font-twk-everett">
+    <div className="w-full min-h-screen py-5 font-twk-everett">
       {/* Top Header */}
-      <div className="flex flex-col gap-3 mb-12">
-        <span className="font-mono text-sm text-[#0000FF] uppercase tracking-[0.06em]">
-          [07/ORIGINS ARCHIVE]
-        </span>
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-tight text-black m-0 uppercase">
-          {title}
-        </h1>
-        <p className="text-base md:text-lg text-[#808080] max-w-3xl m-0 leading-relaxed font-normal">
+      <section className="pb-4 mb-[40px] w-auto">
+        <div className="flex justify-between items-baseline gap-4 mb-4">
+          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+            {title}
+          </h1>
+          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
+            [07/ORIGINS ARCHIVE]
+          </span>
+        </div>
+        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
           {subtitle}
         </p>
-      </div>
+      </section>
+
+      {/* Premium Sorting Sub-navigation */}
+      <ProjectsNav />
 
       {/* Render Full ArchiveOriginsSection without secondary header or duplicate padding */}
       <ArchiveOriginsSection limit={undefined} showTitle={false} noPadding={true} />

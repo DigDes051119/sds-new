@@ -13,6 +13,7 @@ export function Root() {
   const outlet = useOutlet();
   const [locale, setLocale] = useState<Language>("en");
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+
   
   const navClusterRef = useRef<HTMLDivElement>(null);
 
@@ -209,8 +210,13 @@ export function Root() {
 
       sections.forEach((sec) => {
         if (!sec.classList.contains("reveal-visible")) {
-          sec.classList.add("reveal-hidden");
-          observer?.observe(sec);
+          const rect = sec.getBoundingClientRect();
+          if (rect.top < window.innerHeight) {
+            sec.classList.add("reveal-visible");
+          } else {
+            sec.classList.add("reveal-hidden");
+            observer?.observe(sec);
+          }
         }
       });
     }, 150);

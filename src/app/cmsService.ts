@@ -33,6 +33,7 @@ export const cmsService = {
         if (remoteTranslations) {
           lastRemoteTranslationsStr = JSON.stringify(remoteTranslations);
           localStorage.setItem("sds_translations", JSON.stringify(remoteTranslations));
+          this.getTranslations(); // Apply fallbacks for any missing catalog items
         }
       }
     } catch (e) {
@@ -110,31 +111,31 @@ export const cmsService = {
       }
     }
 
-    // Ensure catalog arrays have fallbacks so items never vanish on zh, ar, de
-    const fallbackLang = "en";
+    // Ensure catalog arrays have fallbacks so items never vanish on any language
     for (const lang of langs) {
+      const defLangObj = defaultTranslations[lang as keyof typeof defaultTranslations] || defaultTranslations.en;
       if (!data[lang].projects || !Array.isArray(data[lang].projects.items) || data[lang].projects.items.length === 0) {
-        data[lang].projects = JSON.parse(JSON.stringify(data[fallbackLang]?.projects || data.ru?.projects || { title: "Projects", items: [] }));
+        data[lang].projects = JSON.parse(JSON.stringify(defLangObj.projects || defaultTranslations.en.projects));
         modified = true;
       }
       if (!data[lang].products || !Array.isArray(data[lang].products.items) || data[lang].products.items.length === 0) {
-        data[lang].products = JSON.parse(JSON.stringify(data[fallbackLang]?.products || data.ru?.products || { title: "Products", items: [] }));
+        data[lang].products = JSON.parse(JSON.stringify(defLangObj.products || defaultTranslations.en.products));
         modified = true;
       }
       if (!data[lang].concepts || !Array.isArray(data[lang].concepts.items) || data[lang].concepts.items.length === 0) {
-        data[lang].concepts = JSON.parse(JSON.stringify(data[fallbackLang]?.concepts || data.ru?.concepts || { title: "Concepts & Vision", items: [] }));
+        data[lang].concepts = JSON.parse(JSON.stringify(defLangObj.concepts || defaultTranslations.en.concepts));
         modified = true;
       }
       if (!data[lang].architects || !Array.isArray(data[lang].architects.items) || data[lang].architects.items.length === 0) {
-        data[lang].architects = JSON.parse(JSON.stringify(data[fallbackLang]?.architects || data.ru?.architects || { title: "Architect Projects", items: [] }));
+        data[lang].architects = JSON.parse(JSON.stringify(defLangObj.architects || defaultTranslations.en.architects));
         modified = true;
       }
       if (!data[lang].gamedev || !Array.isArray(data[lang].gamedev.items) || data[lang].gamedev.items.length === 0) {
-        data[lang].gamedev = JSON.parse(JSON.stringify(data[fallbackLang]?.gamedev || data.ru?.gamedev || { title: "GameDev", items: [] }));
+        data[lang].gamedev = JSON.parse(JSON.stringify(defLangObj.gamedev || defaultTranslations.en.gamedev));
         modified = true;
       }
       if (!data[lang].webUiUx || !Array.isArray(data[lang].webUiUx.items) || data[lang].webUiUx.items.length === 0) {
-        data[lang].webUiUx = JSON.parse(JSON.stringify(data[fallbackLang]?.webUiUx || data.ru?.webUiUx || { title: "WEB / UI UX", items: [] }));
+        data[lang].webUiUx = JSON.parse(JSON.stringify(defLangObj.webUiUx || defaultTranslations.en.webUiUx));
         modified = true;
       }
 
@@ -240,9 +241,6 @@ export const cmsService = {
 
     if (modified) {
       localStorage.setItem("sds_translations", JSON.stringify(data));
-      supabaseClient.upsertTable("sds_translations", [{ id: 1, data }]).catch((e) => {
-        console.error("Failed to push migrated translations to Supabase:", e);
-      });
     }
 
     return data;

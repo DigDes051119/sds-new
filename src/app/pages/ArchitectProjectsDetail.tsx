@@ -204,13 +204,13 @@ export function ArchitectProjectsDetail() {
 
       {/* Gallery */}
       {filteredBlocks.length > 0 && (
-        <section className="max-w-[1600px] mx-auto w-full flex flex-col gap-[4px] reveal-visible">
+        <section className="max-w-[1600px] mx-auto w-full flex flex-col gap-[12px] reveal-visible">
           {filteredBlocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
             return (
               <div 
                 key={blockIdx} 
-                className={`grid w-full gap-[4px] ${
+                className={`grid w-full gap-[12px] ${
                   block.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 
                   block.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 
                   block.length === 4 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4' : 
@@ -222,7 +222,7 @@ export function ArchitectProjectsDetail() {
                   const isVideo = imgUrl?.startsWith("video:");
                   const videoUrl = isVideo ? imgUrl.slice(6) : "";
                   return (
-                    <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#fafaf6]">
+                    <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#F4F6F9]">
                       {isVideo ? (
                         <div className="w-full">
                           <InlineVideoPlayer videoUrl={videoUrl} alt="Architecture media" />
@@ -292,13 +292,12 @@ export function ArchitectProjectsDetail() {
 
         const getCover = (pid: string) => {
           const pItem = items.find((p: any) => p.id === pid);
-          const pDetail = localeData[pid];
-          return pItem?.img || pDetail?.collageBlocks?.[0]?.[0] || null;
+          return pItem?.img || pItem?.collageBlocks?.[0]?.[0] || null;
         };
 
         const getDesc = (pid: string) => {
-          const detail = localeData[pid];
-          return detail?.desc || detail?.challenge || '';
+          const pItem = items.find((p: any) => p.id === pid);
+          return pItem?.desc || pItem?.challenge || '';
         };
 
         const tiles = [
@@ -322,7 +321,7 @@ export function ArchitectProjectsDetail() {
                     className="group w-full border border-[#808080]/30 hover:border-black transition-colors flex flex-col"
                   >
                     {cover && (
-                      <div className="w-full aspect-[16/9] overflow-hidden bg-[#fafaf6] border-b border-[#808080]/30">
+                      <div className="w-full aspect-[16/9] overflow-hidden bg-[#F4F6F9] border-b border-[#808080]/30">
                         <img 
                           src={cover} 
                           alt={item.name} 

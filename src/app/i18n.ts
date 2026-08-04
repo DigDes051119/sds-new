@@ -283,7 +283,13 @@ export const translations = {
     },
     concepts: {
       title: "Concepts & Vision",
-      items: [],
+      items: [
+        { id: "evodrone", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785433766519.webp", name: "Evodrone", category: "Industrial design", categoryKey: "industrial" },
+        { id: "iphone-iq-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp", name: "Iphone IQ concept 2018", category: "Industrial design", categoryKey: "industrial" },
+        { id: "sony-zeus", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp", name: "SONY ZEUS", category: "Concept design", categoryKey: "concept" },
+        { id: "ps5-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785657893376.webp", name: "PS5 concept 2018", category: "Industrial design", categoryKey: "industrial" },
+        { id: "tesla-sd-concept", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp", name: "TESLA SD CONCEPT", category: "Industrial design", categoryKey: "industrial" }
+      ],
     },
     architects: {
       title: "Architect Projects",

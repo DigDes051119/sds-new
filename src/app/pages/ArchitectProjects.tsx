@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
+import { ProjectsNav } from "../components/ProjectsNav";
 
 export function ArchitectProjects() {
   const { t, locale } = useContext(LanguageContext);
@@ -37,7 +38,7 @@ export function ArchitectProjects() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
+      <section className="pb-4 mb-[40px] w-auto">
         <div className="flex justify-between items-baseline gap-4 mb-4">
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.architects?.title || (locale === "ru" ? "Архитектурные проекты" : locale === "kg" ? "Архитектуралык долбоорлор" : "Architect Projects")}
@@ -54,6 +55,9 @@ export function ArchitectProjects() {
               : "Conceptual architectural solutions, private villas, public spaces and environmental design studies"}
         </p>
       </section>
+
+      {/* Premium Sorting Sub-navigation */}
+      <ProjectsNav />
 
       {/* Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">

@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
+import { ProjectsNav } from "../components/ProjectsNav";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import coverMoms from "../../imports/cover_moms.webp";
@@ -40,14 +41,19 @@ export function WebUiUx() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
-        <h1 className="text-[40px] md:text-[54px] font-medium leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
-          {t.webUiUx?.title || "WEB / UI UX"}
-        </h1>
-        <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
-          [WEB UI UX/INDEX]
-        </span>
+      <section className="pb-4 mb-[40px] w-auto">
+        <div className="flex justify-between items-baseline gap-4">
+          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+            {t.webUiUx?.title || "WEB / UI UX"}
+          </h1>
+          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
+            [WEB UI UX/INDEX]
+          </span>
+        </div>
       </section>
+
+      {/* Premium Sorting Sub-navigation */}
+      <ProjectsNav />
 
       {/* Projects Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">

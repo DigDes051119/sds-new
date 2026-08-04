@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
+import { ProjectsNav } from "../components/ProjectsNav";
 
 export function Products() {
   const { t, locale } = useContext(LanguageContext);
@@ -37,7 +38,7 @@ export function Products() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="border-b border-[#808080] pb-4 mb-[100px] w-auto">
+      <section className="pb-4 mb-[40px] w-auto">
         <div className="flex justify-between items-baseline gap-4 mb-4">
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.products?.title || getLocText(locale, "Продукты студии", "Studio products", "Студиянын продукциялары")}
@@ -50,6 +51,9 @@ export function Products() {
           {getLocText(locale, "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов", "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts", "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр")}
         </p>
       </section>
+
+      {/* Premium Sorting Sub-navigation */}
+      <ProjectsNav />
 
       {/* Products Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">

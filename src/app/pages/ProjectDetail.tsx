@@ -194,14 +194,14 @@ export function ProjectDetail() {
       )}
 
       {/* Gallery Wall / Image Stack */}
-      <section id="project-collage-section" className="max-w-[1600px] mx-auto w-full flex flex-col gap-[4px] reveal-visible">
+      <section id="project-collage-section" className="max-w-[1600px] mx-auto w-full flex flex-col gap-[12px] reveal-visible">
         {filteredBlocks.map((block: string[], blockIdx: number) => {
           if (!block || block.length === 0) return null;
           
           return (
             <div 
               key={blockIdx} 
-              className={`grid w-full gap-[4px] ${
+              className={`grid w-full gap-[12px] ${
                 block.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 
                 block.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 
                 block.length === 4 ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4' : 
@@ -213,7 +213,7 @@ export function ProjectDetail() {
                 const isVideo = imgUrl?.startsWith("video:");
                 const videoUrl = isVideo ? imgUrl.slice(6) : "";
                 return (
-                  <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#fafaf6]">
+                  <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#F4F6F9]">
                     {isVideo ? (
                       <div className="w-full">
                         <InlineVideoPlayer videoUrl={videoUrl} alt={`${data.name} media`} />
@@ -349,7 +349,7 @@ export function ProjectDetail() {
                   >
                     {/* Cover Image */}
                     {cover && (
-                      <div className="w-full aspect-[16/9] overflow-hidden bg-[#fafaf6]">
+                      <div className="w-full aspect-[16/9] overflow-hidden bg-[#F4F6F9]">
                         <ImageWithFallback
                           src={cover}
                           className="w-full h-full object-cover block group-hover:scale-[1.015] transition-transform duration-700 ease-out"
