@@ -11,10 +11,12 @@ export function ArchitectProjectsDetail() {
   const { id } = useParams();
 
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
 
   useEffect(() => {
     return cmsService.subscribe(() => {
       setSiteTranslations(cmsService.getTranslations());
+      setProductDetails(cmsService.getProductDetails());
     });
   }, []);
 
@@ -22,21 +24,25 @@ export function ArchitectProjectsDetail() {
   const list = archSection?.items || [];
   const listItem = list.find((p: any) => p.id === id);
 
-  const data = listItem || {
-    name: "ARCHITECTURE PROJECT",
-    desc: "",
-    client: "Client",
-    year: "2026",
-    service: "Architect Projects",
-    studio: "Steel Drake Studio",
-    designer: "Steel Drake Team",
-    location: "International",
-    projectType: "Architectural Project",
-    class: "Architecture",
-    challenge: "",
-    processImages: [],
-    results: [],
-    resultsDesc: ""
+  const localeDetails = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
+  const specificData = id ? localeDetails[id] : null;
+
+  const data = {
+    name: specificData?.name || listItem?.name || "ARCHITECTURE PROJECT",
+    desc: specificData?.desc || listItem?.desc || "",
+    client: specificData?.client || listItem?.client || "Client",
+    year: specificData?.year || listItem?.year || "2026",
+    service: specificData?.service || listItem?.service || "Architect Projects",
+    studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
+    designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
+    location: specificData?.location || listItem?.location || "International",
+    projectType: specificData?.projectType || listItem?.projectType || "Architectural Project",
+    class: specificData?.class || listItem?.class || "Architecture",
+    challenge: specificData?.challenge || listItem?.challenge || "",
+    processImages: specificData?.processImages || listItem?.processImages || [],
+    collageBlocks: specificData?.collageBlocks || listItem?.collageBlocks || [],
+    results: specificData?.results || listItem?.results || [],
+    resultsDesc: specificData?.resultsDesc || listItem?.resultsDesc || ""
   };
 
   const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0

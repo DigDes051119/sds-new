@@ -11,10 +11,12 @@ export function ConceptsAndVisionDetail() {
   const { id } = useParams();
 
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
 
   useEffect(() => {
     return cmsService.subscribe(() => {
       setSiteTranslations(cmsService.getTranslations());
+      setProductDetails(cmsService.getProductDetails());
     });
   }, []);
 
@@ -22,21 +24,25 @@ export function ConceptsAndVisionDetail() {
   const items = conceptsSection?.items || [];
   const listItem = items.find((p: any) => p.id === id);
 
-  const data = listItem || {
-    name: "CONCEPT",
-    desc: "",
-    client: "Internal R&D",
-    year: "2026",
-    service: "Concept & Vision",
-    studio: "Steel Drake Studio",
-    designer: "Steel Drake Team",
-    location: "International",
-    projectType: "Visionary Concept",
-    class: "Concept",
-    challenge: "",
-    processImages: [],
-    results: [],
-    resultsDesc: ""
+  const localeDetails = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
+  const specificData = id ? localeDetails[id] : null;
+
+  const data = {
+    name: specificData?.name || listItem?.name || "CONCEPT",
+    desc: specificData?.desc || listItem?.desc || listItem?.challenge || "",
+    client: specificData?.client || listItem?.client || "Internal R&D",
+    year: specificData?.year || listItem?.year || "2026",
+    service: specificData?.service || listItem?.service || "Concept & Vision",
+    studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
+    designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
+    location: specificData?.location || listItem?.location || "International",
+    projectType: specificData?.projectType || listItem?.projectType || "Visionary Concept",
+    class: specificData?.class || listItem?.class || "Concept",
+    challenge: specificData?.challenge || listItem?.challenge || "",
+    processImages: specificData?.processImages || listItem?.processImages || [],
+    collageBlocks: specificData?.collageBlocks || listItem?.collageBlocks || [],
+    results: specificData?.results || listItem?.results || [],
+    resultsDesc: specificData?.resultsDesc || listItem?.resultsDesc || ""
   };
 
   const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
