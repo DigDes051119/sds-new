@@ -686,7 +686,13 @@ export const translations = {
     },
     concepts: {
       title: "Концепциялар жана көрүнүш",
-      items: [],
+      items: [
+        { id: "evodrone", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785433766519.webp", name: "Evodrone", category: "Өнөр жай дизайны", categoryKey: "industrial" },
+        { id: "iphone-iq-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp", name: "Iphone IQ concept 2018", category: "Өнөр жай дизайны", categoryKey: "industrial" },
+        { id: "sony-zeus", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp", name: "SONY ZEUS", category: "Концепт-дизайн", categoryKey: "concept" },
+        { id: "ps5-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785657893376.webp", name: "PS5 concept 2018", category: "Өнөр жай дизайны", categoryKey: "industrial" },
+        { id: "tesla-sd-concept", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp", name: "TESLA SD CONCEPT", category: "Өнөр жай дизайны", categoryKey: "industrial" }
+      ],
     },
     architects: {
       title: "Архитектуралык долбоорлор",
@@ -1083,7 +1089,13 @@ export const translations = {
     },
     concepts: {
       title: "Концепты и видение",
-      items: [],
+      items: [
+        { id: "evodrone", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785433766519.webp", name: "Evodrone", category: "Индустриальный дизайн", categoryKey: "industrial" },
+        { id: "iphone-iq-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp", name: "Iphone IQ concept 2018", category: "Индустриальный дизайн", categoryKey: "industrial" },
+        { id: "sony-zeus", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp", name: "SONY ZEUS", category: "Концептуальный дизайн", categoryKey: "concept" },
+        { id: "ps5-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785657893376.webp", name: "PS5 concept 2018", category: "Индустриальный дизайн", categoryKey: "industrial" },
+        { id: "tesla-sd-concept", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp", name: "TESLA SD CONCEPT", category: "Индустриальный дизайн", categoryKey: "industrial" }
+      ],
     },
     architects: {
       title: "Архитектурные проекты",

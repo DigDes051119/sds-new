@@ -144,6 +144,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
   };
 
   useEffect(() => {
+    cmsService.initSupabaseSync();
     return cmsService.subscribe(() => {
       setTranslations(cmsService.getTranslations());
       setProductDetails(cmsService.getProductDetails());

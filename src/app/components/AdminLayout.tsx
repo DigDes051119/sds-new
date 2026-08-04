@@ -54,6 +54,10 @@ export function AdminLayout() {
   };
 
   useEffect(() => {
+    cmsService.initSupabaseSync();
+  }, []);
+
+  useEffect(() => {
     const loggedIn = localStorage.getItem("sds_admin_logged_in");
     const password = sessionStorage.getItem("sds_current_admin_password");
     if (loggedIn !== "true" || !password) {
