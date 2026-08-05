@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet } from "react-router";
 import { useEffect, useState, useRef } from "react";
-import { LanguageContext, translations, type Language, languageOptions } from "../i18n";
+import { LanguageContext, translations, autoTranslateText, type Language, languageOptions } from "../i18n";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
@@ -229,76 +229,52 @@ export function Root() {
     };
   }, [location.pathname]);
 
-  const getResolvedTranslations = (loc: any) => {
-    const siteT = siteTranslations[loc];
-    const defT = translations[loc];
-    if (!siteT) return defT;
-    if (loc === "ru") return siteT;
+  const getResolvedTranslations = (loc: Language) => {
+    const siteT = siteTranslations[loc] || siteTranslations.en || siteTranslations.ru || {};
+    const defT = (translations as any)[loc] || translations.en;
+    const ruT = siteTranslations.ru || translations.ru || {};
 
-    const ruT = siteTranslations.ru || translations.ru;
-
-    const resolveDeep = (s: any, d: any, r: any, currentKey?: string): any => {
-      if (typeof s === "string") {
-        if (currentKey === "img" || currentKey === "image" || currentKey === "video" || s.startsWith("http") || s.startsWith("/")) {
-          return s || d;
+    const resolveValue = (s: any, d: any, r: any, currentKey?: string): any => {
+      // If s exists and is a valid value
+      if (s !== undefined && s !== null && s !== "") {
+        if (Array.isArray(s)) {
+          return s.map((item: any, idx: number) => resolveValue(item, d?.[idx], r?.[idx], currentKey));
         }
-        return (s === r && s !== d) ? (d || s) : (s || d);
-      }
-      if (Array.isArray(s)) {
-        return s.map((item, idx) => resolveDeep(item, d?.[idx], r?.[idx], currentKey));
-      }
-      if (s && typeof s === "object") {
-        const matchesDefault = !s.id || !d || s.id === d.id;
-        const actualD = matchesDefault ? d : undefined;
-        const res: any = {};
-        for (const key of Object.keys(s)) {
-          res[key] = resolveDeep(s[key], actualD?.[key], r?.[key], key);
-        }
-        if (actualD && typeof actualD === "object") {
-          for (const key of Object.keys(actualD)) {
-            if (!(key in s)) res[key] = actualD[key];
+        if (typeof s === "object") {
+          const res: any = {};
+          for (const k of Object.keys(s)) {
+            res[k] = resolveValue(s[k], d?.[k], r?.[k], k);
           }
+          if (d && typeof d === "object") {
+            for (const k of Object.keys(d)) {
+              if (res[k] === undefined) {
+                res[k] = resolveValue(undefined, d[k], r?.[k], k);
+              }
+            }
+          }
+          return res;
         }
-        return res;
+        if (typeof s === "string") {
+          return autoTranslateText(s, loc);
+        }
+        return s;
       }
-      return s ?? d;
+      // If s is empty, fall back to default translation d
+      if (d !== undefined && d !== null && d !== "") {
+        if (typeof d === "object") return resolveValue(undefined, d, r, currentKey);
+        if (typeof d === "string") return autoTranslateText(d, loc);
+        return d;
+      }
+      // Fall back to Russian r
+      if (r !== undefined && r !== null && r !== "") {
+        if (typeof r === "object") return resolveValue(undefined, undefined, r, currentKey);
+        if (typeof r === "string") return autoTranslateText(r, loc);
+        return r;
+      }
+      return s;
     };
 
-    const resolved = resolveDeep(siteT, defT, ruT);
-
-    if (resolved && resolved.projects && Array.isArray(resolved.projects.items) && ruT?.projects?.items) {
-      resolved.projects.items = ruT.projects.items.map((ruItem: any, idx: number) => {
-        const siteItem = siteT?.projects?.items?.find((item: any) => item.id === ruItem.id) || siteT?.projects?.items?.[idx];
-        
-        let resolvedName = siteItem?.name;
-        if (!resolvedName || (ruItem.name !== "Ala-Too" && resolvedName === "Ala-Too")) {
-          resolvedName = ruItem.name;
-        }
-
-        if (ruItem.id === "one-ordo-resort" || ruItem.id === "one-ordo") {
-          return {
-            ...ruItem,
-            ...siteItem,
-            id: ruItem.id,
-            name: ruItem.name || siteItem?.name || "One Ordo Resort",
-            category: ruItem.category || "Брендинг",
-            categoryKey: ruItem.categoryKey || "branding",
-            img: ruItem.img || siteItem?.img || "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp"
-          };
-        }
-
-        return {
-          ...ruItem,
-          ...siteItem,
-          id: ruItem.id,
-          name: resolvedName,
-          img: ruItem.img || siteItem?.img,
-          categoryKey: ruItem.categoryKey || siteItem?.categoryKey
-        };
-      });
-    }
-
-    return resolved;
+    return resolveValue(siteT, defT, ruT);
   };
 
   const t = getResolvedTranslations(locale);
@@ -622,19 +598,21 @@ export function Root() {
                   </a>
                 </div>
 
-                <div className="md:col-span-4 flex flex-col gap-3">
-                  <span className="text-[12px] font-mono tracking-[0.08em] text-black/40 uppercase">
-                    {locale === "ru" ? "Behance portfolio" : locale === "kg" ? "Behance portfolio" : "Behance portfolio"}
-                  </span>
-                  <a
-                    href="https://www.behance.net/steeldrake"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[15px] text-black hover:opacity-80 transition-opacity interactive-element font-normal"
-                  >
-                    behance.net/steeldrake
-                  </a>
-                </div>
+                {location.pathname !== "/" && location.pathname !== "" && (
+                  <div className="md:col-span-4 flex flex-col gap-3">
+                    <span className="text-[12px] font-mono tracking-[0.08em] text-black/40 uppercase">
+                      {locale === "ru" ? "Behance portfolio" : locale === "kg" ? "Behance portfolio" : "Behance portfolio"}
+                    </span>
+                    <a
+                      href="https://www.behance.net/steeldrake"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[15px] text-black hover:opacity-80 transition-opacity interactive-element font-normal"
+                    >
+                      behance.net/steeldrake
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Divider line */}

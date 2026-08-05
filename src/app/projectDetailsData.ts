@@ -1455,3 +1455,21 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
     }
   }
 };
+
+['en', 'ru', 'kg'].forEach((lang) => {
+  const targetObj = (projectDetailsTranslations as any)[lang];
+  if (targetObj) {
+    if (targetObj['maminy-retsepty']) {
+      targetObj['moms-recipes'] = targetObj['maminy-retsepty'];
+      targetObj['mom-s-recipes'] = targetObj['maminy-retsepty'];
+      targetObj['maminy_retsepty'] = targetObj['maminy-retsepty'];
+    }
+    if (targetObj['tooko']) {
+      targetObj['tooko-brand'] = targetObj['tooko'];
+    }
+    if (targetObj['one-ordo-resort']) {
+      targetObj['one-ordo'] = targetObj['one-ordo-resort'];
+      targetObj['one-ordo-resort-web'] = targetObj['one-ordo-resort'];
+    }
+  }
+});

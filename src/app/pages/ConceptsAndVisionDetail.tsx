@@ -102,22 +102,22 @@ export function ConceptsAndVisionDetail() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">STUDIO</span>
-                <span className="font-normal text-[15px] leading-tight">{data.studio || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.studio || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">DESIGNER</span>
-                <span className="font-normal text-[15px] leading-tight">{data.designer || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.designer || "-")}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">LOCATION</span>
-                <span className="font-normal text-[15px] leading-tight">{data.location || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.location || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">PROJECT TYPE</span>
-                <span className="font-normal text-[15px] leading-tight">{data.projectType || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.projectType || "-")}</span>
               </div>
             </div>
 
@@ -162,11 +162,15 @@ export function ConceptsAndVisionDetail() {
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>
               <span className="text-[17px] text-black font-normal subpixel-antialiased">
-                {locale === "ru" 
-                  ? "Исследование перспективных направлений дизайна и технологий." 
-                  : locale === "kg" 
-                    ? "Дизайн жана технологиялардын келечектүү багыттарын изилдөө."
-                    : "Exploring prospective directions of design, forms, and emerging technologies."}
+                {getLocText(
+                  locale,
+                  "Исследование перспективных направлений дизайна и технологий.",
+                  "Exploring prospective directions of design, forms, and emerging technologies.",
+                  "Дизайн жана технологиялардын келечектүү багыттарын изилдөө.",
+                  "探索设计、形态与前沿技术的未来方向。",
+                  "استكشاف الاتجاهات الواعدة للتصميم والتقنيات.",
+                  "Erforschung zukunftsweisender Designrichtungen und Technologien."
+                )}
               </span>
             </div>
           </div>
@@ -183,7 +187,7 @@ export function ConceptsAndVisionDetail() {
                 activeTab === "gallery" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Галерея" : locale === "kg" ? "Галерея" : "Gallery"}
+              {getLocText(locale, "Галерея", "Gallery", "Галерея")}
               {activeTab === "gallery" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -198,7 +202,7 @@ export function ConceptsAndVisionDetail() {
                 activeTab === "video" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Видео" : locale === "kg" ? "Видео" : "Video"}
+              {getLocText(locale, "Видео", "Video", "Видео")}
               {activeTab === "video" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -259,7 +263,7 @@ export function ConceptsAndVisionDetail() {
           <div className="flex justify-between items-start gap-[28px] mb-6">
             <div className="flex flex-col">
               <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
-                {locale === "ru" ? "Итоги" : locale === "kg" ? "Жыйынтыктар" : "Outcomes"}
+                {getLocText(locale, "Итоги", "Outcomes", "Жыйынтыктар")}
               </h2>
               <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
             </div>
@@ -267,7 +271,7 @@ export function ConceptsAndVisionDetail() {
               to="/concepts-and-vision"
               className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
             >
-              {locale === "ru" ? "Другие концепты" : locale === "kg" ? "Башка концепциялар" : "View other concepts"}
+              {getLocText(locale, "Другие концепты", "View other concepts", "Башка концепциялар")}
               <span className="text-[18px] leading-none">&rarr;</span>
             </Link>
           </div>

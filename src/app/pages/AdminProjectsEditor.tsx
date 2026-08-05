@@ -519,30 +519,27 @@ export function AdminProjectsEditor() {
     try {
       setTranslating(true);
 
-      // Auto translate RU fields to EN and KG
-      const nameEn = await translateText(formNameRu, "en");
-      const nameKg = await translateText(formNameRu, "kg");
+      // Auto translate RU fields to ALL 6 languages (en, kg, zh, ar, de)
+      const targetLangs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+      const names: Record<string, string> = {};
+      const catNames: Record<string, string> = {};
+      const descs: Record<string, string> = {};
+      const clients: Record<string, string> = {};
+      const services: Record<string, string> = {};
+      const challenges: Record<string, string> = {};
+      const results1: Record<string, string> = {};
+      const results2: Record<string, string> = {};
 
-      const categoryEn = await translateText(formCategoryRu, "en");
-      const categoryKg = await translateText(formCategoryRu, "kg");
-
-      const descEn = await translateText(formDescRu, "en");
-      const descKg = await translateText(formDescRu, "kg");
-
-      const clientEn = await translateText(formClientRu, "en");
-      const clientKg = await translateText(formClientRu, "kg");
-
-      const serviceEn = await translateText(formServiceRu, "en");
-      const serviceKg = await translateText(formServiceRu, "kg");
-
-      const challengeEn = await translateText(formChallengeRu, "en");
-      const challengeKg = await translateText(formChallengeRu, "kg");
-
-      const result1En = await translateText(formResult1Ru, "en");
-      const result1Kg = await translateText(formResult1Ru, "kg");
-
-      const result2En = await translateText(formResult2Ru, "en");
-      const result2Kg = await translateText(formResult2Ru, "kg");
+      for (const lang of targetLangs) {
+        names[lang] = lang === "ru" ? formNameRu : (await translateText(formNameRu, lang, "ru"));
+        catNames[lang] = lang === "ru" ? formCategoryRu : (await translateText(formCategoryRu, lang, "ru"));
+        descs[lang] = lang === "ru" ? formDescRu : (await translateText(formDescRu, lang, "ru"));
+        clients[lang] = lang === "ru" ? formClientRu : (await translateText(formClientRu, lang, "ru"));
+        services[lang] = lang === "ru" ? formServiceRu : (await translateText(formServiceRu, lang, "ru"));
+        challenges[lang] = lang === "ru" ? formChallengeRu : (await translateText(formChallengeRu, lang, "ru"));
+        results1[lang] = lang === "ru" ? formResult1Ru : (await translateText(formResult1Ru, lang, "ru"));
+        results2[lang] = lang === "ru" ? formResult2Ru : (await translateText(formResult2Ru, lang, "ru"));
+      }
 
       // Fetch fresh translations and details from Supabase to prevent race conditions
       const remoteTranslationsRows = await supabaseClient.fetchTable("sds_translations");
@@ -560,55 +557,8 @@ export function AdminProjectsEditor() {
         ? (newTranslations.ru.projects.items.find((p: any) => p.id === editingId)?.createdAt || null)
         : new Date().toISOString();
 
-      const listEntryRu = { id: formId, name: formNameRu, category: formCategoryRu, categoryKey: formCategoryKey, img: formImg, createdAt: existingCreatedAt };
-      const listEntryEn = { id: formId, name: nameEn, category: categoryEn, categoryKey: formCategoryKey, img: formImg, createdAt: existingCreatedAt };
-      const listEntryKg = { id: formId, name: nameKg, category: categoryKg, categoryKey: formCategoryKey, img: formImg, createdAt: existingCreatedAt };
-
-      // Formulate project details entries
       const cleanBlocks = formCollageBlocks.map(block => block.filter(Boolean)).filter(block => block.length > 0);
       const flattenedImages = cleanBlocks.flat();
-
-      const detailEntryRu = {
-        name: formNameRu,
-        desc: formDescRu,
-        client: formClientRu,
-        year: formYear,
-        service: formServiceRu,
-        challenge: formChallengeRu,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [formResult1Ru, formResult2Ru].filter(Boolean),
-        websiteUrl: formWebsiteUrl
-      };
-
-      const detailEntryEn = {
-        name: nameEn,
-        desc: descEn,
-        client: clientEn,
-        year: formYear,
-        service: serviceEn,
-        challenge: challengeEn,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [result1En, result2En].filter(Boolean),
-        websiteUrl: formWebsiteUrl
-      };
-
-      const detailEntryKg = {
-        name: nameKg,
-        desc: descKg,
-        client: clientKg,
-        year: formYear,
-        service: serviceKg,
-        challenge: challengeKg,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [result1Kg, result2Kg].filter(Boolean),
-        websiteUrl: formWebsiteUrl
-      };
 
       // Check if new ID already exists
       const isIdTaken = 
@@ -619,48 +569,60 @@ export function AdminProjectsEditor() {
         return;
       }
 
-      if (editingId) {
-        // Modify existing entries in translations
-        ["ru", "en", "kg"].forEach((lang) => {
-          const items = newTranslations[lang].projects.items;
-          const index = items.findIndex((p: any) => p.id === editingId);
-          if (index !== -1) {
-            items[index] = lang === "ru" ? listEntryRu : lang === "en" ? listEntryEn : listEntryKg;
-          }
+      // Update or add entries for ALL 6 languages
+      targetLangs.forEach((lang) => {
+        if (!newTranslations[lang]) newTranslations[lang] = {};
+        if (!newTranslations[lang].projects) newTranslations[lang].projects = { items: [] };
 
-          // Also update the id in home.projects if it exists there
-          if (newTranslations[lang]?.home?.projects) {
-            const hProjIdx = newTranslations[lang].home.projects.findIndex((p: any) => p.id === editingId);
-            if (hProjIdx !== -1) {
-              newTranslations[lang].home.projects[hProjIdx].id = formId;
-              newTranslations[lang].home.projects[hProjIdx].name = lang === "ru" ? formNameRu : (lang === "en" ? nameEn : nameKg);
-              newTranslations[lang].home.projects[hProjIdx].category = lang === "ru" ? formCategoryRu : (lang === "en" ? categoryEn : categoryKg);
-              newTranslations[lang].home.projects[hProjIdx].categoryKey = formCategoryKey;
-              newTranslations[lang].home.projects[hProjIdx].img = formImg;
-            }
-          }
-        });
+        const listEntry = {
+          id: formId,
+          name: names[lang],
+          category: catNames[lang],
+          categoryKey: formCategoryKey,
+          img: formImg,
+          createdAt: existingCreatedAt
+        };
 
-        // Modify existing entries in details
-        if (editingId !== formId) {
-          delete newDetails.ru[editingId];
-          delete newDetails.en[editingId];
-          delete newDetails.kg[editingId];
+        const detailEntry = {
+          name: names[lang],
+          desc: descs[lang],
+          client: clients[lang],
+          year: formYear,
+          service: services[lang],
+          challenge: challenges[lang],
+          processImages: flattenedImages,
+          collageBlocks: cleanBlocks,
+          collageTheme: formCollageTheme,
+          results: [results1[lang], results2[lang]].filter(Boolean),
+          websiteUrl: formWebsiteUrl
+        };
+
+        const items = newTranslations[lang].projects.items;
+        const index = items.findIndex((p: any) => p.id === editingId);
+        if (index !== -1) {
+          items[index] = listEntry;
+        } else {
+          items.push(listEntry);
         }
-        newDetails.ru[formId] = detailEntryRu;
-        newDetails.en[formId] = detailEntryEn;
-        newDetails.kg[formId] = detailEntryKg;
-      } else {
-        // Add new entries to translations — insert at the end
-        newTranslations.ru.projects.items.push(listEntryRu);
-        newTranslations.en.projects.items.push(listEntryEn);
-        newTranslations.kg.projects.items.push(listEntryKg);
 
-        // Add to details
-        newDetails.ru[formId] = detailEntryRu;
-        newDetails.en[formId] = detailEntryEn;
-        newDetails.kg[formId] = detailEntryKg;
-      }
+        if (!newDetails[lang]) newDetails[lang] = {};
+        if (editingId && editingId !== formId) {
+          delete newDetails[lang][editingId];
+        }
+        newDetails[lang][formId] = detailEntry;
+
+        // Update in home.projects if present
+        if (newTranslations[lang]?.home?.projects) {
+          const hProjIdx = newTranslations[lang].home.projects.findIndex((p: any) => p.id === editingId || p.id === formId);
+          if (hProjIdx !== -1) {
+            newTranslations[lang].home.projects[hProjIdx].id = formId;
+            newTranslations[lang].home.projects[hProjIdx].name = names[lang];
+            newTranslations[lang].home.projects[hProjIdx].category = catNames[lang];
+            newTranslations[lang].home.projects[hProjIdx].categoryKey = formCategoryKey;
+            newTranslations[lang].home.projects[hProjIdx].img = formImg;
+          }
+        }
+      });
 
       // Save and publish
       await cmsService.updateTranslations(newTranslations);
@@ -703,18 +665,18 @@ export function AdminProjectsEditor() {
         const newDetails = JSON.parse(JSON.stringify(remoteDetailsRows[0].data));
 
         // Remove from projects list and featured projects list
-        ["ru", "en", "kg"].forEach((lang) => {
+        const targetLangs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+        targetLangs.forEach((lang) => {
           if (newTranslations[lang]?.projects?.items) {
             newTranslations[lang].projects.items = newTranslations[lang].projects.items.filter((p: any) => p.id !== id);
           }
           if (newTranslations[lang]?.home?.projects) {
             newTranslations[lang].home.projects = newTranslations[lang].home.projects.filter((p: any) => p.id !== id);
           }
+          if (newDetails[lang]) {
+            delete newDetails[lang][id];
+          }
         });
-
-        delete newDetails.ru[id];
-        delete newDetails.en[id];
-        delete newDetails.kg[id];
 
         // Save changes to database
         await cmsService.updateTranslations(newTranslations);

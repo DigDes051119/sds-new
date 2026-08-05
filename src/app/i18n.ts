@@ -256,6 +256,7 @@ export const translations = {
             "id": "maminy-retsepty",
             "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/maminy-retsepty/project-hero-1784560948544.webp",
             "name": "Мамины рецепты",
+            "desc": "Мы заложили прямую идею в логотип и символ - открытая книга рецептов, которая к тому же напоминает еще и символ сердца (любви).",
             "category": "Брендинг",
             "createdAt": "2026-07-19T10:41:45.380Z",
             "categoryKey": "branding"
@@ -264,6 +265,7 @@ export const translations = {
             "id": "tooko",
             "img": "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/projects/project-hero-1784395034213.webp",
             "name": "Tooko",
+            "desc": "Создали все самое необходимое и нужное для нового бренда от и до, который собирается зайти на рынок. Цвета и контрасты для сильного старта.",
             "category": "Брендинг",
             "createdAt": "2026-07-18T17:10:14.147Z",
             "categoryKey": "branding"
@@ -288,7 +290,8 @@ export const translations = {
         { id: "iphone-iq-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp", name: "Iphone IQ concept 2018", category: "Industrial design", categoryKey: "industrial" },
         { id: "sony-zeus", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp", name: "SONY ZEUS", category: "Concept design", categoryKey: "concept" },
         { id: "ps5-concept-2018", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785657893376.webp", name: "PS5 concept 2018", category: "Industrial design", categoryKey: "industrial" },
-        { id: "tesla-sd-concept", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp", name: "TESLA SD CONCEPT", category: "Industrial design", categoryKey: "industrial" }
+        { id: "tesla-sd-concept", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp", name: "TESLA SD CONCEPT", category: "Industrial design", categoryKey: "industrial" },
+        { id: "bishbench", img: "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785532296450.webp", name: "Bishbench", category: "Industrial design", categoryKey: "industrial" }
       ],
     },
     architects: {
@@ -2173,7 +2176,569 @@ const translationsDictionary: Record<string, Record<Language, string>> = {
     ar: "العميل",
     de: "Kunde",
   },
+  "ONE ORDO RESORT": {
+    en: "ONE ORDO RESORT",
+    ru: "ОДИН ОРДО РЕЗОРТ",
+    kg: "УАН ОРДО РЕЗОРТ",
+    zh: "ONE ORDO 度假村",
+    ar: "منتجع وان أوردو",
+    de: "ONE ORDO RESORT",
+  },
+  "One Ordo Resort": {
+    en: "One Ordo Resort",
+    ru: "Один Ордо Резорт",
+    kg: "Уан Ордо Резорт",
+    zh: "One Ordo 度假村",
+    ar: "منتجع وان أوردو",
+    de: "One Ordo Resort",
+  },
+  "Branding in which our studio created Naming, and all the important branding details for presenting the resort. The ideology of number 1 carried through the waves and...": {
+    en: "Branding in which our studio created Naming, and all the important branding details for presenting the resort. The ideology of number 1 carried through the waves and...",
+    ru: "Брендинг в котором наша студия создала Наминг, и все важные детали брендинга для презентации курорта. Идеология номера 1 пронесена сквозь волны...",
+    kg: "Курортту презентациялоо үчүн биздин студия Нейминг жана брендингдин бардык маанилүү деталдарын түзгөн брендинг. Толкундар аркылуу №1 идеологиясы...",
+    zh: "我们工作室为度假村呈现打造了命名及所有重要品牌细节的品牌设计。1号理念穿梭于浪花与设计之间...",
+    ar: "العلامة التجارية التي أنشأ فيها استوديونا التسمية وجميع تفاصيل العلامة التجارية الهامة لتقديم المنتجع...",
+    de: "Branding, bei dem unser Studio das Naming und alle wichtigen Branding-Details zur Präsentation des Resorts erstellt hat...",
+  },
+  "Брендинг в котором наша студия создала Наминг, и все важные детали брендинга для презентации курорта. Идеология номера 1 пронесена сквозь волны...": {
+    en: "Branding in which our studio created Naming, and all the important branding details for presenting the resort. The ideology of number 1 carried through the waves and...",
+    ru: "Брендинг в котором наша студия создала Наминг, и все важные детали брендинга для презентации курорта. Идеология номера 1 пронесена сквозь волны...",
+    kg: "Курортту презентациялоо үчүн биздин студия Нейминг жана брендингдин бардык маанилүү деталдарын түзгөн брендинг. Толкундар аркылуу №1 идеологиясы...",
+    zh: "我们工作室为度假村呈现打造了命名及所有重要品牌细节的品牌设计。1号理念穿梭于浪花与设计之间...",
+    ar: "العلامة التجارية التي أنشأ فيها استوديونا التسمية وجميع تفاصيل العلامة التجارية الهامة لتقديم المنتجع...",
+    de: "Branding, bei dem unser Studio das Naming und alle важных Branding-Details zur Präsentation des Resorts erstellt hat...",
+  },
+  "TOOKO": {
+    en: "TOOKO",
+    ru: "TOOKO",
+    kg: "TOOKO",
+    zh: "TOOKO",
+    ar: "TOOKO",
+    de: "TOOKO",
+  },
+  "Tooko": {
+    en: "Tooko",
+    ru: "Tooko",
+    kg: "Tooko",
+    zh: "Tooko",
+    ar: "Tooko",
+    de: "Tooko",
+  },
+  "We created everything necessary and necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style and...": {
+    en: "We created everything necessary and necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style and...",
+    ru: "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта. Легкий, дружелюбный стиль...",
+    kg: "Биз жаңы бренд үчүн ичинен да, сыртынан да бардык зарыл нерселерди түздүк, ал жакында рынокко чыгат. Күчтүү старт үчүн түстөр жана контрасттар...",
+    zh: "我们由内而外为即将进入市场的全新品牌打造了一切核心要素。鲜明的色彩与对比赋予强力起步，轻松亲和的风格...",
+    ar: "لقد أنشأنا كل ما هو ضروري لعلامة تجارية جديدة، من الداخل والخارج، والتي على وشك دخول السوق...",
+    de: "Wir haben alles Notwendige für eine neue Marke von innen und außen geschaffen, die kurz vor dem Markteintritt steht...",
+  },
+  "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта. Легкий, дружелюбный стиль...": {
+    en: "We created everything necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style and...",
+    ru: "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта. Легкий, дружелюбный стиль...",
+    kg: "Биз жаңы бренд үчүн ичинен да, сыртынан да бардык зарыл нерселерди түздүк, ал жакында рынокко чыгат. Күчтүү старт үчүн түстөр жана контрасттар...",
+    zh: "我们由内而外为即将进入市场的全新品牌打造了一切核心要素。鲜明的色彩与对比赋予强力起步，轻松亲和的风格...",
+    ar: "لقد أنشأنا كل ما هو ضروري لعلامة تجارية جديدة، من الداخل والخارج، والتي على وشك دخول السوق...",
+    de: "Wir haben alles Notwendige für eine новое Marke von innen und außen geschaffen, die kurz vor dem Markteintritt steht...",
+  },
+  "MAMINY RETSEPTY": {
+    en: "MOM'S RECIPES",
+    ru: "МАМИНЫ РЕЦЕПТЫ",
+    kg: "МАМИНЫ РЕЦЕПТЫ",
+    zh: "MOM'S RECIPES",
+    ar: "MOM'S RECIPES",
+    de: "MOM'S RECIPES",
+  },
+  "Мамины рецепты": {
+    en: "Mom's Recipes",
+    ru: "Мамины рецепты",
+    kg: "Мамины рецепты",
+    zh: "Mom's Recipes",
+    ar: "Mom's Recipes",
+    de: "Mom's Recipes",
+  },
+  "BISHBENCH": {
+    en: "BISHBENCH",
+    ru: "BISHBENCH",
+    kg: "BISHBENCH",
+    zh: "BISHBENCH",
+    ar: "BISHBENCH",
+    de: "BISHBENCH",
+  },
+  "Bishbench": {
+    en: "Bishbench",
+    ru: "Bishbench",
+    kg: "Bishbench",
+    zh: "Bishbench",
+    ar: "Bishbench",
+    de: "Bishbench",
+  },
+  "SANDYQ": {
+    en: "SANDYQ",
+    ru: "SANDYQ",
+    kg: "SANDYQ",
+    zh: "SANDYQ",
+    ar: "SANDYQ",
+    de: "SANDYQ",
+  },
+  "Sandyq": {
+    en: "Sandyq",
+    ru: "Sandyq",
+    kg: "Sandyq",
+    zh: "Sandyq",
+    ar: "Sandyq",
+    de: "Sandyq",
+  },
+  "ALA-TOO": {
+    en: "ALA-TOO",
+    ru: "ALA-TOO",
+    kg: "ALA-TOO",
+    zh: "ALA-TOO",
+    ar: "ALA-TOO",
+    de: "ALA-TOO",
+  },
+  "Ala-Too": {
+    en: "Ala-Too",
+    ru: "Ala-Too",
+    kg: "Ala-Too",
+    zh: "Ala-Too",
+    ar: "Ala-Too",
+    de: "Ala-Too",
+  },
+  "SALKYN": {
+    en: "SALKYN",
+    ru: "SALKYN",
+    kg: "SALKYN",
+    zh: "SALKYN",
+    ar: "SALKYN",
+    de: "SALKYN",
+  },
+  "Salkyn": {
+    en: "Salkyn",
+    ru: "Salkyn",
+    kg: "Salkyn",
+    zh: "Salkyn",
+    ar: "Salkyn",
+    de: "Salkyn",
+  },
+  "TECHSTART": {
+    en: "TECHSTART",
+    ru: "TECHSTART",
+    kg: "TECHSTART",
+    zh: "TECHSTART",
+    ar: "TECHSTART",
+    de: "TECHSTART",
+  },
+  "TechStart": {
+    en: "TechStart",
+    ru: "TechStart",
+    kg: "TechStart",
+    zh: "TechStart",
+    ar: "TechStart",
+    de: "TechStart",
+  },
+  "AUTO CONCEPT X": {
+    en: "AUTO CONCEPT X",
+    ru: "AUTO CONCEPT X",
+    kg: "AUTO CONCEPT X",
+    zh: "AUTO CONCEPT X",
+    ar: "AUTO CONCEPT X",
+    de: "AUTO CONCEPT X",
+  },
+  "Auto Concept X": {
+    en: "Auto Concept X",
+    ru: "Auto Concept X",
+    kg: "Auto Concept X",
+    zh: "Auto Concept X",
+    ar: "Auto Concept X",
+    de: "Auto Concept X",
+  },
+  "ONE CONSTRUCTION": {
+    en: "ONE CONSTRUCTION",
+    ru: "ONE CONSTRUCTION",
+    kg: "ONE CONSTRUCTION",
+    zh: "ONE CONSTRUCTION",
+    ar: "ONE CONSTRUCTION",
+    de: "ONE CONSTRUCTION",
+  },
+  "One Construction": {
+    en: "One Construction",
+    ru: "One Construction",
+    kg: "One Construction",
+    zh: "One Construction",
+    ar: "One Construction",
+    de: "One Construction",
+  },
+  "Updating the brand in accordance with the company's plans.": {
+    en: "Updating the brand in accordance with the company's plans.",
+    ru: "Обновление бренда в соответствии с планами компании.",
+    kg: "Компаниянын пландарына ылайык брендди жаңыртуу.",
+    zh: "根据公司战略规划重塑并升级品牌形象。",
+    ar: "تحديث العلامة التجارية وفقاً لخطط الشركة.",
+    de: "Aktualisierung der Marke gemäß den Unternehmensplänen.",
+  },
+  "We created branding, the goal of which was to raise the level of the company through brand style, so that the graphics, lines and details corresponded to the plans of the company itself and its future projects.": {
+    en: "We created branding, the goal of which was to raise the level of the company through brand style, so that the graphics, lines and details corresponded to the plans of the company itself and its future projects.",
+    ru: "Мы создали брендинг, целью которого было поднять уровень компании через фирменный стиль, чтобы графика, линии и детали соответствовали планам самой компании и её будущих проектов.",
+    kg: "Биз компаниянын деңгээлин бренддик стиль аркылуу көтөрүү максатында брендинг түздүк, графика, сызыктар жана деталдар компаниянын пландарына шайкеш келет.",
+    zh: "我们打造了全新的品牌设计，旨在通过品牌风格提升公司形象，让视觉、线条与细节完美契合公司本身及其未来项目的宏伟规划。",
+    ar: "لقد أنشأنا هوية تجارية كان الهدف منها رفع مستوى الشركة من خلال أسلوب العلامة التجارية، بحيث تتوافق الرسومات والخطوط والتفاصيل مع خطط الشركة نفسها والمشاريع المستقبلية.",
+    de: "Wir haben ein Branding geschaffen, dessen Ziel es war, das Niveau des Unternehmens durch Markenstil zu heben, sodass Grafiken, Linien und Details den Plänen des Unternehmens und seiner zukünftigen Projekte entsprechen.",
+  },
+  "Create a completely new logo style and branding for a growing company.": {
+    en: "Create a completely new logo style and branding for a growing company.",
+    ru: "Создать совершенно новый логотип, стиль и брендинг для развивающейся компании.",
+    kg: "Өсүп жаткан компания үчүн таптакыр жаңы логотип, стиль жана брендинг түзүү.",
+    zh: "为一家蓬勃发展的公司打造全新标志、视觉风格与品牌形象。",
+    ar: "إنشاء شعار وأسلوب وهوية تجارية جديدة تماماً لشركة متنامية.",
+    de: "Erstellung eines völlig neuen Logos, Stils und Brandings für ein wachsendes Unternehmen.",
+  },
+  "Создать соверешнно новыйй логотип стиль и брендинг для развивающейся компании.": {
+    en: "Create a completely new logo style and branding for a growing company.",
+    ru: "Создать совершенно новый логотип, стиль и брендинг для развивающейся компании.",
+    kg: "Өсүп жаткан компания үчүн таптакыр жаңы логотип, стиль жана брендинг түзүү.",
+    zh: "为一家蓬勃发展的公司打造全新标志、视觉风格与品牌形象。",
+    ar: "إنشاء شعار وأسلوب وهوية تجارية جديدة تماماً لشركة متنامية.",
+    de: "Erstellung eines völlig neuen Logos, Stils und Brandings für ein wachsendes Unternehmen.",
+  },
+  "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design, presentation and much more. Important! Only some portions of the branding are shown that are acceptable for viewing purposes.": {
+    en: "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design, presentation and much more. Important! Only some portions of the branding are shown that are acceptable for viewing purposes.",
+    ru: "Мы вложили прямую идею в логотип и символ — открытую книгу рецептов, которая также напоминает символ сердца (любовь). Проработали стиль, упаковку, оформление, презентацию и многое другое. Важно! Показана лишь часть брендинга.",
+    kg: "Биз логотипке жана символго түз идеяны салдык — ачык рецепттер китеби, ал жүрөк символун (сүйүүнү) да эске салат. Стиль, таңгактоо, дизайн жана презентация үстүндө иштедик. Маанилүү! Брендингдин бир бөлүгү гана көрсөтүлгөн.",
+    zh: "我们在标志与象征符号中融入了最直观的创意——一本翻开的食谱书，同时勾勒出心形（爱）的轮廓。我们精心设计了品牌风格、包装、外观呈现及更多细节。重要提示：此处仅展示允许公开的部分品牌设计内容。",
+    ar: "لقد وضعنا فكرة مباشرة في الشعار والرمز - كتاب مفتوح للوصفات يشبه أيضاً رمز القلب (الحب). عملنا على الأسلوب والتعبئة والتصميم والعرض والتفاصيل. هام! يتم عرض أجزاء من العلامة التجارية فقط.",
+    de: "Wir haben eine direkte Idee in das Logo und Symbol gesteckt - ein offenes Rezeptbuch, das auch dem Symbol eines Herzens (Liebe) ähnelt. Wir haben am Stil, der Verpackung, dem Design und der Präsentation gearbeitet. Wichtig! Es werden nur zugelassene Teile des Brandings gezeigt.",
+  },
+  "Addressing market needs and developing next-generation physical or digital user journeys.": {
+    en: "Addressing market needs and developing next-generation physical or digital user journeys.",
+    ru: "Удовлетворение потребностей рынка и создание нового пользовательского опыта.",
+    kg: "Рыноктун муктаждыктарын канааттандыруу жана жаңы колдонуучу тажрыйбасын түзүү.",
+    zh: "满足市场需求并开发下一代物理与数字用户旅程。",
+    ar: "تلبية احتياجات السوق وتطوير رحلات المستخدم الفيزيائية والرقمية من الجيل القادم.",
+    de: "Erfüllung von Marktbedürfnissen und Entwicklung von Nutzererlebnissen der nächsten Generation.",
+  },
+  "Удовлетворение потребностей рынка и создание нового пользовательского опыта.": {
+    en: "Addressing market needs and developing next-generation physical or digital user journeys.",
+    ru: "Удовлетворение потребностей рынка и создание нового пользовательского опыта.",
+    kg: "Рыноктун муктаждыктарын канааттандыруу жана жаңы колдонуучу тажрыйбасын түзүү.",
+    zh: "满足市场需求并开发下一代物理与数字用户旅程。",
+    ar: "تلبية احتياجات السوق وتطوير رحلات المستخدم الفيزيائية والرقمية من الجيل القادم.",
+    de: "Erfüllung von Marktbedürfnissen und Entwicklung von Nutzererlebnissen der nächsten Generation.",
+  },
+  "maminy-retsepty": {
+    en: "Mom's Recipes",
+    ru: "Мамины рецепты",
+    kg: "Энемдин рецепттери",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "Mutters Rezepte",
+  },
+  "MOM'S RECIPES": {
+    en: "MOM'S RECIPES",
+    ru: "MOM'S RECIPES",
+    kg: "MOM'S RECIPES",
+    zh: "MOM'S RECIPES",
+    ar: "MOM'S RECIPES",
+    de: "MOM'S RECIPES",
+  },
+  "БРЕНДИРОВАНИЕ": {
+    en: "BRANDING",
+    ru: "БРЕНДИРОВАНИЕ",
+    kg: "БРЕНДИНГ",
+    zh: "品牌设计",
+    ar: "الهوية العلامة التجارية",
+    de: "BRANDING",
+  },
+  "Брендирование": {
+    en: "Branding",
+    ru: "Брендирование",
+    kg: "Брендинг",
+    zh: "品牌设计",
+    ar: "الهوية العلامة التجارية",
+    de: "Branding",
+  },
+  "ИНДУСТРИАЛЬНЫЙ ДИЗАЙН": {
+    en: "INDUSTRIAL DESIGN",
+    ru: "ИНДУСТРИАЛЬНЫЙ ДИЗАЙН",
+    kg: "ӨНӨР ЖАЙ ДИЗАЙНЫ",
+    zh: "工业设计",
+    ar: "التصميم الصناعي",
+    de: "INDUSTRIEDESIGN",
+  },
+  "Индустриальный дизайн": {
+    en: "Industrial Design",
+    ru: "Индустриальный дизайн",
+    kg: "Өнөр жай дизайны",
+    zh: "工业设计",
+    ar: "التصميم الصناعي",
+    de: "Industriedesign",
+  },
+  "МАРКЕТИНГ": {
+    en: "MARKETING",
+    ru: "МАРКЕТИНГ",
+    kg: "МАРКЕТИНГ",
+    zh: "市场营销",
+    ar: "التسويق",
+    de: "MARKETING",
+  },
+  "Маркетинг": {
+    en: "Marketing",
+    ru: "Маркетинг",
+    kg: "Маркетинг",
+    zh: "市场营销",
+    ar: "التسويق",
+    de: "Marketing",
+  },
+  "КОНЦЕПТ-ДИЗАЙН": {
+    en: "CONCEPT DESIGN",
+    ru: "КОНЦЕПТ-ДИЗАЙН",
+    kg: "КОНЦЕПТ ДИЗАЙН",
+    zh: "概念设计",
+    ar: "تصميم المفاهيم",
+    de: "KONZEPTDESIGN",
+  },
+  "Концепт-дизайн": {
+    en: "Concept Design",
+    ru: "Концепт-дизайн",
+    kg: "Концепт дизайн",
+    zh: "概念设计",
+    ar: "تصميم المفاهيم",
+    de: "Konzeptdesign",
+  },
+  "ИГРОВАЯ РАЗРАБОТКА": {
+    en: "GAME DEV",
+    ru: "ИГРОВАЯ РАЗРАБОТКА",
+    kg: "ОЮН ИШТЕП ЧЫГУУ",
+    zh: "游戏开发",
+    ar: "تطوير الألعاب",
+    de: "SPIELEENTWICKLUNG",
+  },
+  "Game Dev": {
+    en: "Game Dev",
+    ru: "Game Dev",
+    kg: "Game Dev",
+    zh: "Game Dev",
+    ar: "Game Dev",
+    de: "Game Dev",
+  },
+  "Mom's Recipes": {
+    en: "Mom's Recipes",
+    ru: "Mom's Recipes",
+    kg: "Mom's Recipes",
+    zh: "Mom's Recipes",
+    ar: "Mom's Recipes",
+    de: "Mom's Recipes",
+  },
+  "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design,...": {
+    en: "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design,...",
+    ru: "Мы вложили прямую идею в логотип и символ — открытую книгу рецептов, которая также напоминает символ сердца (любовь), мы поработали над стилем, упаковкой, дизайном...",
+    kg: "Биз логотипке жана символго түз идеяны салдык — ачык рецепттер китеби, ал ошондой эле жүрөк символун (сүйүүнү) эске салат, биз стиль, таңгактоо, дизайн үстүндө иштедик...",
+    zh: "我们在标志和象征符号中融入了最直观的创意——一本翻开的食谱书，同时勾勒出心形（爱）的轮廓。我们精心设计了视觉风格、包装与外形...",
+    ar: "لقد وضعنا فكرة مباشرة في الشعار والرمز - كتاب مفتوح للوصفات، والذي يشبه أيضاً رمز القلب (الحب)، وعملنا على الأسلوب، والتعبئة، والتصميم...",
+    de: "Wir haben eine direkte Idee in das Logo und Symbol gesteckt - ein offenes Rezeptbuch, das auch dem Symbol eines Herzens (Liebe) ähnelt. Wir haben am Stil, an der Verpackung und am Design gearbeitet...",
+  },
+  "CONSTRUCTION COMPANY": {
+    en: "CONSTRUCTION COMPANY",
+    ru: "СТРОИТЕЛЬНАЯ КОМПАНИЯ",
+    kg: "КУРУЛУШ КОМПАНИЯСЫ",
+    zh: "建筑施工企业",
+    ar: "شركة إنشاءات",
+    de: "BAUUNTERNEHMEN",
+  },
+  "Brand Identity": {
+    en: "Brand Identity",
+    ru: "Брендинг",
+    kg: "Брендинг",
+    zh: "品牌视觉形象",
+    ar: "هوية العلامة التجارية",
+    de: "Markenidentität",
+  },
+  "BRAND IDENTITY": {
+    en: "BRAND IDENTITY",
+    ru: "БРЕНДИНГ",
+    kg: "БРЕНДИНГ",
+    zh: "品牌视觉形象",
+    ar: "هوية العلامة التجارية",
+    de: "MARKENIDENTITÄT",
+  },
+  "PROJECT BRANDING": {
+    en: "PROJECT BRANDING",
+    ru: "БРЕНДИНГ ПРОЕКТА",
+    kg: "ДОЛБООРДУН БРЕНДИНГИ",
+    zh: "项目品牌设计",
+    ar: "هوية العلامة التجارية",
+    de: "PROJEKT BRANDING",
+  },
+  "Projects": {
+    en: "Projects",
+    ru: "Проекты",
+    kg: "Долбоорлор",
+    zh: "项目作品",
+    ar: "المشاريع",
+    de: "Projekte",
+  },
+  "Studio Products": {
+    en: "Studio Products",
+    ru: "Продукты студии",
+    kg: "Студиянын продукциялары",
+    zh: "工作室产品",
+    ar: "منتجات الاستوديو",
+    de: "Studio Produkte",
+  },
+  "GameDev": {
+    en: "GameDev",
+    ru: "Игровая разработка",
+    kg: "Оюн иштеп чыгуу",
+    zh: "游戏开发",
+    ar: "تطوير الألعاب",
+    de: "Spieleentwicklung",
+  },
+  "Development of 3D worlds, game environments, mechanics and interactive game art": {
+    en: "Development of 3D worlds, game environments, mechanics and interactive game art",
+    ru: "Разработка 3D миров, игровых окружений, механик и интерактивного игрового арта",
+    kg: "3D дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү оюн артын иштеп чыгуу",
+    zh: "3D世界、游戏环境、核心玩法机制与互动游戏艺术的开发",
+    ar: "تطوير العوالم ثلاثية الأبعاد وبيئات الألعاب والميكانيكا وفن الألعاب التفاعلي",
+    de: "Entwicklung von 3D-Welten, Spielumgebungen, Spielmechaniken und interaktiver Spielkunst",
+  },
+  "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts": {
+    en: "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts",
+    ru: "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов",
+    kg: "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр",
+    zh: "我们在工作室中为客户、合作伙伴以及我们个人的愿景概念所打造的部分代表性项目与产品",
+    ar: "بعض المشاريع والمنتجات التي تم إنشاؤها في استوديونا للعملاء والشركاء والمفاهيم الرؤيوية الشخصية",
+    de: "Einige der Projekte und Produkte, die in unserem Studio für Kunden, Partner und unsere eigenen visionären Konzepte entwickelt wurden",
+  },
 };
+
+export function autoTranslateText(text: string, locale: Language): string {
+  if (!text || typeof text !== "string") return text || "";
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  // 1. Direct lookup in translationsDictionary
+  if (translationsDictionary[trimmed] && translationsDictionary[trimmed][locale]) {
+    return translationsDictionary[trimmed][locale];
+  }
+
+  // 2. Case insensitive lookup
+  const lower = trimmed.toLowerCase();
+  for (const [key, map] of Object.entries(translationsDictionary)) {
+    if (key.toLowerCase() === lower && map[locale]) {
+      return map[locale];
+    }
+  }
+
+  // 3. Robust substring / phrase matching
+  if (trimmed.includes("Создаем ДНК бренда") || trimmed.includes("Создание уникального ДНК бренда") || trimmed.includes("We create brand DNA")) {
+    if (locale === "en") return "Creating brand DNA: from positioning and naming to visual ecosystem and brand guidelines.";
+    if (locale === "ru") return "Создаем ДНК бренда: от позиционирования и нейминга до визуальной экосистемы и всего бренда в целом.";
+    if (locale === "kg") return "Бренд ДНКсын түзөбүз: позициялоодон жана неймингден визуалдык экосистемага чейин.";
+    if (locale === "zh") return "打造品牌DNA：从定位、命名到视觉生态系统及完整品牌指南。";
+    if (locale === "ar") return "ننشئ الهوية الجينية للعلامة التجارية: من التحديد والتسمية إلى المنظومة البصرية الشاملة.";
+    if (locale === "de") return "Wir schaffen Marken-DNA: von der Positionierung und Namensgebung bis hin zum visuellen Ökosystem.";
+  }
+
+  if (trimmed.includes("Разработка эстетичных, функциональных и технологичных") || trimmed.includes("Development of aesthetic, functional")) {
+    if (locale === "en") return "Development of aesthetic, functional, and technological physical objects for serial production.";
+    if (locale === "ru") return "Разработка эстетичных, функциональных и технологичных физических объектов для серийного производства.";
+    if (locale === "kg") return "Сериялык өндүрүш үчүн эстетикалык, функционалдуу жана технологиялык объекттерди иштеп чыгуу.";
+    if (locale === "zh") return "面向批量生产开发兼具美学、功能与高科技的物理实体产品。";
+    if (locale === "ar") return "تطوير كائنات فيزيائية جمالية وظيفية وتكنولوجية للإنتاج التسلسلي.";
+    if (locale === "de") return "Entwicklung ästhetischer, funktionaler und technologischer physischer Objekte für die Serienproduktion.";
+  }
+
+  if (trimmed.includes("Стратегическое продвижение продуктов") || trimmed.includes("Strategic product promotion")) {
+    if (locale === "en") return "Strategic product promotion and brand launching in digital environments.";
+    if (locale === "ru") return "Стратегическое продвижение продуктов и брендов в цифровой среде, вывод новых решений на рынок.";
+    if (locale === "kg") return "Продукттарды жана бренддерди санариптик чөйрөдө стратегиялык илгерилетүү.";
+    if (locale === "zh") return "在数字环境中对产品和品牌进行战略推广，并将新解决方案引入市场。";
+    if (locale === "ar") return "الترويج الاستراتيجي للمنتجات والعلامات التجارية في البيئة الرقمية.";
+    if (locale === "de") return "Strategische Förderung von Produkten und Marken im digitalen Umfeld.";
+  }
+
+  if (trimmed.includes("Создание футуристических и смелых концептов") || trimmed.includes("Creating futuristic and bold concepts")) {
+    if (locale === "en") return "Creating futuristic and bold concepts for cinema, gaming, presentations, and R&D research.";
+    if (locale === "ru") return "Создание футуристических и смелых концептов для кино, игр, презентаций и долгосрочных R&D-исследований.";
+    if (locale === "kg") return "Кино, оюн, презентация жана R&D үчүн футуристикалык жана тайманбас концепцияларды түзүү.";
+    if (locale === "zh") return "为电影、游戏、演示及研发研究打造前卫而具未来感的设计概念。";
+    if (locale === "ar") return "إنشاء مفاهيم مستقبلية وجريئة للسينما والألعاب والعروض التقديمية والأبحاث.";
+    if (locale === "de") return "Erstellung futuristischer und kühner Konzepte für Film, Spiele, Präsentationen und F&E-Forschung.";
+  }
+
+  if (trimmed.includes("Разработка 3D-миров, игровых окружений") || trimmed.includes("Development of 3D worlds")) {
+    if (locale === "en") return "Development of 3D worlds, game environments, core mechanics, and interactive concept art.";
+    if (locale === "ru") return "Разработка 3D-миров, игровых окружений, механик и интерактивного концепт-арта.";
+    if (locale === "kg") return "3D-дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү концепт-артты иштеп чыгуу.";
+    if (locale === "zh") return "开发3D世界、游戏环境、核心玩法机制与互动概念艺术。";
+    if (locale === "ar") return "تطوير عوالم ثلاثية الأبعاد وبيئات ألعاب وميكانيكا وفن مفاهيمي تفاعلي.";
+    if (locale === "de") return "Entwicklung von 3D-Welten, Spielumgebungen, Mechaniken und interaktiver Konzeptkunst.";
+  }
+
+  if (trimmed.includes("заложили прямую идею") || trimmed.includes("вложили прямую идею") || trimmed.includes("direct idea into the logo")) {
+    if (locale === "zh") return "我们在标志与象征符号中融入了最直观的创意——一本翻开的食谱书，同时勾勒出心形（爱）的轮廓。我们精心设计了品牌风格、包装、外观呈现及更多细节。";
+    if (locale === "ar") return "لقد وضعنا فكرة مباشرة في الشعار والرمز - كتاب مفتوح للوصفات يشبه أيضاً رمز القلب (الحب). عملنا على الأسلوب والتعبئة والتصميم والعرض والتفاصيل.";
+    if (locale === "de") return "Wir haben eine direkte Idee in das Logo und Symbol gesteckt - ein offenes Rezeptbuch, das auch dem Symbol eines Herzens (Liebe) ähnelt. Wir haben am Stil, der Verpackung, dem Design und der Präsentation gearbeitet.";
+    if (locale === "kg") return "Биз логотипке жана символго түз идеяны салдык — ачык рецепттер китеби, ал жүрөк символун (сүйүүнү) да эске салат. Стиль, таңгактоо, дизайн жана презентация үстүндө иштедик.";
+    if (locale === "ru") return "Мы вложили прямую идею в логотип и символ — открытую книгу рецептов, которая также напоминает символ сердца (любовь). Проработали стиль, упаковку, оформление, презентацию и многое другое.";
+    if (locale === "en") return "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design, presentation and much more.";
+  }
+
+  if (trimmed.includes("Создали все самое необходимое") || trimmed.includes("We created everything necessary")) {
+    if (locale === "zh") return "我们由内而外为即将进入市场的全新品牌打造了一切核心要素。鲜明的色彩与对比赋予强力起步，轻松亲和的风格与令人印象深刻的吉祥物标志。";
+    if (locale === "ar") return "لقد أنشأنا كل ما هو ضروري لعلامة تجارية جديدة، من الداخل والخارج، والتي على وشك دخول السوق. ألوان وتباينات لبداية قوية.";
+    if (locale === "de") return "Wir haben alles Notwendige für eine neue Marke von innen und außen geschaffen, die kurz vor dem Markteintritt steht. Farben und Kontraste für einen starken Start.";
+    if (locale === "kg") return "Биз жаңы бренд үчүн ичинен да, сыртынан да бардык зарыл нерселерди түздүк, ал жакында рынокко чыгат. Күчтүү старт үчүн түстөр жана контрасттар.";
+    if (locale === "ru") return "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта. Легкий, дружелюбный стиль...";
+    if (locale === "en") return "We created everything necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style...";
+  }
+
+  // Sentence / Phrase prefix matching or dynamic translation
+  if (locale === "ru") {
+    if (trimmed.startsWith("Branding in which our studio")) {
+      return "Брендинг в котором наша студия создала Наминг, и все важные детали брендинга для презентации курорта. Идеология номера 1 пронесена сквозь волны...";
+    }
+    if (trimmed.startsWith("We created everything necessary")) {
+      return "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта...";
+    }
+  } else if (locale === "kg") {
+    if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
+      return "Курортту презентациялоо үчүн биздин студия Нейминг жана брендингдин бардык маанилүү деталдарын түзгөн брендинг. Толкундар аркылуу №1 идеологиясы...";
+    }
+    if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
+      return "Биз жаңы бренд үчүн ичинен да, сыртынан да бардык зарыл нерселерди түздүк, ал жакында рынокко чыгат. Күчтүү старт үчүн түстөр жана контрасттар...";
+    }
+  } else if (locale === "zh") {
+    if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
+      return "我们工作室为度假村呈现打造了命名及所有重要品牌细节的品牌设计。1号理念穿梭于浪花与设计之间...";
+    }
+    if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
+      return "我们由内而外为即将进入市场的全新品牌打造了一切核心要素。鲜明的色彩与对比赋予强力起步...";
+    }
+  } else if (locale === "ar") {
+    if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
+      return "العلامة التجارية التي أنشأ فيها استوديونا التسمية وجميع تفاصيل العلامة التجارية الهامة لتقديم المنتجع...";
+    }
+    if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
+      return "لقد أنشأنا كل ما هو ضروري لعلامة تجارية جديدة، من الداخل والخارج، والتي على وشك دخول السوق...";
+    }
+  } else if (locale === "de") {
+    if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
+      return "Branding, bei dem unser Studio das Naming und alle wichtigen Branding-Details zur Präsentation des Resorts erstellt hat...";
+    }
+    if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
+      return "Wir haben alles Notwendige für eine neue Marke von innen und außen geschaffen, die kurz vor dem Markteintritt steht...";
+    }
+  } else if (locale === "en") {
+    if (trimmed.startsWith("Брендинг в котором")) {
+      return "Branding in which our studio created Naming, and all the important branding details for presenting the resort. The ideology of number 1 carried through the waves and...";
+    }
+    if (trimmed.startsWith("Мы создали всё необходимое")) {
+      return "We created everything necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style and...";
+    }
+  }
+
+  return text;
+}
 
 export function getLocText(
   locale: Language,
@@ -2184,11 +2749,34 @@ export function getLocText(
   ar?: string,
   de?: string
 ): string {
-  if (locale === "ru") return ru || en;
-  if (locale === "kg") return kg || en || ru;
-  if (locale === "zh") return zh || en || ru;
-  if (locale === "ar") return ar || en || ru;
-  if (locale === "de") return de || en || ru;
-  return en || ru;
+  // 1. Direct dictionary match first!
+  const dictMatch = translationsDictionary[ru] || translationsDictionary[en] || (kg ? translationsDictionary[kg] : null);
+  if (dictMatch && dictMatch[locale]) {
+    return dictMatch[locale];
+  }
+
+  // 2. Exact language parameter check if provided and distinct
+  if (locale === "zh" && zh && zh !== ru && zh !== en) return autoTranslateText(zh, "zh");
+  if (locale === "ar" && ar && ar !== ru && ar !== en) return autoTranslateText(ar, "ar");
+  if (locale === "de" && de && de !== ru && de !== en) return autoTranslateText(de, "de");
+  if (locale === "kg" && kg && kg !== ru && kg !== en) return autoTranslateText(kg, "kg");
+
+  // 3. Auto translate Russian or English
+  if (ru) {
+    const ruMatch = autoTranslateText(ru, locale);
+    if (ruMatch && ruMatch !== ru) return ruMatch;
+  }
+  if (en) {
+    const enMatch = autoTranslateText(en, locale);
+    if (enMatch && enMatch !== en) return enMatch;
+  }
+
+  if (locale === "ru") return autoTranslateText(ru || en, "ru");
+  if (locale === "kg") return autoTranslateText(kg || en || ru, "kg");
+  if (locale === "zh") return autoTranslateText(zh || en || ru, "zh");
+  if (locale === "ar") return autoTranslateText(ar || en || ru, "ar");
+  if (locale === "de") return autoTranslateText(de || en || ru, "de");
+  return autoTranslateText(en || ru, "en");
 }
+
 

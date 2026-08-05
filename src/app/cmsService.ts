@@ -1,4 +1,4 @@
-import { translations as defaultTranslations } from "./i18n";
+import { translations as defaultTranslations, autoTranslateText } from "./i18n";
 import { projectDetailsTranslations as defaultProjectDetails } from "./projectDetailsData";
 import { archiveItems as defaultArchiveItems, type ArchiveItem } from "./archiveData";
 import { supabaseClient } from "./supabaseClient";
@@ -239,6 +239,54 @@ export const cmsService = {
       }
     }
 
+    // Ensure all projects, products, concepts across all languages have auto-translated titles & descriptions
+    const catalogCats = ["projects", "products", "concepts", "architects", "gamedev", "webUiUx"] as const;
+    const masterItems: Record<string, any> = {};
+
+    catalogCats.forEach((cat) => {
+      langs.forEach((lang) => {
+        const items = data[lang]?.[cat]?.items || [];
+        items.forEach((item: any) => {
+          if (item && item.id) {
+            const key = `${cat}:${item.id}`;
+            if (!masterItems[key] || (!masterItems[key].desc && item.desc)) {
+              masterItems[key] = item;
+            }
+          }
+        });
+      });
+    });
+
+    catalogCats.forEach((cat) => {
+      langs.forEach((lang) => {
+        if (!data[lang][cat]) data[lang][cat] = { items: [] };
+        if (!Array.isArray(data[lang][cat].items)) data[lang][cat].items = [];
+
+        Object.keys(masterItems).forEach((key) => {
+          if (key.startsWith(`${cat}:`)) {
+            const master = masterItems[key];
+            let existing = data[lang][cat].items.find((p: any) => p.id === master.id);
+            if (!existing) {
+              existing = JSON.parse(JSON.stringify(master));
+              data[lang][cat].items.push(existing);
+              modified = true;
+            }
+
+            // Keep project names untranslated as requested by user
+            if (master.name && existing.name !== master.name) {
+              existing.name = master.name;
+              modified = true;
+            }
+            const descTrans = autoTranslateText(existing.desc || master.desc || "", lang);
+            if (descTrans && existing.desc !== descTrans) {
+              existing.desc = descTrans;
+              modified = true;
+            }
+          }
+        });
+      });
+    });
+
     if (modified) {
       localStorage.setItem("sds_translations", JSON.stringify(data));
     }
@@ -281,7 +329,8 @@ export const cmsService = {
     }
 
     let modified = false;
-    ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
+    const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+    langs.forEach((lang) => {
       if (!data[lang]) {
         data[lang] = JSON.parse(JSON.stringify(data.en || data.ru || {}));
         modified = true;
@@ -294,6 +343,58 @@ export const cmsService = {
             data[lang][key] = JSON.parse(JSON.stringify(defaultItem));
             modified = true;
           }
+        }
+      });
+
+      // Ensure all projects from defaultProjectDetails are populated with desc, challenge, collageBlocks
+      const defaultDetails = (defaultProjectDetails as any).en || (defaultProjectDetails as any).ru || {};
+      Object.keys(defaultDetails).forEach((pId) => {
+        const defItem = (defaultProjectDetails as any)[lang]?.[pId] || (defaultProjectDetails as any).en?.[pId] || (defaultProjectDetails as any).ru?.[pId];
+        if (!data[lang][pId]) {
+          data[lang][pId] = JSON.parse(JSON.stringify(defItem));
+          modified = true;
+        } else {
+          const cur = data[lang][pId];
+          if ((!cur.desc || !cur.desc.trim()) && defItem.desc) {
+            cur.desc = defItem.desc;
+            modified = true;
+          }
+          if ((!cur.challenge || !cur.challenge.trim()) && defItem.challenge) {
+            cur.challenge = defItem.challenge;
+            modified = true;
+          }
+          if ((!cur.collageBlocks || cur.collageBlocks.length === 0) && defItem.collageBlocks && defItem.collageBlocks.length > 0) {
+            cur.collageBlocks = JSON.parse(JSON.stringify(defItem.collageBlocks));
+            modified = true;
+          }
+          if ((!cur.processImages || cur.processImages.length === 0) && defItem.processImages && defItem.processImages.length > 0) {
+            cur.processImages = JSON.parse(JSON.stringify(defItem.processImages));
+            modified = true;
+          }
+        }
+      });
+
+      // Auto-translate project details for all 6 languages
+      const baseDetails = data.ru || data.en || {};
+      Object.keys(baseDetails).forEach((pId) => {
+        const masterDetail = data[lang]?.[pId] || data.en?.[pId] || data.ru?.[pId];
+        if (masterDetail) {
+          if (!data[lang][pId]) {
+            data[lang][pId] = JSON.parse(JSON.stringify(masterDetail));
+            modified = true;
+          }
+          const cur = data[lang][pId];
+          if (masterDetail.name && cur.name !== masterDetail.name) {
+            cur.name = masterDetail.name;
+            modified = true;
+          }
+          const descT = autoTranslateText(cur.desc || masterDetail.desc || "", lang);
+          const chalT = autoTranslateText(cur.challenge || masterDetail.challenge || "", lang);
+          const servT = autoTranslateText(cur.service || masterDetail.service || "", lang);
+
+          if (descT && cur.desc !== descT) { cur.desc = descT; modified = true; }
+          if (chalT && cur.challenge !== chalT) { cur.challenge = chalT; modified = true; }
+          if (servT && cur.service !== servT) { cur.service = servT; modified = true; }
         }
       });
     });
@@ -346,6 +447,47 @@ export const cmsService = {
     });
     await this.updateTranslations(translations);
   },
+
+  // Move catalog item between sections (e.g. products <-> concepts)
+  async moveCatalogItem(itemId: string, sourceType: string, targetType: string) {
+    if (sourceType === targetType) return { success: false, itemName: itemId };
+    const translations = this.getTranslations();
+    const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+    
+    let itemMoved = false;
+    let itemName = itemId;
+    const newTranslations = JSON.parse(JSON.stringify(translations));
+
+    for (const lang of langs) {
+      if (!newTranslations[lang]) continue;
+      if (!newTranslations[lang][sourceType]) newTranslations[lang][sourceType] = { items: [] };
+      if (!newTranslations[lang][targetType]) newTranslations[lang][targetType] = { items: [] };
+
+      const srcItems = newTranslations[lang][sourceType].items || [];
+      const tgtItems = newTranslations[lang][targetType].items || [];
+
+      const idx = srcItems.findIndex((p: any) => p.id === itemId);
+      if (idx !== -1) {
+        const [item] = srcItems.splice(idx, 1);
+        if (lang === "ru") itemName = item.name || itemId;
+
+        const existingTgtIdx = tgtItems.findIndex((p: any) => p.id === itemId);
+        if (existingTgtIdx === -1) {
+          tgtItems.push(item);
+        } else {
+          tgtItems[existingTgtIdx] = item;
+        }
+        itemMoved = true;
+      }
+    }
+
+    if (itemMoved) {
+      await this.updateTranslations(newTranslations);
+      return { success: true, itemName };
+    }
+    return { success: false, itemName };
+  },
+
 
   // Get archive (Origins) items
   getArchiveItems(): Record<string, ArchiveItem[]> {

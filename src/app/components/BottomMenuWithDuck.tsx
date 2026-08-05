@@ -1,6 +1,6 @@
 import { NavLink } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import type { Language } from "../i18n";
+import { languageOptions, type Language } from "../i18n";
 
 interface BottomMenuWithDuckProps {
   locale: Language;
@@ -101,19 +101,19 @@ export function BottomMenuWithDuck({
             )}
 
             {/* Language Switcher — matching header style */}
-            <div className="flex gap-3 items-center">
-              {(["en", "ru", "kg"] as const).map((lang) => (
+            <div className="flex flex-wrap gap-3 items-center">
+              {languageOptions.map((opt) => (
                 <button
-                  key={lang}
-                  onClick={() => setLocale(lang)}
+                  key={opt.code}
+                  onClick={() => setLocale(opt.code)}
                   className={`text-[17px] font-normal tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[6px] ${
-                    locale === lang
+                    locale === opt.code
                       ? "text-black"
                       : "text-[#808080] hover:text-black"
                   }`}
                 >
-                  {lang}
-                  {locale === lang && (
+                  {opt.label}
+                  {locale === opt.code && (
                     <motion.div
                       layoutId="activeLanguageSidebar"
                       className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black"

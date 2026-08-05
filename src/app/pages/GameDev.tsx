@@ -1,9 +1,24 @@
 import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
+
+function renderCommaSplitList(text: any) {
+  if (typeof text !== "string" || !text || text === "-") return text || "-";
+  if (!text.includes(",")) return text;
+  const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <span className="flex flex-col gap-0.5 text-right">
+      {parts.map((part, idx) => (
+        <span key={idx} className="block whitespace-nowrap">
+          {part}{idx < parts.length - 1 ? "," : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function GameDev() {
   const { t, locale } = useContext(LanguageContext);
@@ -20,17 +35,21 @@ export function GameDev() {
   
   const items = list.map((item: any) => {
     const detail = localizedDetails[item.id] || {};
+    const rawName = item.name || item.title || "";
+    const rawDesc = item.desc || item.challenge || detail.desc || detail.challenge || "";
+    const rawTag = item.tags || item.service || detail.service || "GameDev";
     return {
       ...item,
-      tags: detail.service || "GameDev",
-      year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || "",
-      client: detail.client || "",
-      studio: detail.studio || "-",
-      designer: detail.designer || "-",
-      location: detail.location || "-",
-      projectType: detail.projectType || "-",
-      class: detail.class || "-"
+      name: getLocText(locale, rawName, rawName),
+      tags: getLocText(locale, rawTag, rawTag),
+      year: item.year || detail.year || "2026",
+      desc: getLocText(locale, rawDesc, rawDesc),
+      client: item.client || detail.client || "",
+      studio: item.studio || detail.studio || "-",
+      designer: item.designer || detail.designer || "-",
+      location: item.location || detail.location || "-",
+      projectType: item.projectType || detail.projectType || "-",
+      class: item.class || detail.class || "-"
     };
   });
 
@@ -41,25 +60,26 @@ export function GameDev() {
       <section className="pb-4 mb-[40px] w-auto">
         <div className="flex justify-between items-baseline gap-4 mb-4">
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
-            {t.gamedev?.title || (locale === "ru" ? "Игровая разработка" : locale === "kg" ? "Оюн иштеп чыгуу" : "GameDev")}
+            {t.gamedev?.title || getLocText(locale, "Игровая разработка", "GameDev", "Оюн иштеп чыгуу", "游戏开发", "تطوير الألعاب", "Spieleentwicklung")}
           </h1>
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
-            [GAMEDEV/CATALOGUE]
+            [GAMEDEV/PROJECTS]
           </span>
         </div>
         <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
-          {locale === "ru" 
-            ? "Разработка 3D миров, игровых окружений, механик и интерактивного игрового арта" 
-            : locale === "kg" 
-              ? "3D дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү оюн артын иштеп чыгуу"
-              : "Development of 3D worlds, game environments, mechanics and interactive game art"}
+          {getLocText(
+            locale,
+            "Разработка 3D миров, игровых окружений, механик и интерактивного игрового арта",
+            "Development of 3D worlds, game environments, mechanics and interactive game art",
+            "3D дүйнөлөрдү, оюн чөйрөлөрүн, механиканы жана интерактивдүү оюн артын иштеп чыгуу"
+          )}
         </p>
       </section>
 
       {/* Premium Sorting Sub-navigation */}
       <ProjectsNav />
 
-      {/* Grid */}
+      {/* GameDev Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
         {items.map((item: any, index: number) => (
           <div key={item.id} className="w-full flex flex-col">
@@ -75,7 +95,7 @@ export function GameDev() {
                 />
               </div>
 
-              {/* Meta details — two columns with vertical divider */}
+              {/* Meta details */}
               <div className="mt-[20px] flex justify-between items-stretch gap-0">
                 {/* Left column */}
                 <div className="flex-[3] min-w-0 flex flex-col pr-5">
@@ -91,7 +111,7 @@ export function GameDev() {
                   <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 mb-6">
                     <div className="flex flex-col">
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
-                        {locale === "ru" ? "КАТЕГОРИЯ" : locale === "kg" ? "КАТЕГОРИЯ" : "CATEGORY"}
+                        {getLocText(locale, "КАТЕГОРИЯ", "CATEGORY", "КАТЕГОРИЯ")}
                       </span>
                       <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
                         {item.tags}
@@ -99,7 +119,7 @@ export function GameDev() {
                     </div>
                     <div className="flex flex-col">
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
-                        {locale === "ru" ? "ГОД" : locale === "kg" ? "ЖЫЛ" : "YEAR"}
+                        {getLocText(locale, "ГОД", "YEAR", "ЖЫЛ")}
                       </span>
                       <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
                         {item.year}
@@ -130,7 +150,7 @@ export function GameDev() {
                           {row.label}
                         </span>
                         <span className="text-[14px] md:text-[15px] text-black font-normal text-right">
-                          {row.value}
+                          {renderCommaSplitList(row.value)}
                         </span>
                       </div>
                     ))}

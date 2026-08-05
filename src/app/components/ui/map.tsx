@@ -230,8 +230,8 @@ export const Map = forwardRef<MapRef, MapProps>(function Map(
         if (!style || !style.layers) return;
 
         // OpenMapTiles / Carto Streets vector tile language settings
-        const langKey = locale === "kg" ? "name:kg" : locale === "en" ? "name:en" : "name:ru";
-        const fallbackKey = locale === "kg" ? "name:ru" : "name";
+        const langKey = `name:${locale}`;
+        const fallbackKey = locale === "kg" ? "name:ru" : "name:en";
 
         style.layers.forEach((layer) => {
           if (layer.type === "symbol" && layer.layout && layer.layout["text-field"]) {
@@ -239,6 +239,8 @@ export const Map = forwardRef<MapRef, MapProps>(function Map(
               "coalesce",
               ["get", langKey],
               ["get", fallbackKey],
+              ["get", "name:en"],
+              ["get", "name:ru"],
               ["get", "name"]
             ]);
           }

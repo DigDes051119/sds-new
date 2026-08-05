@@ -1,9 +1,24 @@
 import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
+
+function renderCommaSplitList(text: any) {
+  if (typeof text !== "string" || !text || text === "-") return text || "-";
+  if (!text.includes(",")) return text;
+  const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <span className="flex flex-col gap-0.5 text-right">
+      {parts.map((part, idx) => (
+        <span key={idx} className="block whitespace-nowrap">
+          {part}{idx < parts.length - 1 ? "," : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function ConceptsAndVision() {
   const { t, locale } = useContext(LanguageContext);
@@ -20,11 +35,15 @@ export function ConceptsAndVision() {
   
   const items = list.map((item: any) => {
     const detail = localizedDetails[item.id] || {};
+    const rawName = item.name || item.title || "";
+    const rawDesc = item.desc || item.challenge || detail.desc || detail.challenge || "";
+    const rawTag = item.tags || item.service || detail.service || "Concept & Vision";
     return {
       ...item,
-      tags: item.tags || item.service || detail.service || "Concept & Vision",
+      name: getLocText(locale, rawName, rawName),
+      tags: getLocText(locale, rawTag, rawTag),
       year: item.year || detail.year || "2026",
-      desc: item.desc || item.challenge || detail.desc || detail.challenge || "",
+      desc: getLocText(locale, rawDesc, rawDesc),
       client: item.client || detail.client || "",
       studio: item.studio || detail.studio || "-",
       designer: item.designer || detail.designer || "-",
@@ -41,25 +60,21 @@ export function ConceptsAndVision() {
       <section className="pb-4 mb-[40px] w-auto">
         <div className="flex justify-between items-baseline gap-4 mb-4">
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
-            {t.concepts?.title || (locale === "ru" ? "Концепты и видение" : locale === "kg" ? "Концепциялар жана көрүнүш" : "Concepts & Vision")}
+            {t.concepts?.title || getLocText(locale, "Концепты и видение", "Concepts & Vision", "Концепциялар жана көрүнүш", "概念与愿景", "المفاهيم والرؤية", "Konzepte & Vision")}
           </h1>
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
-            [CONCEPTS/CATALOGUE]
+            [CONCEPTS/VISION]
           </span>
         </div>
         <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
-          {locale === "ru" 
-            ? "Наши визионерские концепты, идеи будущего и экспериментальный дизайн" 
-            : locale === "kg" 
-              ? "Биздин визионердик концепциялар, келечектин идеялары жана эксперименталдык дизайн"
-              : "Our visionary concepts, futuristic ideas and experimental design studies"}
+          {getLocText(locale, "Перспективные визионерские исследования, футуристические концепты транспорта, электроники и архитектуры будущего", "Visionary research, futuristic concepts of transport, electronics and architecture of the future", "Келечектин футуристикалык концепциялары, транспорт, электроника жана архитектура боюнча визионердик изилдөөлөр")}
         </p>
       </section>
 
       {/* Premium Sorting Sub-navigation */}
       <ProjectsNav />
 
-      {/* Grid */}
+      {/* Concepts Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
         {items.map((item: any, index: number) => (
           <div key={item.id} className="w-full flex flex-col">
@@ -75,7 +90,7 @@ export function ConceptsAndVision() {
                 />
               </div>
 
-              {/* Meta details — two columns with vertical divider */}
+              {/* Meta details */}
               <div className="mt-[20px] flex justify-between items-stretch gap-0">
                 {/* Left column */}
                 <div className="flex-[3] min-w-0 flex flex-col pr-5">
@@ -91,7 +106,7 @@ export function ConceptsAndVision() {
                   <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 mb-6">
                     <div className="flex flex-col">
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
-                        {locale === "ru" ? "КАТЕГОРИЯ" : locale === "kg" ? "КАТЕГОРИЯ" : "CATEGORY"}
+                        {getLocText(locale, "КАТЕГОРИЯ", "CATEGORY", "КАТЕГОРИЯ")}
                       </span>
                       <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
                         {item.tags}
@@ -99,7 +114,7 @@ export function ConceptsAndVision() {
                     </div>
                     <div className="flex flex-col">
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
-                        {locale === "ru" ? "ГОД" : locale === "kg" ? "ЖЫЛ" : "YEAR"}
+                        {getLocText(locale, "ГОД", "YEAR", "ЖЫЛ")}
                       </span>
                       <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
                         {item.year}
@@ -130,7 +145,7 @@ export function ConceptsAndVision() {
                           {row.label}
                         </span>
                         <span className="text-[14px] md:text-[15px] text-black font-normal text-right">
-                          {row.value}
+                          {renderCommaSplitList(row.value)}
                         </span>
                       </div>
                     ))}

@@ -6,6 +6,21 @@ import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 
+function renderCommaSplitList(text: any) {
+  if (typeof text !== "string" || !text || text === "-") return text || "-";
+  if (!text.includes(",")) return text;
+  const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <span className="flex flex-col gap-0.5 text-right">
+      {parts.map((part, idx) => (
+        <span key={idx} className="block whitespace-nowrap">
+          {part}{idx < parts.length - 1 ? "," : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function ProductDetail() {
   const { t, locale } = useContext(LanguageContext);
   const { id } = useParams();
@@ -18,28 +33,39 @@ export function ProductDetail() {
     });
   }, []);
 
+  const findInObj = (obj: any, targetId: string) => {
+    if (!obj || !targetId) return null;
+    if (obj[targetId]) return obj[targetId];
+    const lower = targetId.toLowerCase();
+    for (const k of Object.keys(obj)) {
+      if (k.toLowerCase() === lower) return obj[k];
+    }
+    return null;
+  };
+
   const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
   const productsList = t.products?.items || [];
-  const productListItem = productsList.find((p: any) => p.id === id);
+  const productListItem = productsList.find((p: any) => p.id === id || p.id?.toLowerCase() === id?.toLowerCase());
 
   const defaultData = t.productDetail?.defaultProduct || {};
-  const specificData = id ? localeData[id] : null;
+  const specificData = id ? findInObj(localeData, id) : null;
 
-  const data = specificData || {
-    name: productListItem?.name || defaultData.name || "PRODUCT",
-    desc: productListItem?.desc || defaultData.desc || "",
-    client: defaultData.client || "Client",
-    year: defaultData.year || "2026",
-    service: defaultData.service || "Product Design",
-    studio: defaultData.studio || "Steel Drake Studio",
-    designer: defaultData.designer || "Steel Drake Team",
-    location: defaultData.location || "International",
-    projectType: defaultData.projectType || "Commercial Product",
-    class: defaultData.class || "A-Class",
-    challenge: defaultData.challenge || "",
-    processImages: defaultData.processImages || [],
-    results: defaultData.results || [],
-    resultsDesc: defaultData.resultsDesc || ""
+  const data = {
+    name: specificData?.name || productListItem?.name || defaultData.name || "PRODUCT",
+    desc: (specificData?.desc && specificData.desc.trim()) || productListItem?.desc || defaultData.desc || "",
+    client: specificData?.client || defaultData.client || "Client",
+    year: specificData?.year || defaultData.year || "2026",
+    service: specificData?.service || defaultData.service || "Product Design",
+    studio: specificData?.studio || defaultData.studio || "Steel Drake Studio",
+    designer: specificData?.designer || defaultData.designer || "Steel Drake Team",
+    location: specificData?.location || defaultData.location || "International",
+    projectType: specificData?.projectType || defaultData.projectType || "Commercial Product",
+    class: specificData?.class || defaultData.class || "A-Class",
+    challenge: (specificData?.challenge && specificData.challenge.trim()) || defaultData.challenge || "",
+    processImages: (specificData?.processImages && specificData.processImages.length > 0) ? specificData.processImages : (defaultData.processImages || []),
+    collageBlocks: (specificData?.collageBlocks && specificData.collageBlocks.length > 0) ? specificData.collageBlocks : (defaultData.collageBlocks || []),
+    results: (specificData?.results && specificData.results.length > 0) ? specificData.results : (defaultData.results || []),
+    resultsDesc: specificData?.resultsDesc || defaultData.resultsDesc || ""
   };
 
   const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
@@ -99,22 +125,22 @@ export function ProductDetail() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.studio || "STUDIO"}</span>
-                <span className="font-normal text-[15px] leading-tight">{data.studio || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(getLocText(locale, data.studio || "-", data.studio || "-"))}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.designer || "DESIGNER"}</span>
-                <span className="font-normal text-[15px] leading-tight">{data.designer || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(getLocText(locale, data.designer || "-", data.designer || "-"))}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.location || "LOCATION"}</span>
-                <span className="font-normal text-[15px] leading-tight">{data.location || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(getLocText(locale, data.location || "-", data.location || "-"))}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">{t.productDetail?.labels?.projectType || "PROJECT TYPE"}</span>
-                <span className="font-normal text-[15px] leading-tight">{data.projectType || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(getLocText(locale, data.projectType || "-", data.projectType || "-"))}</span>
               </div>
             </div>
 
@@ -143,18 +169,18 @@ export function ProductDetail() {
 
         <div className="lg:col-span-7 flex flex-col gap-6">
           <p className="text-[20px] md:text-[28px] font-light leading-[1.35] tracking-[-0.03em] text-black m-0">
-            {data.challenge || data.desc}
+            {getLocText(locale, data.challenge || data.desc, data.challenge || data.desc)}
           </p>
           {data.challenge && (
             <p className="text-[17px] leading-[1.5] text-black m-0 font-normal subpixel-antialiased">
-              {data.desc}
+              {getLocText(locale, data.desc, data.desc)}
             </p>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-[#808080] pt-8 mt-4">
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[01/SCOPE]</span>
-              <span className="text-[17px] text-black font-normal subpixel-antialiased">{data.service || "Product Design & R&D"}</span>
+              <span className="text-[17px] text-black font-normal subpixel-antialiased">{getLocText(locale, data.service || "Product Design & R&D", data.service || "Product Design & R&D")}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>

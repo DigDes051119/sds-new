@@ -1,22 +1,30 @@
 import { useContext } from "react";
 import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { ProjectsNav } from "../components/ProjectsNav";
 
 export function OldProjects() {
   const { locale } = useContext(LanguageContext);
 
-  const title = locale === "ru" 
-    ? "Откуда мы начинали (2005 — 2020)" 
-    : locale === "kg" 
-      ? "Биз кайдан баштаганбыз (2005 — 2020)" 
-      : "Where we started (2005 — 2020)";
+  const title = getLocText(
+    locale,
+    "Откуда мы начинали (2005 — 2020)",
+    "Where we started (2005 — 2020)",
+    "Биз кайдан баштаганбыз (2005 — 2020)",
+    "我们的起点 (2005 — 2020)",
+    "من أين بدأنا (2005 - 2020)",
+    "Wo wir angefangen haben (2005–2020)"
+  );
 
-  const subtitle = locale === "ru"
-    ? "Полный архив концептуальных, брендинговых и промышленных работ Steel Drake Studio со дня основания компании."
-    : locale === "kg"
-      ? "Компания негизделген күндөн берки Steel Drake Studio'нун концептуалдык, брендингдик жана өнөр жай иштеринин толук архиви."
-      : "Complete archive of conceptual, branding, and industrial design projects by Steel Drake Studio since day one.";
+  const subtitle = getLocText(
+    locale,
+    "Полный архив концептуальных, брендинговых и промышленных работ Steel Drake Studio со дня основания компании.",
+    "Complete archive of conceptual, branding, and industrial design projects by Steel Drake Studio since day one.",
+    "Компания негизделген күндөн берки Steel Drake Studio'нун концептуалдык, брендингдик жана өнөр жай иштеринин толук архиви.",
+    "自公司成立首日起 Steel Drake Studio 的概念、品牌和工业设计项目的完整归档。",
+    "الأرشيف الكامل للمشاريع المفاهيمية والعلامات التجارية والتصميم الصناعي لـ Steel Drake Studio منذ اليوم الأول.",
+    "Vollständiges Archiv der Konzept-, Branding- und Industriedesignprojekte von Steel Drake Studio seit dem ersten Tag."
+  );
 
   return (
     <div className="w-full min-h-screen py-5 font-twk-everett">

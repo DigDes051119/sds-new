@@ -20,29 +20,28 @@ export function GameDevDetail() {
     });
   }, []);
 
-  const gdSection = (siteTranslations[locale] || siteTranslations.en || siteTranslations.ru || {}).gamedev;
-  const list = gdSection?.items || [];
-  const listItem = list.find((p: any) => p.id === id);
+  const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
+  const gamedevList = t.gamedev?.items || [];
+  const listItem = gamedevList.find((p: any) => p.id === id);
 
-  const localeDetails = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
-  const specificData = id ? localeDetails[id] : null;
+  const specificData = id ? localeData[id] : null;
 
   const data = {
-    name: specificData?.name || listItem?.name || "GAMEDEV PROJECT",
-    desc: specificData?.desc || listItem?.desc || "",
-    client: specificData?.client || listItem?.client || "Client",
-    year: specificData?.year || listItem?.year || "2026",
-    service: specificData?.service || listItem?.service || "GameDev",
+    name: specificData?.name || listItem?.name || "GAMEDEV",
+    desc: (specificData?.desc && specificData.desc.trim()) || listItem?.desc || "",
+    client: specificData?.client || "Client",
+    year: specificData?.year || "2026",
+    service: specificData?.service || "GameDev",
     studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
     designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
     location: specificData?.location || listItem?.location || "International",
-    projectType: specificData?.projectType || listItem?.projectType || "Game Project",
-    class: specificData?.class || listItem?.class || "GameDev",
-    challenge: specificData?.challenge || listItem?.challenge || "",
-    processImages: specificData?.processImages || listItem?.processImages || [],
-    collageBlocks: specificData?.collageBlocks || listItem?.collageBlocks || [],
-    results: specificData?.results || listItem?.results || [],
-    resultsDesc: specificData?.resultsDesc || listItem?.resultsDesc || ""
+    projectType: specificData?.projectType || listItem?.projectType || "Game Concept",
+    class: specificData?.class || "GameDev",
+    challenge: (specificData?.challenge && specificData.challenge.trim()) || "",
+    processImages: (specificData?.processImages && specificData.processImages.length > 0) ? specificData.processImages : [],
+    collageBlocks: (specificData?.collageBlocks && specificData.collageBlocks.length > 0) ? specificData.collageBlocks : [],
+    results: (specificData?.results && specificData.results.length > 0) ? specificData.results : [],
+    resultsDesc: specificData?.resultsDesc || ""
   };
 
   const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
@@ -82,13 +81,13 @@ export function GameDevDetail() {
         )}
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-end w-full">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col justify-end">
             <div className="mb-4">
               <Link 
                 to="/gamedev" 
                 className="text-[14px] font-mono tracking-wider uppercase text-white/70 hover:text-white transition-colors"
               >
-                &larr; {getLocText(locale, "К GameDev", "Back to GameDev", "GameDev'ге кайтуу")}
+                &larr; {getLocText(locale, "К геймдеву", "Back to gamedev", "Геймдевге кайтуу")}
               </Link>
             </div>
             <h1 className="text-[32px] xs:text-[44px] md:text-[72px] lg:text-[96px] font-bold leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
@@ -99,22 +98,22 @@ export function GameDevDetail() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">STUDIO</span>
-                <span className="font-normal text-[15px] leading-tight">{data.studio || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.studio || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">DESIGNER</span>
-                <span className="font-normal text-[15px] leading-tight">{data.designer || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.designer || "-")}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">LOCATION</span>
-                <span className="font-normal text-[15px] leading-tight">{data.location || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.location || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">PROJECT TYPE</span>
-                <span className="font-normal text-[15px] leading-tight">{data.projectType || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.projectType || "-")}</span>
               </div>
             </div>
 
@@ -159,11 +158,15 @@ export function GameDevDetail() {
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>
               <span className="text-[17px] text-black font-normal subpixel-antialiased">
-                {locale === "ru" 
-                  ? "Разработка 3D миров и увлекательного игрового опыта." 
-                  : locale === "kg" 
-                    ? "3D дүйнөлөрдү жана кызыктуу оюн тажрыйбасын иштеп чыгуу."
-                    : "Creating interactive mechanics, detailed 3D assets, and immersive game worlds."}
+                {getLocText(
+                  locale,
+                  "Разработка 3D миров и увлекательного игрового опыта.",
+                  "Creating interactive mechanics, detailed 3D assets, and immersive game worlds.",
+                  "3D дүйнөлөрдү жана кызыктуу оюн тажрыйбасын иштеп чыгуу.",
+                  "开发3D世界、精细3D资产与沉浸式游戏体验。",
+                  "تطوير عوالم ثلاثية الأبعاد وتجارب ألعاب غامرة.",
+                  "Entwicklung von 3D-Welten und fesselnden Spielerlebnissen."
+                )}
               </span>
             </div>
           </div>
@@ -180,7 +183,7 @@ export function GameDevDetail() {
                 activeTab === "gallery" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Галерея" : locale === "kg" ? "Галерея" : "Gallery"}
+              {getLocText(locale, "Галерея", "Gallery", "Галерея")}
               {activeTab === "gallery" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -195,7 +198,7 @@ export function GameDevDetail() {
                 activeTab === "video" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Видео" : locale === "kg" ? "Видео" : "Video"}
+              {getLocText(locale, "Видео", "Video", "Видео")}
               {activeTab === "video" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -256,7 +259,7 @@ export function GameDevDetail() {
           <div className="flex justify-between items-start gap-[28px] mb-6">
             <div className="flex flex-col">
               <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
-                {locale === "ru" ? "Итоги" : locale === "kg" ? "Жыйынтыктар" : "Outcomes"}
+                {getLocText(locale, "Итоги", "Outcomes", "Жыйынтыктар")}
               </h2>
               <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
             </div>
@@ -264,7 +267,7 @@ export function GameDevDetail() {
               to="/gamedev"
               className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
             >
-              {locale === "ru" ? "Другие проекты" : locale === "kg" ? "Башка долбоорлор" : "View other projects"}
+              {getLocText(locale, "Другие проекты", "View other projects", "Башка долбоорлор")}
               <span className="text-[18px] leading-none">&rarr;</span>
             </Link>
           </div>

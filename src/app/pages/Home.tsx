@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router";
-import { LanguageContext, translations } from "../i18n";
+import { LanguageContext, translations, getLocText } from "../i18n";
 import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
+import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import coverMoms from "../../imports/cover_moms.webp";
@@ -106,23 +107,67 @@ export function Home() {
     };
   }, []);
 
+  const projectAliases: Record<string, string[]> = {
+    "maminy-retsepty": ["moms-recipes", "mom-s-recipes", "maminy_retsepty", "maminy-retsepty", "mothers-recipes"],
+    "one-ordo-resort": ["one-ordo", "one-ordo-resort", "one-ordo-resort-web"],
+    "tooko": ["tooko", "tooko-brand"],
+    "sandyq": ["sandyq", "sandyk"],
+    "ala-too": ["ala-too", "alatoo"],
+    "salkyn": ["salkyn"],
+    "techstart": ["techstart"],
+    "auto-concept-x": ["auto-concept-x", "autoconceptx", "auto-concept"],
+    "bishbench": ["bishbench"]
+  };
+
+  const findInObj = (obj: any, targetId: string) => {
+    if (!obj || !targetId) return null;
+    if (obj[targetId]) return obj[targetId];
+
+    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const targetClean = clean(targetId);
+
+    // 1. Direct clean match
+    for (const k of Object.keys(obj)) {
+      if (clean(k) === targetClean) return obj[k];
+    }
+
+    // 2. Alias match
+    for (const [canonical, aliases] of Object.entries(projectAliases)) {
+      const allKeys = [canonical, ...aliases].map(clean);
+      if (allKeys.includes(targetClean)) {
+        for (const k of Object.keys(obj)) {
+          if (allKeys.includes(clean(k))) return obj[k];
+        }
+      }
+    }
+
+    return null;
+  };
+
   const localizedDetails = projectDetails[locale] || projectDetails["ru"] || {};
 
   // All projects from i18n
   const allProjects = t.projects?.items || [];
   const mappedProjects = allProjects.map((p: any, idx: number) => {
-    const detail = localizedDetails[p.id] || {};
+    const cmsDetail = findInObj(projectDetails[locale], p.id) || findInObj(projectDetails.ru, p.id) || findInObj(projectDetails.en, p.id) || {};
+    const fallbackDetail = findInObj(projectDetailsTranslations[locale], p.id) || findInObj(projectDetailsTranslations.ru, p.id) || findInObj(projectDetailsTranslations.en, p.id) || {};
+
+    const rawTitle = p.name || p.title || cmsDetail.name || fallbackDetail.name || "";
+    const rawDesc = (cmsDetail.desc && cmsDetail.desc.trim()) || (cmsDetail.challenge && cmsDetail.challenge.trim()) || (fallbackDetail.desc && fallbackDetail.desc.trim()) || (fallbackDetail.challenge && fallbackDetail.challenge.trim()) || p.desc || "";
+    const rawTag = cmsDetail.service || fallbackDetail.service || p.category || "Design";
+    const year = cmsDetail.year || fallbackDetail.year || "2026";
+
     return {
       id: p.id || String(idx),
-      title: p.name || p.title || "",
+      title: getLocText(locale, rawTitle, rawTitle),
       image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
         ? p.img
         : (p.id === "maminy-retsepty" ? coverMoms
           : p.id === "tooko" ? coverTooko
           : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
-      tags: detail.service || p.category || "Design",
-      year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || p.desc || ""
+      tags: getLocText(locale, rawTag, rawTag),
+      year: year,
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
 
@@ -134,13 +179,16 @@ export function Home() {
   const allProducts = t.products?.items || [];
   const mappedProducts = allProducts.map((p: any, idx: number) => {
     const detail = localizedProductDetails[p.id] || {};
+    const rawTitle = p.name || p.title || "";
+    const rawDesc = detail.desc || detail.challenge || p.desc || "";
+    const rawTag = detail.service || p.category || "Product";
     return {
       id: p.id || String(idx),
-      title: p.name || p.title || "",
+      title: getLocText(locale, rawTitle, rawTitle),
       image: p.img || (p.images && p.images[0]) || "",
-      tags: detail.service || p.category || "Product",
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || p.desc || ""
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
   const recentProducts = mappedProducts.slice(0, 4);
@@ -149,13 +197,16 @@ export function Home() {
   const allConcepts = t.concepts?.items || [];
   const mappedConcepts = allConcepts.map((p: any, idx: number) => {
     const detail = localizedProductDetails[p.id] || {};
+    const rawTitle = p.name || p.title || "";
+    const rawDesc = detail.desc || detail.challenge || p.desc || "";
+    const rawTag = detail.service || p.category || "Concept";
     return {
       id: p.id || String(idx),
-      title: p.name || p.title || "",
+      title: getLocText(locale, rawTitle, rawTitle),
       image: p.img || (p.images && p.images[0]) || "",
-      tags: detail.service || p.category || "Concept",
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || p.desc || ""
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
   const recentConcepts = mappedConcepts.slice(0, 4);
@@ -168,13 +219,16 @@ export function Home() {
   const featuredConcepts = featuredConceptsRaw.map((fc: any) => {
     const matched = allConcepts.find((c: any) => c.id === fc.id);
     const detail = localizedProductDetails[fc.id] || {};
+    const rawTitle = matched?.name || fc.title || fc.name || "";
+    const rawDesc = detail.desc || detail.challenge || fc.desc || "";
+    const rawTag = detail.service || matched?.category || fc.tag || "Concept";
     return {
       id: fc.id,
-      title: matched?.name || fc.title || fc.name || "",
+      title: getLocText(locale, rawTitle, rawTitle),
       image: fc.image || fc.img || matched?.img || "",
-      tags: detail.service || matched?.category || fc.tag || "Concept",
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || fc.desc || ""
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
 
@@ -182,17 +236,20 @@ export function Home() {
   const allWebUiUx = t.webUiUx?.items || [];
   const mappedWebUiUx = allWebUiUx.map((p: any, idx: number) => {
     const detail = localizedDetails[p.id] || {};
+    const rawTitle = p.name || p.title || "";
+    const rawDesc = detail.desc || detail.challenge || p.desc || "";
+    const rawTag = detail.service || p.category || "WEB / UI UX";
     return {
       id: p.id || String(idx),
-      title: p.name || p.title || "",
+      title: getLocText(locale, rawTitle, rawTitle),
       image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
         ? p.img
         : (p.id === "maminy-retsepty" ? coverMoms
           : p.id === "tooko" ? coverTooko
           : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
-      tags: detail.service || p.category || "WEB / UI UX",
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || p.desc || ""
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
   const recentWebUiUx = mappedWebUiUx.slice(0, 3);
@@ -205,36 +262,29 @@ export function Home() {
   const featuredProjects = featuredProjectsRaw.map((fp: any) => {
     const matched = allProjects.find((p: any) => p.id === fp.id);
     const detail = localizedDetails[fp.id] || {};
+    const rawTitle = (matched?.name && (fp.title === "Ala-Too" || fp.name === "Ala-Too")) ? matched.name : (matched?.name || fp.title || fp.name || "");
+    const rawDesc = detail.desc || detail.challenge || matched?.desc || "";
+    const rawTag = fp.category || fp.tag || detail.service || matched?.category || "Design";
     return {
       id: fp.id,
-      title: (matched?.name && (fp.title === "Ala-Too" || fp.name === "Ala-Too")) ? matched.name : (matched?.name || fp.title || fp.name || ""),
+      title: getLocText(locale, rawTitle, rawTitle),
       image: (fp.img && (fp.img.startsWith("http") || fp.img.startsWith("data:") || fp.img.startsWith("/")))
         ? fp.img
         : (fp.id === "maminy-retsepty" ? coverMoms
           : fp.id === "tooko" ? coverTooko
           : (fp.img || fp.image || matched?.img || "")),
-      tags: fp.category || fp.tag || detail.service || matched?.category || "Design",
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || matched?.desc || ""
+      desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
 
   // Block 3: Advantages list based on i18n about values
-  const advantages = locale === "ru" ? [
-    { num: "01", title: "Founder", desc: "21 год опыта в дизайне — основатель студии." },
-    { num: "02", title: "Studio", desc: "2011 год — опыт работы как студия." },
-    { num: "03", title: "Global", desc: "Проекты для рынков Центральной Азии, Европы и digital-first команд." },
-    { num: "04", title: "Principle", desc: "Становимся частью каждого проекта поэтому переживаем вместе с клиентом и стараемся делать работу по совести. Никаких громких пустых слов, просто делаем как должно быть." }
-  ] : locale === "kg" ? [
-    { num: "01", title: "Founder", desc: "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү." },
-    { num: "02", title: "Studio", desc: "2011-жылдан бери — студия катары тажрыйба." },
-    { num: "03", title: "Global", desc: "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор." },
-    { num: "04", title: "Principle", desc: "Ар бир долбоордун бир бөлүгү болобуз, ошондуктан кардар менен бирге сарсанаа болуп, ишти абийир менен жасоого аракет кылабыз. Эч кандай куру сөз жок, жөн гана кандай болушу керек болсо, ошондой кылабыз." }
-  ] : [
-    { num: "01", title: "Founder", desc: "21 year of experience in Design - studio founder." },
-    { num: "02", title: "Studio", desc: "2011 year - experience as studio." },
-    { num: "03", title: "Global", desc: "Projects for Central Asia, Europe and digital-first teams." },
-    { num: "04", title: "Principle", desc: "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done." }
+  const advantages = [
+    { num: "01", title: "Founder", desc: getLocText(locale, "21 год опыта в дизайне — основатель студии.", "21 year of experience in Design - studio founder.", "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү.", "21年设计经验 — 工作室创始人", "21 عامًا من الخبرة في التصميم - مؤسس الاستوديو", "21 Jahre Erfahrung im Design – Studio-Gründer") },
+    { num: "02", title: "Studio", desc: getLocText(locale, "2011 год — опыт работы как студия.", "2011 year - experience as studio.", "2011-жылдан бери — студия катары тажрыйба.", "自2011年起作为专业工作室的丰富经验", "خبرة كاستوديو محترف منذ عام 2011", "Erfahrung als Studio seit 2011") },
+    { num: "03", title: "Global", desc: getLocText(locale, "Проекты для рынков Центральной Азии, Европы и digital-first команд.", "Projects for Central Asia, Europe and digital-first teams.", "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор.", "服务于中亚、欧洲和数字优先团队的项目。", "مشاريع لأسواق آسيا الوسطى وأوروبا والفرق الرقمية.", "Projekte für Zentralasien, Europa und Digital-First-Teams.") },
+    { num: "04", title: "Principle", desc: getLocText(locale, "Становимся частью каждого проекта поэтому переживаем вместе с клиентом и стараемся делать работу по совести. Никаких громких пустых слов, просто делаем как должно быть.", "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done.", "Ар бир долбоордун бир бөлүгү болобуз, ошондуктан кардар менен бирге сарсанаа болуп, ишти абийир менен жасоого аракет кылабыз. Эч кандай куру сөз жок, жөн гана кандай болушу керек болсо, ошондой кылабыз.", "我们深融于每个项目，与客户同频共振，以诚做事。无句虚言，唯求至臻。", "نصبح جزءًا من كل مشروع، لذا نهتم بعمق جنباً إلى جنب مع العميل ونحافظ على النزاهة.", "Wir werden Teil jedes Projekts, arbeiten mit Integrität und ohne leere Versprechungen.") }
   ];
 
   // Block 4: Services list (Top 5 main services: Branding, Industrial Design, Marketing, Concept Design, Game Dev)
@@ -300,11 +350,11 @@ export function Home() {
         <div className="lg:col-span-9 pt-4 flex justify-end">
           <div className="w-[var(--sds-nav-cluster-width,680px)] max-w-full">
             <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[560px]">
-              {locale === "ru"
-                ? "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь"
-                : locale === "kg"
-                ? "Сиз көргөндөрдүн бардыгы биздин физикалык дүйнөнү кабыл алуубуздун баштапкы муундарынын бири болуп саналат, ошондуктан студиянын философиясы — биринчи кезекте Дизайн."
-                : "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."}
+              {getLocText(
+                locale,
+                "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь",
+                "Everything you see is but a primary link in how we perceive our physical world, which is why the studio's philosophy is Design at first."
+              )}
             </p>
           </div>
         </div>
@@ -316,7 +366,7 @@ export function Home() {
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-              {locale === "ru" ? "Недавние проекты" : locale === "kg" ? "Жакында долбоорлор" : "Recent projects"}
+              {getLocText(locale, "Недавние проекты", "Recent projects", "Жакында долбоорлор")}
             </h2>
           </div>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
@@ -373,7 +423,7 @@ export function Home() {
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0">
-            {locale === "ru" ? "Преимущества" : locale === "kg" ? "Артыкчылыктар" : "Advantages"}
+            {getLocText(locale, "Преимущества", "Advantages", "Артыкчылыктар")}
           </h2>
           <span className="font-mono text-[14px] xs:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 xs:pb-[15px] shrink-0">[03/VALUES]</span>
         </div>
@@ -387,11 +437,7 @@ export function Home() {
                 21+
               </div>
               <span className="font-mono text-[12px] md:text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                {locale === "ru" 
-                  ? "Год опыта в дизайне — основатель студии" 
-                  : locale === "kg" 
-                    ? "Дизайндагы 21 жылдык тажрыйба" 
-                    : "Years of experience in Design — studio founder"}
+                {getLocText(locale, "Год опыта в дизайне — основатель студии", "Years of experience in Design — studio founder", "Дизайндагы 21 жылдык тажрыйба", "设计领域从业年限 — 工作室创始人", "سنوات الخبرة في التصميم - مؤسس الاستوديو", "Jahre Erfahrung im Design - Studio-Gründer")}
               </span>
             </div>
 
@@ -403,11 +449,7 @@ export function Home() {
                 2011
               </div>
               <span className="font-mono text-[12px] md:text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                {locale === "ru" 
-                  ? "Опыт работы как студия" 
-                  : locale === "kg" 
-                    ? "Студия катары тажрыйба" 
-                    : "Experience as studio"}
+                {getLocText(locale, "Опыт работы как студия", "Experience as studio", "Студия катары тажрыйба", "工作室运营历程", "خبرة العمل كاستوديو", "Erfahrung als Studio")}
               </span>
             </div>
           </div>
@@ -445,7 +487,7 @@ export function Home() {
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-              {locale === "ru" ? "Недавние продукты" : locale === "kg" ? "Жакында өнүмдөр" : "Recent products"}
+              {getLocText(locale, "Недавние продукты", "Recent products", "Жакында өнүмдөр")}
             </h2>
           </div>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/PRODUCTS]</span>
@@ -501,7 +543,7 @@ export function Home() {
             <div className="flex flex-col">
               <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
               <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-                {locale === "ru" ? "Недавние концепты" : locale === "kg" ? "Акыркы концепциялар" : "Recent concepts"}
+                {getLocText(locale, "Недавние концепты", "Recent concepts", "Акыркы концепциялар")}
               </h2>
             </div>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04.5/CONCEPTS]</span>
@@ -555,7 +597,7 @@ export function Home() {
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[28px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-            {locale === "ru" ? "Услуги" : locale === "kg" ? "Кызматтар" : "Services"}
+            {getLocText(locale, "Услуги", "Services", "Кызматтар")}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/SERVICES]</span>
         </div>
@@ -641,7 +683,7 @@ export function Home() {
       <section className="flex flex-col w-full">
         <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-            {locale === "ru" ? "Избранные проекты" : locale === "kg" ? "Тандалган долбоорлор" : "Featured projects"}
+            {getLocText(locale, "Избранные проекты", "Featured projects", "Тандалган долбоорлор")}
           </h2>
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/FEATURED]</span>
         </div>
@@ -688,16 +730,12 @@ export function Home() {
         <div className="pb-4 mb-[59px] ">
           <div className="flex justify-between items-baseline">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-              {locale === "ru" ? "Бренды" : locale === "kg" ? "Бренддер" : "Selected brands"}
+              {getLocText(locale, "Бренды", "Selected brands", "Бренддер")}
             </h2>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07/BRANDS]</span>
           </div>
           <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal mt-2 max-w-[600px]">
-            {locale === "ru" 
-              ? "Знакомые вам бренды которые были созданы или обрели обновленный стиль благодаря нашей студии" 
-              : locale === "kg" 
-                ? "Сизге тааныш болгон бренддер биздин студия тарабынан түзүлгөн же жаңыланган стилге ээ болгон"
-                : "Brands you know that were created or have been renewed thanks to our studio"}
+            {getLocText(locale, "Знакомые вам бренды которые были созданы или обрели обновленный стиль благодаря нашей студии", "Brands you know that were created or have been renewed thanks to our studio", "Сизге тааныш болгон бренддер биздин студия тарабынан түзүлгөн же жаңыланган стилге ээ болгон")}
           </p>
         </div>
 
@@ -772,7 +810,7 @@ export function Home() {
         <section className="flex flex-col w-full">
           <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-              {locale === "ru" ? "Концепты и видение" : locale === "kg" ? "Концепциялар жана көрүнүш" : "Concepts & Vision"}
+              {getLocText(locale, "Концепты и видение", "Concepts & Vision", "Концепциялар жана көрүнүш", "概念与愿景", "المفاهيم والرؤية", "Konzepte & Vision")}
             </h2>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07.5/FEATURED-CONCEPTS]</span>
           </div>
@@ -829,7 +867,7 @@ export function Home() {
         <section className="flex flex-col w-full">
           <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-              {locale === "ru" ? "Недавние проекты WEB / UI UX" : locale === "kg" ? "Акыркы WEB / UI UX долбоорлору" : "Recent WEB / UI UX projects"}
+              {getLocText(locale, "Недавние проекты WEB / UI UX", "Recent WEB / UI UX projects", "Акыркы WEB / UI UX долбоорлору", "近期网页与UI/UX项目", "المشاريع الأخيرة للويب وواجهات المستخدم", "Neueste WEB / UI UX Projekte")}
             </h2>
             <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[09/WEB-UI-UX]</span>
           </div>

@@ -116,6 +116,17 @@ export function AdminLayout() {
   const isDark = theme === "dark";
   const t = isDark ? dark : light;
 
+  const [dragOverPath, setDragOverPath] = useState<string | null>(null);
+  const [dropSuccessMessage, setDropSuccessMessage] = useState<string | null>(null);
+
+  const categoryMap: Record<string, string> = {
+    "/admin/products": "products",
+    "/admin/concepts": "concepts",
+    "/admin/architects": "architects",
+    "/admin/gamedev": "gamedev",
+    "/admin/projects": "projects",
+  };
+
   return (
     <div
       className={`admin-app-scope min-h-screen flex transition-colors duration-300 ${isDark ? 'admin-theme-dark' : 'admin-theme-light'}`}
@@ -152,38 +163,78 @@ export function AdminLayout() {
             {filteredMenuItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
+              const targetCategory = categoryMap[item.path];
+              const isDragOver = dragOverPath === item.path;
+
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   title={isCollapsed ? item.name : undefined}
-                  className="flex items-center transition-all duration-200 group"
+                  onDragOver={(e) => {
+                    if (targetCategory) {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      setDragOverPath(item.path);
+                    }
+                  }}
+                  onDragLeave={() => setDragOverPath(null)}
+                  onDrop={async (e) => {
+                    if (!targetCategory) return;
+                    e.preventDefault();
+                    setDragOverPath(null);
+                    const globalItem = (window as any).__draggedAdminCatalogItem;
+                    let parsed = globalItem;
+                    if (!parsed) {
+                      try {
+                        const raw = e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
+                        if (raw) parsed = JSON.parse(raw);
+                      } catch {}
+                    }
+                    if (parsed && parsed.itemId && parsed.sourceType !== targetCategory) {
+                      const res = await cmsService.moveCatalogItem(parsed.itemId, parsed.sourceType, targetCategory);
+                      if (res.success) {
+                        delete (window as any).__draggedAdminCatalogItem;
+                        setDropSuccessMessage(`Проект "${res.itemName}" перемещен в "${item.name}"!`);
+                        setTimeout(() => setDropSuccessMessage(null), 4000);
+                        navigate(item.path);
+                      }
+                    }
+                  }}
+                  className={`flex items-center transition-all duration-200 group relative ${
+                    isDragOver ? "animate-pulse ring-2 ring-white scale-105" : ""
+                  }`}
                   style={{
                     borderRadius: 14,
                     padding: isCollapsed ? "10px" : "10px 14px",
                     justifyContent: isCollapsed ? "center" : "flex-start",
                     gap: 12,
-                    background: isActive ? t.accent : "transparent",
-                    color: isActive ? "#FFF" : t.muted,
-                    boxShadow: isActive ? `0 4px 16px ${t.accentGlow}` : "none",
+                    background: isDragOver ? "#0000FF" : (isActive ? t.accent : "transparent"),
+                    color: isDragOver ? "#FFF" : (isActive ? "#FFF" : t.muted),
+                    boxShadow: isDragOver ? "0 0 20px rgba(0,0,255,0.8)" : (isActive ? `0 4px 16px ${t.accentGlow}` : "none"),
                     fontSize: 13,
-                    fontWeight: isActive ? 700 : 500,
+                    fontWeight: isActive || isDragOver ? 700 : 500,
+                    border: isDragOver ? "2px dashed #FFFFFF" : "1px solid transparent",
                   }}
                   onMouseEnter={e => {
-                    if (!isActive) {
+                    if (!isActive && !isDragOver) {
                       e.currentTarget.style.background = isDark ? "#1F1F28" : "#F0F0F4";
                       e.currentTarget.style.color = t.text;
                     }
                   }}
                   onMouseLeave={e => {
-                    if (!isActive) {
+                    if (!isActive && !isDragOver) {
                       e.currentTarget.style.background = "transparent";
                       e.currentTarget.style.color = t.muted;
                     }
                   }}
                 >
                   <Icon size={19} style={{ flexShrink: 0 }} />
-                  {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  {!isCollapsed && (
+                    <span className="truncate">
+                      {isDragOver ? `🎯 Переместить в ${item.name}` : item.name}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -295,7 +346,12 @@ export function AdminLayout() {
         </header>
 
         {/* Page content */}
-        <div className="flex-1 p-6 lg:p-10">
+        <div className="flex-1 p-6 lg:p-10 space-y-4">
+          {dropSuccessMessage && (
+            <div className="bg-[#0000FF] text-white font-bold text-xs p-4 rounded-xl shadow-xl flex items-center justify-between">
+              <span>🎉 {dropSuccessMessage}</span>
+            </div>
+          )}
           {isAllowed ? (
             <Outlet />
           ) : (

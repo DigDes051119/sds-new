@@ -24,9 +24,15 @@ export function Contacts() {
         </div>
         <div className="md:col-span-7 md:pl-[59px]">
           <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[500px]">
-            {locale === "ru" 
-              ? "Свяжитесь с нами для обсуждения вашего проекта или сотрудничества." 
-              : "Reach out to us to initiate a collaboration or learn more about our design monograph."}
+            {getLocText(
+              locale,
+              "Свяжитесь с нами для обсуждения вашего проекта или сотрудничества.",
+              "Reach out to us to initiate a collaboration or learn more about our design monograph.",
+              "Долбооруңузду же кызматташууну талкуулоо үчүн биз менен байланышыңыз.",
+              "与我们联系，讨论您的项目或合作事宜。",
+              "تواصل معنا لمناقشة مشروعك أو التعاون.",
+              "Nehmen Sie Kontakt mit uns auf, um Ihr Projekt или eine Zusammenarbeit zu besprechen."
+            )}
           </p>
         </div>
       </section>

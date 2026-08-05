@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, ArrowLeftRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
@@ -108,11 +108,45 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
   const [isConverting, setIsConverting] = useState(false);
 
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(null);
+  const [draggedOverTargetCategory, setDraggedOverTargetCategory] = useState<string | null>(null);
 
-  const handleProductDragStart = (e: React.DragEvent, index: number) => {
+  const handleProductDragStart = (e: React.DragEvent, index: number, item: any) => {
     if (isReadOnly) return;
     setDraggedProductIndex(index);
-    e.dataTransfer.setData("text/plain", index.toString());
+    const dragPayload = JSON.stringify({ itemId: item.id, sourceType: type, itemName: item.name });
+    e.dataTransfer.setData("application/json", dragPayload);
+    e.dataTransfer.setData("text/plain", dragPayload);
+    (window as any).__draggedAdminCatalogItem = { itemId: item.id, sourceType: type, itemName: item.name };
+  };
+
+  const handleProductDragEnd = () => {
+    setDraggedProductIndex(null);
+    setDraggedOverTargetCategory(null);
+    delete (window as any).__draggedAdminCatalogItem;
+  };
+
+  const handleMoveToCategory = async (itemId: string, sourceType: string, targetType: string) => {
+    if (isReadOnly || sourceType === targetType) return;
+    try {
+      const res = await cmsService.moveCatalogItem(itemId, sourceType, targetType);
+      if (res.success) {
+        const sourceTitle = CONFIGS[sourceType]?.titleRu || sourceType;
+        const targetTitle = CONFIGS[targetType]?.titleRu || targetType;
+        await logAdminAction(
+          "Управление каталогом",
+          "Перемещение",
+          `Проект "${res.itemName}" (${itemId}) перемещен из "${sourceTitle}" в "${targetTitle}"`
+        );
+        setSuccessMessage(`Проект "${res.itemName}" успешно перемещен из раздела "${sourceTitle}" в "${targetTitle}"!`);
+        setTimeout(() => setSuccessMessage(null), 4000);
+      }
+    } catch (err: any) {
+      alert("Ошибка при перемещении элемента: " + (err.message || err));
+    } finally {
+      setDraggedProductIndex(null);
+      setDraggedOverTargetCategory(null);
+      delete (window as any).__draggedAdminCatalogItem;
+    }
   };
 
   const handleProductDrop = async (e: React.DragEvent, targetIndex: number) => {
@@ -121,11 +155,14 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
 
     try {
       const newTranslations = JSON.parse(JSON.stringify(translations));
-      const langs = ["ru", "en", "kg"] as const;
+      const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
       langs.forEach(lang => {
+        if (!newTranslations[lang] || !newTranslations[lang][type]) return;
         const items = newTranslations[lang][type].items;
-        const [movedItem] = items.splice(draggedProductIndex, 1);
-        items.splice(targetIndex, 0, movedItem);
+        if (items && items[draggedProductIndex]) {
+          const [movedItem] = items.splice(draggedProductIndex, 1);
+          items.splice(targetIndex, 0, movedItem);
+        }
       });
 
       await cmsService.updateTranslations(newTranslations);
@@ -140,6 +177,8 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       alert("Ошибка при сохранении порядка: " + err.message);
     } finally {
       setDraggedProductIndex(null);
+      setDraggedOverTargetCategory(null);
+      delete (window as any).__draggedAdminCatalogItem;
     }
   };
 
@@ -537,108 +576,41 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     try {
       setTranslating(true);
 
-      const nameEn = await translateText(formNameRu, "en");
-      const nameKg = await translateText(formNameRu, "kg");
+      // Auto translate RU fields to ALL 6 languages (en, kg, zh, ar, de)
+      const targetLangs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+      const names: Record<string, string> = {};
+      const catNames: Record<string, string> = {};
+      const descs: Record<string, string> = {};
+      const clients: Record<string, string> = {};
+      const services: Record<string, string> = {};
+      const studios: Record<string, string> = {};
+      const designers: Record<string, string> = {};
+      const locations: Record<string, string> = {};
+      const projectTypes: Record<string, string> = {};
+      const challenges: Record<string, string> = {};
+      const results1: Record<string, string> = {};
+      const results2: Record<string, string> = {};
 
-      const categoryEn = await translateText(formCategoryRu, "en");
-      const categoryKg = await translateText(formCategoryRu, "kg");
-
-      const descEn = await translateText(formDescRu, "en");
-      const descKg = await translateText(formDescRu, "kg");
-
-      const clientEn = await translateText(formClientRu, "en");
-      const clientKg = await translateText(formClientRu, "kg");
-
-      const serviceEn = await translateText(formServiceRu, "en");
-      const serviceKg = await translateText(formServiceRu, "kg");
-
-      const challengeEn = await translateText(formChallengeRu, "en");
-      const challengeKg = await translateText(formChallengeRu, "kg");
-
-      const studioEn = await translateText(formStudioRu, "en");
-      const studioKg = await translateText(formStudioRu, "kg");
-      const designerEn = await translateText(formDesignerRu, "en");
-      const designerKg = await translateText(formDesignerRu, "kg");
-      const locationEn = await translateText(formLocationRu, "en");
-      const locationKg = await translateText(formLocationRu, "kg");
-      const projectTypeEn = await translateText(formProjectTypeRu, "en");
-      const projectTypeKg = await translateText(formProjectTypeRu, "kg");
-
-      const result1En = await translateText(formResult1Ru, "en");
-      const result1Kg = await translateText(formResult1Ru, "kg");
-
-      const result2En = await translateText(formResult2Ru, "en");
-      const result2Kg = await translateText(formResult2Ru, "kg");
+      for (const lang of targetLangs) {
+        names[lang] = lang === "ru" ? formNameRu : (await translateText(formNameRu, lang, "ru"));
+        catNames[lang] = lang === "ru" ? formCategoryRu : (await translateText(formCategoryRu, lang, "ru"));
+        descs[lang] = lang === "ru" ? formDescRu : (await translateText(formDescRu, lang, "ru"));
+        clients[lang] = lang === "ru" ? formClientRu : (await translateText(formClientRu, lang, "ru"));
+        services[lang] = lang === "ru" ? formServiceRu : (await translateText(formServiceRu, lang, "ru"));
+        studios[lang] = lang === "ru" ? formStudioRu : (await translateText(formStudioRu, lang, "ru"));
+        designers[lang] = lang === "ru" ? formDesignerRu : (await translateText(formDesignerRu, lang, "ru"));
+        locations[lang] = lang === "ru" ? formLocationRu : (await translateText(formLocationRu, lang, "ru"));
+        projectTypes[lang] = lang === "ru" ? formProjectTypeRu : (await translateText(formProjectTypeRu, lang, "ru"));
+        challenges[lang] = lang === "ru" ? formChallengeRu : (await translateText(formChallengeRu, lang, "ru"));
+        results1[lang] = lang === "ru" ? formResult1Ru : (await translateText(formResult1Ru, lang, "ru"));
+        results2[lang] = lang === "ru" ? formResult2Ru : (await translateText(formResult2Ru, lang, "ru"));
+      }
 
       const newTranslations = JSON.parse(JSON.stringify(translations));
       const newDetails = JSON.parse(JSON.stringify(productDetails));
 
-      ["ru", "en", "kg"].forEach(lang => {
-        if (!newTranslations[lang][type]) {
-          newTranslations[lang][type] = { title: lang === "ru" ? cfg.defaultTitleRu : lang === "en" ? cfg.defaultTitleEn : cfg.defaultTitleKg, items: [] };
-        }
-      });
-
-      const listEntryRu = { id: formId, name: formNameRu, category: formCategoryRu, categoryKey: formCategoryKey, img: formImg };
-      const listEntryEn = { id: formId, name: nameEn, category: categoryEn, categoryKey: formCategoryKey, img: formImg };
-      const listEntryKg = { id: formId, name: nameKg, category: categoryKg, categoryKey: formCategoryKey, img: formImg };
-
       const cleanBlocks = formCollageBlocks.map(block => block.filter(Boolean)).filter(block => block.length > 0);
       const flattenedImages = cleanBlocks.flat();
-
-      const detailEntryRu = {
-        name: formNameRu,
-        desc: formDescRu,
-        client: formClientRu,
-        year: formYear,
-        service: formServiceRu,
-        studio: formStudioRu,
-        designer: formDesignerRu,
-        location: formLocationRu,
-        projectType: formProjectTypeRu,
-        class: formProductClass,
-        challenge: formChallengeRu,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [formResult1Ru, formResult2Ru].filter(Boolean)
-      };
-
-      const detailEntryEn = {
-        name: nameEn,
-        desc: descEn,
-        client: clientEn,
-        year: formYear,
-        service: serviceEn,
-        studio: studioEn,
-        designer: designerEn,
-        location: locationEn,
-        projectType: projectTypeEn,
-        class: formProductClass,
-        challenge: challengeEn,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [result1En, result2En].filter(Boolean)
-      };
-
-      const detailEntryKg = {
-        name: nameKg,
-        desc: descKg,
-        client: clientKg,
-        year: formYear,
-        service: serviceKg,
-        studio: studioKg,
-        designer: designerKg,
-        location: locationKg,
-        projectType: projectTypeKg,
-        class: formProductClass,
-        challenge: challengeKg,
-        processImages: flattenedImages,
-        collageBlocks: cleanBlocks,
-        collageTheme: formCollageTheme,
-        results: [result1Kg, result2Kg].filter(Boolean)
-      };
 
       const isIdTaken = (translations.ru[type]?.items || []).some((p: any) => p.id === formId && p.id !== editingId);
       if (isIdTaken) {
@@ -646,34 +618,47 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
         return;
       }
 
-      if (editingId) {
-        ["ru", "en", "kg"].forEach((lang) => {
-          const items = newTranslations[lang][type].items;
-          const index = items.findIndex((p: any) => p.id === editingId);
-          if (index !== -1) {
-            items[index] = lang === "ru" ? listEntryRu : lang === "en" ? listEntryEn : listEntryKg;
-          }
-        });
-
-        if (editingId !== formId) {
-          delete newDetails.ru[editingId];
-          delete newDetails.en[editingId];
-          delete newDetails.kg[editingId];
+      targetLangs.forEach(lang => {
+        if (!newTranslations[lang]) newTranslations[lang] = {};
+        if (!newTranslations[lang][type]) {
+          newTranslations[lang][type] = { title: lang === "ru" ? cfg.defaultTitleRu : lang === "en" ? cfg.defaultTitleEn : cfg.defaultTitleKg, items: [] };
         }
-        newDetails.ru[formId] = detailEntryRu;
-        newDetails.en[formId] = detailEntryEn;
-        newDetails.kg[formId] = detailEntryKg;
-      } else {
-        newTranslations.ru[type].items.push(listEntryRu);
-        newTranslations.en[type].items.push(listEntryEn);
-        newTranslations.kg[type].items.push(listEntryKg);
 
-        newDetails.ru[formId] = detailEntryRu;
-        newDetails.en[formId] = detailEntryEn;
-        newDetails.kg[formId] = detailEntryKg;
-      }
+        const listEntry = { id: formId, name: names[lang], category: catNames[lang], categoryKey: formCategoryKey, img: formImg };
+        const detailEntry = {
+          name: names[lang],
+          desc: descs[lang],
+          client: clients[lang],
+          year: formYear,
+          service: services[lang],
+          studio: studios[lang],
+          designer: designers[lang],
+          location: locations[lang],
+          projectType: projectTypes[lang],
+          class: formProductClass,
+          challenge: challenges[lang],
+          processImages: flattenedImages,
+          collageBlocks: cleanBlocks,
+          collageTheme: formCollageTheme,
+          results: [results1[lang], results2[lang]].filter(Boolean)
+        };
 
-      ["ru", "en", "kg"].forEach((lang) => {
+        const items = newTranslations[lang][type].items;
+        const index = items.findIndex((p: any) => p.id === (editingId || formId));
+        if (index !== -1) {
+          items[index] = listEntry;
+        } else {
+          items.push(listEntry);
+        }
+
+        if (!newDetails[lang]) newDetails[lang] = {};
+        if (editingId && editingId !== formId) {
+          delete newDetails[lang][editingId];
+        }
+        newDetails[lang][formId] = detailEntry;
+      });
+
+      targetLangs.forEach((lang) => {
         if (!newTranslations[lang].productDetail) {
           newTranslations[lang].productDetail = {};
         }
@@ -709,17 +694,13 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
         const newTranslations = JSON.parse(JSON.stringify(translations));
         const newDetails = JSON.parse(JSON.stringify(productDetails));
 
-        ["ru", "en", "kg"].forEach((lang) => {
+        targetLangs.forEach((lang) => {
           if (newTranslations[lang]?.[type]?.items) {
             newTranslations[lang][type].items = newTranslations[lang][type].items.filter((p: any) => p.id !== id);
           }
-        });
-
-        delete newDetails.ru[id];
-        delete newDetails.en[id];
-        delete newDetails.kg[id];
-
-        ["ru", "en", "kg"].forEach((lang) => {
+          if (newDetails[lang]) {
+            delete newDetails[lang][id];
+          }
           if (!newTranslations[lang].productDetail) {
             newTranslations[lang].productDetail = {};
           }
@@ -771,18 +752,79 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
 
       {!editingId && !isAdding && (
         <div className="w-full space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold tracking-tight text-white">{cfg.titleRu}</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-white">{cfg.titleRu}</h2>
+              <p className="text-xs text-white/50 mt-1">
+                Зажмите карточку для изменения порядка или перетащите её на один из разделов ниже / в меню слева.
+              </p>
+            </div>
             {!isReadOnly && (
               <button
                 onClick={startAdding}
-                className="px-4 py-2.5 bg-[#0000FF] hover:bg-[#0000FF]/80 text-white font-bold rounded-xl text-xs transition duration-200 cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-[#0000FF] hover:bg-[#0000FF]/80 text-white font-bold rounded-xl text-xs transition duration-200 cursor-pointer flex items-center gap-1.5 shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Добавить {cfg.itemTypeLabelRu}
               </button>
             )}
           </div>
+
+          {/* Target Drop Zone Bar for Cross-Category Drag & Drop */}
+          {!isReadOnly && (
+            <div className="p-4 rounded-2xl bg-[#0D0E13] border border-[#222430] flex flex-wrap items-center gap-3">
+              <span className="text-xs font-semibold text-white/70 flex items-center gap-1.5 mr-1">
+                <ArrowLeftRight className="w-4 h-4 text-[#0000FF]" />
+                Перемещение между разделами:
+              </span>
+              
+              {[
+                { typeKey: "products", label: "Продукты" },
+                { typeKey: "concepts", label: "Концепты (Concepts & Vision)" },
+                { typeKey: "architects", label: "Архитектура" },
+                { typeKey: "gamedev", label: "GameDev" },
+              ]
+                .filter(target => target.typeKey !== type)
+                .map(target => {
+                  const isHovered = draggedOverTargetCategory === target.typeKey;
+                  return (
+                    <div
+                      key={target.typeKey}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDraggedOverTargetCategory(target.typeKey);
+                      }}
+                      onDragLeave={() => setDraggedOverTargetCategory(null)}
+                      onDrop={async (e) => {
+                        e.preventDefault();
+                        setDraggedOverTargetCategory(null);
+                        const globalItem = (window as any).__draggedAdminCatalogItem;
+                        let parsed = globalItem;
+                        if (!parsed) {
+                          try {
+                            const raw = e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
+                            if (raw) parsed = JSON.parse(raw);
+                          } catch {}
+                        }
+                        if (parsed && parsed.itemId) {
+                          await handleMoveToCategory(parsed.itemId, parsed.sourceType || type, target.typeKey);
+                        }
+                      }}
+                      className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 border border-dashed flex items-center gap-2 cursor-pointer ${
+                        isHovered
+                          ? "bg-[#0000FF] text-white border-white scale-105 shadow-xl shadow-[#0000FF]/50 animate-pulse"
+                          : "bg-white/5 text-white/80 border-white/20 hover:border-[#0000FF] hover:text-[#0000FF] hover:bg-white/10"
+                      }`}
+                      title={`Зажмите карточку проекта ниже и перетащите сюда, чтобы переместить в раздел "${target.label}"`}
+                    >
+                      <span>{isHovered ? `🎯 Переместить в "${target.label}"` : `🎯 Перетащить в "${target.label}"`}</span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
           <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
             <div className="grid grid-cols-2 gap-x-8 gap-y-10 pt-4 border-t border-black/[0.04]">
               {itemsList.map((item: any) => {
@@ -791,11 +833,12 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   <div
                     key={item.id}
                     draggable={!isReadOnly}
-                    onDragStart={(e) => handleProductDragStart(e, realIdx)}
+                    onDragStart={(e) => handleProductDragStart(e, realIdx, item)}
+                    onDragEnd={handleProductDragEnd}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => handleProductDrop(e, realIdx)}
                     className="flex flex-col group/card p-3 rounded-2xl hover:bg-black/[0.02] border border-transparent hover:border-black/[0.04] transition duration-200 relative cursor-grab active:cursor-grabbing"
-                    title="Зажмите и перетащите для изменения порядка"
+                    title="Зажмите и перетащите для сортировки или переноса в другой раздел"
                   >
                     <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#eeeee9] mb-3 border border-black/5 relative">
                       <img src={item.img} alt={item.name} className="w-full h-full object-cover" />

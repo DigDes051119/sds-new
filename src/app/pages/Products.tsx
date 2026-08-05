@@ -5,6 +5,21 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
 
+function renderCommaSplitList(text: any) {
+  if (typeof text !== "string" || !text || text === "-") return text || "-";
+  if (!text.includes(",")) return text;
+  const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+  return (
+    <span className="flex flex-col gap-0.5 text-right">
+      {parts.map((part, idx) => (
+        <span key={idx} className="block whitespace-nowrap">
+          {part}{idx < parts.length - 1 ? "," : ""}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function Products() {
   const { t, locale } = useContext(LanguageContext);
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
@@ -20,11 +35,15 @@ export function Products() {
   
   const products = productsList.map((product: any) => {
     const detail = localizedDetails[product.id] || {};
+    const rawName = product.name || product.title || "";
+    const rawDesc = detail.desc || detail.challenge || product.desc || "";
+    const rawTag = detail.service || product.category || "Product";
     return {
       ...product,
-      tags: detail.service || "Product",
+      name: getLocText(locale, rawName, rawName),
+      tags: getLocText(locale, rawTag, rawTag),
       year: detail.year || "2026",
-      desc: detail.desc || detail.challenge || "",
+      desc: getLocText(locale, rawDesc, rawDesc),
       client: detail.client || "",
       studio: detail.studio || "-",
       designer: detail.designer || "-",
@@ -129,7 +148,7 @@ export function Products() {
                           {item.label}
                         </span>
                         <span className="text-[14px] md:text-[15px] text-black font-normal text-right">
-                          {item.value}
+                          {renderCommaSplitList(item.value)}
                         </span>
                       </div>
                     ))}

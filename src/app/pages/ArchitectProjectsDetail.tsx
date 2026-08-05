@@ -20,29 +20,28 @@ export function ArchitectProjectsDetail() {
     });
   }, []);
 
-  const archSection = (siteTranslations[locale] || siteTranslations.en || siteTranslations.ru || {}).architects;
-  const list = archSection?.items || [];
-  const listItem = list.find((p: any) => p.id === id);
+  const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
+  const architectsList = t.architects?.items || [];
+  const listItem = architectsList.find((p: any) => p.id === id);
 
-  const localeDetails = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
-  const specificData = id ? localeDetails[id] : null;
+  const specificData = id ? localeData[id] : null;
 
   const data = {
-    name: specificData?.name || listItem?.name || "ARCHITECTURE PROJECT",
-    desc: specificData?.desc || listItem?.desc || "",
-    client: specificData?.client || listItem?.client || "Client",
-    year: specificData?.year || listItem?.year || "2026",
-    service: specificData?.service || listItem?.service || "Architect Projects",
+    name: specificData?.name || listItem?.name || "ARCHITECTURE",
+    desc: (specificData?.desc && specificData.desc.trim()) || listItem?.desc || "",
+    client: specificData?.client || "Client",
+    year: specificData?.year || "2026",
+    service: specificData?.service || "Architecture",
     studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
     designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
     location: specificData?.location || listItem?.location || "International",
     projectType: specificData?.projectType || listItem?.projectType || "Architectural Project",
-    class: specificData?.class || listItem?.class || "Architecture",
-    challenge: specificData?.challenge || listItem?.challenge || "",
-    processImages: specificData?.processImages || listItem?.processImages || [],
-    collageBlocks: specificData?.collageBlocks || listItem?.collageBlocks || [],
-    results: specificData?.results || listItem?.results || [],
-    resultsDesc: specificData?.resultsDesc || listItem?.resultsDesc || ""
+    class: specificData?.class || "Architecture",
+    challenge: (specificData?.challenge && specificData.challenge.trim()) || "",
+    processImages: (specificData?.processImages && specificData.processImages.length > 0) ? specificData.processImages : [],
+    collageBlocks: (specificData?.collageBlocks && specificData.collageBlocks.length > 0) ? specificData.collageBlocks : [],
+    results: (specificData?.results && specificData.results.length > 0) ? specificData.results : [],
+    resultsDesc: specificData?.resultsDesc || ""
   };
 
   const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
@@ -82,7 +81,7 @@ export function ArchitectProjectsDetail() {
         )}
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-end w-full">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col justify-end">
             <div className="mb-4">
               <Link 
                 to="/architect-projects" 
@@ -99,22 +98,22 @@ export function ArchitectProjectsDetail() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">STUDIO</span>
-                <span className="font-normal text-[15px] leading-tight">{data.studio || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.studio || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">DESIGNER</span>
-                <span className="font-normal text-[15px] leading-tight">{data.designer || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.designer || "-")}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-4 mt-4 border-t border-white/20">
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">LOCATION</span>
-                <span className="font-normal text-[15px] leading-tight">{data.location || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.location || "-")}</span>
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-white/50 text-[11px] mb-1">PROJECT TYPE</span>
-                <span className="font-normal text-[15px] leading-tight">{data.projectType || "-"}</span>
+                <span className="font-normal text-[15px] leading-tight">{renderCommaSplitList(data.projectType || "-")}</span>
               </div>
             </div>
 
@@ -159,11 +158,15 @@ export function ArchitectProjectsDetail() {
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>
               <span className="text-[17px] text-black font-normal subpixel-antialiased">
-                {locale === "ru" 
-                  ? "Создание функциональных пространств и инновационных форм." 
-                  : locale === "kg" 
-                    ? "Функционалдуу мейкиндиктерди жана инновациялык формаларды түзүү."
-                    : "Designing functional environments, luxury residential concepts, and architectural landmarks."}
+                {getLocText(
+                  locale,
+                  "Создание функциональных пространств и инновационных форм.",
+                  "Designing functional environments, luxury residential concepts, and architectural landmarks.",
+                  "Функционалдуу мейкиндиктерди жана инновациялык формаларды түзүү.",
+                  "打造功能性空间、奢华住宅概念与建筑地标。",
+                  "تصميم بيئات وظيفية ومفاهيم سكنية فاخرة ومعالم معمارية.",
+                  "Gestaltung funktionaler Umgebungen, luxuriöser Wohnkonzepte und architektonischer Wahrzeichen."
+                )}
               </span>
             </div>
           </div>
@@ -180,7 +183,7 @@ export function ArchitectProjectsDetail() {
                 activeTab === "gallery" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Галерея" : locale === "kg" ? "Галерея" : "Gallery"}
+              {getLocText(locale, "Галерея", "Gallery", "Галерея")}
               {activeTab === "gallery" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -195,7 +198,7 @@ export function ArchitectProjectsDetail() {
                 activeTab === "video" ? "text-[#0000FF]" : "text-[#808080] hover:text-black"
               }`}
             >
-              {locale === "ru" ? "Видео" : locale === "kg" ? "Видео" : "Video"}
+              {getLocText(locale, "Видео", "Video", "Видео")}
               {activeTab === "video" && (
                 <motion.div
                   layoutId="activeTabUnderline"
@@ -256,7 +259,7 @@ export function ArchitectProjectsDetail() {
           <div className="flex justify-between items-start gap-[28px] mb-6">
             <div className="flex flex-col">
               <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
-                {locale === "ru" ? "Итоги" : locale === "kg" ? "Жыйынтыктар" : "Outcomes"}
+                {getLocText(locale, "Итоги", "Outcomes", "Жыйынтыктар")}
               </h2>
               <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[02/RESULTS]</span>
             </div>
@@ -264,7 +267,7 @@ export function ArchitectProjectsDetail() {
               to="/architect-projects"
               className="shrink-0 inline-flex items-center gap-2 text-[17px] font-bold text-black hover:text-[#0000FF] transition-colors duration-300 uppercase tracking-[-0.15px] mt-2"
             >
-              {locale === "ru" ? "Другие проекты" : locale === "kg" ? "Башка долбоорлор" : "View other projects"}
+              {getLocText(locale, "Другие проекты", "View other projects", "Башка долбоорлор")}
               <span className="text-[18px] leading-none">&rarr;</span>
             </Link>
           </div>

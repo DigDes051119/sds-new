@@ -22,33 +22,89 @@ export function ProjectDetail() {
     });
   }, []);
 
-  let data = (id && projectDetails[locale]?.[id])
-    || (id && projectDetails.en?.[id])
-    || (id && projectDetails.ru?.[id])
-    || (id && projectDetails.kg?.[id])
-    || (id && projectDetailsTranslations[locale]?.[id])
-    || (id && projectDetailsTranslations.en?.[id])
-    || (id && projectDetailsTranslations.ru?.[id])
-    || t.projectDetail.defaultProject;
+  const projectAliases: Record<string, string[]> = {
+    "maminy-retsepty": ["moms-recipes", "mom-s-recipes", "maminy_retsepty", "maminy-retsepty", "mothers-recipes"],
+    "one-ordo-resort": ["one-ordo", "one-ordo-resort", "one-ordo-resort-web"],
+    "tooko": ["tooko", "tooko-brand"],
+    "sandyq": ["sandyq", "sandyk"],
+    "ala-too": ["ala-too", "alatoo"],
+    "salkyn": ["salkyn"],
+    "techstart": ["techstart"],
+    "auto-concept-x": ["auto-concept-x", "autoconceptx", "auto-concept"],
+    "bishbench": ["bishbench"]
+  };
+
+  const findInObj = (obj: any, targetId: string) => {
+    if (!obj || !targetId) return null;
+    if (obj[targetId]) return obj[targetId];
+
+    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const targetClean = clean(targetId);
+
+    // 1. Direct clean match
+    for (const k of Object.keys(obj)) {
+      if (clean(k) === targetClean) return obj[k];
+    }
+
+    // 2. Alias match
+    for (const [canonical, aliases] of Object.entries(projectAliases)) {
+      const allKeys = [canonical, ...aliases].map(clean);
+      if (allKeys.includes(targetClean)) {
+        for (const k of Object.keys(obj)) {
+          if (allKeys.includes(clean(k))) return obj[k];
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const fallbackData = (id && findInObj(projectDetailsTranslations[locale], id))
+    || (id && findInObj(projectDetailsTranslations.en, id))
+    || (id && findInObj(projectDetailsTranslations.ru, id))
+    || t.projectDetail?.defaultProject
+    || {};
+
+  const cmsData = (id && findInObj(projectDetails[locale], id))
+    || (id && findInObj(projectDetails.en, id))
+    || (id && findInObj(projectDetails.ru, id))
+    || (id && findInObj(projectDetails.kg, id));
+
+  let data = {
+    name: cmsData?.name || fallbackData?.name || "PROJECT",
+    desc: (cmsData?.desc && cmsData.desc.trim()) || fallbackData?.desc || "",
+    client: cmsData?.client || fallbackData?.client || "Client",
+    year: cmsData?.year || fallbackData?.year || "2026",
+    service: cmsData?.service || fallbackData?.service || "Branding",
+    challenge: (cmsData?.challenge && cmsData.challenge.trim()) || fallbackData?.challenge || "",
+    processImages: (cmsData?.processImages && cmsData.processImages.length > 0) ? cmsData.processImages : (fallbackData?.processImages || []),
+    collageBlocks: (cmsData?.collageBlocks && cmsData.collageBlocks.length > 0) ? cmsData.collageBlocks : (fallbackData?.collageBlocks || []),
+    results: (cmsData?.results && cmsData.results.length > 0) ? cmsData.results : (fallbackData?.results || []),
+    websiteUrl: cmsData?.websiteUrl || fallbackData?.websiteUrl || "",
+  };
 
   if (id === "one-ordo" || id === "one-ordo-resort") {
-    if (!data || data.service === "WEBDESIGN" || data.service === "webdesign" || (data.desc && data.desc.includes("Website for"))) {
-      data = projectDetailsTranslations[locale]?.["one-ordo-resort"]
+    if (!data.desc || data.service === "WEBDESIGN" || data.service === "webdesign" || data.desc.includes("Website for")) {
+      const ooData = projectDetailsTranslations[locale]?.["one-ordo-resort"]
         || projectDetailsTranslations[locale]?.["one-ordo"]
         || projectDetailsTranslations.en?.["one-ordo-resort"]
         || projectDetailsTranslations.en?.["one-ordo"]
         || projectDetailsTranslations.ru?.["one-ordo-resort"]
-        || projectDetailsTranslations.ru?.["one-ordo"]
-        || data;
+        || projectDetailsTranslations.ru?.["one-ordo"];
+      if (ooData) {
+        data = { ...data, ...ooData };
+      }
     }
   }
 
-  const projectListItem = t.projects?.items?.find((p: any) => p.id === id);
-  const coverImg = projectListItem
-    ? ((projectListItem.img && (projectListItem.img.startsWith("http") || projectListItem.img.startsWith("data:") || projectListItem.img.startsWith("/")))
-        ? projectListItem.img
-        : (projectListItem.id === "sandyq" ? projectImg1 : projectListItem.id === "ala-too" ? projectImg2 : projectListItem.img))
-    : (data.processImages?.[0] || "");
+  const projectListItem = t.projects?.items?.find((p: any) => p.id === id || p.id?.toLowerCase() === id?.toLowerCase());
+  const coverImg = (projectListItem && projectListItem.img && (projectListItem.img.startsWith("http") || projectListItem.img.startsWith("data:") || projectListItem.img.startsWith("/")))
+    ? projectListItem.img
+    : (id === "maminy-retsepty" ? coverMoms
+      : id === "tooko" ? coverTooko
+      : id === "sandyq" ? projectImg1
+      : id === "ala-too" ? projectImg2
+      : (data.collageBlocks?.[0]?.[0] || data.processImages?.[0] || ""));
 
   const collageBlocks: string[][] = data.collageBlocks || [];
   
@@ -105,7 +161,7 @@ export function ProjectDetail() {
           <div className="lg:col-span-5 flex flex-wrap lg:flex-nowrap justify-start lg:justify-end gap-6 md:gap-[48px] uppercase tracking-wider font-mono text-white mt-4 lg:mt-0">
             <div className="border-l border-white/40 pl-6 md:pl-8">
               <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{getLocText(locale, "Клиент", "Client", "Кардар")}</span>
-              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{data.client}</span>
+              <span className="font-normal text-[18px] md:text-[22px] tracking-tight block whitespace-nowrap">{getLocText(locale, data.client, data.client)}</span>
             </div>
             <div>
               <span className="text-white/50 block mb-2 text-[12px] md:text-[14px]">{getLocText(locale, "Год", "Year", "Жыл")}</span>
@@ -130,16 +186,16 @@ export function ProjectDetail() {
 
         <div className="lg:col-span-7 flex flex-col gap-6">
           <p className="text-[20px] md:text-[28px] font-light leading-[1.35] tracking-[-0.03em] text-black m-0">
-            {data.challenge}
+            {getLocText(locale, data.challenge, data.challenge)}
           </p>
           <p className="text-[17px] leading-[1.5] text-black m-0 font-normal subpixel-antialiased">
-            {data.desc}
+            {getLocText(locale, data.desc, data.desc)}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-[#808080] pt-8 mt-4">
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[01/SCOPE]</span>
-              <span className="text-[17px] text-black font-normal subpixel-antialiased">{data.service}</span>
+              <span className="text-[17px] text-black font-normal subpixel-antialiased">{getLocText(locale, data.service, data.service)}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[14px] text-[#808080] uppercase">[02/FOCUS]</span>

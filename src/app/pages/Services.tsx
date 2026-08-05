@@ -1,15 +1,21 @@
 import { useContext } from "react";
-import { LanguageContext, translations } from "../i18n";
+import { LanguageContext, translations, getLocText } from "../i18n";
 
 export function Services() {
   const { t, locale } = useContext(LanguageContext);
   
-  const hasRussian = (text: string) => /[а-яА-ЯёЁ]/.test(text);
-  let servicesSource = t;
-  if (locale !== "ru" && t.services?.items?.some((s: any) => s.id === "01" && hasRussian(s.title))) {
-    servicesSource = translations[locale];
-  }
-  const services = servicesSource.services.items;
+  const langItems = (translations as any)[locale]?.services?.items 
+    || t.services?.items 
+    || (translations as any)["en"]?.services?.items 
+    || translations.ru.services.items 
+    || [];
+
+  const services = langItems.map((service: any) => ({
+    ...service,
+    title: getLocText(locale, service.title, service.title),
+    desc: getLocText(locale, service.desc, service.desc),
+    steps: Array.isArray(service.steps) ? service.steps.map((step: string) => getLocText(locale, step, step)) : []
+  }));
 
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px]">
@@ -18,7 +24,7 @@ export function Services() {
       <section className="border-b border-[#808080] pb-4 mb-[100px] grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start w-auto">
         <div className="md:col-span-5">
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
-            {t.services.title}
+            {getLocText(locale, "Услуги", "Services", "Кызматтар", "服务项目", "الخدمات", "Dienstleistungen")}
           </h1>
           <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
             [SERVICES/CAPABILITIES]
@@ -26,20 +32,24 @@ export function Services() {
         </div>
         <div className="md:col-span-7 md:pl-[59px] flex justify-end">
           <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[500px]">
-            {locale === "ru" 
-              ? "Наши специализированные инженерные и дизайнерские решения." 
-              : locale === "kg"
-                ? "Биздин атайын инженердик жана дизайн чечимдерибиз."
-                : "Our engineering and design systems designed to deliver uncompromising physical and digital experiences."}
+            {getLocText(
+              locale,
+              "Наши специализированные инженерные и дизайнерские решения.",
+              "Our engineering and design systems designed to deliver uncompromising physical and digital experiences.",
+              "Биздин атайын инженердик жана дизайн чечимдерибиз.",
+              "我们为交付不妥协的物理与数字体验而作的专业工程与设计系统。",
+              "أنظمتنا الهندسية والتصميمية المتخصصة في تقديم تجارب مادية ورقمية دون مساومة.",
+              "Unsere spezialisierten Ingenieur- und Designlösungen für kompromisslose physische und digitale Erlebnisse."
+            )}
           </p>
         </div>
       </section>
 
       {/* Services List */}
       <section className="flex flex-col gap-[80px]">
-        {services.map((service, index) => (
+        {services.map((service: any, index: number) => (
           <div 
-            key={service.id} 
+            key={service.id || index} 
             className={`grid grid-cols-1 md:grid-cols-12 gap-[28px] py-8 transition-all duration-300 group ${
               index === 0 ? '' : 'border-t border-[#808080]/30'
             }`}
@@ -62,9 +72,17 @@ export function Services() {
                 </p>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent("sds:open-contact-modal"))}
-                  className="shrink-0 w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-5 py-3 font-mono text-[12px] uppercase tracking-[0.06em] cursor-pointer  text-center md:-mt-1"
+                  className="shrink-0 w-full sm:w-auto border border-[#0000FF] text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 px-5 py-3 font-mono text-[12px] uppercase tracking-[0.06em] cursor-pointer text-center md:-mt-1"
                 >
-                  {locale === "ru" ? "Заказать услугу →" : locale === "kg" ? "Кызматка буйрутма берүү →" : "Order service →"}
+                  {getLocText(
+                    locale,
+                    "Заказать услугу →",
+                    "Order service →",
+                    "Кызматка буйрутма берүү →",
+                    "订购服务 →",
+                    "طلب الخدمة →",
+                    "Dienstleistung bestellen →"
+                  )}
                 </button>
               </div>
 
@@ -73,7 +91,7 @@ export function Services() {
                   {service.steps.map((stepText: string, stepIdx: number) => (
                     <div key={stepIdx} className="flex flex-col gap-4">
                       <span className="font-mono text-[15px] text-[#0000FF] font-bold tracking-[0.04em] uppercase">
-                        [0{stepIdx + 1}/STAGE]
+                        [0{stepIdx + 1}/{getLocText(locale, "STAGE", "STAGE", "ЭТАП", "阶段", "المرحلة", "STUFE")}]
                       </span>
                       <p className="text-[16px] leading-[1.5] text-black m-0 font-normal pr-4">
                         {stepText}

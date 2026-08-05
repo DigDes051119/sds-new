@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { useContext, useState, useEffect } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
@@ -24,16 +24,20 @@ export function WebUiUx() {
   const projects = (t.webUiUx?.items || [])
     .map((project: any) => {
       const detail = localizedDetails[project.id] || {};
+      const rawName = project.name || project.title || "";
+      const rawDesc = detail.desc || detail.challenge || project.desc || "";
+      const rawTag = detail.service || project.category || "Design";
       return {
         ...project,
+        name: getLocText(locale, rawName, rawName),
         img: (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
           ? project.img
           : (project.id === "maminy-retsepty" ? coverMoms
             : project.id === "tooko" ? coverTooko
             : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img)),
-        tags: detail.service || project.category || "Design",
+        tags: getLocText(locale, rawTag, rawTag),
         year: detail.year || "2026",
-        desc: detail.desc || project.desc || ""
+        desc: getLocText(locale, rawDesc, rawDesc)
       };
     });
 
