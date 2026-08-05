@@ -694,6 +694,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
         const newTranslations = JSON.parse(JSON.stringify(translations));
         const newDetails = JSON.parse(JSON.stringify(productDetails));
 
+        const targetLangs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
         targetLangs.forEach((lang) => {
           if (newTranslations[lang]?.[type]?.items) {
             newTranslations[lang][type].items = newTranslations[lang][type].items.filter((p: any) => p.id !== id);

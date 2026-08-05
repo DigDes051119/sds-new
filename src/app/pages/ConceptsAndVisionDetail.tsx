@@ -5,6 +5,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
+import { renderCommaSplitList } from "../utils/renderCommaSplitList";
 
 export function ConceptsAndVisionDetail() {
   const { locale } = useContext(LanguageContext);

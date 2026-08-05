@@ -5,9 +5,10 @@ import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 import { motion } from "motion/react";
+import { renderCommaSplitList } from "../utils/renderCommaSplitList";
 
 export function GameDevDetail() {
-  const { locale } = useContext(LanguageContext);
+  const { t, locale } = useContext(LanguageContext);
   const { id } = useParams();
 
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
@@ -289,7 +290,7 @@ export function GameDevDetail() {
 
       {/* Previous / Next Navigation */}
       {(() => {
-        const items = list;
+        const items = gamedevList;
         const currentIdx = items.findIndex((p: any) => p.id === id);
         if (currentIdx === -1 || items.length <= 1) return null;
 

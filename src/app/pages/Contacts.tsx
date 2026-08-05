@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { LanguageContext } from "../i18n";
+import { LanguageContext, getLocText } from "../i18n";
 import { Map, MapMarker, MarkerContent } from "../components/ui/map";
 
 export function Contacts() {
