@@ -2,6 +2,7 @@ import { translations as defaultTranslations, autoTranslateText } from "./i18n";
 import { projectDetailsTranslations as defaultProjectDetails } from "./projectDetailsData";
 import { archiveItems as defaultArchiveItems, type ArchiveItem } from "./archiveData";
 import { supabaseClient } from "./supabaseClient";
+import { safeLocalStorage, safeSessionStorage } from "./safeStorage";
 
 // Simple pub/sub for changes
 type Listener = () => void;
@@ -32,7 +33,7 @@ export const cmsService = {
         const remoteTranslations = translationRows[0].data;
         if (remoteTranslations) {
           lastRemoteTranslationsStr = JSON.stringify(remoteTranslations);
-          localStorage.setItem("sds_translations", JSON.stringify(remoteTranslations));
+          safeLocalStorage.setItem("sds_translations", JSON.stringify(remoteTranslations));
           this.getTranslations(); // Apply fallbacks for any missing catalog items
         }
       }
@@ -47,7 +48,7 @@ export const cmsService = {
         const remoteDetails = projectDetailsRows[0].data;
         if (remoteDetails) {
           lastRemoteProjectDetailsStr = JSON.stringify(remoteDetails);
-          localStorage.setItem("sds_project_details", JSON.stringify(remoteDetails));
+          safeLocalStorage.setItem("sds_project_details", JSON.stringify(remoteDetails));
         }
       }
     } catch (e) {
@@ -58,10 +59,10 @@ export const cmsService = {
       // 3. Try syncing archive items
       const archiveRows = await supabaseClient.fetchTable("sds_archive_items").catch(() => null);
       if (archiveRows && archiveRows.length > 0 && archiveRows[0]?.data) {
-        localStorage.setItem("sds_archive_items", JSON.stringify(archiveRows[0].data));
+        safeLocalStorage.setItem("sds_archive_items", JSON.stringify(archiveRows[0].data));
       } else {
         // Fallback: load archive from translations if available
-        const storedTrans = localStorage.getItem("sds_translations");
+        const storedTrans = safeLocalStorage.getItem("sds_translations");
         if (storedTrans) {
           try {
             const trans = JSON.parse(storedTrans);
@@ -71,7 +72,7 @@ export const cmsService = {
                 en: trans.en?.archive || trans.ru.archive,
                 kg: trans.kg?.archive || trans.ru.archive,
               };
-              localStorage.setItem("sds_archive_items", JSON.stringify(archiveData));
+              safeLocalStorage.setItem("sds_archive_items", JSON.stringify(archiveData));
             }
           } catch {
             // ignore
@@ -86,7 +87,7 @@ export const cmsService = {
   },
 
   getTranslations() {
-    const stored = localStorage.getItem("sds_translations");
+    const stored = safeLocalStorage.getItem("sds_translations");
     let data: any;
     if (!stored) {
       data = JSON.parse(JSON.stringify(defaultTranslations));
@@ -288,7 +289,7 @@ export const cmsService = {
     });
 
     if (modified) {
-      localStorage.setItem("sds_translations", JSON.stringify(data));
+      safeLocalStorage.setItem("sds_translations", JSON.stringify(data));
     }
 
     return data;
@@ -296,14 +297,14 @@ export const cmsService = {
 
   // Update translations locally & remotely
   async updateTranslations(newTranslations: any, forceOverride = false) {
-    localStorage.setItem("sds_translations", JSON.stringify(newTranslations));
+    safeLocalStorage.setItem("sds_translations", JSON.stringify(newTranslations));
     this.notify();
 
     try {
-      const currentAdminStr = localStorage.getItem("sds_current_admin");
+      const currentAdminStr = safeLocalStorage.getItem("sds_current_admin");
       if (currentAdminStr) {
         const currentAdmin = JSON.parse(currentAdminStr);
-        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        const requesterPassword = safeSessionStorage.getItem("sds_current_admin_password") || "";
         await supabaseClient.updateTranslationsSecure(currentAdmin.username, requesterPassword, newTranslations);
         lastRemoteTranslationsStr = JSON.stringify(newTranslations);
       }
@@ -316,7 +317,7 @@ export const cmsService = {
 
   // Get project details
   getProjectDetails() {
-    const stored = localStorage.getItem("sds_project_details");
+    const stored = safeLocalStorage.getItem("sds_project_details");
     let data: any;
     if (!stored) {
       data = JSON.parse(JSON.stringify(defaultProjectDetails));
@@ -400,7 +401,7 @@ export const cmsService = {
     });
 
     if (modified) {
-      localStorage.setItem("sds_project_details", JSON.stringify(data));
+      safeLocalStorage.setItem("sds_project_details", JSON.stringify(data));
       supabaseClient.upsertTable("sds_project_details", [{ id: 1, data }]).catch(() => {});
     }
 
@@ -409,14 +410,14 @@ export const cmsService = {
 
   // Update project details locally & remotely
   async updateProjectDetails(newDetails: any, forceOverride = false) {
-    localStorage.setItem("sds_project_details", JSON.stringify(newDetails));
+    safeLocalStorage.setItem("sds_project_details", JSON.stringify(newDetails));
     this.notify();
 
     try {
-      const currentAdminStr = localStorage.getItem("sds_current_admin");
+      const currentAdminStr = safeLocalStorage.getItem("sds_current_admin");
       if (currentAdminStr) {
         const currentAdmin = JSON.parse(currentAdminStr);
-        const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
+        const requesterPassword = safeSessionStorage.getItem("sds_current_admin_password") || "";
         await supabaseClient.updateProjectDetailsSecure(currentAdmin.username, requesterPassword, newDetails);
         lastRemoteProjectDetailsStr = JSON.stringify(newDetails);
       }
@@ -500,7 +501,7 @@ export const cmsService = {
         data[lang] = translations[lang]?.archive || translations.en?.archive || translations.ru.archive;
       });
     } else {
-      const stored = localStorage.getItem("sds_archive_items");
+      const stored = safeLocalStorage.getItem("sds_archive_items");
       if (stored) {
         try {
           data = JSON.parse(stored);
@@ -541,7 +542,7 @@ export const cmsService = {
       return; // aborted by user due to collision
     }
 
-    localStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
+    safeLocalStorage.setItem("sds_archive_items", JSON.stringify(newArchiveData));
     this.notify();
 
     // 2. Also attempt saving to sds_archive_items if table exists
@@ -554,10 +555,10 @@ export const cmsService = {
 
   // Reset all to defaults
   async resetToDefaults() {
-    localStorage.removeItem("sds_translations");
-    localStorage.removeItem("sds_project_details");
-    localStorage.removeItem("sds_projects_list");
-    localStorage.removeItem("sds_archive_items");
+    safeLocalStorage.removeItem("sds_translations");
+    safeLocalStorage.removeItem("sds_project_details");
+    safeLocalStorage.removeItem("sds_projects_list");
+    safeLocalStorage.removeItem("sds_archive_items");
     this.notify();
 
     try {

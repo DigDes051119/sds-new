@@ -1,8 +1,9 @@
 import { supabaseClient } from "./supabaseClient";
+import { safeLocalStorage } from "./safeStorage";
 
 export const logAdminAction = async (section: string, action: string, details: string) => {
   try {
-    const currentAdminStr = localStorage.getItem("sds_current_admin");
+    const currentAdminStr = safeLocalStorage.getItem("sds_current_admin");
     if (!currentAdminStr) return;
     
     const currentAdmin = JSON.parse(currentAdminStr);

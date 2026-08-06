@@ -1,3 +1,5 @@
+import { safeLocalStorage, safeSessionStorage } from "./safeStorage";
+
 const SUPABASE_URL = "https://hniqpnuqqsmqpolxgbav.supabase.co";
 const STORAGE_CDN_URL = "https://cdn.steeldrakestudio.com";
 const SUPABASE_KEY = "sb_publishable_3DWLrcWUpjuE_gNKEivM8A_UHOmJLgu";
@@ -20,13 +22,13 @@ export const supabaseClient = {
     }
 
     // Save session in localStorage
-    localStorage.setItem("sds_supabase_session", JSON.stringify(data));
+    safeLocalStorage.setItem("sds_supabase_session", JSON.stringify(data));
     return { data, error: null };
   },
 
   // Get current auth token
   getToken() {
-    const sessionStr = localStorage.getItem("sds_supabase_session");
+    const sessionStr = safeLocalStorage.getItem("sds_supabase_session");
     if (!sessionStr) return null;
     try {
       const session = JSON.parse(sessionStr);
@@ -38,17 +40,17 @@ export const supabaseClient = {
 
   // Logout
   signOut() {
-    localStorage.removeItem("sds_supabase_session");
-    localStorage.removeItem("sds_admin_logged_in");
+    safeLocalStorage.removeItem("sds_supabase_session");
+    safeLocalStorage.removeItem("sds_admin_logged_in");
   },
 
   // Dynamic Custom Analytics Visit Logger
   async logVisit(path: string, locale: string) {
     try {
-      let sessionId = sessionStorage.getItem("sds_session_id");
+      let sessionId = safeSessionStorage.getItem("sds_session_id");
       if (!sessionId) {
         sessionId = Math.random().toString(36).substring(2, 15);
-        sessionStorage.setItem("sds_session_id", sessionId);
+        safeSessionStorage.setItem("sds_session_id", sessionId);
       }
 
       const row = {
