@@ -6,6 +6,7 @@ import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 import { renderCommaSplitList } from "../utils/renderCommaSplitList";
+import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
 
 export function ConceptsAndVisionDetail() {
   const { locale } = useContext(LanguageContext);
@@ -221,6 +222,10 @@ export function ConceptsAndVisionDetail() {
         <section className="max-w-[1600px] mx-auto w-full flex flex-col gap-[12px] reveal-visible">
           {filteredBlocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
+            if (block[0]?.startsWith("text:")) {
+              const textData = parseTextBlock(block[0]);
+              return textData ? <TextBlockRenderer key={blockIdx} data={textData} /> : null;
+            }
             return (
               <div 
                 key={blockIdx} 

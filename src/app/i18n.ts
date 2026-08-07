@@ -296,7 +296,10 @@ export const translations = {
     },
     architects: {
       title: "Architect Projects",
-      items: [],
+      items: [
+        { id: "one-ordo-resort", img: "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp", name: "One Ordo Resort", category: "Architectural Design", categoryKey: "architectural", desc: "Conceptual architectural ensemble and premium resort complex." },
+        { id: "villa-horizon", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200", name: "Villa Horizon", category: "Architectural Design", categoryKey: "architectural", desc: "Futuristic residential villa concept with panoramic glazing and natural integration." }
+      ],
     },
     gamedev: {
       title: "GameDev",
@@ -400,6 +403,147 @@ export const translations = {
             "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600"
           ],
           results: ["Winner of Interior Design Show 2026"]
+        },
+        evodrone: {
+          name: "Evodrone",
+          desc: "Во главе стояла идея изменить привычные пульты управления дронами на одноручный, в котором будет учтено множество функций упрощяющих управление, наподобии рычага управления самолетом.",
+          year: "2016",
+          class: "-",
+          client: "Personal concept",
+          studio: "Steel Drake Studio team",
+          service: "concept design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "Идея создать удобный контроллер управление дроном - однйо рукой.",
+          projectType: "concept",
+          collageTheme: "light",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785433999273.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785434006514.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785434010517.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785434017539.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785434020971.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785434037206.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785434066130.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785434080022.webp"]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785433999273.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785434006514.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785434010517.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785434017539.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785434020971.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785434037206.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785434066130.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785434080022.webp"
+          ],
+          results: []
+        },
+        "ps5-concept-2018": {
+          name: "PS5 concept 2018",
+          desc: "This concept was made in 2018 and it is still popular, many publics still publish it under name ps6 concept.",
+          year: "2018",
+          class: "-",
+          client: "Personal concept",
+          studio: "Steel Drake Studio Team",
+          service: "Concept design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "A Desire to show another way of exterior device design for Sony",
+          projectType: "personal concept",
+          collageTheme: "light",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785662333489.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785657849508.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785658032364.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785658044819.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785658049212.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785658052737.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785658057347.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785658061557.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785658065498.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-8-0-1785658069512.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-0-1785658073187.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-12-0-1785662348161.webp"]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785662333489.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785657849508.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785658032364.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785658044819.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785658049212.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785658052737.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785658057347.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785658061557.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785658065498.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-8-0-1785658069512.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-0-1785658073187.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-12-0-1785662348161.webp"
+          ],
+          results: ["published on many publics worldwide"]
+        },
+        "iphone-iq-concept-2018": {
+          name: "Iphone IQ concept 2018",
+          desc: "Концептуальное видение флагманского смартфона Apple с усовершенствованной эргономикой и бесшовным корпусом.",
+          year: "2018",
+          class: "-",
+          client: "Personal concept",
+          studio: "Steel Drake Studio team",
+          service: "Industrial design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "Переосмысление визуальной эстетики линейки iPhone.",
+          projectType: "Concept",
+          collageTheme: "light",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp"]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785435568845.webp"
+          ],
+          results: []
+        },
+        "sony-zeus": {
+          name: "SONY ZEUS",
+          desc: "Концепт премиальной техники SONY с акцентом на монолитную архитектуру и современный промышленный язык форм.",
+          year: "2018",
+          class: "-",
+          client: "Personal concept",
+          studio: "Steel Drake Studio team",
+          service: "Concept design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "Создание флагманского языка дизайна для устройств Sony.",
+          projectType: "Concept",
+          collageTheme: "dark",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp"]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785056660421.webp"
+          ],
+          results: []
+        },
+        "tesla-sd-concept": {
+          name: "TESLA SD CONCEPT",
+          desc: "Концептуальный дизайн премиального электрического транспортного средства со специфической аэродинамикой.",
+          year: "2019",
+          class: "-",
+          client: "Personal concept",
+          studio: "Steel Drake Studio team",
+          service: "Industrial design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "Аэродинамический дизайн и спортивные пропорции электромобиля.",
+          projectType: "Concept",
+          collageTheme: "dark",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp"]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp"
+          ],
+          results: []
         }
       },
       defaultProduct: {
@@ -699,7 +843,10 @@ export const translations = {
     },
     architects: {
       title: "Архитектуралык долбоорлор",
-      items: [],
+      items: [
+        { id: "one-ordo-resort", img: "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp", name: "One Ordo Resort", category: "Архитектуралык дизайн", categoryKey: "architectural", desc: "Концептуалдык архитектуралык ансамбль жана премиум-класстагы курорттук комплекс." },
+        { id: "villa-horizon", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200", name: "Villa Horizon", category: "Архитектуралык дизайн", categoryKey: "architectural", desc: "Панорамалык айнек жана ландшафтка интеграцияланган футуристтик турак жай вилла концепти." }
+      ],
     },
     gamedev: {
       title: "GameDev",
@@ -1102,7 +1249,10 @@ export const translations = {
     },
     architects: {
       title: "Архитектурные проекты",
-      items: [],
+      items: [
+        { id: "one-ordo-resort", img: "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp", name: "One Ordo Resort", category: "Архитектурный дизайн", categoryKey: "architectural", desc: "Концептуальный архитектурный ансамбль и курортный комплекс премиум-класса." },
+        { id: "villa-horizon", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200", name: "Villa Horizon", category: "Архитектурный дизайн", categoryKey: "architectural", desc: "Футуристический жилой комплекс с панорамным остеклением и интеграцией в ландшафт." }
+      ],
     },
     gamedev: {
       title: "GameDev",

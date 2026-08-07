@@ -245,7 +245,7 @@ export function Root() {
           for (const k of Object.keys(s)) {
             res[k] = resolveValue(s[k], d?.[k], r?.[k], k);
           }
-          if (d && typeof d === "object") {
+          if (d && typeof d === "object" && !Array.isArray(d)) {
             for (const k of Object.keys(d)) {
               if (res[k] === undefined) {
                 res[k] = resolveValue(undefined, d[k], r?.[k], k);
@@ -261,13 +261,31 @@ export function Root() {
       }
       // If s is empty, fall back to default translation d
       if (d !== undefined && d !== null && d !== "") {
-        if (typeof d === "object") return resolveValue(undefined, d, r, currentKey);
+        if (Array.isArray(d)) {
+          return d.map((item: any, idx: number) => resolveValue(undefined, item, r?.[idx], currentKey));
+        }
+        if (typeof d === "object") {
+          const res: any = {};
+          for (const k of Object.keys(d)) {
+            res[k] = resolveValue(undefined, d[k], r?.[k], k);
+          }
+          return res;
+        }
         if (typeof d === "string") return autoTranslateText(d, loc);
         return d;
       }
       // Fall back to Russian r
       if (r !== undefined && r !== null && r !== "") {
-        if (typeof r === "object") return resolveValue(undefined, undefined, r, currentKey);
+        if (Array.isArray(r)) {
+          return r.map((item: any, idx: number) => resolveValue(undefined, undefined, item, currentKey));
+        }
+        if (typeof r === "object") {
+          const res: any = {};
+          for (const k of Object.keys(r)) {
+            res[k] = resolveValue(undefined, undefined, r[k], k);
+          }
+          return res;
+        }
         if (typeof r === "string") return autoTranslateText(r, loc);
         return r;
       }

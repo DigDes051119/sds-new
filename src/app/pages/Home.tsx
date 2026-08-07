@@ -193,28 +193,29 @@ export function Home() {
   });
   const recentProducts = mappedProducts.slice(0, 4);
 
-  // Recent Concepts (4 items = 2 rows of 2 cards)
-  const allConcepts = t.concepts?.items || [];
-  const mappedConcepts = allConcepts.map((p: any, idx: number) => {
-    const detail = localizedProductDetails[p.id] || {};
+  // Recent Architecture Projects (2 items = 1 row of 2 cards)
+  const allArchitects = t.architects?.items || [];
+  const mappedArchitects = allArchitects.map((p: any, idx: number) => {
+    const detail = localizedProductDetails[p.id] || localizedDetails[p.id] || {};
     const rawTitle = p.name || p.title || "";
     const rawDesc = detail.desc || detail.challenge || p.desc || "";
-    const rawTag = detail.service || p.category || "Concept";
+    const rawTag = p.tags || detail.service || p.category || "Architecture";
     return {
       id: p.id || String(idx),
       title: getLocText(locale, rawTitle, rawTitle),
-      image: p.img || (p.images && p.images[0]) || "",
+      image: p.img || p.image || (p.images && p.images[0]) || "",
       tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || "2026",
+      year: p.year || detail.year || "2026",
       desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
-  const recentConcepts = mappedConcepts.slice(0, 4);
+  const recentArchitects = mappedArchitects.slice(0, 2);
 
-  // Selected / Featured Concepts (from t.home.featuredConcepts)
+  // Selected / Featured Concepts (from t.home.featuredConcepts or top 4 concepts = 2 rows of 2)
+  const allConcepts = t.concepts?.items || [];
   const featuredConceptsRaw = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
-    ? t.home.featuredConcepts
-    : allConcepts.slice(0, 2);
+    ? t.home.featuredConcepts.slice(0, 4)
+    : allConcepts.slice(0, 4);
 
   const featuredConcepts = featuredConceptsRaw.map((fc: any) => {
     const matched = allConcepts.find((c: any) => c.id === fc.id);
@@ -536,28 +537,28 @@ export function Home() {
         </div>
       </section>
 
-      {/* 4.5 БЛОК: Recent Concepts (Недавние концепты) */}
-      {recentConcepts.length > 0 && (
+      {/* 4.5 БЛОК: Architecture (Архитектура - 2 плашки) */}
+      {recentArchitects.length > 0 && (
         <section className="flex flex-col w-full">
           <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
             <div className="flex flex-col">
               <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
               <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
-                {getLocText(locale, "Недавние концепты", "Recent concepts", "Акыркы концепциялар")}
+                {t.architects?.title || getLocText(locale, "Архитектура", "Architecture", "Архитектура", "建筑设计", "الهندسة المعمارية", "Architektur")}
               </h2>
             </div>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04.5/CONCEPTS]</span>
+            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04.5/ARCHITECTURE]</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
-            {recentConcepts.map((concept, index) => (
-              <div key={`recent-concept-${concept.id}`} className="w-full flex flex-col group"
+            {recentArchitects.map((project, index) => (
+              <div key={`recent-arch-${project.id}`} className="w-full flex flex-col group"
                 style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
-                <Link to={`/concepts-and-vision/${concept.id}`} className="group flex flex-col flex-1">
+                <Link to={`/architect-projects/${project.id}`} className="group flex flex-col flex-1">
                   <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                     <ImageWithFallback 
-                      src={concept.image} 
-                      alt={concept.title} 
+                      src={project.image} 
+                      alt={project.title} 
                       className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
                     />
                   </div>
@@ -566,14 +567,14 @@ export function Home() {
                       {/* Left block: label + title */}
                       <div className="flex-1 min-w-0 flex flex-col gap-2">
                         <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                          0{index + 1} / CONCEPT
+                          0{index + 1} / ARCHITECTURE
                         </span>
                         <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                          {concept.title}
+                          {project.title}
                         </h3>
-                        {concept.desc && (
+                        {project.desc && (
                           <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
-                            {concept.desc}
+                            {project.desc}
                           </p>
                         )}
                       </div>
@@ -581,8 +582,8 @@ export function Home() {
                       <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                       {/* Right block: category + year */}
                       <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{concept.tags}</span>
-                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{concept.year}</span>
+                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
                       </div>
                     </div>
                   </div>

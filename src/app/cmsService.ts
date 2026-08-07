@@ -115,27 +115,27 @@ export const cmsService = {
     // Ensure catalog arrays have fallbacks so items never vanish on any language
     for (const lang of langs) {
       const defLangObj = defaultTranslations[lang as keyof typeof defaultTranslations] || defaultTranslations.en;
-      if (!data[lang].projects || !Array.isArray(data[lang].projects.items) || data[lang].projects.items.length === 0) {
+      if (!data[lang].projects || !Array.isArray(data[lang].projects.items)) {
         data[lang].projects = JSON.parse(JSON.stringify(defLangObj.projects || defaultTranslations.en.projects));
         modified = true;
       }
-      if (!data[lang].products || !Array.isArray(data[lang].products.items) || data[lang].products.items.length === 0) {
+      if (!data[lang].products || !Array.isArray(data[lang].products.items)) {
         data[lang].products = JSON.parse(JSON.stringify(defLangObj.products || defaultTranslations.en.products));
         modified = true;
       }
-      if (!data[lang].concepts || !Array.isArray(data[lang].concepts.items) || data[lang].concepts.items.length === 0) {
+      if (!data[lang].concepts || !Array.isArray(data[lang].concepts.items)) {
         data[lang].concepts = JSON.parse(JSON.stringify(defLangObj.concepts || defaultTranslations.en.concepts));
         modified = true;
       }
-      if (!data[lang].architects || !Array.isArray(data[lang].architects.items) || data[lang].architects.items.length === 0) {
+      if (!data[lang].architects || !Array.isArray(data[lang].architects.items)) {
         data[lang].architects = JSON.parse(JSON.stringify(defLangObj.architects || defaultTranslations.en.architects));
         modified = true;
       }
-      if (!data[lang].gamedev || !Array.isArray(data[lang].gamedev.items) || data[lang].gamedev.items.length === 0) {
+      if (!data[lang].gamedev || !Array.isArray(data[lang].gamedev.items)) {
         data[lang].gamedev = JSON.parse(JSON.stringify(defLangObj.gamedev || defaultTranslations.en.gamedev));
         modified = true;
       }
-      if (!data[lang].webUiUx || !Array.isArray(data[lang].webUiUx.items) || data[lang].webUiUx.items.length === 0) {
+      if (!data[lang].webUiUx || !Array.isArray(data[lang].webUiUx.items)) {
         data[lang].webUiUx = JSON.parse(JSON.stringify(defLangObj.webUiUx || defaultTranslations.en.webUiUx));
         modified = true;
       }
@@ -433,7 +433,9 @@ export const cmsService = {
     const translations = this.getTranslations();
     const res: any = {};
     ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
-      res[lang] = translations[lang]?.productDetail?.products || translations.en?.productDetail?.products || translations.ru?.productDetail?.products || {};
+      const defProducts = (defaultTranslations as any)[lang]?.productDetail?.products || (defaultTranslations as any).en?.productDetail?.products || {};
+      const curProducts = translations[lang]?.productDetail?.products || translations.en?.productDetail?.products || translations.ru?.productDetail?.products || {};
+      res[lang] = { ...defProducts, ...curProducts };
     });
     return res;
   },

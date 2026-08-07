@@ -9,6 +9,7 @@ import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
+import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
 
 export function WebUiUxDetail() {
   const { t, locale } = useContext(LanguageContext);
@@ -187,7 +188,10 @@ export function WebUiUxDetail() {
       <section id="project-collage-section" className="max-w-[1600px] mx-auto w-full flex flex-col gap-[12px] reveal-visible">
         {filteredBlocks.map((block: string[], blockIdx: number) => {
           if (!block || block.length === 0) return null;
-          
+          if (block[0]?.startsWith("text:")) {
+            const textData = parseTextBlock(block[0]);
+            return textData ? <TextBlockRenderer key={blockIdx} data={textData} /> : null;
+          }
           return (
             <div 
               key={blockIdx} 

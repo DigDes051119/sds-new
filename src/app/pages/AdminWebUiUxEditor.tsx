@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, Type } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
 import { supabaseClient } from "../supabaseClient";
 import { getEmbedUrl, getAspectClass } from "../videoHelper";
 import { convertToWebM } from "../videoConverter";
+import { AdminTextBlockEditor } from "../components/AdminTextBlockEditor";
 
 
 const slugify = (text: string) => {
@@ -1261,6 +1262,49 @@ export function AdminWebUiUxEditor() {
                 {formCollageBlocks.map((block, blockIdx) => {
                   if (!block) return null;
                   
+                  const isTextBlock = block[0]?.startsWith("text:");
+                  if (isTextBlock) {
+                    return (
+                      <div key={blockIdx} className="space-y-3 w-full my-4">
+                        <AdminTextBlockEditor
+                          blockIdx={blockIdx}
+                          blockUrl={block[0]}
+                          onChange={(newUrl) => {
+                            setFormCollageBlocks(prev => prev.map((b, idx) => idx === blockIdx ? [newUrl] : b));
+                          }}
+                          onDelete={() => {
+                            setFormCollageBlocks(prev => prev.filter((_, idx) => idx !== blockIdx));
+                          }}
+                        />
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setFormCollageBlocks(prev => {
+                              const next = [...prev];
+                              next.splice(blockIdx + 1, 0, []);
+                              return next;
+                            })}
+                            className="py-2 px-4 border border-dashed border-[#0000FF]/30 hover:border-[#0000FF] bg-[#0000FF]/5 hover:bg-[#0000FF]/10 text-[#0000FF] rounded-2xl text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Вставить фото-блок сюда
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormCollageBlocks(prev => {
+                              const next = [...prev];
+                              const defaultText = `text:${JSON.stringify({ font: "Inter", size: "18px", align: "left", text: "" })}`;
+                              next.splice(blockIdx + 1, 0, [defaultText]);
+                              return next;
+                            })}
+                            className="py-2 px-4 border border-dashed border-[#0000FF]/30 hover:border-[#0000FF] bg-[#0000FF]/5 hover:bg-[#0000FF]/10 text-[#0000FF] rounded-2xl text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Type className="w-3.5 h-3.5" /> Вставить текст сюда
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   const isVideoBlock = block[0]?.startsWith("video:");
 
                   if (isVideoBlock && false) {
@@ -1743,46 +1787,72 @@ export function AdminWebUiUxEditor() {
                       </motion.div>
 
                       {formCollageBlocks.length > 1 && blockIdx < formCollageBlocks.length - 1 && (
-                        <button
-                          type="button"
-                          onClick={() => setFormCollageBlocks(prev => {
-                            const next = [...prev];
-                            next.splice(blockIdx + 1, 0, []);
-                            return next;
-                          })}
-                          onDragOver={(e) => e.preventDefault()}
-                          onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone(`insert-${blockIdx}`); }}
-                          onDragLeave={() => setDraggedOverZone(null)}
-                          onDrop={(e) => handlePhotoDropOnButton(e, { insertAfter: blockIdx })}
-                          className={`w-full py-3 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider my-2 ${draggedOverZone === `insert-${blockIdx}`
-                            ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
-                            : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
-                            }`}
-                          title="Вставить блок между этими блоками • Сюда можно перетащить фото"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Вставить блок сюда
-                        </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 my-2">
+                          <button
+                            type="button"
+                            onClick={() => setFormCollageBlocks(prev => {
+                              const next = [...prev];
+                              next.splice(blockIdx + 1, 0, []);
+                              return next;
+                            })}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone(`insert-${blockIdx}`); }}
+                            onDragLeave={() => setDraggedOverZone(null)}
+                            onDrop={(e) => handlePhotoDropOnButton(e, { insertAfter: blockIdx })}
+                            className={`w-full py-3 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider ${draggedOverZone === `insert-${blockIdx}`
+                              ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
+                              : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
+                              }`}
+                            title="Вставить блок коллажа • Сюда можно перетащить фото"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Вставить фото-блок сюда
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormCollageBlocks(prev => {
+                              const next = [...prev];
+                              const defaultText = `text:${JSON.stringify({ font: "Inter", size: "18px", align: "left", text: "" })}`;
+                              next.splice(blockIdx + 1, 0, [defaultText]);
+                              return next;
+                            })}
+                            className="w-full py-3 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
+                            title="Вставить текстовый блок между фото"
+                          >
+                            <Type className="w-3.5 h-3.5" /> Вставить текст сюда
+                          </button>
+                        </div>
                       )}
                     </div>
                   );
                 })}
 
                 {/* Add Block Slot inside Mockup */}
-                <button
-                  type="button"
-                  onClick={() => setFormCollageBlocks(prev => [...prev, []])}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone("end"); }}
-                  onDragLeave={() => setDraggedOverZone(null)}
-                  onDrop={(e) => handlePhotoDropOnButton(e, "end")}
-                  className={`w-full py-3.5 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider ${draggedOverZone === "end"
-                    ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
-                    : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
-                    }`}
-                  title="Добавить блок коллажа • Сюда можно перетащить фото"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Добавить блок коллажа
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormCollageBlocks(prev => [...prev, []])}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone("end"); }}
+                    onDragLeave={() => setDraggedOverZone(null)}
+                    onDrop={(e) => handlePhotoDropOnButton(e, "end")}
+                    className={`w-full py-3.5 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider ${draggedOverZone === "end"
+                      ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
+                      : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
+                      }`}
+                    title="Добавить блок коллажа • Сюда можно перетащить фото"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Добавить блок фото
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormCollageBlocks(prev => [...prev, [`text:${JSON.stringify({ font: "Inter", size: "18px", align: "left", text: "" })}`]])}
+                    className="w-full py-3.5 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
+                    title="Добавить текстовый блок"
+                  >
+                    <Type className="w-3.5 h-3.5" /> Добавить текстовый блок
+                  </button>
+                </div>
               </div>
 
               {/* Mock Results Showcase */}

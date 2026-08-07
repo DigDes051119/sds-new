@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
-import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
+import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
 
 function renderCommaSplitList(text: any) {
   if (typeof text !== "string" || !text || text === "-") return text || "-";
@@ -240,6 +240,10 @@ export function ProductDetail() {
           {filteredBlocks.map((block: string[], blockIdx: number) => {
             if (!block || block.length === 0) return null;
             
+            if (block[0]?.startsWith("text:")) {
+              const textData = parseTextBlock(block[0]);
+              return textData ? <TextBlockRenderer key={blockIdx} data={textData} /> : null;
+            }
             return (
               <div 
                 key={blockIdx} 
