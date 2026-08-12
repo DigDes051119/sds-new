@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, Type } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, Type, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
@@ -739,6 +739,27 @@ export function AdminWebUiUxEditor() {
     }
   };
 
+  const handleDuplicate = async (id: string) => {
+    if (isReadOnly) return;
+    try {
+      setTranslating(true);
+      const res = await cmsService.duplicateProject(id, "webUiUx");
+      if (res.success) {
+        await logAdminAction(
+          "Управление проектами WEB / UI UX",
+          "Дублирование проекта",
+          `Создан дубликат проекта "${res.newName}" (ID: ${res.newId})`
+        );
+        setSuccessMessage(`Проект "${res.newName}" успешно продублирован!`);
+        setTimeout(() => setSuccessMessage(null), 4000);
+      }
+    } catch (err: any) {
+      alert("Ошибка при дублировании проекта: " + (err.message || err));
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const rawProjects = translations.ru.webUiUx.items;
   const projectsList = rawProjects.map((project: any) => {
     const detail = projectDetails.ru[project.id] || {};
@@ -806,9 +827,21 @@ export function AdminWebUiUxEditor() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              handleDuplicate(project.id);
+                            }}
+                            className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
+                            title="Дублировать проект"
+                          >
+                            <Copy className="w-3 h-3" />
+                            Копия
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDelete(project.id);
                             }}
                             className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition cursor-pointer"
+                            title="Удалить проект"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

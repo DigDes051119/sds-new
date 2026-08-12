@@ -495,6 +495,91 @@ export const cmsService = {
     return { success: false, itemName };
   },
 
+  // Duplicate project across all 6 languages
+  async duplicateProject(itemId: string, categoryType: string) {
+    const translations = this.getTranslations();
+    const isMainSection = categoryType === "projects" || categoryType === "webUiUx";
+    const details = isMainSection 
+      ? this.getProjectDetails() 
+      : this.getProductDetails();
+
+    const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
+    const newTranslations = JSON.parse(JSON.stringify(translations));
+    const newDetails = JSON.parse(JSON.stringify(details));
+
+    // Generate unique ID: e.g. itemId-copy, itemId-copy-2, etc.
+    let baseCopyId = `${itemId}-copy`;
+    let newId = baseCopyId;
+    let counter = 1;
+
+    const allExistingIds = new Set<string>();
+    langs.forEach((lang) => {
+      if (newTranslations[lang]) {
+        Object.keys(newTranslations[lang]).forEach((catKey) => {
+          const items = newTranslations[lang][catKey]?.items;
+          if (Array.isArray(items)) {
+            items.forEach((p: any) => p?.id && allExistingIds.add(p.id));
+          }
+        });
+      }
+    });
+
+    while (allExistingIds.has(newId)) {
+      counter++;
+      newId = `${baseCopyId}-${counter}`;
+    }
+
+    let duplicatedName = itemId;
+
+    for (const lang of langs) {
+      if (!newTranslations[lang]) continue;
+      if (!newTranslations[lang][categoryType]) newTranslations[lang][categoryType] = { items: [] };
+
+      const items = newTranslations[lang][categoryType].items || [];
+      const origIdx = items.findIndex((p: any) => p.id === itemId);
+
+      if (origIdx !== -1) {
+        const origItem = items[origIdx];
+        const copySuffix = lang === "ru" ? " (Копия)" : lang === "kg" ? " (Көчүрмө)" : " (Copy)";
+        const newName = origItem.name ? `${origItem.name}${copySuffix}` : `${itemId}${copySuffix}`;
+        if (lang === "ru") duplicatedName = newName;
+
+        const duplicatedItem = {
+          ...JSON.parse(JSON.stringify(origItem)),
+          id: newId,
+          name: newName,
+          createdAt: new Date().toISOString()
+        };
+
+        // Insert copy right after original item
+        items.splice(origIdx + 1, 0, duplicatedItem);
+
+        // Duplicate details entry if exists
+        const origDetail = newDetails[lang]?.[itemId] || details[lang]?.[itemId];
+        if (origDetail) {
+          if (!newDetails[lang]) newDetails[lang] = {};
+          newDetails[lang][newId] = {
+            ...JSON.parse(JSON.stringify(origDetail)),
+            name: newName
+          };
+
+          if (!isMainSection) {
+            if (!newTranslations[lang].productDetail) newTranslations[lang].productDetail = {};
+            if (!newTranslations[lang].productDetail.products) newTranslations[lang].productDetail.products = {};
+            newTranslations[lang].productDetail.products[newId] = newDetails[lang][newId];
+          }
+        }
+      }
+    }
+
+    await this.updateTranslations(newTranslations);
+    if (isMainSection) {
+      await this.updateProjectDetails(newDetails);
+    }
+
+    return { success: true, newId, newName: duplicatedName };
+  },
+
 
   // Get archive (Origins) items
   getArchiveItems(): Record<string, ArchiveItem[]> {

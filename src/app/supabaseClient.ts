@@ -79,21 +79,35 @@ export const supabaseClient = {
   // Database operations (PostgREST API)
   async fetchTable(tableName: string) {
     const token = this.getToken() || SUPABASE_KEY;
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?select=*`, {
-      method: "GET",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ message: response.statusText }));
-      throw new Error(err.message || `Failed to fetch table ${tableName}`);
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?select=*`, {
+        method: "GET",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(err.message || `Failed to fetch table ${tableName}`);
+      }
+
+      return await response.json();
+    } catch (e: any) {
+      clearTimeout(timer);
+      if (e.name === 'AbortError') {
+        console.warn(`Timeout fetching table ${tableName}, using local fallback.`);
+      }
+      throw e;
     }
-
-    return await response.json();
   },
 
   async upsertTable(tableName: string, rows: any[]) {

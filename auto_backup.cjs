@@ -4,6 +4,9 @@ const path = require('path');
 const SUPABASE_URL = "https://hniqpnuqqsmqpolxgbav.supabase.co";
 const SUPABASE_KEY = "sb_publishable_3DWLrcWUpjuE_gNKEivM8A_UHOmJLgu";
 
+// Настройка пути к Google Диску (оставьте пустым для автоопределения или укажите вручную)
+let GOOGLE_DRIVE_DIR = ''; 
+
 // Папка для бэкапов
 const BACKUP_BASE_DIR = path.join(__dirname, 'backups');
 const MEDIA_DIR = path.join(BACKUP_BASE_DIR, 'media');
@@ -126,9 +129,67 @@ async function runBackup() {
     }
 
     console.log(`✅ Скачано новых медиафайлов: ${downloadedCount}`);
+
+    // 4. СИНХРОНИЗАЦИЯ С GOOGLE DRIVE
+    let targetGdriveDir = GOOGLE_DRIVE_DIR;
+    if (!targetGdriveDir) {
+        // Попытка автоопределения путей Google Диска на Windows
+        const possiblePaths = [
+            'G:\\My Drive\\SDST backups',
+            'G:\\Мой диск\\SDST backups',
+            path.join(process.env.USERPROFILE || 'C:\\Users\\Default', 'Google Drive\\My Drive\\SDST backups'),
+            path.join(process.env.USERPROFILE || 'C:\\Users\\Default', 'Google Диск\\Мой диск\\SDST backups')
+        ];
+        for (const p of possiblePaths) {
+            const parent = path.dirname(p);
+            if (fs.existsSync(parent)) {
+                targetGdriveDir = p;
+                break;
+            }
+        }
+    }
+
+    if (targetGdriveDir) {
+        console.log(`\n☁️ 4/4 Синхронизация бэкапа с Google Диском...`);
+        try {
+            const cloudBackupDir = path.join(targetGdriveDir, `backup_${timestamp}`);
+            fs.mkdirSync(cloudBackupDir, { recursive: true });
+            
+            // Копируем файлы бэкапа кода и БД
+            copyDirSync(path.join(currentBackupDir, 'site_and_admin_code'), path.join(cloudBackupDir, 'site_and_admin_code'));
+            copyDirSync(path.join(currentBackupDir, 'database_dump'), path.join(cloudBackupDir, 'database_dump'));
+            
+            // Копируем медиафайлы в единую облачную папку media
+            const cloudMediaDir = path.join(targetGdriveDir, 'media');
+            fs.mkdirSync(cloudMediaDir, { recursive: true });
+            
+            const localMediaFiles = fs.readdirSync(MEDIA_DIR);
+            let copiedMediaCount = 0;
+            for (const file of localMediaFiles) {
+                const srcPath = path.join(MEDIA_DIR, file);
+                const destPath = path.join(cloudMediaDir, file);
+                if (!fs.existsSync(destPath)) {
+                    fs.copyFileSync(srcPath, destPath);
+                    copiedMediaCount++;
+                }
+            }
+            
+            console.log(`✅ Успешно синхронизировано с Google Диском: ${targetGdriveDir}`);
+            if (copiedMediaCount > 0) {
+                console.log(`  - Отправлено новых медиафайлов в облако: ${copiedMediaCount}`);
+            }
+        } catch (e) {
+            console.warn(`  ⚠️ Не удалось скопировать на Google Диск: ${e.message}`);
+            console.log(`  👉 Проверьте, запущен ли клиент Google Диск и правильный ли путь.`);
+        }
+    } else {
+        console.log(`\n☁️ 4/4 Пропуск синхронизации с Google Диском (папка Google Drive не обнаружена).`);
+        console.log(`👉 Вы можете указать точный путь к папке Google Диска в переменной GOOGLE_DRIVE_DIR на строке 8 в auto_backup.cjs`);
+    }
+
     console.log(`\n========================================`);
     console.log(`🎉 ПОЛНЫЙ БЭКАП УСПЕШНО ЗАВЕРШЕН!`);
-    console.log(`Путь к копии: backups/backup_${timestamp}`);
+    console.log(`Путь к локальной копии: backups/backup_${timestamp}`);
     console.log(`========================================\n`);
 }
 
