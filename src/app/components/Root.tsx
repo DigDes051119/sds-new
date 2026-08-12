@@ -13,6 +13,37 @@ export function Root() {
   const outlet = useOutlet();
   const [locale, setLocale] = useState<Language>("en");
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateUnderline = () => {
+      const activeEl = navRef.current?.querySelector(".nav-link-active");
+      if (activeEl && navRef.current) {
+        const activeRect = activeEl.getBoundingClientRect();
+        const navRect = navRef.current.getBoundingClientRect();
+        setUnderlineStyle({
+          left: activeRect.left - navRect.left,
+          width: activeRect.width,
+          opacity: 1
+        });
+      } else {
+        setUnderlineStyle(prev => ({ ...prev, opacity: 0 }));
+      }
+    };
+
+    // Run once immediately on navigation / language change
+    updateUnderline();
+    
+    // Add a tiny micro-tick delay only once to ensure layout is ready
+    const timer = setTimeout(updateUnderline, 0);
+
+    window.addEventListener("resize", updateUnderline);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateUnderline);
+    };
+  }, [location.pathname, locale]);
 
   
   const navClusterRef = useRef<HTMLDivElement>(null);
@@ -37,7 +68,7 @@ export function Root() {
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [locale, location.pathname]);
+  }, []);
   
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showPreloader, setShowPreloader] = useState(false);
@@ -187,45 +218,37 @@ export function Root() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    let observer: IntersectionObserver | null = null;
+    const sections = document.querySelectorAll("section");
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px 0px -80px 0px",
+      threshold: 0.05
+    };
 
-    const delayTimer = setTimeout(() => {
-      window.scrollTo(0, 0);
-      const sections = document.querySelectorAll("section");
-      
-      const observerOptions = {
-        root: null,
-        rootMargin: "0px 0px -80px 0px",
-        threshold: 0.05
-      };
-
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("reveal-visible");
-            observer?.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      sections.forEach((sec) => {
-        if (!sec.classList.contains("reveal-visible")) {
-          const rect = sec.getBoundingClientRect();
-          if (rect.top < window.innerHeight) {
-            sec.classList.add("reveal-visible");
-          } else {
-            sec.classList.add("reveal-hidden");
-            observer?.observe(sec);
-          }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("reveal-visible");
+          observer.unobserve(entry.target);
         }
       });
-    }, 150);
+    }, observerOptions);
+
+    sections.forEach((sec) => {
+      if (!sec.classList.contains("reveal-visible")) {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          sec.classList.add("reveal-visible");
+        } else {
+          sec.classList.add("reveal-hidden");
+          observer.observe(sec);
+        }
+      }
+    });
 
     return () => {
-      clearTimeout(delayTimer);
-      if (observer) {
-        observer.disconnect();
-      }
+      observer.disconnect();
     };
   }, [location.pathname]);
 
@@ -365,7 +388,7 @@ export function Root() {
           {/* Navigation Links and Languages (Desktop) */}
           <div className="hidden lg:flex lg:col-span-9 justify-end">
             <div ref={navClusterRef} className="flex flex-nowrap items-center gap-[28px] xl:gap-[40px] whitespace-nowrap">
-              <nav className="flex flex-nowrap items-center gap-[20px] xl:gap-[28px]">
+              <nav ref={navRef} className="flex flex-nowrap items-center gap-[20px] xl:gap-[28px] relative pb-[6px]">
               {navLinks.map((link) => {
                 if (link.path === "/projects") {
                   return (
@@ -374,20 +397,11 @@ export function Root() {
                         to={link.path}
                         className={({ isActive }) =>
                           `text-[16px] font-medium tracking-[-0.15px] uppercase transition-colors duration-300 group-hover/navdropdown:text-[#0000FF] relative pb-[6px] flex items-center gap-1 ${
-                            isActive ? "text-[#0000FF]" : "text-black"
+                            isActive ? "text-[#0000FF] nav-link-active" : "text-black"
                           }`
                         }
                       >
-                        {({ isActive }) => (
-                          <>
-                            {link.name}
-                            <span
-                              className={`absolute bottom-0 left-0 h-[1.5px] bg-[#0000FF] transition-all duration-300 ease-out ${
-                                isActive ? "w-full" : "w-0"
-                              }`}
-                            />
-                          </>
-                        )}
+                        {link.name}
                       </NavLink>
 
                       {/* Dropdown Menu on Hover */}
@@ -472,23 +486,24 @@ export function Root() {
                     to={link.path}
                     className={({ isActive }) =>
                       `text-[16px] font-medium tracking-[-0.15px] uppercase transition-colors duration-300 hover:text-[#0000FF] relative pb-[6px] ${
-                        isActive ? "text-[#0000FF]" : "text-black"
+                        isActive ? "text-[#0000FF] nav-link-active" : "text-black"
                       }`
                     }
                   >
-                    {({ isActive }) => (
-                      <>
-                        {link.name}
-                        <span
-                          className={`absolute bottom-0 left-0 h-[1.5px] bg-[#0000FF] transition-all duration-300 ease-out ${
-                            isActive ? "w-full" : "w-0"
-                          }`}
-                        />
-                      </>
-                    )}
+                    {link.name}
                   </NavLink>
                 );
               })}
+              
+              {/* Single CSS-based GPU sliding active underline */}
+              <span
+                className="absolute bottom-0 h-[1.5px] bg-[#0000FF] transition-all duration-300 ease-out pointer-events-none"
+                style={{
+                  left: `${underlineStyle.left}px`,
+                  width: `${underlineStyle.width}px`,
+                  opacity: underlineStyle.opacity
+                }}
+              />
             </nav>
 
             <span className="hidden md:inline text-[#808080] text-[17px]">|</span>
