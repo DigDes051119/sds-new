@@ -217,16 +217,31 @@ export function About() {
                         </div>
                       )}
 
-                      {/* Faint Wave Decoration at the bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none opacity-[0.14] overflow-hidden select-none">
+                      {/* Softer, more premium double gradient wave decoration */}
+                      <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none overflow-hidden select-none">
                         <svg className="w-full h-full" viewBox="0 0 100 25" preserveAspectRatio="none">
-                          <path d="M0,15 C30,25 70,5 100,15 L100,25 L0,25 Z" fill="#0000FF" />
-                          <path d="M0,8 C35,18 65,2 100,10 L100,25 L0,25 Z" fill="none" stroke="#0000FF" strokeWidth="0.5" />
+                          <defs>
+                            <linearGradient id={`waveGrad1-${idx}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#0000FF" stopOpacity="0.03" />
+                              <stop offset="50%" stopColor="#0000FF" stopOpacity="0.12" />
+                              <stop offset="100%" stopColor="#0000FF" stopOpacity="0.03" />
+                            </linearGradient>
+                            <linearGradient id={`waveGrad2-${idx}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#0000FF" stopOpacity="0.02" />
+                              <stop offset="30%" stopColor="#0000FF" stopOpacity="0.08" />
+                              <stop offset="70%" stopColor="#0000FF" stopOpacity="0.05" />
+                              <stop offset="100%" stopColor="#0000FF" stopOpacity="0.01" />
+                            </linearGradient>
+                          </defs>
+                          {/* Back wave */}
+                          <path d="M0,15 C30,22 70,8 100,15 L100,25 L0,25 Z" fill={`url(#waveGrad1-${idx})`} />
+                          {/* Front wave */}
+                          <path d="M0,10 C45,2 55,20 100,10 L100,25 L0,25 Z" fill={`url(#waveGrad2-${idx})`} />
+                          {/* Very thin top strokes */}
+                          <path d="M0,15 C30,22 70,8 100,15" fill="none" stroke="#0000FF" strokeWidth="0.15" strokeOpacity="0.3" />
+                          <path d="M0,10 C45,2 55,20 100,10" fill="none" stroke="#0000FF" strokeWidth="0.1" strokeOpacity="0.2" />
                         </svg>
                       </div>
-                      
-                      {/* Tiny Blue Dot at the bottom center */}
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0000FF] opacity-60"></div>
                     </div>
                   );
                 })}

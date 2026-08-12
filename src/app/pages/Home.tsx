@@ -325,7 +325,7 @@ export function Home() {
     currentFilteredProjects = localizedArchive.slice(0, 4).map((p: any) => ({
       id: p.id,
       title: p.title || p.name || "",
-      image: p.img || p.image || "",
+      image: p.images?.[0] || p.img || p.image || "",
       tags: p.category || "Archive",
       year: p.year || "2020",
       desc: p.challenge || p.description || ""
@@ -396,6 +396,9 @@ export function Home() {
     
     return {
       ...service,
+      title: getLocText(locale, service.title, service.title),
+      desc: getLocText(locale, service.desc, service.desc),
+      steps: Array.isArray(service.steps) ? service.steps.map((step: string) => getLocText(locale, step, step)) : [],
       imgUrl
     };
   });
@@ -430,7 +433,7 @@ export function Home() {
 
       {/* 2 БЛОК: Recent Projects (Недавние проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[30px] flex justify-between items-baseline ">
+        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
@@ -444,42 +447,66 @@ export function Home() {
 
 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+        <div className={activeFilterTab === "/projects/old"
+          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]"
+          : "grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]"
+        }>
           {currentFilteredProjects.map((project, index) => (
             <div key={`recent-${project.id}-${activeFilterTab}`} className="w-full flex flex-col group">
               <Link to={isArchiveOrVideo ? detailPathPrefix : `${detailPathPrefix}/${project.id}`} className="group flex flex-col flex-1">
-                <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
+                <div className={`w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center ${activeFilterTab === "/projects/old" ? "rounded-[8px]" : ""}`}>
                   <ImageWithFallback 
                     src={project.image} 
                     alt={project.title} 
                     className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
                   />
                 </div>
-                <div className="mt-[25px] flex flex-col">
-                  <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
-                    {/* Left block: label + title */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-2">
+                {activeFilterTab === "/projects/old" ? (
+                  <div className="mt-[20px] flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
                       <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                        0{index + 1} / NEW
+                        [{String(index + 1).padStart(2, '0')}] — {project.year}
                       </span>
-                      <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                        {project.title}
-                      </h3>
-                      {project.desc && (
-                        <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
-                          {project.desc}
-                        </p>
-                      )}
+                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
+                        {project.tags}
+                      </span>
                     </div>
-                    {/* Vertical divider stretching to end of description */}
-                    <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
-                    {/* Right block: category + year */}
-                    <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                      <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
-                      <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
+                    <h3 className="text-[22px] xs:text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                      {project.title}
+                    </h3>
+                    {project.desc && (
+                      <p className="text-[15px] leading-[1.4] text-[#808080] m-0 mt-2 font-normal line-clamp-2 pr-4">
+                        {project.desc}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-[25px] flex flex-col">
+                    <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                      {/* Left block: label + title */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                          0{index + 1} / NEW
+                        </span>
+                        <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                          {project.title}
+                        </h3>
+                        {project.desc && (
+                          <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                            {project.desc}
+                          </p>
+                        )}
+                      </div>
+                      {/* Vertical divider stretching to end of description */}
+                      <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                      {/* Right block: category + year */}
+                      <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </Link>
             </div>
           ))}
@@ -490,14 +517,14 @@ export function Home() {
 
       {/* 3 БЛОК: Advantages (Преимущества) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[28px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 ">
+        <div className="pb-4 mb-[40px] flex flex-col xs:flex-row justify-between items-start xs:items-baseline gap-2 ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0">
             {getLocText(locale, "Преимущества", "Advantages", "Артыкчылыктар")}
           </h2>
           <span className="font-mono text-[14px] xs:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 xs:pb-[15px] shrink-0">[03/VALUES]</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-[59px] pt-[28px] items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-[59px] pt-0 items-start">
           {/* Left Column: Divided into 2 display stats */}
           <div className="lg:col-span-5 flex flex-col gap-6 md:gap-8  pr-4">
             {/* Stat 1: Founder Experience */}
@@ -552,7 +579,7 @@ export function Home() {
 
       {/* 4 БЛОК: Recent Products (Недавние продукты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
           <div className="flex flex-col">
             <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
@@ -607,7 +634,7 @@ export function Home() {
       {/* 4.5 БЛОК: Architecture (Архитектура - 2 плашки) */}
       {recentArchitects.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
             <div className="flex flex-col">
               <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
               <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
@@ -662,7 +689,7 @@ export function Home() {
 
       {/* 5 БЛОК: Services (Услуги) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[28px] flex justify-between items-baseline ">
+        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {getLocText(locale, "Услуги", "Services", "Кызматтар")}
           </h2>
@@ -748,7 +775,7 @@ export function Home() {
 
       {/* 6 БЛОК: Featured Projects (Избранные проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
           <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {getLocText(locale, "Избранные проекты", "Featured projects", "Тандалган долбоорлор")}
           </h2>
@@ -793,7 +820,7 @@ export function Home() {
 
       {/* 7 БЛОК: Brands (Бренды) */}
       <section className="flex flex-col w-full overflow-hidden mb-[100px]">
-        <div className="pb-4 mb-[59px] ">
+        <div className="pb-4 mb-[40px] ">
           <div className="flex justify-between items-baseline">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Бренды", "Selected brands", "Бренддер")}
@@ -874,7 +901,7 @@ export function Home() {
       {/* 7.5 БЛОК: Featured Concepts (Избранные концепты на Главной - 2 в ряд) */}
       {featuredConcepts.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Концепты и видение", "Concepts & Vision", "Концепциялар жана көрүнүш", "概念与愿景", "المفاهيم والرؤية", "Konzepte & Vision")}
             </h2>
@@ -930,7 +957,7 @@ export function Home() {
       {/* 9 БЛОК: Recent WEB / UI UX Projects (Недавние проекты WEB / UI UX) */}
       {recentWebUiUx.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[59px] flex justify-between items-baseline ">
+          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
             <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Недавние проекты WEB / UI UX", "Recent WEB / UI UX projects", "Акыркы WEB / UI UX долбоорлору", "近期网页与UI/UX项目", "المشاريع الأخيرة للويب وواجهات المستخدم", "Neueste WEB / UI UX Projekte")}
             </h2>

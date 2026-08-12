@@ -165,56 +165,61 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
     }
   ];
 
+  const elements: React.ReactNode[] = [];
+  navItems.forEach((item, idx) => {
+    const l = item.label[locale as keyof typeof item.label] || item.label["en"];
+    const s = item.subtext[locale as keyof typeof item.subtext] || item.subtext["en"];
+    
+    const activeClass = (active: boolean) =>
+      `flex flex-col text-left gap-1.5 transition-colors duration-300 hover:text-[#0000FF] cursor-pointer group ${
+        active ? "text-[#0000FF]" : "text-black"
+      }`;
+
+    elements.push(
+      <div key={item.path} className="flex items-start">
+        {onTabChange ? (
+          <button
+            type="button"
+            onClick={() => onTabChange(item.path)}
+            className={activeClass(activeTab === item.path)}
+          >
+            <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+              {l}
+            </span>
+            <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[90px] md:max-w-[115px] whitespace-normal line-clamp-2 mt-1.5">
+              {s}
+            </span>
+          </button>
+        ) : (
+          <NavLink
+            to={item.path}
+            end={item.path === "/projects"}
+            className={({ isActive }) => activeClass(isActive)}
+          >
+            <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+              {l}
+            </span>
+            <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[90px] md:max-w-[115px] whitespace-normal line-clamp-2 mt-1.5">
+              {s}
+            </span>
+          </NavLink>
+        )}
+      </div>
+    );
+
+    if (idx < navItems.length - 1) {
+      elements.push(
+        <span key={`slash-${idx}`} className="text-black/40 text-[18px] md:text-[25px] font-light select-none pt-0.5 self-start">
+          /
+        </span>
+      );
+    }
+  });
+
   return (
     <div className="w-full mb-12 md:mb-16 overflow-x-auto no-scrollbar">
       <div className="flex items-start justify-between flex-nowrap min-w-max md:min-w-0 md:w-full">
-        {navItems.map((item, idx) => {
-          const l = item.label[locale as keyof typeof item.label] || item.label["en"];
-          const s = item.subtext[locale as keyof typeof item.subtext] || item.subtext["en"];
-          
-          const activeClass = (active: boolean) =>
-            `flex flex-col text-left gap-2 transition-colors duration-300 hover:text-[#0000FF] cursor-pointer group ${
-              active ? "text-[#0000FF]" : "text-black"
-            }`;
-
-          return (
-            <div key={item.path} className="flex items-start">
-              {onTabChange ? (
-                <button
-                  type="button"
-                  onClick={() => onTabChange(item.path)}
-                  className={activeClass(activeTab === item.path)}
-                >
-                  <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
-                    {l}
-                  </span>
-                  <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[130px] md:max-w-[170px] whitespace-normal">
-                    {s}
-                  </span>
-                </button>
-              ) : (
-                <NavLink
-                  to={item.path}
-                  end={item.path === "/projects"}
-                  className={({ isActive }) => activeClass(isActive)}
-                >
-                  <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
-                    {l}
-                  </span>
-                  <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[130px] md:max-w-[170px] whitespace-normal">
-                    {s}
-                  </span>
-                </NavLink>
-              )}
-              
-              {idx < navItems.length - 1 && (
-                <span className="text-black/40 mx-3 md:mx-4.5 text-[18px] md:text-[25px] font-light select-none pt-0.5">
-                  /
-                </span>
-              )}
-            </div>
-          );
-        })}
+        {elements}
       </div>
     </div>
   );

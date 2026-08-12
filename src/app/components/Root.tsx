@@ -381,13 +381,11 @@ export function Root() {
                         {({ isActive }) => (
                           <>
                             {link.name}
-                            {isActive && (
-                              <motion.div
-                                layoutId="activeUnderline"
-                                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
-                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                              />
-                            )}
+                            <span
+                              className={`absolute bottom-0 left-0 h-[1.5px] bg-[#0000FF] transition-all duration-300 ease-out ${
+                                isActive ? "w-full" : "w-0"
+                              }`}
+                            />
                           </>
                         )}
                       </NavLink>
@@ -481,13 +479,11 @@ export function Root() {
                     {({ isActive }) => (
                       <>
                         {link.name}
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeUnderline"
-                            className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#0000FF]"
-                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                          />
-                        )}
+                        <span
+                          className={`absolute bottom-0 left-0 h-[1.5px] bg-[#0000FF] transition-all duration-300 ease-out ${
+                            isActive ? "w-full" : "w-0"
+                          }`}
+                        />
                       </>
                     )}
                   </NavLink>
