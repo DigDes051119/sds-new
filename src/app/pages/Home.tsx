@@ -15,12 +15,14 @@ export function Home() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
+  const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
   const [activeFilterTab, setActiveFilterTab] = useState("/projects");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
       setProjectDetails(cmsService.getProjectDetails());
       setProductDetails(cmsService.getProductDetails());
+      setSiteTranslations(cmsService.getTranslations());
     });
   }, []);
 
@@ -333,13 +335,15 @@ export function Home() {
   } else if (activeFilterTab === "/video") {
     isArchiveOrVideo = true;
     detailPathPrefix = "/video";
-    const videoItems = translations[locale]?.video?.items || translations["en"]?.video?.items || [];
+    const videoItems = siteTranslations[locale]?.video?.items || siteTranslations["en"]?.video?.items || [];
     currentFilteredProjects = videoItems.slice(0, 4).map((p: any) => {
       const detail = localizedDetails[p.id] || {};
+      const displayVideoUrl = detail.videoUrl || p.img || "";
       return {
         id: p.id,
         title: p.name || p.title || "",
         image: p.img || "",
+        videoUrl: displayVideoUrl,
         tags: detail.service || p.category || "Video",
         year: detail.year || "2026",
         desc: detail.desc || detail.challenge || p.desc || ""
@@ -361,7 +365,7 @@ export function Home() {
   const hasRussian = (text: string) => /[а-яА-ЯёЁ]/.test(text);
   let servicesSource = t;
   if (locale !== "ru" && t.services?.items?.some((s: any) => s.id === "01" && hasRussian(s.title))) {
-    servicesSource = translations[locale];
+    servicesSource = siteTranslations[locale];
   }
   const allItems = servicesSource.services?.items || [];
   
@@ -374,7 +378,7 @@ export function Home() {
   const servicesList = finalItems.map((service: any) => {
     let homeSource = t;
     if (locale !== "ru" && t.home?.services?.some((s: any) => s[0] === "01" && hasRussian(s[1]))) {
-      homeSource = translations[locale];
+      homeSource = siteTranslations[locale];
     }
     const match = homeSource.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
     let imgUrl = match ? match[3] : "";
@@ -447,69 +451,115 @@ export function Home() {
 
 
 
-        <div className={activeFilterTab === "/projects/old"
-          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]"
-          : "grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]"
+        <div className={
+          activeFilterTab === "/video"
+            ? "columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2 w-full mt-4"
+            : activeFilterTab === "/projects/old"
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]"
+              : "grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]"
         }>
-          {currentFilteredProjects.map((project, index) => (
-            <div key={`recent-${project.id}-${activeFilterTab}`} className="w-full flex flex-col group">
-              <Link to={isArchiveOrVideo ? detailPathPrefix : `${detailPathPrefix}/${project.id}`} className="group flex flex-col flex-1">
-                <div className={`w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center ${activeFilterTab === "/projects/old" ? "rounded-[8px]" : ""}`}>
-                  <ImageWithFallback 
-                    src={project.image} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
-                  />
-                </div>
-                {activeFilterTab === "/projects/old" ? (
-                  <div className="mt-[20px] flex flex-col">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                        [{String(index + 1).padStart(2, '0')}] — {project.year}
-                      </span>
-                      <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
-                        {project.tags}
-                      </span>
-                    </div>
-                    <h3 className="text-[22px] xs:text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    {project.desc && (
-                      <p className="text-[15px] leading-[1.4] text-[#808080] m-0 mt-2 font-normal line-clamp-2 pr-4">
-                        {project.desc}
-                      </p>
+          {currentFilteredProjects.map((project, index) => {
+            if (activeFilterTab === "/video") {
+              const isVideo = project.videoUrl?.startsWith("video:") || project.videoUrl?.endsWith(".webm") || project.videoUrl?.endsWith(".mp4");
+              const realUrl = project.videoUrl?.startsWith("video:") ? project.videoUrl.slice(6) : project.videoUrl;
+
+              return (
+                <div
+                  key={`recent-${project.id}-${activeFilterTab}`}
+                  className="break-inside-avoid mb-2 w-full group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
+                >
+                  <Link to="/video" className="block relative w-full h-full">
+                    {isVideo ? (
+                      <video
+                        src={realUrl}
+                        className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+                        muted
+                        playsInline
+                        autoPlay
+                        loop
+                      />
+                    ) : (
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
                     )}
+
+                    {/* Overlay with info on hover */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10">
+                      <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em] mb-1">
+                        {project.year} — {project.tags}
+                      </span>
+                      <h3 className="text-[18px] font-bold text-white uppercase leading-none m-0">
+                        {project.title}
+                      </h3>
+                    </div>
+                  </Link>
+                </div>
+              );
+            }
+
+            return (
+              <div key={`recent-${project.id}-${activeFilterTab}`} className="w-full flex flex-col group">
+                <Link to={isArchiveOrVideo ? detailPathPrefix : `${detailPathPrefix}/${project.id}`} className="group flex flex-col flex-1">
+                  <div className={`w-full bg-[#191919] overflow-hidden relative aspect-[16/9] flex items-center justify-center ${activeFilterTab === "/projects/old" ? "rounded-[8px]" : ""}`}>
+                    <ImageWithFallback 
+                      src={project.image} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover scale-[1.02] transition duration-500 group-hover:brightness-75"
+                    />
                   </div>
-                ) : (
-                  <div className="mt-[25px] flex flex-col">
-                    <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
-                      {/* Left block: label + title */}
-                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                  {activeFilterTab === "/projects/old" ? (
+                    <div className="mt-[20px] flex flex-col">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
-                          0{index + 1} / NEW
+                          [{String(index + 1).padStart(2, '0')}] — {project.year}
                         </span>
-                        <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
-                          {project.title}
-                        </h3>
-                        {project.desc && (
-                          <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
-                            {project.desc}
-                          </p>
-                        )}
+                        <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em] text-right truncate pl-4">
+                          {project.tags}
+                        </span>
                       </div>
-                      {/* Vertical divider stretching to end of description */}
-                      <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
-                      {/* Right block: category + year */}
-                      <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
-                        <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
-                        <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
+                      <h3 className="text-[22px] xs:text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                        {project.title}
+                      </h3>
+                      {project.desc && (
+                        <p className="text-[15px] leading-[1.4] text-[#808080] m-0 mt-2 font-normal line-clamp-2 pr-4">
+                          {project.desc}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-[25px] flex flex-col">
+                      <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
+                        {/* Left block: label + title */}
+                        <div className="flex-1 min-w-0 flex flex-col gap-2">
+                          <span className="font-mono text-[13px] text-[#808080] uppercase tracking-[0.04em]">
+                            0{index + 1} / NEW
+                          </span>
+                          <h3 className="text-[22px] xs:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                            {project.title}
+                          </h3>
+                          {project.desc && (
+                            <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                              {project.desc}
+                            </p>
+                          )}
+                        </div>
+                        {/* Vertical divider stretching to end of description */}
+                        <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                        {/* Right block: category + year */}
+                        <div className="text-left flex flex-col gap-1 shrink-0 md:max-w-[40%] self-start">
+                          <span className="text-[13px] tracking-[0.04em] text-[#808080] uppercase">{project.tags}</span>
+                          <span className="font-mono text-[13px] tracking-[0.04em] text-black">{project.year}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </Link>
-            </div>
-          ))}
+                  )}
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </section>
 
