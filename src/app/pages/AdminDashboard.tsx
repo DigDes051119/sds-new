@@ -92,7 +92,7 @@ BEGIN
       AND password = p_requester_password 
       AND (role = 'creator' OR role = 'full' OR (permissions->>'analytics')::boolean = true)
   ) THEN
-    RETURN QUERY SELECT a.id, a.session_id, a.path, a.locale, a.referrer, a.user_agent, a.created_at FROM sds_analytics a;
+    RETURN QUERY SELECT a.id, a.session_id, a.path, a.locale, a.referrer, a.user_agent, a.created_at FROM sds_analytics a ORDER BY a.created_at DESC;
   ELSE
     RAISE EXCEPTION 'Access Denied';
   END IF;
@@ -151,11 +151,11 @@ $$ LANGUAGE plpgsql;`;
 
       const currentAdmin = JSON.parse(localStorage.getItem("sds_current_admin") || "{}");
       const requesterPassword = sessionStorage.getItem("sds_current_admin_password") || "";
-      const data = await supabaseClient.getAnalyticsDataSecure(currentAdmin.username, requesterPassword);
-      const rows: AnalyticsRow[] = data || [];
+      const { rows, totalCount } = await supabaseClient.getAnalyticsDataSecure(currentAdmin.username, requesterPassword);
       setLogs(rows);
 
       const totalRows = rows.length;
+      const realTotalViews = totalCount || totalRows;
       const unique = new Set(rows.map((r) => r.session_id)).size;
       const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
       const active = rows.filter((r) => new Date(r.created_at) > fifteenMinsAgo).length;
@@ -406,7 +406,7 @@ $$ LANGUAGE plpgsql;`;
       const avgDuration = avgSec > 60 ? `${Math.floor(avgSec / 60)}м ${avgSec % 60}с` : `${avgSec}с`;
 
       setStats({
-        pageViews: rows.length,
+        pageViews: realTotalViews,
         uniqueVisitors: unique,
         activeNow: active || Math.floor(Math.random() * 3) + 1,
         avgDuration: avgDuration || "1м 45с",
@@ -439,6 +439,13 @@ $$ LANGUAGE plpgsql;`;
 
   useEffect(() => {
     loadAnalytics();
+
+    // Auto-refresh analytics in real-time every 20 seconds
+    const interval = setInterval(() => {
+      loadAnalytics(true);
+    }, 20000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {

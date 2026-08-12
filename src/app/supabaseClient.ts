@@ -451,11 +451,12 @@ export const supabaseClient = {
   },
 
   async getAnalyticsDataSecure(requesterUsername: string, requesterPassword: string) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_analytics_data`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_analytics_data?order=created_at.desc`, {
       method: "POST",
       headers: {
         "apikey": SUPABASE_KEY,
         "Content-Type": "application/json",
+        "Prefer": "count=exact"
       },
       body: JSON.stringify({
         p_requester_username: requesterUsername,
@@ -468,7 +469,10 @@ export const supabaseClient = {
       throw new Error(err.message || "Ошибка получения аналитики");
     }
 
-    return await response.json();
+    const contentRange = response.headers.get("content-range");
+    const totalCount = contentRange ? parseInt(contentRange.split("/")[1], 10) : null;
+    const data = await response.json();
+    return { rows: data || [], totalCount };
   },
 
   async clearAnalyticsSecure(requesterUsername: string, requesterPassword: string) {
