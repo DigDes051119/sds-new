@@ -93,6 +93,7 @@ export function AdminLayout() {
     { name: "Concepts & Vision", path: "/admin/concepts", icon: FolderGit, permKey: "projects" },
     { name: "Архитектура", path: "/admin/architects", icon: FolderGit, permKey: "projects" },
     { name: "GameDev", path: "/admin/gamedev", icon: FolderGit, permKey: "projects" },
+    { name: "Видео", path: "/admin/video", icon: FolderGit, permKey: "projects" },
     { name: "Контакты и Карта", path: "/admin/contacts", icon: MapPin, permKey: "contacts" },
     { name: "Услуги", path: "/admin/services", icon: Briefcase, permKey: "services" },
     { name: "Бренды", path: "/admin/brands", icon: Star, permKey: "about" },
@@ -125,6 +126,7 @@ export function AdminLayout() {
     "/admin/architects": "architects",
     "/admin/gamedev": "gamedev",
     "/admin/projects": "projects",
+    "/admin/video": "video",
   };
 
   return (

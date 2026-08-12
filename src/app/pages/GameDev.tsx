@@ -4,6 +4,7 @@ import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
+import { GridSwitcher } from "../components/GridSwitcher";
 
 function renderCommaSplitList(text: any) {
   if (typeof text !== "string" || !text || text === "-") return text || "-";
@@ -23,6 +24,7 @@ function renderCommaSplitList(text: any) {
 export function GameDev() {
   const { t, locale } = useContext(LanguageContext);
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
+  const [cols, setCols] = useState(() => localStorage.getItem("sds_grid_layout") || "2");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -62,9 +64,10 @@ export function GameDev() {
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.gamedev?.title || getLocText(locale, "Игровая разработка", "GameDev", "Оюн иштеп чыгуу", "游戏开发", "تطوير الألعاب", "Spieleentwicklung")}
           </h1>
-          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
-            [GAMEDEV/PROJECTS]
-          </span>
+          <GridSwitcher cols={cols} onChange={(val) => {
+            setCols(val);
+            localStorage.setItem("sds_grid_layout", val);
+          }} />
         </div>
         <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
           {getLocText(
@@ -80,7 +83,7 @@ export function GameDev() {
       <ProjectsNav />
 
       {/* GameDev Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-[59px]">
+      <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-[59px]`}>
         {items.map((item: any, index: number) => (
           <div key={item.id} className="w-full flex flex-col">
             <Link to={`/gamedev/${item.id}`} className="group flex flex-col flex-1">

@@ -311,6 +311,10 @@ export const translations = {
         { id: "chyraq", name: "Chyraq", category: "Industrial Design", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
     },
+    video: {
+      title: "Video",
+      items: [],
+    },
     projectCategories: {
       all: "All",
       branding: "Branding",
@@ -858,6 +862,10 @@ export const translations = {
         { id: "chyraq", name: "Chyraq", category: "Өнөр жай дизайны", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
     },
+    video: {
+      title: "Видео",
+      items: [],
+    },
     projectCategories: {
       all: "Баардыгы",
       branding: "Брендинг",
@@ -1263,6 +1271,10 @@ export const translations = {
       items: [
         { id: "chyraq", name: "Chyraq", category: "Индустриальный Дизайн", categoryKey: "industrial", img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600" }
       ],
+    },
+    video: {
+      title: "Видео",
+      items: [],
     },
     projectCategories: {
       all: "Все",

@@ -17,6 +17,7 @@ import { ArchitectProjects } from "./pages/ArchitectProjects";
 import { ArchitectProjectsDetail } from "./pages/ArchitectProjectsDetail";
 import { GameDev } from "./pages/GameDev";
 import { GameDevDetail } from "./pages/GameDevDetail";
+import { Video } from "./pages/Video";
 
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminLogin } from "./pages/AdminLogin";
@@ -24,7 +25,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminProjectsEditor } from "./pages/AdminProjectsEditor";
 import { AdminWebUiUxEditor } from "./pages/AdminWebUiUxEditor";
 import { AdminProductsEditor } from "./pages/AdminProductsEditor";
-import { AdminConceptsEditor, AdminArchitectsEditor, AdminGameDevEditor } from "./pages/AdminCatalogEditor";
+import { AdminConceptsEditor, AdminArchitectsEditor, AdminGameDevEditor, AdminVideoEditor } from "./pages/AdminCatalogEditor";
 import { AdminFeaturedProjects } from "./pages/AdminFeaturedProjects";
 import { AdminAboutEditor } from "./pages/AdminAboutEditor";
 import { AdminContactsEditor } from "./pages/AdminContactsEditor";
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: "architect-projects/:id", Component: ArchitectProjectsDetail },
       { path: "gamedev", Component: GameDev },
       { path: "gamedev/:id", Component: GameDevDetail },
+      { path: "video", Component: Video },
       { path: "contacts", Component: Contacts },
     ],
   },
@@ -84,6 +86,7 @@ export const router = createBrowserRouter([
       { path: "concepts", Component: AdminConceptsEditor },
       { path: "architects", Component: AdminArchitectsEditor },
       { path: "gamedev", Component: AdminGameDevEditor },
+      { path: "video", Component: AdminVideoEditor },
       { path: "contacts", Component: AdminContactsEditor },
       { path: "services", Component: AdminServicesEditor },
       { path: "brands", Component: AdminBrandsEditor },

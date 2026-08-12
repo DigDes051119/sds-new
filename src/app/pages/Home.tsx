@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { LanguageContext, translations, getLocText } from "../i18n";
 import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ProjectsNav } from "../components/ProjectsNav";
 import { cmsService } from "../cmsService";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
@@ -14,6 +15,7 @@ export function Home() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
+  const [activeFilterTab, setActiveFilterTab] = useState("/projects");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -280,6 +282,71 @@ export function Home() {
     };
   });
 
+  // Dynamic filtered projects for the main page interactive Recent Projects filter tab
+  let currentFilteredProjects: any[] = [];
+  let detailPathPrefix = "/projects";
+  let isArchiveOrVideo = false;
+
+  if (activeFilterTab === "/projects") {
+    currentFilteredProjects = mappedProjects.slice(0, 4);
+    detailPathPrefix = "/projects";
+  } else if (activeFilterTab === "/products") {
+    currentFilteredProjects = mappedProducts.slice(0, 4);
+    detailPathPrefix = "/products";
+  } else if (activeFilterTab === "/architect-projects") {
+    currentFilteredProjects = mappedArchitects.slice(0, 4);
+    detailPathPrefix = "/architect-projects";
+  } else if (activeFilterTab === "/concepts-and-vision") {
+    currentFilteredProjects = featuredConcepts.slice(0, 4);
+    detailPathPrefix = "/concepts-and-vision";
+  } else if (activeFilterTab === "/gamedev") {
+    const allGameDev = t.gamedev?.items || [];
+    const mappedGameDev = allGameDev.map((p: any, idx: number) => {
+      const detail = localizedProductDetails[p.id] || {};
+      return {
+        id: p.id || String(idx),
+        title: getLocText(locale, p.name || p.title || "", p.name || p.title || ""),
+        image: p.img || "",
+        tags: getLocText(locale, detail.service || p.category || "Gamedev", detail.service || p.category || "Gamedev"),
+        year: detail.year || "2026",
+        desc: getLocText(locale, detail.desc || detail.challenge || p.desc || "", detail.desc || detail.challenge || p.desc || "")
+      };
+    });
+    currentFilteredProjects = mappedGameDev.slice(0, 4);
+    detailPathPrefix = "/gamedev";
+  } else if (activeFilterTab === "/web-ui-ux") {
+    currentFilteredProjects = mappedWebUiUx.slice(0, 4);
+    detailPathPrefix = "/web-ui-ux";
+  } else if (activeFilterTab === "/projects/old") {
+    isArchiveOrVideo = true;
+    detailPathPrefix = "/projects/old";
+    const archiveItems = cmsService.getArchiveItems();
+    const localizedArchive = archiveItems[locale] || archiveItems["ru"] || [];
+    currentFilteredProjects = localizedArchive.slice(0, 4).map((p: any) => ({
+      id: p.id,
+      title: p.title || p.name || "",
+      image: p.img || p.image || "",
+      tags: p.category || "Archive",
+      year: p.year || "2020",
+      desc: p.challenge || p.description || ""
+    }));
+  } else if (activeFilterTab === "/video") {
+    isArchiveOrVideo = true;
+    detailPathPrefix = "/video";
+    const videoItems = translations[locale]?.video?.items || translations["en"]?.video?.items || [];
+    currentFilteredProjects = videoItems.slice(0, 4).map((p: any) => {
+      const detail = localizedDetails[p.id] || {};
+      return {
+        id: p.id,
+        title: p.name || p.title || "",
+        image: p.img || "",
+        tags: detail.service || p.category || "Video",
+        year: detail.year || "2026",
+        desc: detail.desc || detail.challenge || p.desc || ""
+      };
+    });
+  }
+
   // Block 3: Advantages list based on i18n about values
   const advantages = [
     { num: "01", title: "Founder", desc: getLocText(locale, "21 год опыта в дизайне — основатель студии.", "21 year of experience in Design - studio founder.", "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү.", "21年设计经验 — 工作室创始人", "21 عامًا من الخبرة في التصميم - مؤسس الاستوديو", "21 Jahre Erfahrung im Design – Studio-Gründer") },
@@ -373,13 +440,14 @@ export function Home() {
           <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
         </div>
 
+        <ProjectsNav activeTab={activeFilterTab} onTabChange={setActiveFilterTab} />
+
 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
-          {recentProjects.map((project, index) => (
-            <div key={`recent-${project.id}`} className="w-full flex flex-col group"
-              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
-              <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
+          {currentFilteredProjects.map((project, index) => (
+            <div key={`recent-${project.id}-${activeFilterTab}`} className="w-full flex flex-col group">
+              <Link to={isArchiveOrVideo ? detailPathPrefix : `${detailPathPrefix}/${project.id}`} className="group flex flex-col flex-1">
                 <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
                     src={project.image} 
@@ -496,8 +564,7 @@ export function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
           {recentProducts.map((product, index) => (
-            <div key={`recent-prod-${product.id}`} className="w-full flex flex-col group"
-              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+            <div key={`recent-prod-${product.id}`} className="w-full flex flex-col group">
               <Link to={`/products/${product.id}`} className="group flex flex-col flex-1">
                 <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                   <ImageWithFallback 
@@ -552,8 +619,7 @@ export function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
             {recentArchitects.map((project, index) => (
-              <div key={`recent-arch-${project.id}`} className="w-full flex flex-col group"
-                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+              <div key={`recent-arch-${project.id}`} className="w-full flex flex-col group">
                 <Link to={`/architect-projects/${project.id}`} className="group flex flex-col flex-1">
                   <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                     <ImageWithFallback 
@@ -691,8 +757,7 @@ export function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
           {featuredProjects.map((project, index) => (
-            <div key={`featured-${project.id}`} className="w-full flex flex-col group"
-              style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+            <div key={`featured-${project.id}`} className="w-full flex flex-col group">
               <Link to={`/projects/${project.id}`} className="group flex flex-col flex-1">
                 <div className="w-full overflow-hidden relative aspect-[16/9] flex items-center justify-center transition duration-500 rounded-[8px] bg-transparent">
                   <ImageWithFallback
@@ -818,8 +883,7 @@ export function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
             {featuredConcepts.map((concept, index) => (
-              <div key={`feat-concept-${concept.id}`} className="w-full flex flex-col group"
-                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+              <div key={`feat-concept-${concept.id}`} className="w-full flex flex-col group">
                 <Link to={`/concepts-and-vision/${concept.id}`} className="group flex flex-col flex-1">
                   <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                     <ImageWithFallback 
@@ -875,8 +939,7 @@ export function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
             {recentWebUiUx.map((project, index) => (
-              <div key={`recent-web-${project.id}`} className="w-full flex flex-col group"
-                style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+              <div key={`recent-web-${project.id}`} className="w-full flex flex-col group">
                 <Link to={`/web-ui-ux/${project.id}`} className="group flex flex-col flex-1">
                   <div className="w-full bg-transparent overflow-hidden relative aspect-[16/9] flex items-center justify-center">
                     <ImageWithFallback 

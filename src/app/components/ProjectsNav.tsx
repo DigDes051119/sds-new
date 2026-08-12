@@ -2,7 +2,12 @@ import { NavLink } from "react-router";
 import { useContext } from "react";
 import { LanguageContext } from "../i18n";
 
-export function ProjectsNav() {
+interface ProjectsNavProps {
+  activeTab?: string;
+  onTabChange?: (path: string) => void;
+}
+
+export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
   const { locale } = useContext(LanguageContext);
 
   const navItems = [
@@ -138,37 +143,72 @@ export function ProjectsNav() {
         ar: "2005-2020",
         de: "2005-2020"
       }
+    },
+    {
+      path: "/video",
+      label: {
+        en: "Video",
+        ru: "Видео",
+        kg: "Видео",
+        zh: "视频",
+        ar: "فيديو",
+        de: "Video"
+      },
+      subtext: {
+        en: "Our video directing and motion design",
+        ru: "Наше видеорежиссура и моушн-дизайн",
+        kg: "Биздин видео режиссёрлук жана моушн дизайн",
+        zh: "我们的视频导演和动态设计",
+        ar: "إخراج الفيديو وتصميم الحركة لدينا",
+        de: "Unsere Regie- und Motion-Design-Arbeiten"
+      }
     }
   ];
 
   return (
     <div className="w-full mb-12 md:mb-16 overflow-x-auto no-scrollbar">
-      <div className="flex items-start flex-nowrap min-w-max md:min-w-0">
+      <div className="flex items-start justify-between flex-nowrap min-w-max md:min-w-0 md:w-full">
         {navItems.map((item, idx) => {
           const l = item.label[locale as keyof typeof item.label] || item.label["en"];
           const s = item.subtext[locale as keyof typeof item.subtext] || item.subtext["en"];
           
+          const activeClass = (active: boolean) =>
+            `flex flex-col text-left gap-2 transition-colors duration-300 hover:text-[#0000FF] cursor-pointer group ${
+              active ? "text-[#0000FF]" : "text-black"
+            }`;
+
           return (
             <div key={item.path} className="flex items-start">
-              <NavLink
-                to={item.path}
-                end={item.path === "/projects"}
-                className={({ isActive }) =>
-                  `flex flex-col gap-2 transition-colors duration-300 hover:text-[#0000FF] cursor-pointer group ${
-                    isActive ? "text-[#0000FF]" : "text-black"
-                  }`
-                }
-              >
-                <span className="text-[20px] md:text-[32px] font-medium leading-none tracking-[-0.03em]">
-                  {l}
-                </span>
-                <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[130px] md:max-w-[170px] whitespace-normal">
-                  {s}
-                </span>
-              </NavLink>
+              {onTabChange ? (
+                <button
+                  type="button"
+                  onClick={() => onTabChange(item.path)}
+                  className={activeClass(activeTab === item.path)}
+                >
+                  <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+                    {l}
+                  </span>
+                  <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[130px] md:max-w-[170px] whitespace-normal">
+                    {s}
+                  </span>
+                </button>
+              ) : (
+                <NavLink
+                  to={item.path}
+                  end={item.path === "/projects"}
+                  className={({ isActive }) => activeClass(isActive)}
+                >
+                  <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+                    {l}
+                  </span>
+                  <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[130px] md:max-w-[170px] whitespace-normal">
+                    {s}
+                  </span>
+                </NavLink>
+              )}
               
               {idx < navItems.length - 1 && (
-                <span className="text-black/40 mx-4 md:mx-6 text-[20px] md:text-[32px] font-light select-none pt-0.5">
+                <span className="text-black/40 mx-3 md:mx-4.5 text-[18px] md:text-[25px] font-light select-none pt-0.5">
                   /
                 </span>
               )}

@@ -271,3 +271,60 @@ export async function convertToWebM(
     }
   }
 }
+
+/**
+ * Extracts a frame at 0.5s from the video file and exports it as a JPEG File.
+ */
+export async function extractVideoFrame(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+
+    const videoUrl = URL.createObjectURL(file);
+    video.src = videoUrl;
+
+    video.onloadeddata = () => {
+      video.currentTime = 0.5;
+    };
+
+    video.onseeked = () => {
+      try {
+        const width = video.videoWidth || 1280;
+        const height = video.videoHeight || 720;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          URL.revokeObjectURL(videoUrl);
+          reject(new Error("Failed to get canvas 2d context"));
+          return;
+        }
+
+        ctx.drawImage(video, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(videoUrl);
+          if (blob) {
+            const originalBaseName = file.name.substring(0, file.name.lastIndexOf(".")) || file.name;
+            const coverFile = new File([blob], `${originalBaseName}_cover.jpg`, { type: "image/jpeg" });
+            resolve(coverFile);
+          } else {
+            reject(new Error("Failed to export canvas to blob"));
+          }
+        }, "image/jpeg", 0.9);
+      } catch (err) {
+        URL.revokeObjectURL(videoUrl);
+        reject(err);
+      }
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(videoUrl);
+      reject(new Error("Failed to load video for frame extraction."));
+    };
+  });
+}

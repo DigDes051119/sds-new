@@ -4,6 +4,7 @@ import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
+import { GridSwitcher } from "../components/GridSwitcher";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import coverMoms from "../../imports/cover_moms.webp";
@@ -12,6 +13,7 @@ import coverTooko from "../../imports/cover_tooko.webp";
 export function WebUiUx() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
+  const [cols, setCols] = useState(() => localStorage.getItem("sds_grid_layout") || "2");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -50,9 +52,10 @@ export function WebUiUx() {
           <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.webUiUx?.title || "WEB / UI UX"}
           </h1>
-          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
-            [WEB UI UX/INDEX]
-          </span>
+          <GridSwitcher cols={cols} onChange={(val) => {
+            setCols(val);
+            localStorage.setItem("sds_grid_layout", val);
+          }} />
         </div>
       </section>
 
@@ -60,10 +63,9 @@ export function WebUiUx() {
       <ProjectsNav />
 
       {/* Projects Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
+      <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-x-[28px] gap-y-[48px]`}>
         {projects.map((project: any, index: number) => (
-          <div key={project.id} className="w-full flex flex-col"
-            style={{ contentVisibility: "Auto", containIntrinsicSize: "Auto 400px" }}>
+          <div key={project.id} className="w-full flex flex-col">
             <Link to={`/web-ui-ux/${project.id}`} className="group flex flex-col flex-1">
               
               {/* Image band container */}

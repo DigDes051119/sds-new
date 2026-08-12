@@ -139,6 +139,10 @@ export const cmsService = {
         data[lang].webUiUx = JSON.parse(JSON.stringify(defLangObj.webUiUx || defaultTranslations.en.webUiUx));
         modified = true;
       }
+      if (!data[lang].video || !Array.isArray(data[lang].video.items)) {
+        data[lang].video = JSON.parse(JSON.stringify(defLangObj.video || defaultTranslations.en.video));
+        modified = true;
+      }
 
       if (!data[lang].nav) data[lang].nav = {};
       if (!data[lang].nav.products) {
@@ -241,7 +245,7 @@ export const cmsService = {
     }
 
     // Ensure all projects, products, concepts across all languages have auto-translated titles & descriptions
-    const catalogCats = ["projects", "products", "concepts", "architects", "gamedev", "webUiUx"] as const;
+    const catalogCats = ["projects", "products", "concepts", "architects", "gamedev", "webUiUx", "video"] as const;
     const masterItems: Record<string, any> = {};
 
     catalogCats.forEach((cat) => {

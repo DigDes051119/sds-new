@@ -6,7 +6,7 @@ import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
 import { supabaseClient } from "../supabaseClient";
 import { getEmbedUrl, getAspectClass } from "../videoHelper";
-import { convertToWebM } from "../videoConverter";
+import { convertToWebM, extractVideoFrame } from "../videoConverter";
 import { AdminTextBlockEditor } from "../components/AdminTextBlockEditor";
 
 const slugify = (text: string) => {
@@ -28,7 +28,7 @@ const slugify = (text: string) => {
 };
 
 interface CatalogConfig {
-  type: "products" | "concepts" | "architects" | "gamedev";
+  type: "products" | "concepts" | "architects" | "gamedev" | "video";
   titleRu: string;
   titleEn: string;
   titleKg: string;
@@ -89,9 +89,21 @@ const CONFIGS: Record<string, CatalogConfig> = {
     defaultTitleEn: "GameDev",
     defaultTitleKg: "GameDev",
   },
+  video: {
+    type: "video",
+    titleRu: "Видео",
+    titleEn: "Video",
+    titleKg: "Видео",
+    logSection: "Управление Видео",
+    itemTypeLabelRu: "видео",
+    itemTypeLabelRuGenitive: "видео",
+    defaultTitleRu: "Видео и Анимация",
+    defaultTitleEn: "Video & Motion",
+    defaultTitleKg: "Видео жана Анимация",
+  },
 };
 
-export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "architects" | "gamedev" }) {
+export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "architects" | "gamedev" | "video" }) {
   const cfg = CONFIGS[type];
   const [translations, setTranslations] = useState(() => cmsService.getTranslations());
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
@@ -107,6 +119,8 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
   const [draggedOverZone, setDraggedOverZone] = useState<string | null>(null);
   const [conversionProgress, setConversionProgress] = useState<number | null>(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [formVideo, setFormVideo] = useState("");
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(null);
   const [draggedOverTargetCategory, setDraggedOverTargetCategory] = useState<string | null>(null);
@@ -472,6 +486,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     setFormResult2En("");
     setFormResult2Kg("");
     setFormCollageTheme("light");
+    setFormVideo("");
   };
 
   const startAdding = () => {
@@ -546,6 +561,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     setFormResult2Ru(detailRu.results?.[1] || "");
     setFormResult2En(detailEn.results?.[1] || "");
     setFormResult2Kg(detailKg.results?.[1] || "");
+    setFormVideo(detailRu.videoUrl || "");
   };
 
   const moveBlockUp = (index: number) => {
@@ -641,6 +657,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
           processImages: flattenedImages,
           collageBlocks: cleanBlocks,
           collageTheme: formCollageTheme,
+          videoUrl: formVideo,
           results: [results1[lang], results2[lang]].filter(Boolean)
         };
 
@@ -785,6 +802,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                 { typeKey: "concepts", label: "Концепты (Concepts & Vision)" },
                 { typeKey: "architects", label: "Архитектура" },
                 { typeKey: "gamedev", label: "GameDev" },
+                { typeKey: "video", label: "Видео" },
               ]
                 .filter(target => target.typeKey !== type)
                 .map(target => {
@@ -967,7 +985,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
                 2. URL и Внешний вид
               </h4>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className={`grid gap-6 ${type === "video" ? "grid-cols-1" : "md:grid-cols-2"}`}>
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-white/50">ID (URL латиница)</label>
                   <div className="flex gap-2">
@@ -989,17 +1007,19 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                     </button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тема коллажей</label>
-                  <select
-                    value={formCollageTheme}
-                    onChange={(e) => setFormCollageTheme(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  >
-                    <option value="light" className="bg-[#080810] text-white">Светлая</option>
-                    <option value="dark" className="bg-[#080810] text-white">Темная</option>
-                  </select>
-                </div>
+                {type !== "video" && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тема коллажей</label>
+                    <select
+                      value={formCollageTheme}
+                      onChange={(e) => setFormCollageTheme(e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    >
+                      <option value="light" className="bg-[#080810] text-white">Светлая</option>
+                      <option value="dark" className="bg-[#080810] text-white">Темная</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1007,44 +1027,171 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
               <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
-                  3. Обложка (Главное фото)
+                  3. Обложка и Видеофайл
                 </h4>
-                <div className="relative cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUploadPhoto("img", file);
-                    }}
-                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                    disabled={isReadOnly || uploadingImg}
-                  />
-                  <button
-                    type="button"
-                    disabled={uploadingImg}
-                    className="px-3.5 py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition"
-                  >
-                    {uploadingImg ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Camera className="w-3.5 h-3.5" />
-                    )}
-                    Загрузить фото
-                  </button>
-                </div>
+                {type !== "video" && (
+                  <div className="relative cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadPhoto("img", file);
+                      }}
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      disabled={isReadOnly || uploadingImg}
+                    />
+                    <button
+                      type="button"
+                      disabled={uploadingImg}
+                      className="px-3.5 py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition"
+                    >
+                      {uploadingImg ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Camera className="w-3.5 h-3.5" />
+                      )}
+                      Загрузить обложку
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={formImg}
-                  onChange={(e) => setFormImg(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-xs text-white focus:border-[#0066FF] outline-none"
-                  placeholder="Вставьте ссылку на картинку или загрузите новую"
-                />
-                <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 relative">
-                  <img src={formImg} alt="Hero Preview" className="w-full h-full object-cover" />
+              <div className="space-y-4">
+                {type !== "video" && (
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-white/40 uppercase">Ссылка на обложку</label>
+                    <input
+                      type="text"
+                      value={formImg}
+                      onChange={(e) => setFormImg(e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-xs text-white focus:border-[#0066FF] outline-none"
+                      placeholder="Вставьте ссылку на картинку или загрузите новую"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[10px] text-white/40 uppercase block mb-1">Обложка</span>
+                    {type === "video" ? (
+                      <div
+                        onClick={() => !uploadingImg && document.getElementById("file-input-cover-direct")?.click()}
+                        className={`rounded-2xl overflow-hidden border border-white/5 relative cursor-pointer group flex items-center justify-center ${
+                          formImg ? "max-h-[250px] w-fit mx-auto" : "aspect-video w-full bg-black/40"
+                        }`}
+                      >
+                        <input
+                          id="file-input-cover-direct"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadPhoto("img", file);
+                          }}
+                          className="hidden"
+                          disabled={isReadOnly || uploadingImg}
+                        />
+                        {formImg ? (
+                          <>
+                            <img src={formImg} alt="Hero Preview" className="max-h-[250px] w-auto object-contain group-hover:opacity-40 transition block" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                              <span className="text-white font-bold text-xs flex items-center gap-1.5"><Camera size={14} /> Загрузить обложку</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-white/20 text-xs flex flex-col items-center gap-1.5">
+                            <Camera className="w-8 h-8" />
+                            <span className="text-[10px] uppercase font-mono font-bold text-white/40">Загрузить обложку</span>
+                          </div>
+                        )}
+                        {uploadingImg && !isConverting && (
+                          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#0066FF]" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 relative">
+                        <img src={formImg} alt="Hero Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+
+                  {type === "video" && (
+                    <div>
+                      <span className="text-[10px] text-white/40 uppercase block mb-1">Видео</span>
+                      <div
+                        onClick={() => !(uploadingImg || uploadingVideo) && document.getElementById("file-input-video-direct")?.click()}
+                        className={`rounded-2xl overflow-hidden border border-white/5 relative cursor-pointer group flex items-center justify-center ${
+                          formVideo ? "max-h-[250px] w-fit mx-auto" : "aspect-video w-full bg-black/40"
+                        }`}
+                      >
+                        <input
+                          id="file-input-video-direct"
+                          type="file"
+                          accept="video/mp4,video/quicktime,video/webm"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              setUploadingImg(true);
+                              setUploadingVideo(true);
+                              setIsConverting(true);
+                              setConversionProgress(0);
+                              const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
+                              setIsConverting(false);
+                              setConversionProgress(null);
+                              const fileExt = file.name.split('.').pop();
+                              const path = `video/${formId}/main-video-${Date.now()}.webm`;
+                              const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
+                              setFormVideo(publicUrl);
+
+                              // Auto-extract video frame and set as cover image
+                              try {
+                                const coverFile = await extractVideoFrame(file);
+                                const coverPath = `video/${formId}/main-cover-${Date.now()}.jpg`;
+                                const coverUrl = await supabaseClient.uploadFile("assets", coverPath, coverFile);
+                                setFormImg(coverUrl);
+                              } catch (frameErr) {
+                                console.warn("Failed to extract video frame:", frameErr);
+                              }
+                            } catch (err: any) {
+                              alert("Ошибка при загрузке видео: " + err.message);
+                            } finally {
+                              setUploadingImg(false);
+                              setUploadingVideo(false);
+                            }
+                          }}
+                          className="hidden"
+                          disabled={isReadOnly || uploadingImg || uploadingVideo}
+                        />
+                        {isConverting || uploadingVideo ? (
+                          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white gap-2 z-20 aspect-video w-full min-w-[200px]">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#0000FF]" />
+                            <span className="text-[10px] font-bold uppercase">
+                              {isConverting 
+                                ? (conversionProgress !== null ? `Сжатие: ${Math.round(conversionProgress)}%` : "Сжатие...") 
+                                : "Загрузка видео..."
+                              }
+                            </span>
+                          </div>
+                        ) : formVideo ? (
+                          <>
+                            <video src={formVideo} className="max-h-[250px] w-auto object-contain group-hover:opacity-40 transition block" muted autoPlay loop playsInline />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                              <span className="text-white font-bold text-xs flex items-center gap-1.5">🎬 Заменить видео</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-white/20 text-xs flex flex-col items-center gap-1.5">
+                            <span className="text-xl">🎬</span>
+                            <span className="text-[10px] uppercase font-mono font-bold text-white/40">Загрузить видео</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1055,7 +1202,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                 4. Детальное описание и Характеристики (RU)
               </h4>
               <div className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-6">
+                {type === "video" ? (
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-white/50">Клиент</label>
                     <input
@@ -1066,70 +1213,85 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                       className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Услуга</label>
-                    <input
-                      type="text"
-                      value={formServiceRu}
-                      onChange={(e) => setFormServiceRu(e.target.value)}
-                      placeholder="Industrial Design"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Клиент</label>
+                        <input
+                          type="text"
+                          value={formClientRu}
+                          onChange={(e) => setFormClientRu(e.target.value)}
+                          placeholder="Chyraq Labs"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Услуга</label>
+                        <input
+                          type="text"
+                          value={formServiceRu}
+                          onChange={(e) => setFormServiceRu(e.target.value)}
+                          placeholder="Industrial Design"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                    </div>
 
-                <div className="grid md:grid-cols-2 gap-6 mt-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Студия</label>
-                    <input
-                      type="text"
-                      value={formStudioRu}
-                      onChange={(e) => setFormStudioRu(e.target.value)}
-                      placeholder="Steel Drake Studio"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Дизайнер</label>
-                    <input
-                      type="text"
-                      value={formDesignerRu}
-                      onChange={(e) => setFormDesignerRu(e.target.value)}
-                      placeholder="Иван Иванов"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Локация</label>
-                    <input
-                      type="text"
-                      value={formLocationRu}
-                      onChange={(e) => setFormLocationRu(e.target.value)}
-                      placeholder="Бишкек, Кыргызстан"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тип проекта</label>
-                    <input
-                      type="text"
-                      value={formProjectTypeRu}
-                      onChange={(e) => setFormProjectTypeRu(e.target.value)}
-                      placeholder="Коммерческий"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Класс</label>
-                    <input
-                      type="text"
-                      value={formProductClass}
-                      onChange={(e) => setFormProductClass(e.target.value)}
-                      placeholder="-"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
-                  </div>
-                </div>
+                    <div className="grid md:grid-cols-2 gap-6 mt-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Студия</label>
+                        <input
+                          type="text"
+                          value={formStudioRu}
+                          onChange={(e) => setFormStudioRu(e.target.value)}
+                          placeholder="Steel Drake Studio"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Дизайнер</label>
+                        <input
+                          type="text"
+                          value={formDesignerRu}
+                          onChange={(e) => setFormDesignerRu(e.target.value)}
+                          placeholder="Иван Иванов"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Локация</label>
+                        <input
+                          type="text"
+                          value={formLocationRu}
+                          onChange={(e) => setFormLocationRu(e.target.value)}
+                          placeholder="Бишкек, Кыргызстан"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тип проекта</label>
+                        <input
+                          type="text"
+                          value={formProjectTypeRu}
+                          onChange={(e) => setFormProjectTypeRu(e.target.value)}
+                          placeholder="Коммерческий"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Класс</label>
+                        <input
+                          type="text"
+                          value={formProductClass}
+                          onChange={(e) => setFormProductClass(e.target.value)}
+                          placeholder="-"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-white/50">Задача и Вызов</label>
@@ -1155,31 +1317,33 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               </div>
             </div>
 
-            {/* Card 5: Результаты */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                5. Результаты (RU)
-              </h4>
-              <p className="text-xs text-white/40">
-                Введите до двух ключевых метрик или достижений. (Например: "Победитель Interior Design Show 2026").
-              </p>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  value={formResult1Ru}
-                  onChange={(e) => setFormResult1Ru(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  placeholder="Результат 1 (например: 1 место на выставке)"
-                />
-                <input
-                  type="text"
-                  value={formResult2Ru}
-                  onChange={(e) => setFormResult2Ru(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  placeholder="Результат 2 (например: более 10 000 продаж)"
-                />
+            {type !== "video" && (
+              /* Card 5: Результаты */
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                  5. Результаты (RU)
+                </h4>
+                <p className="text-xs text-white/40">
+                  Введите до двух ключевых метрик или достижений. (Например: "Победитель Interior Design Show 2026").
+                </p>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={formResult1Ru}
+                    onChange={(e) => setFormResult1Ru(e.target.value)}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    placeholder="Результат 1 (например: 1 место на выставке)"
+                  />
+                  <input
+                    type="text"
+                    value={formResult2Ru}
+                    onChange={(e) => setFormResult2Ru(e.target.value)}
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                    placeholder="Результат 2 (например: более 10 000 продаж)"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4 pt-4">
               <button
@@ -1217,91 +1381,162 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               <h4 className="text-sm font-bold uppercase tracking-wider text-white/50 font-sans">Предпросмотр в реальном времени</h4>
             </div>
 
-            <div className="rounded-3xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs pb-16">
-              <div
-                onClick={() => document.getElementById("file-input-img")?.click()}
-                className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white "
-              >
-                <input
-                  id="file-input-img"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleUploadPhoto("img", file);
-                  }}
-                  className="hidden"
-                  disabled={uploadingImg}
-                />
-                {formImg ? (
-                  <img src={formImg} alt="Hero mockup" className="absolute inset-0 w-full h-full object-cover opacity-70" />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-white/20"><Camera className="w-8 h-8" /></div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-
-                <div className="relative z-10 space-y-2">
-                  <h1 className="text-xl md:text-3xl font-bold tracking-tighter leading-none mb-1">{formNameRu || "Название"}</h1>
-                  <div className="flex gap-4 text-[7px] uppercase tracking-widest opacity-80 pt-1 border-t border-white/10 mt-1 max-w-sm font-mono">
-                    <div>
-                      <p className="opacity-50">Клиент</p>
-                      <p className="font-semibold truncate max-w-[80px]">{formClientRu || "..."}</p>
+            {type === "video" ? (
+              /* Video Popup Mock Preview */
+              <div className="rounded-3xl overflow-hidden bg-[#f3f3f3] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-5 md:p-6 space-y-6">
+                <div className="flex justify-between items-center text-[#808080] font-mono text-[10px] uppercase">
+                  <span>[ПРЕДПРОСМОТР ПОПАПА]</span>
+                  <span>[CLOSE / X]</span>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 bg-[#eeeee9] rounded-xl overflow-hidden border border-black/5">
+                  {/* Left Side (Player) */}
+                  <div className="p-4 flex flex-col justify-between bg-[#eeeee9] relative aspect-video lg:aspect-auto">
+                    <span className="font-mono text-[9px] text-[#808080] uppercase">[01 / 01]</span>
+                    <div className="flex-1 flex items-center justify-center py-4">
+                      {formCollageBlocks.flat().find(url => url.startsWith("video:") || url.endsWith(".webm")) ? (
+                        <video
+                          src={formCollageBlocks.flat().find(url => url.startsWith("video:") || url.endsWith(".webm"))?.replace("video:", "")}
+                          className="max-h-[180px] object-contain rounded"
+                          muted
+                          playsInline
+                          autoPlay
+                          loop
+                        />
+                      ) : formImg ? (
+                        <img src={formImg} alt="Cover Preview" className="max-h-[180px] object-contain rounded" />
+                      ) : (
+                        <Camera className="w-8 h-8 text-black/25" />
+                      )}
                     </div>
-                    <div>
-                      <p className="opacity-50">Год</p>
-                      <p className="font-semibold">{formYear || "..."}</p>
+                  </div>
+                  {/* Right Side (Info) */}
+                  <div className="p-4 bg-[#f3f3f3] flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-black/10">
+                    <div className="space-y-4">
+                      <div>
+                        <span className="font-mono text-[9px] text-[#808080] uppercase tracking-wider block mb-1">
+                          {formYear || "2026"} — {formCategoryRu || "Видео"}
+                        </span>
+                        <h3 className="text-lg font-bold uppercase leading-tight m-0 truncate">
+                          {formNameRu || "Название видео"}
+                        </h3>
+                        {formClientRu && (
+                          <div className="font-mono text-[9px] text-[#808080] uppercase mt-1">
+                            Client: <span className="text-black font-semibold">{formClientRu}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="h-[1px] w-full bg-black/10" />
+                      {formChallengeRu && (
+                        <div className="space-y-1">
+                          <span className="font-mono text-[9px] text-[#808080] uppercase block">[CHALLENGE]</span>
+                          <p className="text-[10px] leading-relaxed text-black m-0 font-medium line-clamp-3">{formChallengeRu}</p>
+                        </div>
+                      )}
+                      {formDescRu && (
+                        <div className="space-y-1">
+                          <span className="font-mono text-[9px] text-[#808080] uppercase block">[ABOUT]</span>
+                          <p className="text-[10px] leading-relaxed text-[#808080] m-0 line-clamp-3">{formDescRu}</p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="opacity-50">Услуга</p>
-                      <p className="font-semibold truncate max-w-[90px]">{formServiceRu || "..."}</p>
+                    <div className="mt-6 pt-4 border-t border-black/10">
+                      <span className="text-[10px] font-bold text-[#0000FF] uppercase tracking-wider block">
+                        Обсудить проект →
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
+            ) : (
+              /* Original Product/Concept Mockup Page Preview */
+              <div className="rounded-3xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs pb-16">
+                <div
+                  onClick={() => document.getElementById("file-input-img")?.click()}
+                  className="relative aspect-[1.7] w-full bg-black cursor-pointer group overflow-hidden flex flex-col justify-end p-6 md:p-8 text-white "
+                >
+                  <input
+                    id="file-input-img"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUploadPhoto("img", file);
+                    }}
+                    className="hidden"
+                    disabled={uploadingImg}
+                  />
+                  {formImg ? (
+                    <img src={formImg} alt="Hero mockup" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-white/20"><Camera className="w-8 h-8" /></div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-              {/* Challenge description preview */}
-              <div className="max-w-[1380px] mx-auto px-6 py-12 border-b border-black/[0.06] bg-[#fafaf6]">
-                <div className="grid grid-cols-[1fr_1.8fr] gap-6 items-start">
-                  <div className="flex flex-col gap-2">
-                    <h2 className="text-md font-bold tracking-tight text-black">Задача и Вызов</h2>
-                    <div className="h-[1.5px] w-8 bg-[#0000FF]" />
+                  <div className="relative z-10 space-y-2">
+                    <h1 className="text-xl md:text-3xl font-bold tracking-tighter leading-none mb-1">{formNameRu || "Название"}</h1>
+                    <div className="flex gap-4 text-[7px] uppercase tracking-widest opacity-80 pt-1 border-t border-white/10 mt-1 max-w-sm font-mono">
+                      <div>
+                        <p className="opacity-50">Клиент</p>
+                        <p className="font-semibold truncate max-w-[80px]">{formClientRu || "..."}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">Год</p>
+                        <p className="font-semibold">{formYear || "..."}</p>
+                      </div>
+                      <div>
+                        <p className="opacity-50">Услуга</p>
+                        <p className="font-semibold truncate max-w-[90px]">{formServiceRu || "..."}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    <p className="text-[11px] font-medium leading-relaxed text-black/85">{formChallengeRu || "Описание задачи и вызова..."}</p>
-                    <p className="text-[10px] text-black/60 leading-normal font-light">{formDescRu || "Краткое описание..."}</p>
+                </div>
+
+                {/* Challenge description preview */}
+                <div className="max-w-[1380px] mx-auto px-6 py-12 border-b border-black/[0.06] bg-[#fafaf6]">
+                  <div className="grid grid-cols-[1fr_1.8fr] gap-6 items-start">
+                    <div className="flex flex-col gap-2">
+                      <h2 className="text-md font-bold tracking-tight text-black">Задача и Вызов</h2>
+                      <div className="h-[1.5px] w-8 bg-[#0000FF]" />
+                    </div>
+                    <div className="space-y-4">
+                      <p className="text-[11px] font-medium leading-relaxed text-black/85">{formChallengeRu || "Описание задачи и вызова..."}</p>
+                      <p className="text-[10px] text-black/60 leading-normal font-light">{formDescRu || "Краткое описание..."}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mock Gallery / Video Toggle */}
+                <div className="flex justify-center border-b border-black/[0.06] pb-4 bg-[#fafaf6] pt-4">
+                  <div className="flex gap-6">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewActiveTab("gallery")}
+                      className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                        previewActiveTab === "gallery"
+                          ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                          : "text-black/55 hover:text-black"
+                      }`}
+                    >
+                      Галерея
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewActiveTab("video")}
+                      className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
+                        previewActiveTab === "video"
+                          ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
+                          : "text-black/55 hover:text-black"
+                      }`}
+                    >
+                      Видео
+                    </button>
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* Mock Gallery / Video Toggle */}
-              <div className="flex justify-center border-b border-black/[0.06] pb-4 bg-[#fafaf6] pt-4">
-                <div className="flex gap-6">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewActiveTab("gallery")}
-                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
-                      previewActiveTab === "gallery"
-                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
-                        : "text-black/55 hover:text-black"
-                    }`}
-                  >
-                    Галерея
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewActiveTab("video")}
-                    className={`text-[12px] font-mono font-bold uppercase tracking-[0.06em] transition-all cursor-pointer relative pb-1.5 ${
-                      previewActiveTab === "video"
-                        ? "text-[#0000FF] border-b-[1.5px] border-[#0000FF]"
-                        : "text-black/55 hover:text-black"
-                    }`}
-                  >
-                    Видео
-                  </button>
-                </div>
-              </div>
-
-              {/* Collage Blocks Builder - Fully Interactive */}
+            {type !== "video" && (
+              /* Collage Blocks Builder - Fully Interactive */
               <div className="px-6 py-10 bg-[#fafaf6] space-y-10 ">
                 {formCollageBlocks.length > 1 && (
                   <button
@@ -1367,6 +1602,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   }
 
                   const visibleItems = block.filter(item => {
+                    if (type === "video") return true;
                     const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
                     return previewActiveTab === "video" ? isVid : !isVid;
                   });
@@ -1687,13 +1923,13 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   </button>
                 </div>
               </div>
+            )}
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
+      </div>
+    );
+  }
 
 export function AdminProductsEditor() {
   return <AdminCatalogEditor type="products" />;
@@ -1709,4 +1945,8 @@ export function AdminArchitectsEditor() {
 
 export function AdminGameDevEditor() {
   return <AdminCatalogEditor type="gamedev" />;
+}
+
+export function AdminVideoEditor() {
+  return <AdminCatalogEditor type="video" />;
 }
