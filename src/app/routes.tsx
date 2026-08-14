@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router";
 import { Root } from "./components/Root";
+import { RouteErrorBoundary } from "./components/ErrorBoundary";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
+    ErrorBoundary: RouteErrorBoundary,
     children: [
       { index: true, Component: Home },
       { path: "about", Component: About },
@@ -79,10 +81,12 @@ export const router = createBrowserRouter([
   {
     path: "/admin/login",
     Component: AdminLogin,
+    ErrorBoundary: RouteErrorBoundary,
   },
   {
     path: "/admin",
     Component: AdminLayout,
+    ErrorBoundary: RouteErrorBoundary,
     children: [
       { index: true, Component: AdminDashboard },
       { path: "featured", Component: AdminFeaturedProjects },
