@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router";
 import { LanguageContext, translations, getLocText } from "../i18n";
 import { ArchiveOriginsSection } from "../components/ArchiveOriginsSection";
@@ -8,8 +8,8 @@ import { cmsService } from "../cmsService";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
-import coverMoms from "../../imports/cover_moms.webp";
 import coverTooko from "../../imports/cover_tooko.webp";
+import { findInObjectCaseInsensitive, getProjectCardInfo, COVER_MOMS } from "../utils/slugUtils";
 
 export function Home() {
   const { t, locale } = useContext(LanguageContext);
@@ -38,6 +38,12 @@ export function Home() {
     let speed = 1.2;
     let animationFrameId: number;
     let isRunning = false;
+    let halfWidth = el.scrollWidth / 2;
+
+    const onResize = () => {
+      if (el) halfWidth = el.scrollWidth / 2;
+    };
+    window.addEventListener("resize", onResize, { passive: true });
 
     const update = () => {
       let targetSpeed = 1.2;
@@ -56,10 +62,8 @@ export function Home() {
         speed += (targetSpeed - speed) * 0.05;
       }
 
-
       x -= speed;
 
-      const halfWidth = el.scrollWidth / 2;
       if (halfWidth > 0) {
         if (x <= -halfWidth) {
           x += halfWidth;
@@ -111,195 +115,165 @@ export function Home() {
     };
   }, []);
 
-  const projectAliases: Record<string, string[]> = {
-    "maminy-retsepty": ["moms-recipes", "mom-s-recipes", "maminy_retsepty", "maminy-retsepty", "mothers-recipes"],
-    "one-ordo-resort": ["one-ordo", "one-ordo-resort", "one-ordo-resort-web"],
-    "tooko": ["tooko", "tooko-brand"],
-    "sandyq": ["sandyq", "sandyk"],
-    "ala-too": ["ala-too", "alatoo"],
-    "salkyn": ["salkyn"],
-    "techstart": ["techstart"],
-    "auto-concept-x": ["auto-concept-x", "autoconceptx", "auto-concept"],
-    "bishbench": ["bishbench"]
-  };
-
   const findInObj = (obj: any, targetId: string) => {
-    if (!obj || !targetId) return null;
-    if (obj[targetId]) return obj[targetId];
-
-    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const targetClean = clean(targetId);
-
-    // 1. Direct clean match
-    for (const k of Object.keys(obj)) {
-      if (clean(k) === targetClean) return obj[k];
-    }
-
-    // 2. Alias match
-    for (const [canonical, aliases] of Object.entries(projectAliases)) {
-      const allKeys = [canonical, ...aliases].map(clean);
-      if (allKeys.includes(targetClean)) {
-        for (const k of Object.keys(obj)) {
-          if (allKeys.includes(clean(k))) return obj[k];
-        }
-      }
-    }
-
-    return null;
+    return findInObjectCaseInsensitive(obj, targetId);
   };
 
   const localizedDetails = projectDetails[locale] || projectDetails["ru"] || {};
 
-  // All projects from i18n
   const allProjects = t.projects?.items || [];
-  const mappedProjects = allProjects.map((p: any, idx: number) => {
-    const cmsDetail = findInObj(projectDetails[locale], p.id) || findInObj(projectDetails.ru, p.id) || findInObj(projectDetails.en, p.id) || {};
-    const fallbackDetail = findInObj(projectDetailsTranslations[locale], p.id) || findInObj(projectDetailsTranslations.ru, p.id) || findInObj(projectDetailsTranslations.en, p.id) || {};
+  const mappedProjects = useMemo(() => {
+    return allProjects.map((p: any, idx: number) => {
+      const cardInfo = getProjectCardInfo(p.id, locale, p, projectDetails, projectDetailsTranslations);
 
-    const rawTitle = p.name || p.title || cmsDetail.name || fallbackDetail.name || "";
-    const rawDesc = (cmsDetail.desc && cmsDetail.desc.trim()) || (cmsDetail.challenge && cmsDetail.challenge.trim()) || (fallbackDetail.desc && fallbackDetail.desc.trim()) || (fallbackDetail.challenge && fallbackDetail.challenge.trim()) || p.desc || "";
-    const rawTag = cmsDetail.service || fallbackDetail.service || p.category || "Design";
-    const year = cmsDetail.year || fallbackDetail.year || "2026";
-
-    return {
-      id: p.id || String(idx),
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
-        ? p.img
-        : (p.id === "maminy-retsepty" ? coverMoms
-          : p.id === "tooko" ? coverTooko
-          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
-      tags: getLocText(locale, rawTag, rawTag),
-      year: year,
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
+      return {
+        id: p.id || String(idx),
+        title: cardInfo.title,
+        image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
+          ? p.img
+          : (p.id === "maminy-retsepty" ? COVER_MOMS
+            : p.id === "tooko" ? coverTooko
+            : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
+        tags: cardInfo.service,
+        year: cardInfo.year,
+        desc: cardInfo.desc
+      };
+    });
+  }, [allProjects, locale, projectDetails]);
 
   // Block 2: Recent Projects (4 items = 2 rows of 2 cards)
-  const recentProjects = mappedProjects.slice(0, 4);
+  const recentProjects = useMemo(() => mappedProjects.slice(0, 4), [mappedProjects]);
 
   // Recent Products (4 items = 2 rows of 2 cards)
   const localizedProductDetails = productDetails[locale] || productDetails["ru"] || {};
   const allProducts = t.products?.items || [];
-  const mappedProducts = allProducts.map((p: any, idx: number) => {
-    const detail = localizedProductDetails[p.id] || {};
-    const rawTitle = p.name || p.title || "";
-    const rawDesc = detail.desc || detail.challenge || p.desc || "";
-    const rawTag = detail.service || p.category || "Product";
-    return {
-      id: p.id || String(idx),
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: p.img || (p.images && p.images[0]) || "",
-      tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || "2026",
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
-  const recentProducts = mappedProducts.slice(0, 4);
+  const mappedProducts = useMemo(() => {
+    return allProducts.map((p: any, idx: number) => {
+      const detail = localizedProductDetails[p.id] || {};
+      const rawTitle = p.name || p.title || "";
+      const rawDesc = detail.desc || detail.challenge || p.desc || "";
+      const rawTag = detail.service || p.category || "Product";
+      return {
+        id: p.id || String(idx),
+        title: getLocText(locale, rawTitle, rawTitle),
+        image: p.img || (p.images && p.images[0]) || "",
+        tags: getLocText(locale, rawTag, rawTag),
+        year: detail.year || "2026",
+        desc: getLocText(locale, rawDesc, rawDesc)
+      };
+    });
+  }, [allProducts, localizedProductDetails, locale]);
+  const recentProducts = useMemo(() => mappedProducts.slice(0, 4), [mappedProducts]);
 
   // Recent Architecture Projects (4 items = 2 rows of 2 cards)
   const allArchitects = t.architects?.items || [];
-  const mappedArchitects = allArchitects.map((p: any, idx: number) => {
-    const detail = localizedProductDetails[p.id] || localizedDetails[p.id] || {};
-    const rawTitle = p.name || p.title || "";
-    const rawDesc = detail.desc || detail.challenge || p.desc || "";
-    const rawTag = p.tags || detail.service || p.category || "Architecture";
-    return {
-      id: p.id || String(idx),
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: p.img || p.image || (p.images && p.images[0]) || "",
-      tags: getLocText(locale, rawTag, rawTag),
-      year: p.year || detail.year || "2026",
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
-  const recentArchitects = mappedArchitects.slice(0, 4);
+  const mappedArchitects = useMemo(() => {
+    return allArchitects.map((p: any, idx: number) => {
+      const detail = localizedProductDetails[p.id] || localizedDetails[p.id] || {};
+      const rawTitle = p.name || p.title || "";
+      const rawDesc = detail.desc || detail.challenge || p.desc || "";
+      const rawTag = p.tags || detail.service || p.category || "Architecture";
+      return {
+        id: p.id || String(idx),
+        title: getLocText(locale, rawTitle, rawTitle),
+        image: p.img || p.image || (p.images && p.images[0]) || "",
+        tags: getLocText(locale, rawTag, rawTag),
+        year: p.year || detail.year || "2026",
+        desc: getLocText(locale, rawDesc, rawDesc)
+      };
+    });
+  }, [allArchitects, localizedProductDetails, localizedDetails, locale]);
+  const recentArchitects = useMemo(() => mappedArchitects.slice(0, 4), [mappedArchitects]);
 
   // Selected / Featured Concepts (4 items = 2 rows of 2 cards)
   const allConcepts = t.concepts?.items || [];
-  let featuredConceptsRaw: any[] = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
-    ? [...t.home.featuredConcepts]
-    : [];
+  const featuredConcepts = useMemo(() => {
+    let featuredConceptsRaw: any[] = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
+      ? [...t.home.featuredConcepts]
+      : [];
 
-  if (featuredConceptsRaw.length < 4) {
-    for (const c of allConcepts) {
-      if (!featuredConceptsRaw.some((fc: any) => fc.id === c.id)) {
-        featuredConceptsRaw.push({
-          id: c.id,
-          title: c.name || c.title || "",
-          image: c.img || c.image || "",
-          tag: c.category || "Concept",
-          year: c.year || "2026",
-          desc: c.desc || ""
-        });
+    if (featuredConceptsRaw.length < 4) {
+      for (const c of allConcepts) {
+        if (!featuredConceptsRaw.some((fc: any) => fc.id === c.id)) {
+          featuredConceptsRaw.push({
+            id: c.id,
+            title: c.name || c.title || "",
+            image: c.img || c.image || "",
+            tag: c.category || "Concept",
+            year: c.year || "2026",
+            desc: c.desc || ""
+          });
+        }
+        if (featuredConceptsRaw.length >= 4) break;
       }
-      if (featuredConceptsRaw.length >= 4) break;
     }
-  }
-  featuredConceptsRaw = featuredConceptsRaw.slice(0, 4);
+    featuredConceptsRaw = featuredConceptsRaw.slice(0, 4);
 
-  const featuredConcepts = featuredConceptsRaw.map((fc: any) => {
-    const matched = allConcepts.find((c: any) => c.id === fc.id);
-    const detail = localizedProductDetails[fc.id] || {};
-    const rawTitle = matched?.name || fc.title || fc.name || "";
-    const rawDesc = detail.desc || detail.challenge || fc.desc || matched?.desc || "";
-    const rawTag = detail.service || matched?.category || fc.tag || "Concept";
-    return {
-      id: fc.id,
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: fc.image || fc.img || matched?.img || "",
-      tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || fc.year || "2026",
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
+    return featuredConceptsRaw.map((fc: any) => {
+      const matched = allConcepts.find((c: any) => c.id === fc.id);
+      const detail = localizedProductDetails[fc.id] || {};
+      const rawTitle = matched?.name || fc.title || fc.name || "";
+      const rawDesc = detail.desc || detail.challenge || fc.desc || matched?.desc || "";
+      const rawTag = detail.service || matched?.category || fc.tag || "Concept";
+      return {
+        id: fc.id,
+        title: getLocText(locale, rawTitle, rawTitle),
+        image: fc.image || fc.img || matched?.img || "",
+        tags: getLocText(locale, rawTag, rawTag),
+        year: detail.year || fc.year || "2026",
+        desc: getLocText(locale, rawDesc, rawDesc)
+      };
+    });
+  }, [t.home?.featuredConcepts, allConcepts, localizedProductDetails, locale]);
 
   // Recent WEB / UI UX Projects (4 items = 2 rows of 2 cards)
   const allWebUiUx = t.webUiUx?.items || [];
-  const mappedWebUiUx = allWebUiUx.map((p: any, idx: number) => {
-    const detail = localizedDetails[p.id] || {};
-    const rawTitle = p.name || p.title || "";
-    const rawDesc = detail.desc || detail.challenge || p.desc || "";
-    const rawTag = detail.service || p.category || "WEB / UI UX";
-    return {
-      id: p.id || String(idx),
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
-        ? p.img
-        : (p.id === "maminy-retsepty" ? coverMoms
-          : p.id === "tooko" ? coverTooko
-          : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
-      tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || "2026",
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
-  const recentWebUiUx = mappedWebUiUx.slice(0, 3);
+  const mappedWebUiUx = useMemo(() => {
+    return allWebUiUx.map((p: any, idx: number) => {
+      const detail = localizedDetails[p.id] || {};
+      const rawTitle = p.name || p.title || "";
+      const rawDesc = detail.desc || detail.challenge || p.desc || "";
+      const rawTag = detail.service || p.category || "WEB / UI UX";
+      return {
+        id: p.id || String(idx),
+        title: getLocText(locale, rawTitle, rawTitle),
+        image: (p.img && (p.img.startsWith("http") || p.img.startsWith("data:") || p.img.startsWith("/")))
+          ? p.img
+          : (p.id === "maminy-retsepty" ? COVER_MOMS
+            : p.id === "tooko" ? coverTooko
+            : (p.id === "sandyq" ? projectImg1 : p.id === "ala-too" ? projectImg2 : p.img)),
+        tags: getLocText(locale, rawTag, rawTag),
+        year: detail.year || "2026",
+        desc: getLocText(locale, rawDesc, rawDesc)
+      };
+    });
+  }, [allWebUiUx, localizedDetails, locale]);
+  const recentWebUiUx = useMemo(() => mappedWebUiUx.slice(0, 3), [mappedWebUiUx]);
 
   // Block 5: Selected / Featured Projects (from t.home.projects)
-  const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
-    ? t.home.projects
-    : allProjects.slice(0, 6);
+  const featuredProjects = useMemo(() => {
+    const featuredProjectsRaw = (t.home?.projects && Array.isArray(t.home.projects) && t.home.projects.length > 0)
+      ? t.home.projects
+      : allProjects.slice(0, 6);
 
-  const featuredProjects = featuredProjectsRaw.map((fp: any) => {
-    const matched = allProjects.find((p: any) => p.id === fp.id);
-    const detail = localizedDetails[fp.id] || {};
-    const rawTitle = (matched?.name && (fp.title === "Ala-Too" || fp.name === "Ala-Too")) ? matched.name : (matched?.name || fp.title || fp.name || "");
-    const rawDesc = detail.desc || detail.challenge || matched?.desc || "";
-    const rawTag = fp.category || fp.tag || detail.service || matched?.category || "Design";
-    return {
-      id: fp.id,
-      title: getLocText(locale, rawTitle, rawTitle),
-      image: (fp.img && (fp.img.startsWith("http") || fp.img.startsWith("data:") || fp.img.startsWith("/")))
-        ? fp.img
-        : (fp.id === "maminy-retsepty" ? coverMoms
-          : fp.id === "tooko" ? coverTooko
-          : (fp.img || fp.image || matched?.img || "")),
-      tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || "2026",
-      desc: getLocText(locale, rawDesc, rawDesc)
-    };
-  });
+    return featuredProjectsRaw.map((fp: any) => {
+      const matched = allProjects.find((p: any) => p.id === fp.id);
+      const cardInfo = getProjectCardInfo(fp.id, locale, matched || fp, projectDetails, projectDetailsTranslations);
+
+      return {
+        id: fp.id,
+        title: cardInfo.title,
+        image: (fp.img && (fp.img.startsWith("http") || fp.img.startsWith("data:") || fp.img.startsWith("/")))
+          ? fp.img
+          : (fp.id === "maminy-retsepty" ? COVER_MOMS
+            : fp.id === "tooko" ? coverTooko
+            : (fp.img || fp.image || matched?.img || "")),
+        tags: cardInfo.service,
+        year: cardInfo.year,
+        desc: cardInfo.desc
+      };
+    });
+  }, [t.home?.projects, allProjects, locale, projectDetails]);
 
   // Dynamic filtered projects for the main page interactive Recent Projects filter tab
   let currentFilteredProjects: any[] = [];
@@ -370,10 +344,10 @@ export function Home() {
 
   // Block 3: Advantages list based on i18n about values
   const advantages = [
-    { num: "01", title: "Founder", desc: getLocText(locale, "21 год опыта в дизайне — основатель студии.", "21 year of experience in Design - studio founder.", "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү.", "21年设计经验 — 工作室创始人", "21 عامًا من الخبرة في التصميم - مؤسس الاستوديو", "21 Jahre Erfahrung im Design – Studio-Gründer") },
+    { num: "01", title: "Founder", desc: getLocText(locale, "21 год опыта в дизайне — основатель студии.", "21 year of experience in Design - studio founder.", "Дизайндагы 21 жылдык тажрыйба — студиянын негиздөөчүсү.", "21年设计经验 — 工作室创始人", "21 عامًا من الخبرة في التصميم - مؤسс الاستوديو", "21 Jahre Erfahrung im Design – Studio-Gründer") },
     { num: "02", title: "Studio", desc: getLocText(locale, "2011 год — опыт работы как студия.", "2011 year - experience as studio.", "2011-жылдан бери — студия катары тажрыйба.", "自2011年起作为专业工作室的丰富经验", "خبرة كاستوديو محترف منذ عام 2011", "Erfahrung als Studio seit 2011") },
     { num: "03", title: "Global", desc: getLocText(locale, "Проекты для рынков Центральной Азии, Европы и digital-first команд.", "Projects for Central Asia, Europe and digital-first teams.", "Борбордук Азия, Европа жана санарип биринчи командалар үчүн долбоорлор.", "服务于中亚、欧洲和数字优先团队的项目。", "مشاريع لأسواق آسيا الوسطى وأوروبا والفرق الرقمية.", "Projekte für Zentralasien, Europa und Digital-First-Teams.") },
-    { num: "04", title: "Principle", desc: getLocText(locale, "Становимся частью каждого проекта поэтому переживаем вместе с клиентом и стараемся делать работу по совести. Никаких громких пустых слов, просто делаем как должно быть.", "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done.", "Ар бир долбоордун бир бөлүгү болобуз, ошондуктан кардар менен бирге сарсанаа болуп, ишти абийир менен жасоого аракет кылабыз. Эч кандай куру сөз жок, жөн гана кандай болушу керек болсо, ошондой кылабыз.", "我们深融于每个项目，与客户同频共振，以诚做事。无句虚言，唯求至臻。", "نصبح جزءًا من كل مشروع، لذا نهتم بعمق جنباً إلى جنب مع العميل ونحافظ على النزاهة.", "Wir werden Teil jedes Projekts, arbeiten mit Integrität und ohne leere Versprechungen.") }
+    { num: "04", title: "Principle", desc: getLocText(locale, "Становимся частью каждого проекта поэтому переживаем вместе с клиентом и стараемся делать работу по совести. Никаких громких пустых слов, просто делаем как должно быть.", "We become a part of every project, so we care deeply alongside the client and strive to work with integrity. No empty loud words, we simply do things as they should be done.", "Ар бир долбоордун бир бөлүгү болобуз, ошондуктан кардар менен бирге сарсанаа болуп, ишти абийир менен жасоого аракет кылабыз. Эч кандай куру сөз жок, жөн гана кандай болушу керек болсо, ошондой кылабыз.", "我们深融于每个项目，与客户同频共振，以诚做事。无句虚言，唯求至臻。", "نصبح جزءًا من كل проект, لذا نهتم بعمق جنباً إلى جنب مع العميل ونحافظ على النزاهة.", "Wir werden Teil jedes Projekts, arbeiten mit Integrität und ohne leere Versprechungen.") }
   ];
 
   // Block 4: Services list (Top 5 main services: Branding, Industrial Design, Marketing, Concept Design, Game Dev)
@@ -392,37 +366,39 @@ export function Home() {
 
   const finalItems = filteredServices.length === 5 ? filteredServices : allItems.slice(0, 5);
 
-  const servicesList = finalItems.map((service: any) => {
-    let homeSource = t;
-    if (locale !== "ru" && t.home?.services?.some((s: any) => s[0] === "01" && hasRussian(s[1]))) {
-      homeSource = siteTranslations[locale];
-    }
-    const match = homeSource.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
-    let imgUrl = match ? match[3] : "";
-    
-    // Use high-quality Unsplash design placeholders for immediate presentation
-    if (!imgUrl || imgUrl.includes("supabase.co")) {
-      if (service.id === "01") {
-        imgUrl = "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=600";
-      } else if (service.id === "03") {
-        imgUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600";
-      } else if (service.id === "09") {
-        imgUrl = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600";
-      } else if (service.id === "13") {
-        imgUrl = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600";
-      } else {
-        imgUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=600";
+  const servicesList = useMemo(() => {
+    return finalItems.map((service: any) => {
+      let homeSource = t;
+      if (locale !== "ru" && t.home?.services?.some((s: any) => s[0] === "01" && hasRussian(s[1]))) {
+        homeSource = siteTranslations[locale];
       }
-    }
-    
-    return {
-      ...service,
-      title: getLocText(locale, service.title, service.title),
-      desc: getLocText(locale, service.desc, service.desc),
-      steps: Array.isArray(service.steps) ? service.steps.map((step: string) => getLocText(locale, step, step)) : [],
-      imgUrl
-    };
-  });
+      const match = homeSource.home.services?.find((s: any) => s[0] === service.id || s[1].toLowerCase() === service.title.toLowerCase());
+      let imgUrl = match ? match[3] : "";
+      
+      // Use high-quality Unsplash design placeholders for immediate presentation
+      if (!imgUrl || imgUrl.includes("supabase.co")) {
+        if (service.id === "01") {
+          imgUrl = "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=600";
+        } else if (service.id === "03") {
+          imgUrl = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600";
+        } else if (service.id === "09") {
+          imgUrl = "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600";
+        } else if (service.id === "13") {
+          imgUrl = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=600";
+        } else {
+          imgUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=600";
+        }
+      }
+      
+      return {
+        ...service,
+        title: getLocText(locale, service.title, service.title),
+        desc: getLocText(locale, service.desc, service.desc),
+        steps: Array.isArray(service.steps) ? service.steps.map((step: string) => getLocText(locale, step, step)) : [],
+        imgUrl
+      };
+    });
+  }, [finalItems, t, siteTranslations, locale]);
 
   // Block 6: Brands list
   const brands = t.home.brands || [];

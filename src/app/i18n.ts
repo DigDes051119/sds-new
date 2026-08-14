@@ -1444,6 +1444,7 @@ export const translations = {
       services: "服务项目",
       projects: "设计项目",
       products: "设计产品",
+      architecture: "建筑设计",
       webUiUx: "网页 / UI UX",
       contacts: "联系方式",
     },
@@ -2689,18 +2690,18 @@ const translationsDictionary: Record<string, Record<Language, string>> = {
   "MAMINY RETSEPTY": {
     en: "MOM'S RECIPES",
     ru: "МАМИНЫ РЕЦЕПТЫ",
-    kg: "МАМИНЫ РЕЦЕПТЫ",
-    zh: "MOM'S RECIPES",
-    ar: "MOM'S RECIPES",
-    de: "MOM'S RECIPES",
+    kg: "ЭНЕНИН РЕЦЕПТТЕРИ",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "MAMAS REZEPTE",
   },
-  "Мамины рецепты": {
+  "maminy retsepty": {
     en: "Mom's Recipes",
     ru: "Мамины рецепты",
-    kg: "Мамины рецепты",
-    zh: "Mom's Recipes",
-    ar: "Mom's Recipes",
-    de: "Mom's Recipes",
+    kg: "Эненин рецепттери",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "Mamas Rezepte",
   },
   "BISHBENCH": {
     en: "BISHBENCH",
@@ -2880,18 +2881,90 @@ const translationsDictionary: Record<string, Record<Language, string>> = {
   },
   "MOM'S RECIPES": {
     en: "MOM'S RECIPES",
-    ru: "MOM'S RECIPES",
-    kg: "MOM'S RECIPES",
-    zh: "MOM'S RECIPES",
-    ar: "MOM'S RECIPES",
-    de: "MOM'S RECIPES",
+    ru: "МАМИНЫ РЕЦЕПТЫ",
+    kg: "ЭНЕНИН РЕЦЕПТТЕРИ",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "MAMAS REZEPTE",
+  },
+  "Mom's Recipes": {
+    en: "Mom's Recipes",
+    ru: "Мамины рецепты",
+    kg: "Эненин рецепттери",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "Mamas Rezepte",
+  },
+  "МАМИНЫ РЕЦЕПТЫ": {
+    en: "MOM'S RECIPES",
+    ru: "МАМИНЫ РЕЦЕПТЫ",
+    kg: "ЭНЕНИН РЕЦЕПТТЕРИ",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "MAMAS REZEPTE",
+  },
+  "Мамины рецепты": {
+    en: "Mom's Recipes",
+    ru: "Мамины рецепты",
+    kg: "Эненин рецепттери",
+    zh: "妈妈的食谱",
+    ar: "وصفات أمي",
+    de: "Mamas Rezepte",
+  },
+  "АРХИТЕКТУРА": {
+    en: "ARCHITECTURE",
+    ru: "АРХИТЕКТУРА",
+    kg: "АРХИТЕКТУРА",
+    zh: "建筑设计",
+    ar: "الهندسة المعمارية",
+    de: "ARCHITEKTUR",
+  },
+  "Архитектура": {
+    en: "Architecture",
+    ru: "Архитектура",
+    kg: "Архитектура",
+    zh: "建筑设计",
+    ar: "الهندسة المعمارية",
+    de: "Architektur",
+  },
+  "ARCHITECTURE": {
+    en: "ARCHITECTURE",
+    ru: "АРХИТЕКТУРА",
+    kg: "АРХИТЕКТУРА",
+    zh: "建筑设计",
+    ar: "الهندسة المعمارية",
+    de: "ARCHITEKTUR",
+  },
+  "Architecture": {
+    en: "Architecture",
+    ru: "Архитектура",
+    kg: "Архитектура",
+    zh: "建筑设计",
+    ar: "الهندسة المعمارية",
+    de: "Architektur",
+  },
+  "БРЕНДИНГ": {
+    en: "BRANDING",
+    ru: "БРЕНДИНГ",
+    kg: "БРЕНДИНГ",
+    zh: "品牌设计",
+    ar: "الهوية التجارية",
+    de: "BRANDING",
+  },
+  "Брендинг": {
+    en: "Branding",
+    ru: "Брендинг",
+    kg: "Брендинг",
+    zh: "品牌设计",
+    ar: "الهوية التجارية",
+    de: "Branding",
   },
   "БРЕНДИРОВАНИЕ": {
     en: "BRANDING",
     ru: "БРЕНДИРОВАНИЕ",
     kg: "БРЕНДИНГ",
     zh: "品牌设计",
-    ar: "الهوية العلامة التجارية",
+    ar: "الهوية التجارية",
     de: "BRANDING",
   },
   "Брендирование": {
@@ -2899,7 +2972,7 @@ const translationsDictionary: Record<string, Record<Language, string>> = {
     ru: "Брендирование",
     kg: "Брендинг",
     zh: "品牌设计",
-    ar: "الهوية العلامة التجارية",
+    ar: "الهوية التجارية",
     de: "Branding",
   },
   "ИНДУСТРИАЛЬНЫЙ ДИЗАЙН": {
@@ -2965,14 +3038,6 @@ const translationsDictionary: Record<string, Record<Language, string>> = {
     zh: "Game Dev",
     ar: "Game Dev",
     de: "Game Dev",
-  },
-  "Mom's Recipes": {
-    en: "Mom's Recipes",
-    ru: "Mom's Recipes",
-    kg: "Mom's Recipes",
-    zh: "Mom's Recipes",
-    ar: "Mom's Recipes",
-    de: "Mom's Recipes",
   },
   "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design,...": {
     en: "We put a direct idea into the logo and symbol - an open book of recipes, which also resembles the symbol of a heart, (love), we worked on the style, packaging, design,...",
@@ -3120,6 +3185,15 @@ export function autoTranslateText(text: string, locale: Language): string {
     if (locale === "de") return "Entwicklung von 3D-Welten, Spielumgebungen, Mechaniken und interaktiver Konzeptkunst.";
   }
 
+  if (trimmed.includes("совершенно новый логотип") || trimmed.includes("соверешнно новый") || trimmed.includes("completely new logo")) {
+    if (locale === "zh") return "为一家成长型公司打造全新的标志、风格和品牌。";
+    if (locale === "ar") return "إنشاء شعار وأسلوب وهوية تجارية جديدة تمامًا لشركة نامية.";
+    if (locale === "de") return "Ein völlig neues Logo, einen neuen Stil und ein neues Branding für ein wachsendes Unternehmen zu schaffen.";
+    if (locale === "kg") return "Өнүгүп келе жаткан компания үчүн таптакыр жаңы логотип, стиль жана брендинг түзүү.";
+    if (locale === "en") return "Create a completely new logo, style and branding for a growing company.";
+    if (locale === "ru") return "Создать совершенно новый логотип, стиль и брендинг для развивающейся компании.";
+  }
+
   if (trimmed.includes("заложили прямую идею") || trimmed.includes("вложили прямую идею") || trimmed.includes("direct idea into the logo")) {
     if (locale === "zh") return "我们在标志与象征符号中融入了最直观的创意——一本翻开的食谱书，同时勾勒出心形（爱）的轮廓。我们精心设计了品牌风格、包装、外观呈现及更多细节。";
     if (locale === "ar") return "لقد وضعنا فكرة مباشرة في الشعار والرمز - كتاب مفتوح للوصفات يشبه أيضاً رمز القلب (الحب). عملنا على الأسلوب والتعبئة والتصميم والعرض والتفاصيل.";
@@ -3146,12 +3220,18 @@ export function autoTranslateText(text: string, locale: Language): string {
     if (trimmed.startsWith("We created everything necessary")) {
       return "Мы создали всё необходимое для нового бренда внутри и снаружи, который готов выйти на рынок. Цвета и контрасты для сильного старта...";
     }
+    if (trimmed.startsWith("We put a direct idea") || trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "Мы заложили прямую идею в логотип и символ — открытая книга рецептов, которая к тому же напоминает еще и символ сердца (любви). Проработали стиль, упаковки, оформление, подачу и многое другое.";
+    }
   } else if (locale === "kg") {
     if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
       return "Курортту презентациялоо үчүн биздин студия Нейминг жана брендингдин бардык маанилүү деталдарын түзгөн брендинг. Толкундар аркылуу №1 идеологиясы...";
     }
     if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
       return "Биз жаңы бренд үчүн ичинен да, сыртынан да бардык зарыл нерселерди түздүк, ал жакында рынокко чыгат. Күчтүү старт үчүн түстөр жана контрасттар...";
+    }
+    if (trimmed.startsWith("We put a direct idea") || trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "Биз логотипке жана белгиге түздөн-түз идеяны киргиздик — ачык рецепт китеби, ал дагы жүрөк (сүйүү) символуна окшош. Биз стилди, таңгакты, дизайнды, презентацияны жана башка көптөгөн нерселерди иштеп чыктык.";
     }
   } else if (locale === "zh") {
     if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
@@ -3160,12 +3240,18 @@ export function autoTranslateText(text: string, locale: Language): string {
     if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
       return "我们由内而外为即将进入市场的全新品牌打造了一切核心要素。鲜明的色彩与对比赋予强力起步...";
     }
+    if (trimmed.startsWith("We put a direct idea") || trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "我们在标志和符号中融入了一个直接的想法——一本打开的食谱书，它也让人想起心（爱）的象征。制定了风格、包装、设计、呈现等。";
+    }
   } else if (locale === "ar") {
     if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
       return "العلامة التجارية التي أنشأ فيها استوديونا التسمية وجميع تفاصيل العلامة التجارية الهامة لتقديم المنتجع...";
     }
     if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
       return "لقد أنشأنا كل ما هو ضروري لعلامة تجارية جديدة، من الداخل والخارج، والتي على وشك دخول السوق...";
+    }
+    if (trimmed.startsWith("We put a direct idea") || trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "لقد وضعنا فكرة مباشرة في الشعار والرمز — كتاب وصفات مفتوح يشبه أيضًا رمز القلب (الحب). عملنا على الأسلوب والتغليف والتصميم والعرض وغير ذلك الكثير.";
     }
   } else if (locale === "de") {
     if (trimmed.startsWith("Branding in which") || trimmed.startsWith("Брендинг в котором")) {
@@ -3174,12 +3260,18 @@ export function autoTranslateText(text: string, locale: Language): string {
     if (trimmed.startsWith("We created everything") || trimmed.startsWith("Мы создали всё")) {
       return "Wir haben alles Notwendige für eine neue Marke von innen und außen geschaffen, die kurz vor dem Markteintritt steht...";
     }
+    if (trimmed.startsWith("We put a direct idea") || trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "Wir haben eine direkte Idee in das Logo und das Symbol gesteckt – ein offenes Rezeptbuch, das auch an ein Herzsymbol (Liebe) erinnert. Wir haben Stil, Verpackung, Design, Präsentation und vieles mehr ausgearbeitet.";
+    }
   } else if (locale === "en") {
     if (trimmed.startsWith("Брендинг в котором")) {
       return "Branding in which our studio created Naming, and all the important branding details for presenting the resort. The ideology of number 1 carried through the waves and...";
     }
     if (trimmed.startsWith("Мы создали всё необходимое")) {
       return "We created everything necessary for a new brand, inside and out, which is about to enter the market. Colors and contrasts for a strong start. Light, friendly style and...";
+    }
+    if (trimmed.startsWith("Мы заложили прямую идею") || trimmed.startsWith("Биз логотипке") || trimmed.startsWith("Логотипке")) {
+      return "We put a direct idea into the logo and symbol — an open recipe book that also resembles a heart symbol (love). We worked out the style, packaging, design, presentation and much more.";
     }
   }
 

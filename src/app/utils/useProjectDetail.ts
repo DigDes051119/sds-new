@@ -23,22 +23,8 @@ export interface ProjectDetailData {
   videoUrl?: string;
 }
 
-export const cleanSlug = (s?: string): string => {
-  return (s || "").toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-};
-
-export const findInObjectCaseInsensitive = <T = any>(obj: Record<string, T> | null | undefined, targetId?: string): T | null => {
-  if (!obj || !targetId) return null;
-  if (obj[targetId]) return obj[targetId];
-
-  const targetClean = cleanSlug(targetId);
-  for (const [key, value] of Object.entries(obj)) {
-    if (cleanSlug(key) === targetClean) {
-      return value;
-    }
-  }
-  return null;
-};
+import { cleanSlug, findInObjectCaseInsensitive, matchProjectKey } from "./slugUtils";
+export { cleanSlug, findInObjectCaseInsensitive, matchProjectKey };
 
 export function useProjectDetail(catalogType: "projects" | "products" | "concepts" | "architects" | "gamedev" | "webUiUx") {
   const { locale, t } = useContext(LanguageContext);

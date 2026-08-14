@@ -8,8 +8,9 @@ import { GridSwitcher } from "../components/GridSwitcher";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
-import coverMoms from "../../imports/cover_moms.webp";
 import coverTooko from "../../imports/cover_tooko.webp";
+
+import { findInObjectCaseInsensitive, getProjectCardInfo, COVER_MOMS } from "../utils/slugUtils";
 
 export function Projects() {
   const { t, locale } = useContext(LanguageContext);
@@ -22,64 +23,21 @@ export function Projects() {
     });
   }, []);
 
-  const projectAliases: Record<string, string[]> = {
-    "maminy-retsepty": ["moms-recipes", "mom-s-recipes", "maminy_retsepty", "maminy-retsepty", "mothers-recipes"],
-    "one-ordo-resort": ["one-ordo", "one-ordo-resort", "one-ordo-resort-web"],
-    "tooko": ["tooko", "tooko-brand"],
-    "sandyq": ["sandyq", "sandyk"],
-    "ala-too": ["ala-too", "alatoo"],
-    "salkyn": ["salkyn"],
-    "techstart": ["techstart"],
-    "auto-concept-x": ["auto-concept-x", "autoconceptx", "auto-concept"],
-    "bishbench": ["bishbench"]
-  };
-
-  const findInObj = (obj: any, targetId: string) => {
-    if (!obj || !targetId) return null;
-    if (obj[targetId]) return obj[targetId];
-
-    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const targetClean = clean(targetId);
-
-    // 1. Direct clean match
-    for (const k of Object.keys(obj)) {
-      if (clean(k) === targetClean) return obj[k];
-    }
-
-    // 2. Alias match
-    for (const [canonical, aliases] of Object.entries(projectAliases)) {
-      const allKeys = [canonical, ...aliases].map(clean);
-      if (allKeys.includes(targetClean)) {
-        for (const k of Object.keys(obj)) {
-          if (allKeys.includes(clean(k))) return obj[k];
-        }
-      }
-    }
-
-    return null;
-  };
-
   const projects = t.projects.items
     .map((project: any) => {
-      const cmsDetail = findInObj(projectDetails[locale], project.id) || findInObj(projectDetails.ru, project.id) || findInObj(projectDetails.en, project.id) || {};
-      const fallbackDetail = findInObj(projectDetailsTranslations[locale], project.id) || findInObj(projectDetailsTranslations.ru, project.id) || findInObj(projectDetailsTranslations.en, project.id) || {};
-      
-      const rawTitle = project.name || project.title || cmsDetail.name || fallbackDetail.name || "";
-      const rawDesc = (cmsDetail.desc && cmsDetail.desc.trim()) || (cmsDetail.challenge && cmsDetail.challenge.trim()) || (fallbackDetail.desc && fallbackDetail.desc.trim()) || (fallbackDetail.challenge && fallbackDetail.challenge.trim()) || project.desc || "";
-      const rawTag = cmsDetail.service || fallbackDetail.service || project.category || "Design";
-      const year = cmsDetail.year || fallbackDetail.year || "2026";
+      const cardInfo = getProjectCardInfo(project.id, locale, project, projectDetails, projectDetailsTranslations);
 
       return {
         ...project,
-        name: getLocText(locale, rawTitle, rawTitle),
+        name: cardInfo.title,
         img: (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
           ? project.img
-          : (project.id === "maminy-retsepty" ? coverMoms
+          : (project.id === "maminy-retsepty" ? COVER_MOMS
             : project.id === "tooko" ? coverTooko
             : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img)),
-        tags: getLocText(locale, rawTag, rawTag),
-        year: year,
-        desc: getLocText(locale, rawDesc, rawDesc)
+        tags: cardInfo.service,
+        year: cardInfo.year,
+        desc: cardInfo.desc
       };
     });
 

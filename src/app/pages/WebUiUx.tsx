@@ -7,8 +7,8 @@ import { ProjectsNav } from "../components/ProjectsNav";
 import { GridSwitcher } from "../components/GridSwitcher";
 import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
-import coverMoms from "../../imports/cover_moms.webp";
 import coverTooko from "../../imports/cover_tooko.webp";
+import { COVER_MOMS } from "../utils/slugUtils";
 
 export function WebUiUx() {
   const { t, locale } = useContext(LanguageContext);
@@ -34,7 +34,7 @@ export function WebUiUx() {
         name: getLocText(locale, rawName, rawName),
         img: (project.img && (project.img.startsWith("http") || project.img.startsWith("data:") || project.img.startsWith("/")))
           ? project.img
-          : (project.id === "maminy-retsepty" ? coverMoms
+          : (project.id === "maminy-retsepty" ? COVER_MOMS
             : project.id === "tooko" ? coverTooko
             : (project.id === "sandyq" ? projectImg1 : project.id === "ala-too" ? projectImg2 : project.img)),
         tags: getLocText(locale, rawTag, rawTag),

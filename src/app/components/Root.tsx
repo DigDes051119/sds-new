@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet } from "react-router";
-import { useEffect, useState, useRef, Suspense } from "react";
-import { LanguageContext, translations, autoTranslateText, type Language, languageOptions } from "../i18n";
+import { useEffect, useState, useRef, useMemo, Suspense } from "react";
+import { LanguageContext, translations, autoTranslateText, getLocText, type Language, languageOptions } from "../i18n";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,30 +17,30 @@ export function Root() {
   const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let rafId: number | null = null;
     const updateUnderline = () => {
-      const activeEl = navRef.current?.querySelector(".nav-link-active");
-      if (activeEl && navRef.current) {
-        const activeRect = activeEl.getBoundingClientRect();
-        const navRect = navRef.current.getBoundingClientRect();
-        setUnderlineStyle({
-          left: activeRect.left - navRect.left,
-          width: activeRect.width,
-          opacity: 1
-        });
-      } else {
-        setUnderlineStyle(prev => ({ ...prev, opacity: 0 }));
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const activeEl = navRef.current?.querySelector(".nav-link-active");
+        if (activeEl && navRef.current) {
+          const activeRect = activeEl.getBoundingClientRect();
+          const navRect = navRef.current.getBoundingClientRect();
+          setUnderlineStyle({
+            left: activeRect.left - navRect.left,
+            width: activeRect.width,
+            opacity: 1
+          });
+        } else {
+          setUnderlineStyle(prev => (prev.opacity === 0 ? prev : { ...prev, opacity: 0 }));
+        }
+      });
     };
 
-    // Run once immediately on navigation / language change
     updateUnderline();
-    
-    // Add a tiny micro-tick delay only once to ensure layout is ready
-    const timer = setTimeout(updateUnderline, 0);
 
     window.addEventListener("resize", updateUnderline);
     return () => {
-      clearTimeout(timer);
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener("resize", updateUnderline);
     };
   }, [location.pathname, locale]);
@@ -185,74 +185,81 @@ export function Root() {
     setProjectBannerDismissed(false);
   }, [location.pathname]);
 
-  // Scroll tracking — native scroll, no custom animation
+  // Scroll tracking — native scroll, rAF throttled
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsScrolled(false);
     setShowScrollTop(false);
     let wasScrolled = false;
+    let scrollRaf: number | null = null;
+
     const onScroll = () => {
-      const scrolled = window.scrollY > 80;
-      if (scrolled !== wasScrolled) {
-        wasScrolled = scrolled;
-        setIsScrolled(scrolled);
-      }
-      setShowScrollTop(window.scrollY > 300);
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        const currentY = window.scrollY;
+        const scrolled = currentY > 80;
+        if (scrolled !== wasScrolled) {
+          wasScrolled = scrolled;
+          setIsScrolled(scrolled);
+        }
+        setShowScrollTop(currentY > 300);
 
-      // Project detail sticky banner: appears strictly when user reaches middle of page (50% scroll) and disappears when collage section ends
-      if (isProjectDetailPage && !projectBannerDismissed) {
-        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrollPct = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
-        
-        const collageEl = document.getElementById("project-collage-section");
-        const collageRect = collageEl ? collageEl.getBoundingClientRect() : null;
-        
-        // Collage section has ended when its bottom edge scrolls above 30% of viewport
-        const collageEnded = collageRect ? collageRect.bottom < window.innerHeight * 0.3 : false;
+        // Project detail sticky banner: appears strictly when user reaches middle of page (50% scroll) and disappears when collage section ends
+        if (isProjectDetailPage && !projectBannerDismissed) {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollPct = totalHeight > 0 ? (currentY / totalHeight) * 100 : 0;
+          
+          const collageEl = document.getElementById("project-collage-section");
+          const collageRect = collageEl ? collageEl.getBoundingClientRect() : null;
+          
+          // Collage section has ended when its bottom edge scrolls above 30% of viewport
+          const collageEnded = collageRect ? collageRect.bottom < window.innerHeight * 0.3 : false;
 
-        if (scrollPct >= 48 && !collageEnded) {
-          setShowProjectBanner(true);
+          if (scrollPct >= 48 && !collageEnded) {
+            setShowProjectBanner(true);
+          } else {
+            setShowProjectBanner(false);
+          }
         } else {
           setShowProjectBanner(false);
         }
-      } else {
-        setShowProjectBanner(false);
-      }
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+    };
   }, [location.pathname, isProjectDetailPage, projectBannerDismissed]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-
     const sections = document.querySelectorAll("section");
     
     const observerOptions = {
       root: null,
-      rootMargin: "0px 0px -80px 0px",
-      threshold: 0.05
+      rootMargin: "0px 0px -40px 0px",
+      threshold: 0.02
     };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("reveal-visible");
+          entry.target.classList.remove("reveal-hidden");
           observer.unobserve(entry.target);
         }
       });
     }, observerOptions);
 
-    sections.forEach((sec) => {
-      if (!sec.classList.contains("reveal-visible")) {
-        const rect = sec.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-          sec.classList.add("reveal-visible");
-        } else {
-          sec.classList.add("reveal-hidden");
-          observer.observe(sec);
-        }
+    sections.forEach((sec, idx) => {
+      // First section or already visible sections should not get hidden and transitioned
+      if (idx === 0 || sec.classList.contains("reveal-visible")) {
+        sec.classList.add("reveal-visible");
+        sec.classList.remove("reveal-hidden");
+      } else {
+        sec.classList.add("reveal-hidden");
+        observer.observe(sec);
       }
     });
 
@@ -327,7 +334,7 @@ export function Root() {
     return resolveValue(siteT, defT, ruT);
   };
 
-  const t = getResolvedTranslations(locale);
+  const t = useMemo(() => getResolvedTranslations(locale), [locale, siteTranslations]);
 
   // Close mobile menu on navigation
   useEffect(() => {
@@ -340,7 +347,7 @@ export function Root() {
     { name: t.nav.services, path: "/services" },
     { name: t.nav.projects, path: "/projects" },
     { name: t.nav.products, path: "/products" },
-    { name: (t.nav as any)?.architecture || (locale === "ru" ? "Архитектура" : locale === "kg" ? "Архитектура" : locale === "zh" ? "建筑" : locale === "ar" ? "الهندسة المعمارية" : locale === "de" ? "Architektur" : "Architecture"), path: "/architect-projects" },
+    { name: getLocText(locale, (t.nav as any)?.architecture || "Архитектура", "Architecture", "Архитектура", "建筑设计", "الهندسة المعمارية", "Architektur"), path: "/architect-projects" },
     { name: t.nav.contacts, path: "/contacts" },
   ];
 

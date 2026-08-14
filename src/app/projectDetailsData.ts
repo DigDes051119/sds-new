@@ -17,13 +17,13 @@ export interface ProjectDetailData {
 export const projectDetailsTranslations: Record<string, Record<string, ProjectDetailData>> = {
   en: {
     "maminy-retsepty": {
-      "desc": "Мы заложили прямую идею в логотип и символ - открытая книга рецептав которая к тому же напоминает еще и символ сердца, (любви). Проработали, стиль, упаковки, оформление, подачу и многое другое",
+      "desc": "Мы заложили прямую идею в логотип и символ - открытая книга рецептов которая к тому же напоминает еще и символ сердца, (любви), проработали, стиль, упаковки, оформление, подачу и многое другое. \n\nВажно! Показаны только некоторые части брендинга, допустимые для ознакомления.",
       "name": "Мамины рецепты",
       "year": "2025",
       "client": "maminy-retsepty",
       "results": [],
       "service": "БРЕНДИНГ",
-      "challenge": "Создать соверешнно новыйй логотип стиль и брендинг для развивающейся компании.",
+      "challenge": "Создать совершенно новый логотип стиль и брендинг для развивающейся компании.",
       "websiteUrl": "https://www.instagram.com/maminy_retsepty.kg",
       "collageTheme": "light",
       "collageBlocks": [
@@ -1454,13 +1454,73 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
   }
 };
 
-['en', 'ru', 'kg'].forEach((lang) => {
+// Initialize multilingual fallbacks
+['ru', 'kg', 'zh', 'ar', 'de', 'fr', 'es', 'it', 'ja', 'ko'].forEach((lang) => {
+  if (!(projectDetailsTranslations as any)[lang]) {
+    (projectDetailsTranslations as any)[lang] = JSON.parse(JSON.stringify(projectDetailsTranslations.en || {}));
+  }
+});
+
+const localizedMaminyData: Record<string, { name: string; service: string; challenge: string; desc: string; client: string }> = {
+  ru: {
+    name: "МАМИНЫ РЕЦЕПТЫ",
+    client: "Мамины рецепты",
+    service: "БРЕНДИНГ",
+    challenge: "Создать совершенно новый логотип стиль и брендинг для развивающейся компании.",
+    desc: "Мы заложили прямую идею в логотип и символ - открытая книга рецептов которая к тому же напоминает еще и символ сердца, (любви), проработали, стиль, упаковки, оформление, подачу и многое другое. \n\nВажно! Показаны только некоторые части брендинга, допустимые для ознакомления."
+  },
+  en: {
+    name: "MOM'S RECIPES",
+    client: "Mom's Recipes",
+    service: "BRANDING",
+    challenge: "Create a completely new logo, style and branding for a growing company.",
+    desc: "We put a direct idea into the logo and symbol - an open recipe book that also resembles a heart symbol (love). We worked out the style, packaging, design, presentation and much more.\n\nImportant! Only some parts of branding permissible for display are shown."
+  },
+  kg: {
+    name: "ЭНЕНИН РЕЦЕПТТЕРИ",
+    client: "Эненин рецепттери",
+    service: "БРЕНДИНГ",
+    challenge: "Өнүгүп келе жаткан компания үчүн таптакыр жаңы логотип, стиль жана брендинг түзүү.",
+    desc: "Биз логотипке жана белгиге түздөн-түз идеяны киргиздик — ачык рецепт китеби, ал дагы жүрөк (сүйүү) символуна окшош, стилди, таңгакты, дизайнды, презентацияны жана башка көптөгөн нерселерди иштеп чыктык.\n\nМаанилүү! Көрүү үчүн брендингдин айрым бөлүктөрү гана көрсөтүлгөн."
+  },
+  zh: {
+    name: "妈妈的食谱",
+    client: "妈妈的食谱",
+    service: "品牌设计",
+    challenge: "为一家成长型公司打造全新的标志、风格和品牌。",
+    desc: "我们在标志与象征符号中融入了最直观的创意——一本翻开的食谱书，同时勾勒出心形（爱）的轮廓。我们精心设计了品牌风格、包装、外观呈现及更多细节。\n\n注意！仅展示允许公开的部分品牌设计内容。"
+  },
+  ar: {
+    name: "وصفات أمي",
+    client: "وصفات أمي",
+    service: "الهوية التجارية",
+    challenge: "إنشاء شعار وأسلوب وهوية تجارية جديدة تمامًا لشركة نامية.",
+    desc: "لقد وضعنا فكرة مباشرة في الشعار والرمز — كتاب وصفات مفتوح يشبه أيضًا رمز القلب (الحب). عملна على الأسلوب والتغليف والتصميم والعرض وغير ذلك الكثير.\n\nهام! يتم عرض الأجزاء المسموح بها فقط من العلامة التجارية للاطلاع."
+  },
+  de: {
+    name: "MAMAS REZEPTE",
+    client: "Mamas Rezepte",
+    service: "BRANDING",
+    challenge: "Ein völlig neues Logo, einen neuen Stil und ein neues Branding für ein wachsendes Unternehmen zu schaffen.",
+    desc: "Wir haben eine direkte Idee in das Logo und das Symbol gesteckt – ein offenes Rezeptbuch, das auch an ein Herzsymbol (Liebe) erinnert. Wir haben Stil, Verpackung, Design, Präsentation und vieles mehr ausgearbeitet.\n\nWichtig! Es werden nur einige Teile des Brandings gezeigt, die zur Ansicht freigegeben sind."
+  }
+};
+
+['en', 'ru', 'kg', 'zh', 'ar', 'de'].forEach((lang) => {
   const targetObj = (projectDetailsTranslations as any)[lang];
   if (targetObj) {
+    if (localizedMaminyData[lang] && targetObj['maminy-retsepty']) {
+      targetObj['maminy-retsepty'] = {
+        ...targetObj['maminy-retsepty'],
+        ...localizedMaminyData[lang]
+      };
+    }
     if (targetObj['maminy-retsepty']) {
       targetObj['moms-recipes'] = targetObj['maminy-retsepty'];
       targetObj['mom-s-recipes'] = targetObj['maminy-retsepty'];
       targetObj['maminy_retsepty'] = targetObj['maminy-retsepty'];
+      targetObj['мамины-рецепты'] = targetObj['maminy-retsepty'];
+      targetObj['мамины рецепты'] = targetObj['maminy-retsepty'];
     }
     if (targetObj['tooko']) {
       targetObj['tooko-brand'] = targetObj['tooko'];
@@ -1471,3 +1531,4 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
     }
   }
 });
+

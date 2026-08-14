@@ -11,6 +11,11 @@ const listeners = new Set<Listener>();
 let lastRemoteTranslationsStr: string | null = null;
 let lastRemoteProjectDetailsStr: string | null = null;
 
+let memoryTranslations: any = null;
+let memoryProjectDetails: any = null;
+let memoryProductDetails: any = null;
+let memoryArchiveItems: any = null;
+
 export const cmsService = {
   subscribe(listener: Listener) {
     listeners.add(listener);
@@ -20,6 +25,10 @@ export const cmsService = {
   },
 
   notify() {
+    memoryTranslations = null;
+    memoryProjectDetails = null;
+    memoryProductDetails = null;
+    memoryArchiveItems = null;
     listeners.forEach((l) => l());
   },
 
@@ -34,6 +43,7 @@ export const cmsService = {
         if (remoteTranslations) {
           lastRemoteTranslationsStr = JSON.stringify(remoteTranslations);
           safeLocalStorage.setItem("sds_translations", JSON.stringify(remoteTranslations));
+          memoryTranslations = null;
           this.getTranslations(); // Apply fallbacks for any missing catalog items
         }
       }
@@ -49,6 +59,7 @@ export const cmsService = {
         if (remoteDetails) {
           lastRemoteProjectDetailsStr = JSON.stringify(remoteDetails);
           safeLocalStorage.setItem("sds_project_details", JSON.stringify(remoteDetails));
+          memoryProjectDetails = null;
         }
       }
     } catch (e) {
@@ -60,6 +71,7 @@ export const cmsService = {
       const archiveRows = await supabaseClient.fetchTable("sds_archive_items").catch(() => null);
       if (archiveRows && archiveRows.length > 0 && archiveRows[0]?.data) {
         safeLocalStorage.setItem("sds_archive_items", JSON.stringify(archiveRows[0].data));
+        memoryArchiveItems = null;
       } else {
         // Fallback: load archive from translations if available
         const storedTrans = safeLocalStorage.getItem("sds_translations");
@@ -73,6 +85,7 @@ export const cmsService = {
                 kg: trans.kg?.archive || trans.ru.archive,
               };
               safeLocalStorage.setItem("sds_archive_items", JSON.stringify(archiveData));
+              memoryArchiveItems = null;
             }
           } catch {
             // ignore
@@ -86,7 +99,10 @@ export const cmsService = {
     this.notify();
   },
 
-  getTranslations() {
+  getTranslations(forceReload = false) {
+    if (memoryTranslations && !forceReload) {
+      return memoryTranslations;
+    }
     const stored = safeLocalStorage.getItem("sds_translations");
     let data: any;
     if (!stored) {
@@ -145,8 +161,9 @@ export const cmsService = {
       }
 
       if (!data[lang].nav) data[lang].nav = {};
-      if (!data[lang].nav.architecture) {
-        data[lang].nav.architecture = defaultTranslations[lang as keyof typeof defaultTranslations]?.nav?.architecture || defaultTranslations.en.nav.architecture;
+      const defNavArch = defaultTranslations[lang as keyof typeof defaultTranslations]?.nav?.architecture || defaultTranslations.en.nav.architecture;
+      if (!data[lang].nav.architecture || (lang !== "en" && data[lang].nav.architecture === "Architecture")) {
+        data[lang].nav.architecture = defNavArch;
         modified = true;
       }
       if (!data[lang].nav.products) {
@@ -300,6 +317,7 @@ export const cmsService = {
       safeLocalStorage.setItem("sds_translations", JSON.stringify(data));
     }
 
+    memoryTranslations = data;
     return data;
   },
 
@@ -324,7 +342,10 @@ export const cmsService = {
   },
 
   // Get project details
-  getProjectDetails() {
+  getProjectDetails(forceReload = false) {
+    if (memoryProjectDetails && !forceReload) {
+      return memoryProjectDetails;
+    }
     const stored = safeLocalStorage.getItem("sds_project_details");
     let data: any;
     if (!stored) {
@@ -412,6 +433,7 @@ export const cmsService = {
       safeLocalStorage.setItem("sds_project_details", JSON.stringify(data));
     }
 
+    memoryProjectDetails = data;
     return data;
   },
 
@@ -436,7 +458,10 @@ export const cmsService = {
   },
 
   // Get product details
-  getProductDetails() {
+  getProductDetails(forceReload = false) {
+    if (memoryProductDetails && !forceReload) {
+      return memoryProductDetails;
+    }
     const translations = this.getTranslations();
     const res: any = {};
     ["ru", "en", "kg", "zh", "ar", "de"].forEach((lang) => {
@@ -444,6 +469,7 @@ export const cmsService = {
       const curProducts = translations[lang]?.productDetail?.products || translations.en?.productDetail?.products || translations.ru?.productDetail?.products || {};
       res[lang] = { ...defProducts, ...curProducts };
     });
+    memoryProductDetails = res;
     return res;
   },
 
@@ -585,7 +611,10 @@ export const cmsService = {
 
 
   // Get archive (Origins) items
-  getArchiveItems(): Record<string, ArchiveItem[]> {
+  getArchiveItems(forceReload = false): Record<string, ArchiveItem[]> {
+    if (memoryArchiveItems && !forceReload) {
+      return memoryArchiveItems;
+    }
     let data: any = null;
 
     const translations = this.getTranslations();
@@ -614,6 +643,7 @@ export const cmsService = {
         data[lang] = JSON.parse(JSON.stringify(data.en || data.ru || []));
       }
     });
+    memoryArchiveItems = data;
     return data;
   },
 

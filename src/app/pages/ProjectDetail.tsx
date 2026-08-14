@@ -10,6 +10,7 @@ import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
+import { findInObjectCaseInsensitive, cleanSlug, cleanTranslitSlug, COVER_MOMS } from "../utils/slugUtils";
 
 export function ProjectDetail() {
   const { t, locale } = useContext(LanguageContext);
@@ -23,61 +24,31 @@ export function ProjectDetail() {
     });
   }, []);
 
-  const projectAliases: Record<string, string[]> = {
-    "maminy-retsepty": ["moms-recipes", "mom-s-recipes", "maminy_retsepty", "maminy-retsepty", "mothers-recipes"],
-    "one-ordo-resort": ["one-ordo", "one-ordo-resort", "one-ordo-resort-web"],
-    "tooko": ["tooko", "tooko-brand"],
-    "sandyq": ["sandyq", "sandyk"],
-    "ala-too": ["ala-too", "alatoo"],
-    "salkyn": ["salkyn"],
-    "techstart": ["techstart"],
-    "auto-concept-x": ["auto-concept-x", "autoconceptx", "auto-concept"],
-    "bishbench": ["bishbench"]
-  };
-
   const findInObj = (obj: any, targetId: string) => {
-    if (!obj || !targetId) return null;
-    if (obj[targetId]) return obj[targetId];
-
-    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const targetClean = clean(targetId);
-
-    // 1. Direct clean match
-    for (const k of Object.keys(obj)) {
-      if (clean(k) === targetClean) return obj[k];
-    }
-
-    // 2. Alias match
-    for (const [canonical, aliases] of Object.entries(projectAliases)) {
-      const allKeys = [canonical, ...aliases].map(clean);
-      if (allKeys.includes(targetClean)) {
-        for (const k of Object.keys(obj)) {
-          if (allKeys.includes(clean(k))) return obj[k];
-        }
-      }
-    }
-
-    return null;
+    return findInObjectCaseInsensitive(obj, targetId);
   };
 
   const fallbackData = (id && findInObj(projectDetailsTranslations[locale], id))
-    || (id && findInObj(projectDetailsTranslations.en, id))
     || (id && findInObj(projectDetailsTranslations.ru, id))
+    || (id && findInObj(projectDetailsTranslations.en, id))
     || t.projectDetail?.defaultProject
     || {};
 
   const cmsData = (id && findInObj(projectDetails[locale], id))
-    || (id && findInObj(projectDetails.en, id))
     || (id && findInObj(projectDetails.ru, id))
-    || (id && findInObj(projectDetails.kg, id));
+    || (id && findInObj(projectDetails.en, id))
+    || (id && findInObj(projectDetails.kg, id))
+    || (id && findInObj(projectDetails.zh, id))
+    || (id && findInObj(projectDetails.ar, id))
+    || (id && findInObj(projectDetails.de, id));
 
   let data = {
     name: cmsData?.name || fallbackData?.name || "PROJECT",
-    desc: (cmsData?.desc && cmsData.desc.trim()) || fallbackData?.desc || "",
+    desc: (cmsData?.desc && cmsData.desc.trim()) || (cmsData?.description && cmsData.description.trim()) || (fallbackData?.desc && fallbackData.desc.trim()) || "",
     client: cmsData?.client || fallbackData?.client || "Client",
     year: cmsData?.year || fallbackData?.year || "2026",
     service: cmsData?.service || fallbackData?.service || "Branding",
-    challenge: (cmsData?.challenge && cmsData.challenge.trim()) || fallbackData?.challenge || "",
+    challenge: (cmsData?.challenge && cmsData.challenge.trim()) || (fallbackData?.challenge && fallbackData.challenge.trim()) || "",
     processImages: (cmsData?.processImages && cmsData.processImages.length > 0) ? cmsData.processImages : (fallbackData?.processImages || []),
     collageBlocks: (cmsData?.collageBlocks && cmsData.collageBlocks.length > 0) ? cmsData.collageBlocks : (fallbackData?.collageBlocks || []),
     results: (cmsData?.results && cmsData.results.length > 0) ? cmsData.results : (fallbackData?.results || []),
@@ -101,7 +72,7 @@ export function ProjectDetail() {
   const projectListItem = t.projects?.items?.find((p: any) => p.id === id || p.id?.toLowerCase() === id?.toLowerCase());
   const coverImg = (projectListItem && projectListItem.img && (projectListItem.img.startsWith("http") || projectListItem.img.startsWith("data:") || projectListItem.img.startsWith("/")))
     ? projectListItem.img
-    : (id === "maminy-retsepty" ? coverMoms
+    : (id === "maminy-retsepty" ? COVER_MOMS
       : id === "tooko" ? coverTooko
       : id === "sandyq" ? projectImg1
       : id === "ala-too" ? projectImg2
@@ -145,7 +116,7 @@ export function ProjectDetail() {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-end w-full">
           <div className="lg:col-span-7">
             <h1 className="text-[32px] xs:text-[44px] md:text-[72px] lg:text-[96px] font-bold leading-[1.0] tracking-[-0.04em] text-white m-0 uppercase">
-              {data.name}
+              {getLocText(locale, data.name, data.name)}
             </h1>
             {data.websiteUrl && (
               <a

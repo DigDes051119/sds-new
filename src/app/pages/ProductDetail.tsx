@@ -10,6 +10,7 @@ export function ProductDetail() {
   const {
     id,
     locale,
+    t,
     data,
     listItem: productListItem,
     items,
