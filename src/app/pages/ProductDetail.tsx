@@ -8,9 +8,12 @@ import { useProjectDetail } from "../utils/useProjectDetail";
 
 export function ProductDetail() {
   const {
+    id,
     locale,
     data,
     listItem: productListItem,
+    items,
+    productDetails,
     collageBlocks,
     filteredBlocks,
     activeTab,
@@ -267,9 +270,10 @@ export function ProductDetail() {
 
       {/* Loop Previous / Next Product Navigation */}
       {(() => {
-        const items = productsList;
-        const currentIdx = items.findIndex((p: any) => p.id === id);
-        if (currentIdx === -1 || items.length <= 1) return null;
+        const clean = (s?: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const targetClean = clean(id);
+        const currentIdx = (items || []).findIndex((p: any) => clean(p.id) === targetClean || clean(p.name) === targetClean);
+        if (currentIdx === -1 || (items || []).length <= 1) return null;
 
         const prevIdx = (currentIdx - 1 + items.length) % items.length;
         const nextIdx = (currentIdx + 1) % items.length;
@@ -277,15 +281,18 @@ export function ProductDetail() {
         const prevProduct = items[prevIdx];
         const nextProduct = items[nextIdx];
 
+        const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
+
         const getProdCover = (pid: string) => {
-          const pItem = items.find((p: any) => p.id === pid);
+          const pItem = (items || []).find((p: any) => clean(p.id) === clean(pid));
           const pDetail = localeData[pid];
           return pItem?.img || pDetail?.collageBlocks?.[0]?.[0] || null;
         };
 
         const getProdDesc = (pid: string) => {
           const detail = localeData[pid];
-          return detail?.desc || detail?.challenge || '';
+          const pItem = (items || []).find((p: any) => clean(p.id) === clean(pid));
+          return detail?.desc || detail?.challenge || pItem?.desc || pItem?.challenge || '';
         };
 
         const tiles = [

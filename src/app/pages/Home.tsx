@@ -197,7 +197,7 @@ export function Home() {
   });
   const recentProducts = mappedProducts.slice(0, 4);
 
-  // Recent Architecture Projects (2 items = 1 row of 2 cards)
+  // Recent Architecture Projects (4 items = 2 rows of 2 cards)
   const allArchitects = t.architects?.items || [];
   const mappedArchitects = allArchitects.map((p: any, idx: number) => {
     const detail = localizedProductDetails[p.id] || localizedDetails[p.id] || {};
@@ -213,26 +213,43 @@ export function Home() {
       desc: getLocText(locale, rawDesc, rawDesc)
     };
   });
-  const recentArchitects = mappedArchitects.slice(0, 2);
+  const recentArchitects = mappedArchitects.slice(0, 4);
 
-  // Selected / Featured Concepts (from t.home.featuredConcepts or top 4 concepts = 2 rows of 2)
+  // Selected / Featured Concepts (4 items = 2 rows of 2 cards)
   const allConcepts = t.concepts?.items || [];
-  const featuredConceptsRaw = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
-    ? t.home.featuredConcepts.slice(0, 4)
-    : allConcepts.slice(0, 4);
+  let featuredConceptsRaw: any[] = (t.home?.featuredConcepts && Array.isArray(t.home.featuredConcepts) && t.home.featuredConcepts.length > 0)
+    ? [...t.home.featuredConcepts]
+    : [];
+
+  if (featuredConceptsRaw.length < 4) {
+    for (const c of allConcepts) {
+      if (!featuredConceptsRaw.some((fc: any) => fc.id === c.id)) {
+        featuredConceptsRaw.push({
+          id: c.id,
+          title: c.name || c.title || "",
+          image: c.img || c.image || "",
+          tag: c.category || "Concept",
+          year: c.year || "2026",
+          desc: c.desc || ""
+        });
+      }
+      if (featuredConceptsRaw.length >= 4) break;
+    }
+  }
+  featuredConceptsRaw = featuredConceptsRaw.slice(0, 4);
 
   const featuredConcepts = featuredConceptsRaw.map((fc: any) => {
     const matched = allConcepts.find((c: any) => c.id === fc.id);
     const detail = localizedProductDetails[fc.id] || {};
     const rawTitle = matched?.name || fc.title || fc.name || "";
-    const rawDesc = detail.desc || detail.challenge || fc.desc || "";
+    const rawDesc = detail.desc || detail.challenge || fc.desc || matched?.desc || "";
     const rawTag = detail.service || matched?.category || fc.tag || "Concept";
     return {
       id: fc.id,
       title: getLocText(locale, rawTitle, rawTitle),
       image: fc.image || fc.img || matched?.img || "",
       tags: getLocText(locale, rawTag, rawTag),
-      year: detail.year || "2026",
+      year: detail.year || fc.year || "2026",
       desc: getLocText(locale, rawDesc, rawDesc)
     };
   });

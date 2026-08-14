@@ -58,9 +58,11 @@ export function useProjectDetail(catalogType: "projects" | "products" | "concept
 
   const targetClean = id ? cleanSlug(id) : "";
 
-  // 1. Find the catalog list item (case-insensitive across active and fallback languages)
+  // 1. Find the catalog list items (with language fallbacks)
   const currentSection = (siteTranslations[locale] || siteTranslations.en || siteTranslations.ru || {})[catalogType];
-  const items = (currentSection?.items || []) as any[];
+  const items = ((currentSection?.items && currentSection.items.length > 0)
+    ? currentSection.items
+    : (siteTranslations.en?.[catalogType]?.items || siteTranslations.ru?.[catalogType]?.items || [])) as any[];
 
   const listItem = items.find((p: any) => cleanSlug(p.id) === targetClean || cleanSlug(p.name) === targetClean)
     || (siteTranslations.en?.[catalogType]?.items || []).find((p: any) => cleanSlug(p.id) === targetClean || cleanSlug(p.name) === targetClean)
@@ -139,6 +141,9 @@ export function useProjectDetail(catalogType: "projects" | "products" | "concept
     t,
     data,
     listItem,
+    items,
+    productDetails,
+    projectDetails,
     collageBlocks: rawCollageBlocks,
     filteredBlocks,
     activeTab,

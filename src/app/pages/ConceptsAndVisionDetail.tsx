@@ -9,9 +9,11 @@ import { useProjectDetail } from "../utils/useProjectDetail";
 
 export function ConceptsAndVisionDetail() {
   const {
+    id,
     locale,
     data,
     listItem,
+    items,
     collageBlocks,
     filteredBlocks,
     activeTab,
@@ -256,8 +258,10 @@ export function ConceptsAndVisionDetail() {
 
       {/* Previous / Next Navigation */}
       {(() => {
-        const currentIdx = items.findIndex((p: any) => p.id === id);
-        if (currentIdx === -1 || items.length <= 1) return null;
+        const clean = (s?: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const targetClean = clean(id);
+        const currentIdx = (items || []).findIndex((p: any) => clean(p.id) === targetClean || clean(p.name) === targetClean);
+        if (currentIdx === -1 || (items || []).length <= 1) return null;
 
         const prevIdx = (currentIdx - 1 + items.length) % items.length;
         const nextIdx = (currentIdx + 1) % items.length;
@@ -266,12 +270,12 @@ export function ConceptsAndVisionDetail() {
         const nextItem = items[nextIdx];
 
         const getCover = (pid: string) => {
-          const pItem = items.find((p: any) => p.id === pid);
+          const pItem = (items || []).find((p: any) => clean(p.id) === clean(pid));
           return pItem?.img || pItem?.collageBlocks?.[0]?.[0] || null;
         };
 
         const getDesc = (pid: string) => {
-          const pItem = items.find((p: any) => p.id === pid);
+          const pItem = (items || []).find((p: any) => clean(p.id) === clean(pid));
           return pItem?.desc || pItem?.challenge || '';
         };
 
