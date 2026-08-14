@@ -111,7 +111,7 @@ export function ArchiveOriginsSection({
 
   return (
     <section className={`flex flex-col w-full font-twk-everett  ${
-      noPadding ? "" : "py-16 md:py-24 border-t border-[#808080]/20 px-[45px] md:px-[65px] lg:px-[105px]"
+      noPadding ? "" : "py-16 md:py-24 border-t border-[#808080]/20 px-4 sm:px-6 md:px-[65px] lg:px-[105px]"
     }`}>
       {/* ───── Section Header (Exact Site Hierarchy) ───── */}
       {showTitle && (

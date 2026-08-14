@@ -3,7 +3,6 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
-import { ProjectsNav } from "../components/ProjectsNav";
 import { GridSwitcher } from "../components/GridSwitcher";
 
 function renderCommaSplitList(text: any) {
@@ -73,9 +72,6 @@ export function Products() {
           {getLocText(locale, "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов", "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts", "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр")}
         </p>
       </section>
-
-      {/* Premium Sorting Sub-navigation */}
-      <ProjectsNav />
 
       {/* Products Grid */}
       <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-[59px]`}>

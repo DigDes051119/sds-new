@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { 
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Check, Sun, Moon, 
@@ -355,7 +355,9 @@ export function AdminLayout() {
             </div>
           )}
           {isAllowed ? (
-            <Outlet />
+            <Suspense fallback={<div className="p-8 text-center text-xs opacity-50">Загрузка...</div>}>
+              <Outlet />
+            </Suspense>
           ) : (
             <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
               <Shield className="w-16 h-16 text-red-500/80 animate-pulse" />

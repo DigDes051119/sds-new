@@ -193,7 +193,6 @@
 /* Maintain crisp white text on primary blue buttons and emerald toasts */
 .admin-theme-light .bg-\[\#0000FF\],
 .admin-theme-light .bg-\[\#0000FF\] *,
-.admin-theme-light .bg-[#0000FF] *,
 .admin-theme-light .bg-emerald-500,
 .admin-theme-light .bg-emerald-500 * {
   color: #FFFFFF !important;

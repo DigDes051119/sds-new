@@ -59,7 +59,7 @@ export function WebUiUxDetail() {
       {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+90px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-45px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-[45px] md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+32px)] sm:w-[calc(100%+48px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-16px] sm:mx-[-24px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-4 sm:px-6 md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {coverImg && (

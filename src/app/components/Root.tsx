@@ -1,5 +1,5 @@
 import { NavLink, Link, useLocation, useOutlet } from "react-router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { LanguageContext, translations, autoTranslateText, type Language, languageOptions } from "../i18n";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
@@ -52,20 +52,29 @@ export function Root() {
     const el = navClusterRef.current;
     if (!el) return;
 
+    let rafId: number | null = null;
     const measure = () => {
-      const w = el.offsetWidth;
-      if (w > 0) {
-        document.documentElement.style.setProperty('--sds-nav-cluster-width', `${w}px`);
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (!el) return;
+        const w = el.offsetWidth;
+        if (w > 0) {
+          document.documentElement.style.setProperty('--sds-nav-cluster-width', `${w}px`);
+        }
+      });
     };
 
     measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(measure);
+      ro.observe(el);
+    }
     window.addEventListener("resize", measure);
 
     return () => {
-      ro.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      if (ro) ro.disconnect();
       window.removeEventListener("resize", measure);
     };
   }, []);
@@ -331,6 +340,7 @@ export function Root() {
     { name: t.nav.services, path: "/services" },
     { name: t.nav.projects, path: "/projects" },
     { name: t.nav.products, path: "/products" },
+    { name: (t.nav as any)?.architecture || (locale === "ru" ? "Архитектура" : locale === "kg" ? "Архитектура" : locale === "zh" ? "建筑" : locale === "ar" ? "الهندسة المعمارية" : locale === "de" ? "Architektur" : "Architecture"), path: "/architect-projects" },
     { name: t.nav.contacts, path: "/contacts" },
   ];
 
@@ -377,7 +387,7 @@ export function Root() {
       <div className={`min-h-screen text-black selection:bg-[#0000FF] selection:text-white relative flex flex-col font-twk-everett overflow-x-hidden ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
         
         {/* Top Navigation Row: Clocks left, Expanded Menu & Languages right */}
-        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-[45px] md:px-[65px] lg:px-[105px] z-50 transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0] pb-[20px] md:pb-[28px]' : 'bg-white pb-[30px] md:pb-[64px]'}`}>
+        <header className={`w-full flex lg:grid lg:grid-cols-12 gap-[28px] justify-between lg:justify-start items-center pt-[30px] md:pt-[40px] px-4 sm:px-6 md:px-[65px] lg:px-[105px] z-50 transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0] pb-[20px] md:pb-[28px]' : 'bg-white pb-[30px] md:pb-[64px]'}`}>
           {/* Logo */}
           <div className="lg:col-span-3 flex items-center">
             <NavLink to="/" className="flex items-center">
@@ -440,17 +450,6 @@ export function Root() {
                             }
                           >
                             <span>{locale === "ru" ? "Concepts and vision" : locale === "kg" ? "Концепциялар жана көрүнүш" : "Concepts and vision"}</span>
-                          </NavLink>
-
-                          <NavLink
-                            to="/architect-projects"
-                            className={({ isActive }) =>
-                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
-                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
-                              }`
-                            }
-                          >
-                            <span>{locale === "ru" ? "Architect projects" : locale === "kg" ? "Архитектуралык долбоорлор" : "Architect projects"}</span>
                           </NavLink>
 
                           <NavLink
@@ -554,14 +553,16 @@ export function Root() {
         {/* Main Content + Footer container */}
         <div className="flex flex-col flex-grow">
           {/* Main Content Area */}
-          <main key={location.pathname} className="w-full flex-grow px-[45px] md:px-[65px] lg:px-[105px] page-transition overflow-hidden">
-            {outlet}
+          <main key={location.pathname} className="w-full flex-grow px-4 sm:px-6 md:px-[65px] lg:px-[105px] page-transition overflow-hidden">
+            <Suspense fallback={null}>
+              {outlet}
+            </Suspense>
           </main>
 
 
 
           {/* Footer */}
-          <footer className={`w-full text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-[45px] md:px-[65px] lg:px-[105px] transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
+          <footer className={`w-full text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-4 sm:px-6 md:px-[65px] lg:px-[105px] transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">

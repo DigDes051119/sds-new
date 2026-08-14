@@ -145,6 +145,10 @@ export const cmsService = {
       }
 
       if (!data[lang].nav) data[lang].nav = {};
+      if (!data[lang].nav.architecture) {
+        data[lang].nav.architecture = defaultTranslations[lang as keyof typeof defaultTranslations]?.nav?.architecture || defaultTranslations.en.nav.architecture;
+        modified = true;
+      }
       if (!data[lang].nav.products) {
         data[lang].nav.products = defaultTranslations[lang as keyof typeof defaultTranslations]?.nav?.products || defaultTranslations.en.nav.products;
         modified = true;
@@ -406,7 +410,6 @@ export const cmsService = {
 
     if (modified) {
       safeLocalStorage.setItem("sds_project_details", JSON.stringify(data));
-      supabaseClient.upsertTable("sds_project_details", [{ id: 1, data }]).catch(() => {});
     }
 
     return data;

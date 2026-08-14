@@ -1,39 +1,46 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router";
 import { Root } from "./components/Root";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Services } from "./pages/Services";
 import { Projects } from "./pages/Projects";
-import { OldProjects } from "./pages/OldProjects";
-import { ProjectDetail } from "./pages/ProjectDetail";
-import { WebUiUx } from "./pages/WebUiUx";
-import { WebUiUxDetail } from "./pages/WebUiUxDetail";
-import { Products } from "./pages/Products";
-import { ProductDetail } from "./pages/ProductDetail";
 import { Contacts } from "./pages/Contacts";
-import { ConceptsAndVision } from "./pages/ConceptsAndVision";
-import { ConceptsAndVisionDetail } from "./pages/ConceptsAndVisionDetail";
-import { ArchitectProjects } from "./pages/ArchitectProjects";
-import { ArchitectProjectsDetail } from "./pages/ArchitectProjectsDetail";
-import { GameDev } from "./pages/GameDev";
-import { GameDevDetail } from "./pages/GameDevDetail";
-import { Video } from "./pages/Video";
 
-import { AdminLayout } from "./components/AdminLayout";
-import { AdminLogin } from "./pages/AdminLogin";
-import { AdminDashboard } from "./pages/AdminDashboard";
-import { AdminProjectsEditor } from "./pages/AdminProjectsEditor";
-import { AdminWebUiUxEditor } from "./pages/AdminWebUiUxEditor";
-import { AdminProductsEditor } from "./pages/AdminProductsEditor";
-import { AdminConceptsEditor, AdminArchitectsEditor, AdminGameDevEditor, AdminVideoEditor } from "./pages/AdminCatalogEditor";
-import { AdminFeaturedProjects } from "./pages/AdminFeaturedProjects";
-import { AdminAboutEditor } from "./pages/AdminAboutEditor";
-import { AdminContactsEditor } from "./pages/AdminContactsEditor";
-import { AdminUsersManager } from "./pages/AdminUsersManager";
-import { AdminServicesEditor } from "./pages/AdminServicesEditor";
-import { AdminBrandsEditor } from "./pages/AdminBrandsEditor";
-import { AdminArchiveEditor } from "./pages/AdminArchiveEditor";
-import { AdminLeads } from "./pages/AdminLeads";
+// Public pages lazy
+const OldProjects = lazy(() => import("./pages/OldProjects").then(m => ({ default: m.OldProjects })));
+const ProjectDetail = lazy(() => import("./pages/ProjectDetail").then(m => ({ default: m.ProjectDetail })));
+const WebUiUx = lazy(() => import("./pages/WebUiUx").then(m => ({ default: m.WebUiUx })));
+const WebUiUxDetail = lazy(() => import("./pages/WebUiUxDetail").then(m => ({ default: m.WebUiUxDetail })));
+const Products = lazy(() => import("./pages/Products").then(m => ({ default: m.Products })));
+const ProductDetail = lazy(() => import("./pages/ProductDetail").then(m => ({ default: m.ProductDetail })));
+const ConceptsAndVision = lazy(() => import("./pages/ConceptsAndVision").then(m => ({ default: m.ConceptsAndVision })));
+const ConceptsAndVisionDetail = lazy(() => import("./pages/ConceptsAndVisionDetail").then(m => ({ default: m.ConceptsAndVisionDetail })));
+const ArchitectProjects = lazy(() => import("./pages/ArchitectProjects").then(m => ({ default: m.ArchitectProjects })));
+const ArchitectProjectsDetail = lazy(() => import("./pages/ArchitectProjectsDetail").then(m => ({ default: m.ArchitectProjectsDetail })));
+const GameDev = lazy(() => import("./pages/GameDev").then(m => ({ default: m.GameDev })));
+const GameDevDetail = lazy(() => import("./pages/GameDevDetail").then(m => ({ default: m.GameDevDetail })));
+const Video = lazy(() => import("./pages/Video").then(m => ({ default: m.Video })));
+
+// Admin pages lazy (heavy admin bundle separated)
+const AdminLayout = lazy(() => import("./components/AdminLayout").then(m => ({ default: m.AdminLayout })));
+const AdminLogin = lazy(() => import("./pages/AdminLogin").then(m => ({ default: m.AdminLogin })));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
+const AdminProjectsEditor = lazy(() => import("./pages/AdminProjectsEditor").then(m => ({ default: m.AdminProjectsEditor })));
+const AdminWebUiUxEditor = lazy(() => import("./pages/AdminWebUiUxEditor").then(m => ({ default: m.AdminWebUiUxEditor })));
+const AdminProductsEditor = lazy(() => import("./pages/AdminProductsEditor").then(m => ({ default: m.AdminProductsEditor })));
+const AdminConceptsEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminConceptsEditor })));
+const AdminArchitectsEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminArchitectsEditor })));
+const AdminGameDevEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminGameDevEditor })));
+const AdminVideoEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminVideoEditor })));
+const AdminFeaturedProjects = lazy(() => import("./pages/AdminFeaturedProjects").then(m => ({ default: m.AdminFeaturedProjects })));
+const AdminAboutEditor = lazy(() => import("./pages/AdminAboutEditor").then(m => ({ default: m.AdminAboutEditor })));
+const AdminContactsEditor = lazy(() => import("./pages/AdminContactsEditor").then(m => ({ default: m.AdminContactsEditor })));
+const AdminUsersManager = lazy(() => import("./pages/AdminUsersManager").then(m => ({ default: m.AdminUsersManager })));
+const AdminServicesEditor = lazy(() => import("./pages/AdminServicesEditor").then(m => ({ default: m.AdminServicesEditor })));
+const AdminBrandsEditor = lazy(() => import("./pages/AdminBrandsEditor").then(m => ({ default: m.AdminBrandsEditor })));
+const AdminArchiveEditor = lazy(() => import("./pages/AdminArchiveEditor").then(m => ({ default: m.AdminArchiveEditor })));
+const AdminLeads = lazy(() => import("./pages/AdminLeads").then(m => ({ default: m.AdminLeads })));
 
 export const router = createBrowserRouter([
   {
@@ -96,4 +103,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-

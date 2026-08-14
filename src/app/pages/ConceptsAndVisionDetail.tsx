@@ -1,75 +1,32 @@
-import { useContext, useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { LanguageContext, getLocText } from "../i18n";
-import { cmsService } from "../cmsService";
+import { getLocText } from "../i18n";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 import { renderCommaSplitList } from "../utils/renderCommaSplitList";
 import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
+import { useProjectDetail } from "../utils/useProjectDetail";
 
 export function ConceptsAndVisionDetail() {
-  const { locale } = useContext(LanguageContext);
-  const { id } = useParams();
-
-  const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
-  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
-
-  useEffect(() => {
-    return cmsService.subscribe(() => {
-      setSiteTranslations(cmsService.getTranslations());
-      setProductDetails(cmsService.getProductDetails());
-    });
-  }, []);
-
-  const conceptsSection = (siteTranslations[locale] || siteTranslations.en || siteTranslations.ru || {}).concepts;
-  const items = conceptsSection?.items || [];
-  const listItem = items.find((p: any) => p.id === id);
-
-  const localeDetails = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
-  const specificData = id ? localeDetails[id] : null;
-
-  const data = {
-    name: specificData?.name || listItem?.name || "CONCEPT",
-    desc: specificData?.desc || listItem?.desc || listItem?.challenge || "",
-    client: specificData?.client || listItem?.client || "Internal R&D",
-    year: specificData?.year || listItem?.year || "2026",
-    service: specificData?.service || listItem?.service || "Concept & Vision",
-    studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
-    designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
-    location: specificData?.location || listItem?.location || "International",
-    projectType: specificData?.projectType || listItem?.projectType || "Visionary Concept",
-    class: specificData?.class || listItem?.class || "Concept",
-    challenge: specificData?.challenge || listItem?.challenge || "",
-    processImages: specificData?.processImages || listItem?.processImages || [],
-    collageBlocks: specificData?.collageBlocks || listItem?.collageBlocks || [],
-    results: specificData?.results || listItem?.results || [],
-    resultsDesc: specificData?.resultsDesc || listItem?.resultsDesc || ""
-  };
-
-  const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
-    ? data.collageBlocks
-    : (data.processImages || []).map((img: string) => [img]);
-
-  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
-
-  const hasVideos = collageBlocks.some((block: string[]) => 
-    block?.some((url: string) => url?.startsWith("video:"))
-  );
-
-  const filteredBlocks = activeTab === "video" 
-    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:"))).filter((block: string[]) => block.length > 0)
-    : collageBlocks.map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:"))).filter((block: string[]) => block.length > 0);
-
-  const heroImage = listItem?.img || collageBlocks[0]?.[0] || "";
+  const {
+    locale,
+    data,
+    listItem,
+    collageBlocks,
+    filteredBlocks,
+    activeTab,
+    setActiveTab,
+    hasVideos,
+    heroImage
+  } = useProjectDetail("concepts");
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
       
-      {/* 1 БЛОК: Hero Section */}
+      {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+90px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-45px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-[45px] md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+32px)] sm:w-[calc(100%+48px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-16px] sm:mx-[-24px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-4 sm:px-6 md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {heroImage && (

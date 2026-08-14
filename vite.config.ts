@@ -73,9 +73,42 @@ export default defineConfig({
   },
 
   server: {
-    port: 5174,
+    port: 5173,
     strictPort: false,
     host: true,
+  },
+  preview: {
+    port: 5173,
+    strictPort: false,
+    host: true,
+  },
+  build: {
+    target: ['es2020', 'safari14', 'chrome87', 'firefox78', 'edge88'],
+    cssTarget: ['safari14', 'chrome87', 'firefox78', 'edge88'],
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            if (id.includes('motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('maplibre-gl')) {
+              return 'vendor-maplibre';
+            }
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('@radix-ui') || id.includes('@emotion') || id.includes('@mui')) {
+              return 'vendor-ui';
+            }
+          }
+        },
+      },
+    },
   },
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],

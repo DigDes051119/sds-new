@@ -829,9 +829,7 @@ export const projectDetailsTranslations: Record<string, Record<string, ProjectDe
       challenge: "Шаар мейкиндигинде да, эс алуу зонасында да бирдей жакшы иштеген аутентификациялык, бирок заманбап образ түзүү.",
       processImages: [
         projectImg1,
-        "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=1600"
-      ],
-      processImages: [
+        "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&q=80&w=1600",
         "https://hniqpnuqqsmqpolxgbav.supabase.co/storage/v1/object/public/assets/projects/project-hero-1784022970658.webp"
       ],
       results: [

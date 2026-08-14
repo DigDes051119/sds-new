@@ -793,6 +793,24 @@ export function AdminWebUiUxEditor() {
           {/* Scale/Mockup container with page content */}
           <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
 
+            {/* Top Action Bar */}
+            <div className="flex items-center justify-between gap-4 pb-4 border-b border-black/[0.06] mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-mono text-[#0000FF] uppercase tracking-wider font-semibold">WEB & UI/UX</span>
+                <h3 className="text-[16px] font-bold text-black tracking-tight">Список проектов</h3>
+              </div>
+
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={startAdding}
+                  className="rounded-full px-5 py-2.5 bg-[#0000FF] hover:bg-[#0000FF]/90 text-white text-[13px] font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  Добавить проект
+                </button>
+              )}
+            </div>
 
             {/* Projects Grid Replica with drag & drop */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-10">

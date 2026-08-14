@@ -31,44 +31,6 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
       }
     },
     {
-      path: "/products",
-      label: {
-        en: "Products",
-        ru: "Продукты",
-        kg: "Продукциялар",
-        zh: "产品",
-        ar: "المنتجات",
-        de: "Produkte"
-      },
-      subtext: {
-        en: "For companies and from studio",
-        ru: "Для компаний и от студии",
-        kg: "Компаниялар үчүн жана студиядан",
-        zh: "为公司及来自工作室",
-        ar: "للشركات ومن الاستوديو",
-        de: "Für Unternehmen und vom Studio"
-      }
-    },
-    {
-      path: "/architect-projects",
-      label: {
-        en: "Architecture",
-        ru: "Архитектура",
-        kg: "Архитектура",
-        zh: "建筑",
-        ar: "الهندسة المعمارية",
-        de: "Architektur"
-      },
-      subtext: {
-        en: "Complex projects",
-        ru: "Сложные проекты",
-        kg: "Татаал долбоорлор",
-        zh: "复杂项目",
-        ar: "مشاريع معقدة",
-        de: "Komplexe Projekte"
-      }
-    },
-    {
       path: "/concepts-and-vision",
       label: {
         en: "Concepts",

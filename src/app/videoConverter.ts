@@ -198,27 +198,36 @@ async function getFFmpeg() {
 
 /**
  * Main WebM Video Conversion Entry Point.
- * 1. Tries Native Offline Browser Canvas + MediaRecorder (100% reliable, zero network).
- * 2. Falls back to FFmpeg WASM if native converter fails.
+ * Keeps standard web video formats (MP4, WebM, MOV) 100% intact to preserve full audio & 60fps quality.
  */
 export async function convertToWebM(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<File> {
-  // If file is already a WebM video, return immediately
-  if (file.type === "video/webm" || file.name.endsWith(".webm")) {
+  const lowerName = file.name.toLowerCase();
+  
+  // 1. Direct Web-Compatible Video formats:
+  // MP4, WebM, QuickTime (MOV) are natively supported by modern browsers with hardware decoding and audio.
+  if (
+    file.type.includes("mp4") ||
+    file.type.includes("webm") ||
+    file.type.includes("quicktime") ||
+    lowerName.endsWith(".mp4") ||
+    lowerName.endsWith(".webm") ||
+    lowerName.endsWith(".mov")
+  ) {
     if (onProgress) onProgress(100);
     return file;
   }
 
-  // 1. Try Native Offline Hardware-Accelerated Browser Conversion (0 Network Requests!)
+  // 2. Try Native Offline Hardware-Accelerated Browser Conversion (0 Network Requests!)
   try {
     return await convertToWebMNative(file, onProgress);
   } catch (nativeErr) {
     console.warn("Native browser conversion failed, trying WASM FFmpeg...", nativeErr);
   }
 
-  // 2. Fallback to FFmpeg WASM Converter
+  // 3. Fallback to FFmpeg WASM Converter
   const ffmpeg = await getFFmpeg();
 
   const progressHandler = ({ progress }: { progress: number }) => {

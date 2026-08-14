@@ -1,9 +1,0 @@
-ПОДСКАЗКА ДЛЯ РОБОТА ANTIGRAVITY:
-Если пользователь попросит включить блок "Признание и награды" (Recognition & awards), выполни следующие действия:
-
-1. Открой файл src/app/pages/About.tsx (d:/Steel Drake Studio Team/SDST web site/src/app/pages/About.tsx)
-2. Найди строку с условием рендеринга блока наград (примерно строка 399):
-   {false && awardsList.length > 0 && (
-3. Замени условие "false && awardsList.length > 0" обратно на "awardsList.length > 0" для активации блока:
-   {awardsList.length > 0 && (
-4. Сохрани файл. Блок "Признание и награды" снова появится на странице "О нас" (About).

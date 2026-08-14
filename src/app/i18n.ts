@@ -20,6 +20,7 @@ export const translations = {
       services: "Services",
       projects: "Projects",
       products: "Products",
+      architecture: "Architecture",
       webUiUx: "WEB / UI UX",
       contacts: "Contacts",
     },
@@ -548,6 +549,53 @@ export const translations = {
             "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-hero-1785057676457.webp"
           ],
           results: []
+        },
+        bishbench: {
+          name: "Bishbench",
+          desc: "Персональный концепт скамеек, сложной формы с изгибами.",
+          year: "2020",
+          class: "-",
+          client: "Personal project",
+          studio: "Steel Drake Studio Team",
+          service: "concept design",
+          designer: "Steel Drake",
+          location: "Bishkek, Kyrgyzstan",
+          challenge: "Идея создать скамейки на которые не захотят садиться ногами",
+          projectType: "concept",
+          collageTheme: "light",
+          collageBlocks: [
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785694162505.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785694174592.webp"],
+            [
+              "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785694180730.webp",
+              "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-1-1785694190573.webp"
+            ],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785694197054.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785694203969.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785694256990.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785694211072.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785694228688.webp"],
+            ["https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785694233548.webp"],
+            [
+              "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-0-1785694267784.webp",
+              "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-1-1785694271909.webp"
+            ]
+          ],
+          processImages: [
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-0-0-1785694162505.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-1-0-1785694174592.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-0-1785694180730.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-2-1-1785694190573.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-3-0-1785694197054.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-4-0-1785694203969.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785694256990.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-5-0-1785694211072.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-6-0-1785694228688.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-7-0-1785694233548.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-0-1785694267784.webp",
+            "https://cdn.steeldrakestudio.com/storage/v1/object/public/assets/products/product-block-9-1-1785694271909.webp"
+          ],
+          results: []
         }
       },
       defaultProduct: {
@@ -574,6 +622,7 @@ export const translations = {
       services: "Кызматтар",
       projects: "Долбоор",
       products: "Продукциялар",
+      architecture: "Архитектура",
       webUiUx: "WEB / UI UX",
       contacts: "Байланыш",
     },
@@ -984,6 +1033,7 @@ export const translations = {
       services: "Услуги",
       projects: "Проекты",
       products: "Продукты",
+      architecture: "Архитектура",
       webUiUx: "WEB / UI UX",
       contacts: "Контакты",
     },
@@ -1594,6 +1644,7 @@ export const translations = {
       services: "الخدمات",
       projects: "المشاريع",
       products: "المنتجات",
+      architecture: "الهندسة المعمارية",
       webUiUx: "الويب / UI UX",
       contacts: "اتصل بنا",
     },
@@ -1794,6 +1845,7 @@ export const translations = {
       services: "Services",
       projects: "Projekte",
       products: "Produkte",
+      architecture: "Architektur",
       webUiUx: "WEB / UI UX",
       contacts: "Kontakt",
     },

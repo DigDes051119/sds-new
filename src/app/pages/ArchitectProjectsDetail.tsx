@@ -1,74 +1,32 @@
-import { useContext, useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { LanguageContext, getLocText } from "../i18n";
-import { cmsService } from "../cmsService";
+import { getLocText } from "../i18n";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 import { motion } from "motion/react";
 import { renderCommaSplitList } from "../utils/renderCommaSplitList";
 import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
+import { useProjectDetail } from "../utils/useProjectDetail";
 
 export function ArchitectProjectsDetail() {
-  const { t, locale } = useContext(LanguageContext);
-  const { id } = useParams();
-
-  const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
-  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
-
-  useEffect(() => {
-    return cmsService.subscribe(() => {
-      setSiteTranslations(cmsService.getTranslations());
-      setProductDetails(cmsService.getProductDetails());
-    });
-  }, []);
-
-  const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
-  const architectsList = t.architects?.items || [];
-  const listItem = architectsList.find((p: any) => p.id === id);
-
-  const specificData = id ? localeData[id] : null;
-
-  const data = {
-    name: specificData?.name || listItem?.name || "ARCHITECTURE",
-    desc: (specificData?.desc && specificData.desc.trim()) || listItem?.desc || "",
-    client: specificData?.client || "Client",
-    year: specificData?.year || "2026",
-    service: specificData?.service || "Architecture",
-    studio: specificData?.studio || listItem?.studio || "Steel Drake Studio",
-    designer: specificData?.designer || listItem?.designer || "Steel Drake Team",
-    location: specificData?.location || listItem?.location || "International",
-    projectType: specificData?.projectType || listItem?.projectType || "Architectural Project",
-    class: specificData?.class || "Architecture",
-    challenge: (specificData?.challenge && specificData.challenge.trim()) || "",
-    processImages: (specificData?.processImages && specificData.processImages.length > 0) ? specificData.processImages : [],
-    collageBlocks: (specificData?.collageBlocks && specificData.collageBlocks.length > 0) ? specificData.collageBlocks : [],
-    results: (specificData?.results && specificData.results.length > 0) ? specificData.results : [],
-    resultsDesc: specificData?.resultsDesc || ""
-  };
-
-  const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
-    ? data.collageBlocks
-    : (data.processImages || []).map((img: string) => [img]);
-
-  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
-
-  const hasVideos = collageBlocks.some((block: string[]) => 
-    block?.some((url: string) => url?.startsWith("video:"))
-  );
-
-  const filteredBlocks = activeTab === "video" 
-    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:"))).filter((block: string[]) => block.length > 0)
-    : collageBlocks.map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:"))).filter((block: string[]) => block.length > 0);
-
-  const heroImage = listItem?.img || collageBlocks[0]?.[0] || "";
+  const {
+    locale,
+    data,
+    listItem,
+    collageBlocks,
+    filteredBlocks,
+    activeTab,
+    setActiveTab,
+    hasVideos,
+    heroImage
+  } = useProjectDetail("architects");
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
       
-      {/* 1 БЛОК: Hero */}
+      {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+90px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-45px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-[45px] md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+32px)] sm:w-[calc(100%+48px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-16px] sm:mx-[-24px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-4 sm:px-6 md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {heroImage && (
           <div className="absolute inset-0 w-full h-full">

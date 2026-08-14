@@ -593,6 +593,18 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     try {
       setTranslating(true);
 
+      const targetId = formId.trim() || editingId || (type === "video" ? `video-${Date.now()}` : "");
+      if (!targetId) {
+        alert("Пожалуйста, укажите ID проекта.");
+        return;
+      }
+
+      const isIdTaken = (translations.ru[type]?.items || []).some((p: any) => p.id === targetId && p.id !== editingId);
+      if (isIdTaken) {
+        alert(`Элемент с ID "${targetId}" уже существует. Пожалуйста, выберите другой ID.`);
+        return;
+      }
+
       // Auto translate RU fields to ALL 6 languages (en, kg, zh, ar, de)
       const targetLangs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
       const names: Record<string, string> = {};
@@ -608,19 +620,29 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       const results1: Record<string, string> = {};
       const results2: Record<string, string> = {};
 
+      const safeTranslate = async (text: string, lang: string) => {
+        if (!text || !text.trim()) return "";
+        if (lang === "ru") return text;
+        try {
+          return await translateText(text, lang, "ru");
+        } catch {
+          return text;
+        }
+      };
+
       for (const lang of targetLangs) {
-        names[lang] = lang === "ru" ? formNameRu : (await translateText(formNameRu, lang, "ru"));
-        catNames[lang] = lang === "ru" ? formCategoryRu : (await translateText(formCategoryRu, lang, "ru"));
-        descs[lang] = lang === "ru" ? formDescRu : (await translateText(formDescRu, lang, "ru"));
-        clients[lang] = lang === "ru" ? formClientRu : (await translateText(formClientRu, lang, "ru"));
-        services[lang] = lang === "ru" ? formServiceRu : (await translateText(formServiceRu, lang, "ru"));
-        studios[lang] = lang === "ru" ? formStudioRu : (await translateText(formStudioRu, lang, "ru"));
-        designers[lang] = lang === "ru" ? formDesignerRu : (await translateText(formDesignerRu, lang, "ru"));
-        locations[lang] = lang === "ru" ? formLocationRu : (await translateText(formLocationRu, lang, "ru"));
-        projectTypes[lang] = lang === "ru" ? formProjectTypeRu : (await translateText(formProjectTypeRu, lang, "ru"));
-        challenges[lang] = lang === "ru" ? formChallengeRu : (await translateText(formChallengeRu, lang, "ru"));
-        results1[lang] = lang === "ru" ? formResult1Ru : (await translateText(formResult1Ru, lang, "ru"));
-        results2[lang] = lang === "ru" ? formResult2Ru : (await translateText(formResult2Ru, lang, "ru"));
+        names[lang] = await safeTranslate(formNameRu, lang);
+        catNames[lang] = await safeTranslate(formCategoryRu, lang);
+        descs[lang] = await safeTranslate(formDescRu, lang);
+        clients[lang] = await safeTranslate(formClientRu, lang);
+        services[lang] = await safeTranslate(formServiceRu, lang);
+        studios[lang] = await safeTranslate(formStudioRu, lang);
+        designers[lang] = await safeTranslate(formDesignerRu, lang);
+        locations[lang] = await safeTranslate(formLocationRu, lang);
+        projectTypes[lang] = await safeTranslate(formProjectTypeRu, lang);
+        challenges[lang] = await safeTranslate(formChallengeRu, lang);
+        results1[lang] = await safeTranslate(formResult1Ru, lang);
+        results2[lang] = await safeTranslate(formResult2Ru, lang);
       }
 
       const newTranslations = JSON.parse(JSON.stringify(translations));
@@ -629,40 +651,40 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       const cleanBlocks = formCollageBlocks.map(block => block.filter(Boolean)).filter(block => block.length > 0);
       const flattenedImages = cleanBlocks.flat();
 
-      const isIdTaken = (translations.ru[type]?.items || []).some((p: any) => p.id === formId && p.id !== editingId);
-      if (isIdTaken) {
-        alert(`Элемент с ID "${formId}" уже существует. Пожалуйста, выберите другой ID.`);
-        return;
-      }
-
       targetLangs.forEach(lang => {
         if (!newTranslations[lang]) newTranslations[lang] = {};
         if (!newTranslations[lang][type]) {
           newTranslations[lang][type] = { title: lang === "ru" ? cfg.defaultTitleRu : lang === "en" ? cfg.defaultTitleEn : cfg.defaultTitleKg, items: [] };
         }
 
-        const listEntry = { id: formId, name: names[lang], category: catNames[lang], categoryKey: formCategoryKey, img: formImg };
+        const listEntry = { 
+          id: targetId, 
+          name: names[lang] || "", 
+          category: catNames[lang] || "", 
+          categoryKey: formCategoryKey, 
+          img: formImg || formVideo || "" 
+        };
         const detailEntry = {
-          name: names[lang],
-          desc: descs[lang],
-          client: clients[lang],
-          year: formYear,
-          service: services[lang],
-          studio: studios[lang],
-          designer: designers[lang],
-          location: locations[lang],
-          projectType: projectTypes[lang],
-          class: formProductClass,
-          challenge: challenges[lang],
+          name: names[lang] || "",
+          desc: descs[lang] || "",
+          client: clients[lang] || "",
+          year: formYear || "",
+          service: services[lang] || "",
+          studio: studios[lang] || "",
+          designer: designers[lang] || "",
+          location: locations[lang] || "",
+          projectType: projectTypes[lang] || "",
+          class: formProductClass || "-",
+          challenge: challenges[lang] || "",
           processImages: flattenedImages,
           collageBlocks: cleanBlocks,
           collageTheme: formCollageTheme,
-          videoUrl: formVideo,
+          videoUrl: formVideo || "",
           results: [results1[lang], results2[lang]].filter(Boolean)
         };
 
         const items = newTranslations[lang][type].items;
-        const index = items.findIndex((p: any) => p.id === (editingId || formId));
+        const index = items.findIndex((p: any) => p.id === (editingId || targetId));
         if (index !== -1) {
           items[index] = listEntry;
         } else {
@@ -670,10 +692,10 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
         }
 
         if (!newDetails[lang]) newDetails[lang] = {};
-        if (editingId && editingId !== formId) {
+        if (editingId && editingId !== targetId) {
           delete newDetails[lang][editingId];
         }
-        newDetails[lang][formId] = detailEntry;
+        newDetails[lang][targetId] = detailEntry;
       });
 
       targetLangs.forEach((lang) => {
@@ -688,7 +710,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       await logAdminAction(
         cfg.logSection,
         editingId ? "Редактирование" : "Создание",
-        editingId ? `Изменен: ${formId} (${formNameRu})` : `Создан: ${formId} (${formNameRu})`
+        editingId ? `Изменен: ${targetId} (${formNameRu || "Без названия"})` : `Создан: ${targetId} (${formNameRu || "Без названия"})`
       );
 
       setTranslations(newTranslations);
@@ -867,66 +889,193 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
           )}
 
           <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-10 pt-4 border-t border-black/[0.04]">
-              {itemsList.map((item: any) => {
-                const realIdx = itemsList.findIndex((p: any) => p.id === item.id);
-                return (
-                  <div
-                    key={item.id}
-                    draggable={!isReadOnly}
-                    onDragStart={(e) => handleProductDragStart(e, realIdx, item)}
-                    onDragEnd={handleProductDragEnd}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => handleProductDrop(e, realIdx)}
-                    className="flex flex-col group/card p-3 rounded-2xl hover:bg-black/[0.02] border border-transparent hover:border-black/[0.04] transition duration-200 relative cursor-grab active:cursor-grabbing"
-                    title="Зажмите и перетащите для сортировки или переноса в другой раздел"
-                  >
-                    <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#eeeee9] mb-3 border border-black/5 relative">
-                      <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+            {/* Top Action Bar */}
+            <div className="flex items-center justify-between gap-4 pb-4 border-b border-black/[0.06] mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-mono text-[#0000FF] uppercase tracking-wider font-semibold">{cfg.titleRu}</span>
+                <h3 className="text-[16px] font-bold text-black tracking-tight">Список работ</h3>
+              </div>
 
-                      {!isReadOnly && (
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center gap-2 opacity-0 group-hover/card:opacity-100 transition duration-200">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startEditing(item.id);
-                            }}
-                            className="p-2 bg-white hover:bg-[#eeeee9] text-black rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            Изменить
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDuplicate(item.id);
-                            }}
-                            className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
-                            title="Дублировать проект"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            Копия
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(item.id);
-                            }}
-                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition cursor-pointer"
-                            title="Удалить проект"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <h3 className="text-[18px] font-bold tracking-tight text-black mt-1 leading-tight">{item.name}</h3>
-                    <p className="text-[13px] text-black/60 line-clamp-2 mt-1 leading-relaxed font-light">{item.desc}</p>
-                  </div>
-                );
-              })}
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={startAdding}
+                  className="rounded-full px-5 py-2.5 bg-[#0000FF] hover:bg-[#0000FF]/90 text-white text-[13px] font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  Добавить {cfg.itemTypeLabelRu}
+                </button>
+              )}
             </div>
+
+            {type === "video" ? (
+              /* Dense Masonry Puzzle Grid (Matching public Video page) */
+              <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2.5 w-full pt-2">
+                {itemsList.map((item: any) => {
+                  const realIdx = itemsList.findIndex((p: any) => p.id === item.id);
+                  const detail = productDetails.ru[item.id] || productDetails.en[item.id] || {};
+                  const videoUrl = detail.videoUrl || item.videoUrl || item.img;
+                  const isVideo = videoUrl?.startsWith("video:") || videoUrl?.endsWith(".webm") || videoUrl?.endsWith(".mp4");
+                  const realVideoSrc = videoUrl?.startsWith("video:") ? videoUrl.slice(6) : videoUrl;
+
+                  return (
+                    <div
+                      key={item.id}
+                      draggable={!isReadOnly}
+                      onDragStart={(e) => handleProductDragStart(e, realIdx, item)}
+                      onDragEnd={handleProductDragEnd}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleProductDrop(e, realIdx)}
+                      className="break-inside-avoid mb-2.5 w-full group relative cursor-grab active:cursor-grabbing overflow-hidden rounded-[8px] bg-[#111] border border-black/10 transition-transform duration-300 select-none shadow-sm"
+                      title="Зажмите и перетащите для изменения порядка"
+                    >
+                      {isVideo ? (
+                        <video
+                          src={realVideoSrc}
+                          className="w-full h-auto object-cover block"
+                          muted
+                          playsInline
+                          autoPlay
+                          loop
+                        />
+                      ) : (
+                        <img
+                          src={item.img}
+                          alt={item.name}
+                          className="w-full h-auto object-cover block"
+                          loading="lazy"
+                        />
+                      )}
+
+                      {/* Overlay with info & action buttons on hover */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3.5 z-10">
+                        {/* Top Action Buttons */}
+                        <div className="flex items-center justify-end gap-1.5 self-end">
+                          {!isReadOnly && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startEditing(item.id);
+                                }}
+                                className="p-1.5 bg-white hover:bg-[#eeeee9] text-black rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
+                                title="Редактировать видео"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDuplicate(item.id);
+                                }}
+                                className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
+                                title="Дублировать проект"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(item.id);
+                                }}
+                                className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition cursor-pointer"
+                                title="Удалить проект"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Bottom Tag & Title (if filled) */}
+                        {(item.name || detail?.year || item.category) ? (
+                          <div className="flex flex-col text-left">
+                            {(detail?.year || item.category) && (
+                              <span className="font-mono text-[10px] text-white/70 uppercase tracking-[0.04em] mb-0.5">
+                                {[detail?.year, item.category].filter(Boolean).join(" — ")}
+                              </span>
+                            )}
+                            {item.name && (
+                              <h4 className="text-[14px] font-bold text-white uppercase leading-tight m-0 truncate">
+                                {item.name}
+                              </h4>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="font-mono text-[10px] text-white/40 italic">
+                            (Без текста)
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-x-8 gap-y-10">
+                {itemsList.map((item: any) => {
+                  const realIdx = itemsList.findIndex((p: any) => p.id === item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      draggable={!isReadOnly}
+                      onDragStart={(e) => handleProductDragStart(e, realIdx, item)}
+                      onDragEnd={handleProductDragEnd}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleProductDrop(e, realIdx)}
+                      className="flex flex-col group/card p-3 rounded-2xl hover:bg-black/[0.02] border border-transparent hover:border-black/[0.04] transition duration-200 relative cursor-grab active:cursor-grabbing"
+                      title="Зажмите и перетащите для сортировки или переноса в другой раздел"
+                    >
+                      <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#eeeee9] mb-3 border border-black/5 relative">
+                        <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+
+                        {!isReadOnly && (
+                          <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center gap-2 opacity-0 group-hover/card:opacity-100 transition duration-200">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(item.id);
+                              }}
+                              className="p-2 bg-white hover:bg-[#eeeee9] text-black rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              Изменить
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDuplicate(item.id);
+                              }}
+                              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition cursor-pointer flex items-center gap-1 text-[9px] font-bold uppercase"
+                              title="Дублировать проект"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              Копия
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(item.id);
+                              }}
+                              className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition cursor-pointer"
+                              title="Удалить проект"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <h3 className="text-[18px] font-bold tracking-tight text-black mt-1 leading-tight">{item.name}</h3>
+                      <p className="text-[13px] text-black/60 line-clamp-2 mt-1 leading-relaxed font-light">{item.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -958,29 +1107,33 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
             {/* Card 1: Основные параметры */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                1. Основные параметры
+                1. Основные параметры {type === "video" && <span className="text-white/40 normal-case font-normal">(необязательно)</span>}
               </h4>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Название (RU)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    Название (RU) {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                  </label>
                   <input
                     type="text"
                     value={formNameRu}
                     onChange={(e) => handleNameRuChange(e.target.value)}
-                    placeholder="Chyraq"
+                    placeholder={type === "video" ? "Название видео (необязательно)" : "Chyraq"}
                     className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required
+                    required={type !== "video"}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Категория (RU)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    Категория (RU) {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                  </label>
                   <input
                     type="text"
                     value={formCategoryRu}
                     onChange={(e) => setFormCategoryRu(e.target.value)}
-                    placeholder="Индустриальный дизайн"
+                    placeholder={type === "video" ? "Видео / Motion" : "Индустриальный дизайн"}
                     className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required
+                    required={type !== "video"}
                   />
                 </div>
               </div>
@@ -1001,13 +1154,16 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Год</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    Год {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                  </label>
                   <input
                     type="text"
                     value={formYear}
                     onChange={(e) => setFormYear(e.target.value)}
+                    placeholder={type === "video" ? "2026 (необязательно)" : "2026"}
                     className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required
+                    required={type !== "video"}
                   />
                 </div>
               </div>
@@ -1020,15 +1176,17 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               </h4>
               <div className={`grid gap-6 ${type === "video" ? "grid-cols-1" : "md:grid-cols-2"}`}>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">ID (URL латиница)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    ID (URL латиница) {type === "video" && <span className="text-white/30 lowercase">(сгенерируется автоматически, если пусто)</span>}
+                  </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={formId}
                       onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-                      placeholder="chyraq"
+                      placeholder={type === "video" ? "video-id (необязательно)" : "chyraq"}
                       className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                      required
+                      required={type !== "video"}
                     />
                     <button
                       type="button"
@@ -1175,15 +1333,16 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                               const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
                               setIsConverting(false);
                               setConversionProgress(null);
-                              const fileExt = file.name.split('.').pop();
-                              const path = `video/${formId}/main-video-${Date.now()}.webm`;
+                              const fileExt = convertedFile.name.split('.').pop() || file.name.split('.').pop() || "mp4";
+                              const targetFolder = formId.trim() || `video-${Date.now()}`;
+                              const path = `video/${targetFolder}/main-video-${Date.now()}.${fileExt}`;
                               const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
                               setFormVideo(publicUrl);
 
                               // Auto-extract video frame and set as cover image
                               try {
                                 const coverFile = await extractVideoFrame(file);
-                                const coverPath = `video/${formId}/main-cover-${Date.now()}.jpg`;
+                                const coverPath = `video/${targetFolder}/main-cover-${Date.now()}.jpg`;
                                 const coverUrl = await supabaseClient.uploadFile("assets", coverPath, coverFile);
                                 setFormImg(coverUrl);
                               } catch (frameErr) {
@@ -1327,24 +1486,28 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Задача и Вызов</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    Задача и Вызов {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                  </label>
                   <textarea
                     value={formChallengeRu}
                     onChange={(e) => setFormChallengeRu(e.target.value)}
-                    placeholder="Разработать премиальный настольный светильник..."
+                    placeholder={type === "video" ? "Краткое описание задачи или вызова (необязательно)..." : "Разработать премиальный настольный светильник..."}
                     className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-28 text-base"
-                    required
+                    required={type !== "video"}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Описание реализации</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                    Описание реализации {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                  </label>
                   <textarea
                     value={formDescRu}
                     onChange={(e) => setFormDescRu(e.target.value)}
-                    placeholder="Инновационный минималистичный настольный светильник..."
+                    placeholder={type === "video" ? "Детали проекта (необязательно)..." : "Инновационный минималистичный настольный светильник..."}
                     className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-32 text-base"
-                    required
+                    required={type !== "video"}
                   />
                 </div>
               </div>

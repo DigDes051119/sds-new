@@ -1,96 +1,31 @@
-import { useContext, useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { LanguageContext, getLocText } from "../i18n";
-import { cmsService } from "../cmsService";
+import { getLocText } from "../i18n";
 import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
-
-function renderCommaSplitList(text: any) {
-  if (typeof text !== "string" || !text || text === "-") return text || "-";
-  if (!text.includes(",")) return text;
-  const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
-  return (
-    <span className="flex flex-col gap-0.5 text-right">
-      {parts.map((part, idx) => (
-        <span key={idx} className="block whitespace-nowrap">
-          {part}{idx < parts.length - 1 ? "," : ""}
-        </span>
-      ))}
-    </span>
-  );
-}
+import { renderCommaSplitList } from "../utils/renderCommaSplitList";
+import { useProjectDetail } from "../utils/useProjectDetail";
 
 export function ProductDetail() {
-  const { t, locale } = useContext(LanguageContext);
-  const { id } = useParams();
-
-  const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
-
-  useEffect(() => {
-    return cmsService.subscribe(() => {
-      setProductDetails(cmsService.getProductDetails());
-    });
-  }, []);
-
-  const findInObj = (obj: any, targetId: string) => {
-    if (!obj || !targetId) return null;
-    if (obj[targetId]) return obj[targetId];
-    const lower = targetId.toLowerCase();
-    for (const k of Object.keys(obj)) {
-      if (k.toLowerCase() === lower) return obj[k];
-    }
-    return null;
-  };
-
-  const localeData = productDetails[locale] || productDetails["en"] || productDetails["ru"] || {};
-  const productsList = t.products?.items || [];
-  const productListItem = productsList.find((p: any) => p.id === id || p.id?.toLowerCase() === id?.toLowerCase());
-
-  const defaultData = t.productDetail?.defaultProduct || {};
-  const specificData = id ? findInObj(localeData, id) : null;
-
-  const data = {
-    name: specificData?.name || productListItem?.name || defaultData.name || "PRODUCT",
-    desc: (specificData?.desc && specificData.desc.trim()) || productListItem?.desc || defaultData.desc || "",
-    client: specificData?.client || defaultData.client || "Client",
-    year: specificData?.year || defaultData.year || "2026",
-    service: specificData?.service || defaultData.service || "Product Design",
-    studio: specificData?.studio || defaultData.studio || "Steel Drake Studio",
-    designer: specificData?.designer || defaultData.designer || "Steel Drake Team",
-    location: specificData?.location || defaultData.location || "International",
-    projectType: specificData?.projectType || defaultData.projectType || "Commercial Product",
-    class: specificData?.class || defaultData.class || "A-Class",
-    challenge: (specificData?.challenge && specificData.challenge.trim()) || defaultData.challenge || "",
-    processImages: (specificData?.processImages && specificData.processImages.length > 0) ? specificData.processImages : (defaultData.processImages || []),
-    collageBlocks: (specificData?.collageBlocks && specificData.collageBlocks.length > 0) ? specificData.collageBlocks : (defaultData.collageBlocks || []),
-    results: (specificData?.results && specificData.results.length > 0) ? specificData.results : (defaultData.results || []),
-    resultsDesc: specificData?.resultsDesc || defaultData.resultsDesc || ""
-  };
-
-  const collageBlocks: string[][] = data.collageBlocks && data.collageBlocks.length > 0
-    ? data.collageBlocks
-    : (data.processImages || []).map((img: string) => [img]);
-
-  const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
-
-  const hasVideos = collageBlocks.some((block: string[]) => 
-    block?.some((url: string) => url?.startsWith("video:"))
-  );
-
-  const filteredBlocks = activeTab === "video" 
-    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:"))).filter((block: string[]) => block.length > 0)
-    : collageBlocks.map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:"))).filter((block: string[]) => block.length > 0);
-
-  const heroImage = productListItem?.img || collageBlocks[0]?.[0] || "";
+  const {
+    locale,
+    data,
+    listItem: productListItem,
+    collageBlocks,
+    filteredBlocks,
+    activeTab,
+    setActiveTab,
+    hasVideos,
+    heroImage
+  } = useProjectDetail("products");
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
       
-      {/* 1 БЛОК: Hero Section */}
+      {/* 1 БЛОК: Hero Section with Full-Width Cover and Overlay Metadata */}
       <section 
         data-theme="dark" 
-        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+90px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-45px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-[45px] md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
+        className="relative h-[80vh] md:h-[94vh] min-h-[500px] md:min-h-[600px] w-[calc(100%+32px)] sm:w-[calc(100%+48px)] md:w-[calc(100%+130px)] lg:w-[calc(100%+210px)] mx-[-16px] sm:mx-[-24px] md:mx-[-65px] lg:mx-[-105px] mt-[-24px] bg-black flex flex-col justify-end px-4 sm:px-6 md:px-[65px] lg:px-[105px] pb-8 md:pb-[60px] overflow-hidden"
       >
         {/* Cover Image */}
         {heroImage && (

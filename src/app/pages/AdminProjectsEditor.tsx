@@ -755,24 +755,37 @@ export function AdminProjectsEditor() {
           {/* Scale/Mockup container with page content */}
           <div className="rounded-2xl overflow-hidden bg-[#fafaf6] text-black border border-black/5 shadow-2xl font-['Inter',sans-serif] text-xs p-8 pb-16 ">
 
-            {/* Category Pills replica */}
-            <div className="flex overflow-x-auto scrollbar-none flex-nowrap gap-1.5 pb-4 border-b border-black/[0.04] mb-6">
-              {adminCategories.map((cat) => {
-                const isActive = selectedCategory === cat.key;
-                return (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.key)}
-                    className={`rounded-full px-4.5 py-2 text-[13px] font-semibold transition duration-200 cursor-pointer ${isActive
-                      ? "bg-[#0000FF] text-white"
-                      : "text-black/60 bg-black/[0.04] hover:bg-black/[0.08]"
-                      }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+            {/* Category Pills & Top Action Button */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pb-4 border-b border-black/[0.06] mb-6">
+              <div className="flex overflow-x-auto scrollbar-none flex-nowrap gap-1.5 py-1">
+                {adminCategories.map((cat) => {
+                  const isActive = selectedCategory === cat.key;
+                  return (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.key)}
+                      className={`rounded-full px-4.5 py-2 text-[13px] font-semibold transition duration-200 cursor-pointer ${isActive
+                        ? "bg-[#0000FF] text-white"
+                        : "text-black/60 bg-black/[0.04] hover:bg-black/[0.08]"
+                        }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={startAdding}
+                  className="rounded-full px-5 py-2.5 bg-[#0000FF] hover:bg-[#0000FF]/90 text-white text-[13px] font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-md hover:shadow-lg active:scale-95"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  Добавить проект
+                </button>
+              )}
             </div>
 
             {/* Projects Grid Replica with drag & drop */}

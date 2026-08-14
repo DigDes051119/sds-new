@@ -3,7 +3,6 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
-import { ProjectsNav } from "../components/ProjectsNav";
 import { GridSwitcher } from "../components/GridSwitcher";
 
 function renderCommaSplitList(text: any) {
@@ -73,9 +72,6 @@ export function ArchitectProjects() {
           {getLocText(locale, "Инновационное проектирование зданий, общественных пространств и градостроительных решений", "Innovative architectural design of buildings, public spaces and urban solutions", "Имараттардын, коомдук мейкиндиктердин жана шаар куруу чечимдеринин инновациялык архитектуралык долбоорлору")}
         </p>
       </section>
-
-      {/* Premium Sorting Sub-navigation */}
-      <ProjectsNav />
 
       {/* Architects Grid */}
       <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-[59px]`}>

@@ -77,7 +77,7 @@ export function ImageWithFallback(props: ImageProps) {
         className={`${hasHAuto ? 'w-full h-auto block' : 'w-full h-full'} ${objectFitClass} scale-[1.01] transition-opacity duration-500 ease-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         decoding="async"
         loading={finalLoading}
-        {...(fetchPriority ? { fetchPriority } : {})}
+        {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
         {...rest} 
         onLoad={() => setIsLoaded(true)}
         onError={handleError} 
