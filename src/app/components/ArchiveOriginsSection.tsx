@@ -115,16 +115,16 @@ export function ArchiveOriginsSection({
     }`}>
       {/* ───── Section Header (Exact Site Hierarchy) ───── */}
       {showTitle && (
-        <div className="pb-4 mb-[59px] flex justify-between items-baseline  border-b border-[#808080]/30">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2 border-b border-[#808080]/30">
           <div className="flex flex-col">
-            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">
+            <span className="font-mono text-[14px] sm:text-[18px] text-[#808080] uppercase tracking-[0.04em]">
               2005 — 2020
             </span>
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {sectionHeading}
             </h2>
           </div>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">
             [08/ORIGINS]
           </span>
         </div>

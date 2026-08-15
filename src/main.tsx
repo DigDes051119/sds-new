@@ -29,6 +29,15 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
+// Purge any obsolete service workers to prevent Safari from serving old builds
+if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  }).catch(() => {});
+}
+
 createRoot(document.getElementById("root")!).render(<App />);
 
   

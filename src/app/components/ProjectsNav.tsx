@@ -138,17 +138,17 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
       }`;
 
     elements.push(
-      <div key={item.path} className="flex items-start">
+      <div key={item.path} className="flex items-start shrink-0">
         {onTabChange ? (
           <button
             type="button"
             onClick={() => onTabChange(item.path)}
             className={activeClass(activeTab === item.path)}
           >
-            <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+            <span className="text-[17px] sm:text-[20px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
               {l}
             </span>
-            <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[90px] md:max-w-[115px] whitespace-normal line-clamp-2 mt-1.5">
+            <span className="text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[120px] sm:max-w-[140px] whitespace-normal line-clamp-2 mt-1.5">
               {s}
             </span>
           </button>
@@ -158,10 +158,10 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
             end={item.path === "/projects"}
             className={({ isActive }) => activeClass(isActive)}
           >
-            <span className="text-[18px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
+            <span className="text-[17px] sm:text-[20px] md:text-[25px] font-medium leading-none tracking-[-0.03em] whitespace-nowrap">
               {l}
             </span>
-            <span className="text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[90px] md:max-w-[115px] whitespace-normal line-clamp-2 mt-1.5">
+            <span className="text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-[1.3] text-[#808080] max-w-[120px] sm:max-w-[140px] whitespace-normal line-clamp-2 mt-1.5">
               {s}
             </span>
           </NavLink>
@@ -171,7 +171,7 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
 
     if (idx < navItems.length - 1) {
       elements.push(
-        <span key={`slash-${idx}`} className="text-black/40 text-[18px] md:text-[25px] font-light select-none pt-0.5 self-start">
+        <span key={`slash-${idx}`} className="text-black/30 text-[16px] sm:text-[18px] md:text-[25px] font-light select-none pt-0.5 px-2 sm:px-3 md:px-4 self-start shrink-0">
           /
         </span>
       );
@@ -179,8 +179,51 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
   });
 
   return (
-    <div className="w-full mb-12 md:mb-16 overflow-x-auto no-scrollbar">
-      <div className="flex items-start justify-between flex-nowrap min-w-max md:min-w-0 md:w-full">
+    <div className="w-full mb-8 sm:mb-12 md:mb-16 font-twk-everett">
+      {/* ── Mobile View (< md): Flex-wrap All Categories (100% Visible & Accessible) ── */}
+      <div className="md:hidden w-full">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3.5 border-b border-[#808080]/20 pb-4 pt-1 w-full">
+          {navItems.map((item) => {
+            const l = item.label[locale as keyof typeof item.label] || item.label["en"];
+            if (onTabChange) {
+              const isActive = activeTab === item.path;
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => onTabChange(item.path)}
+                  className={`text-[14px] xs:text-[15px] uppercase tracking-[-0.01em] whitespace-nowrap transition-colors relative pb-0.5 cursor-pointer ${
+                    isActive
+                      ? "text-[#0000FF] font-medium border-b-2 border-[#0000FF]"
+                      : "text-[#808080] hover:text-black font-normal"
+                  }`}
+                >
+                  {l}
+                </button>
+              );
+            }
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === "/projects"}
+                className={({ isActive }) =>
+                  `text-[14px] xs:text-[15px] uppercase tracking-[-0.01em] whitespace-nowrap transition-colors relative pb-0.5 ${
+                    isActive
+                      ? "text-[#0000FF] font-medium border-b-2 border-[#0000FF]"
+                      : "text-[#808080] hover:text-black font-normal"
+                  }`
+                }
+              >
+                {l}
+              </NavLink>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Desktop View (>= md): Full Editorial Column Layout with Slashes and Subtexts ── */}
+      <div className="hidden md:flex items-start justify-between w-full py-1">
         {elements}
       </div>
     </div>

@@ -3,41 +3,44 @@
  * disabled cookies/storage in Safari private mode, or unexpected browser security restrictions.
  */
 
+const memoryStore: Record<string, string> = {};
+
 export const safeLocalStorage = {
   getItem(key: string): string | null {
     try {
-      return localStorage.getItem(key);
+      const val = localStorage.getItem(key);
+      if (val !== null) return val;
+      return memoryStore[key] ?? null;
     } catch (e) {
-      console.warn(`[safeStorage] localStorage.getItem failed for "${key}":`, e);
-      return null;
+      return memoryStore[key] ?? null;
     }
   },
 
   setItem(key: string, value: string): boolean {
+    memoryStore[key] = value;
     try {
       localStorage.setItem(key, value);
       return true;
     } catch (e) {
-      console.warn(`[safeStorage] localStorage.setItem failed for "${key}":`, e);
-      // Attempt quota recovery: clear potential heavy caches if key is not the one we are setting
+      console.warn(`[safeStorage] localStorage.setItem failed for "${key}", using memory store fallback:`, e);
+      // Clean only non-critical temporary session/analytics items if quota is exceeded
       try {
-        if (key !== "sds_project_details") localStorage.removeItem("sds_project_details");
-        if (key !== "sds_translations") localStorage.removeItem("sds_translations");
-        if (key !== "sds_archive_items") localStorage.removeItem("sds_archive_items");
+        localStorage.removeItem("last_chunk_reload");
+        localStorage.removeItem("sds_session_id");
         localStorage.setItem(key, value);
         return true;
       } catch {
-        // If recovery still fails, fail gracefully without throwing QuotaExceededError
-        return false;
+        return true; // Retained in memoryStore
       }
     }
   },
 
   removeItem(key: string): void {
+    delete memoryStore[key];
     try {
       localStorage.removeItem(key);
     } catch (e) {
-      console.warn(`[safeStorage] localStorage.removeItem failed for "${key}":`, e);
+      // ignore
     }
   }
 };

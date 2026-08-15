@@ -21,17 +21,17 @@ export function Services() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title block */}
-      <section className="border-b border-[#808080] pb-4 mb-[100px] grid grid-cols-1 md:grid-cols-12 gap-[28px] items-start w-auto">
+      <section className="border-b border-[#808080] pb-4 mb-[40px] md:mb-[100px] grid grid-cols-1 md:grid-cols-12 gap-[20px] md:gap-[28px] items-start w-auto">
         <div className="md:col-span-5">
-          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+          <h1 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {getLocText(locale, "Услуги", "Services", "Кызматтар", "服务项目", "الخدمات", "Dienstleistungen")}
           </h1>
-          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
+          <span className="font-mono text-[13px] sm:text-[16px] tracking-[0.04em] text-[#808080] uppercase mt-2 block">
             [SERVICES/CAPABILITIES]
           </span>
         </div>
-        <div className="md:col-span-7 md:pl-[59px] flex justify-end">
-          <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[500px]">
+        <div className="md:col-span-7 pl-0 md:pl-[59px] flex justify-start md:justify-end">
+          <p className="text-[15px] sm:text-[17px] leading-[1.44] text-black m-0 max-w-[500px]">
             {getLocText(
               locale,
               "Наши специализированные инженерные и дизайнерские решения.",
@@ -46,7 +46,7 @@ export function Services() {
       </section>
 
       {/* Services List */}
-      <section className="flex flex-col gap-[80px]">
+      <section className="flex flex-col gap-[40px] md:gap-[80px]">
         {services.map((service: any, index: number) => (
           <div 
             key={service.id || index} 

@@ -94,20 +94,20 @@ export function ArchitectProjectsDetail() {
       </section>
 
       {/* Challenge */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start pt-[10px]">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-[20px] md:gap-[28px] items-start pt-[10px]">
         <div className="lg:col-span-5 flex flex-col">
-          <h2 className="text-[40px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-none">
+          <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold tracking-[-0.04em] text-black m-0 leading-tight">
             {getLocText(locale, "Идея и концепт", "Concept & Idea", "Идея жана концепт")}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase mt-2">[01/CONCEPT]</span>
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase mt-2">[01/CONCEPT]</span>
         </div>
 
-        <div className="lg:col-span-7 flex flex-col gap-6">
-          <p className="text-[20px] md:text-[28px] font-light leading-[1.35] tracking-[-0.03em] text-black m-0">
+        <div className="lg:col-span-7 flex flex-col gap-5 sm:gap-6">
+          <p className="text-[17px] sm:text-[22px] md:text-[28px] font-light leading-[1.35] tracking-[-0.03em] text-black m-0">
             {data.challenge || data.desc}
           </p>
           {data.challenge && (
-            <p className="text-[17px] leading-[1.5] text-black m-0 font-normal subpixel-antialiased">
+            <p className="text-[15px] sm:text-[17px] leading-[1.5] text-black m-0 font-normal subpixel-antialiased">
               {data.desc}
             </p>
           )}

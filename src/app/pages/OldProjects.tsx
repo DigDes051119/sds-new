@@ -29,16 +29,16 @@ export function OldProjects() {
   return (
     <div className="w-full min-h-screen py-5 font-twk-everett">
       {/* Top Header */}
-      <section className="pb-4 mb-[40px] w-auto">
-        <div className="flex justify-between items-baseline gap-4 mb-4">
-          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+      <section className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] w-auto">
+        <div className="flex flex-wrap xs:flex-nowrap justify-between items-end gap-2 mb-3 sm:mb-4">
+          <h1 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {title}
           </h1>
-          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
+          <span className="font-mono text-[13px] sm:text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
             [07/ORIGINS ARCHIVE]
           </span>
         </div>
-        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
+        <p className="text-[#808080] text-[14px] sm:text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
           {subtitle}
         </p>
       </section>

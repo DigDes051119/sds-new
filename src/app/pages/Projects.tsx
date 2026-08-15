@@ -47,9 +47,9 @@ export function Projects() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="pb-4 mb-[40px] w-auto">
+      <section className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] w-auto">
         <div className="flex justify-between items-baseline gap-4">
-          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+          <h1 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.projects.title}
           </h1>
           <GridSwitcher cols={cols} onChange={(val) => {
@@ -83,26 +83,26 @@ export function Projects() {
                 <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4 md:gap-0">
                   {/* Left block: label + title + description */}
                   <div className="flex-1 min-w-0 flex flex-col gap-2">
-                    <span className="font-mono text-[16px] text-[#808080]">
+                    <span className="font-mono text-[13px] sm:text-[16px] text-[#808080]">
                       {String(index + 1).padStart(2, '0')} / PROJECT
                     </span>
-                    <h3 className="text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                    <h3 className="text-[22px] xs:text-[26px] md:text-[28px] font-semibold leading-[1.30] tracking-[-0.28px] text-black uppercase m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                       {project.name}
                     </h3>
                     {project.desc && (
-                      <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
+                      <p className="text-[15px] sm:text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-2">
                         {project.desc}
                       </p>
                     )}
                   </div>
                   {/* Vertical divider stretching to end of description */}
-                  <div className="w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
+                  <div className="hidden md:block w-[1px] bg-black/60 mx-6 shrink-0 self-stretch my-0.5"></div>
                   {/* Right block: category + year */}
-                  <div className="text-left flex flex-col gap-1 shrink-0 self-start">
-                    <span className="text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
+                  <div className="text-left flex flex-row md:flex-col justify-between md:justify-start gap-1 shrink-0 self-start w-full md:w-auto pt-2 md:pt-0 border-t md:border-t-0 border-black/10">
+                    <span className="text-[13px] sm:text-[16px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
                       {project.tags}
                     </span>
-                    <span className="font-mono text-[16px] tracking-[0.04em] text-black whitespace-nowrap">
+                    <span className="font-mono text-[13px] sm:text-[16px] tracking-[0.04em] text-black whitespace-nowrap">
                       {project.year}
                     </span>
                   </div>

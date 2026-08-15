@@ -537,25 +537,119 @@ export function Root() {
             </div>
           </div>
         </div>
+      </header>
 
-          {/* Mobile Right Side: Language Switcher */}
-          <div className="flex lg:hidden items-center justify-end">
-            <div className="flex gap-2">
-              {languageOptions.map((opt) => (
-                <button 
-                  key={opt.code}
-                  onClick={() => setLocale(opt.code)}
-                  className={`text-[13px] font-mono tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[2px] ${
-                    locale === opt.code ? "text-[#0000FF] font-bold" : "text-[#808080] hover:text-black"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+        {/* Fullscreen Mobile Navigation Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className={`fixed inset-0 w-full max-w-full z-45 flex flex-col justify-start pt-[115px] pb-[100px] px-8 sm:px-10 overflow-y-auto overflow-x-hidden lg:hidden font-twk-everett ${
+                isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'
+              }`}
+            >
+              <div className="flex flex-col gap-[28px] sm:gap-[32px] w-full max-w-full">
+                {navLinks.map((link) => {
+                  const isProjects = link.path === "/projects";
+                  return (
+                    <div key={link.path} className="flex flex-col">
+                      <NavLink
+                        to={link.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `text-[20px] sm:text-[23px] font-normal tracking-[-0.01em] uppercase transition-colors leading-none ${
+                            isActive ? "text-[#0000FF] font-medium" : "text-black hover:text-[#0000FF]"
+                          }`
+                        }
+                      >
+                        {link.name}
+                      </NavLink>
+
+                      {/* If on Projects, show quick sub-categories */}
+                      {isProjects && (
+                        <div className="flex flex-wrap gap-2 pt-4 pb-1">
+                          {[
+                            { name: locale === "ru" ? "Старые проекты (2005-2020)" : "Old Projects", path: "/projects/old" },
+                            { name: locale === "ru" ? "Концепты и видение" : "Concepts & Vision", path: "/concepts-and-vision" },
+                            { name: "Web UI / UX", path: "/web-ui-ux" },
+                            { name: "GameDev", path: "/gamedev" },
+                            { name: locale === "ru" ? "Видео" : "Video", path: "/video" },
+                          ].map((sub) => (
+                            <NavLink
+                              key={sub.path}
+                              to={sub.path}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="font-mono text-[11px] uppercase px-2.5 py-1 bg-black/[0.03] text-black/60 hover:text-[#0000FF] hover:bg-[#0000FF]/10 transition-colors"
+                            >
+                              {sub.name}
+                            </NavLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Single dividing line between navigation links and language switcher */}
+                <div className="w-full border-t border-[#808080]/20 my-4" />
+
+                {/* Language Switcher in Mobile Drawer */}
+                <div className="flex flex-wrap gap-6 pt-1 pb-4">
+                  {languageOptions.map((opt) => (
+                    <button
+                      key={opt.code}
+                      onClick={() => setLocale(opt.code)}
+                      className={`text-[16px] font-normal uppercase tracking-tight cursor-pointer transition-all pb-1 relative ${
+                        locale === opt.code
+                          ? "text-[#0000FF] font-medium border-b-2 border-[#0000FF]"
+                          : "text-[#808080] hover:text-black"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Fixed Full-Width Bottom Tab Bar (Studio Design Aesthetic) */}
+        <div className={`fixed bottom-0 left-0 right-0 z-50 border-t border-[#808080]/30 px-6 py-3.5 flex items-center lg:hidden transition-colors duration-300 ${
+          isProjectDetailPage ? 'bg-[#f0f0f0]/95 backdrop-blur-md' : 'bg-white/95 backdrop-blur-md'
+        }`}>
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="w-full flex items-center justify-between font-twk-everett cursor-pointer transition-colors duration-200 group"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-[#0000FF] transition-transform duration-200 group-hover:scale-125" />
+              <span className="text-[15px] font-medium tracking-[-0.01em] uppercase text-black group-hover:text-[#0000FF] transition-colors">
+                {isMobileMenuOpen 
+                  ? (locale === "ru" ? "Закрыть меню" : locale === "kg" ? "Менюну жабуу" : "Close Menu") 
+                  : (locale === "ru" ? "Меню" : locale === "kg" ? "Меню" : "Menu")}
+              </span>
             </div>
-          </div>
-        </header>
 
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[12px] text-[#808080] uppercase tracking-[0.04em]">
+                [{locale.toUpperCase()}]
+              </span>
+              <span className="text-[#808080]/40 font-mono text-[12px]">|</span>
+              <span className="font-mono text-[12px] text-[#808080] uppercase tracking-[0.04em]">
+                [07]
+              </span>
+              <div className="ml-1 text-black group-hover:text-[#0000FF] transition-colors">
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </div>
+            </div>
+          </button>
+        </div>
 
         {/* Main Content + Footer container */}
         <div className="flex flex-col flex-grow">
@@ -566,10 +660,8 @@ export function Root() {
             </Suspense>
           </main>
 
-
-
           {/* Footer */}
-          <footer className={`w-full text-black pt-16 md:pt-20 pb-36 md:pb-40 lg:pb-24 mt-16 md:mt-20 border-t border-black/10 font-twk-everett px-4 sm:px-6 md:px-[65px] lg:px-[105px] transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
+          <footer className={`w-full text-black pt-12 md:pt-20 pb-16 md:pb-24 mt-12 md:mt-20 border-t border-black/10 font-twk-everett px-4 sm:px-6 md:px-[65px] lg:px-[105px] transition-colors duration-300 ${isProjectDetailPage ? 'bg-[#f0f0f0]' : 'bg-white'}`}>
             <div className="w-full">
               {/* Top Row: Button and Social Links */}
               <div className="flex flex-row justify-between items-start">
@@ -602,7 +694,7 @@ export function Root() {
               </div>
 
               {/* Huge Email Address */}
-              <div className="mt-8 mb-16">
+              <div className="mt-8 mb-12 md:mb-16">
                 <a
                   href="mailto:contact@steeldrakestudio.com"
                   className="text-[18px] xs:text-[22px] sm:text-4xl md:text-5xl lg:text-[76px] font-normal tracking-[-0.04em] text-black leading-none hover:text-[#0000FF] transition-colors duration-300 interactive-element block w-full break-all"
@@ -612,7 +704,7 @@ export function Root() {
               </div>
 
               {/* Grid: Address and Call Us columns */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-16">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 md:pb-16">
                 <div className="md:col-span-4 flex flex-col gap-3">
                   <span className="text-[12px] font-mono tracking-[0.08em] text-black/40 uppercase">
                     {locale === "ru" ? "Office address" : locale === "kg" ? "Office address" : "Office address"}
@@ -673,31 +765,6 @@ export function Root() {
             </div>
           </footer>
         </div>
-
-        {/* 2-Row Grid Tab Bar (Mobile) */}
-        <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-black/10 z-[900] lg:hidden pb-[env(safe-area-inset-bottom)]">
-          <div className="grid grid-cols-3 w-full">
-            {navLinks.map((link, index) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `flex items-center justify-center py-3 text-[10px] xs:text-[11px] sm:text-[12px] font-bold font-mono tracking-[0.02em] uppercase transition-colors duration-300 ${
-                    index < 3 ? 'border-b border-black/10' : ''
-                  } ${
-                    (index + 1) % 3 !== 0 ? 'border-r border-black/10' : ''
-                  } ${
-                    isActive 
-                      ? "text-[#0000FF]" 
-                      : "text-black hover:text-[#0000FF]"
-                  }`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
 
         {/* Contact Form Overlay and Panel */}
         <AnimatePresence>

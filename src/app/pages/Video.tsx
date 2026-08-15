@@ -76,16 +76,16 @@ export function Video() {
   return (
     <div className="w-full flex flex-col pt-5 pb-[150px] font-twk-everett">
       {/* Title Block */}
-      <section className="pb-4 mb-[40px] w-auto">
-        <div className="flex justify-between items-baseline gap-4 mb-4">
-          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+      <section className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] w-auto">
+        <div className="flex flex-wrap xs:flex-nowrap justify-between items-end gap-2 mb-3 sm:mb-4">
+          <h1 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {translations[locale]?.video?.title || getLocText(locale, "Видео", "Video", "Видео")}
           </h1>
-          <span className="font-mono text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
+          <span className="font-mono text-[13px] sm:text-[16px] tracking-[0.04em] text-[#808080] uppercase shrink-0">
             [VIDEO/DIRECTING]
           </span>
         </div>
-        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
+        <p className="text-[#808080] text-[14px] sm:text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
           {getLocText(
             locale,
             "Наша видеорежиссура и моушн-дизайн",
@@ -292,9 +292,10 @@ export function Video() {
 }
 
 function InstagramVideoPlayer({ src }: { src: string }) {
+  const { locale } = useContext(LanguageContext);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [showPlayOverlay, setShowPlayOverlay] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -304,13 +305,12 @@ function InstagramVideoPlayer({ src }: { src: string }) {
     videoRef.current.muted = isMuted;
     videoRef.current.volume = 1;
     
-    // Play on mount; if browser blocks unmuted autoplay, smoothly fallback to muted
+    // Autoplay muted (compliant with all modern mobile and desktop browser autoplay policies)
     const playPromise = videoRef.current.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
         if (videoRef.current) {
           videoRef.current.muted = true;
-          setIsMuted(true);
           videoRef.current.play().catch(() => {});
         }
       });
@@ -406,12 +406,12 @@ function InstagramVideoPlayer({ src }: { src: string }) {
         {isMuted ? (
           <>
             <VolumeX className="w-4 h-4" />
-            <span>Включить звук</span>
+            <span>{getLocText(locale, "Включить звук", "Unmute", "Үндү күйгүзүү")}</span>
           </>
         ) : (
           <>
             <Volume2 className="w-4 h-4" />
-            <span>Звук включен</span>
+            <span>{getLocText(locale, "Звук включен", "Sound On", "Үн күйүк")}</span>
           </>
         )}
       </button>

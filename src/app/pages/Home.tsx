@@ -404,20 +404,20 @@ export function Home() {
   const brands = t.home.brands || [];
 
   return (
-    <div className="w-full flex flex-col pt-[80px] md:pt-[120px] lg:pt-[160px] pb-[120px] gap-[120px] md:gap-[140px] lg:gap-[160px]">
+    <div className="w-full flex flex-col pt-[30px] sm:pt-[60px] md:pt-[100px] lg:pt-[140px] pb-[60px] md:pb-[120px] gap-[64px] sm:gap-[90px] md:gap-[130px] lg:gap-[160px]">
       
       {/* 1 БЛОК: Hero Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-[20px] md:gap-[28px] items-start">
         {/* Left: Big Display Brand Mark */}
-        <div className="lg:col-span-3 pr-4">
-          <h1 className="text-[40px] xs:text-[48px] md:text-[90px] lg:text-[110px] xl:text-[124px] leading-[0.85] tracking-[-0.05em] font-bold uppercase text-black m-0 pt-1">
+        <div className="lg:col-span-3 pr-0 md:pr-4">
+          <h1 className="text-[38px] xs:text-[48px] sm:text-[68px] md:text-[90px] lg:text-[110px] xl:text-[124px] leading-[0.88] tracking-[-0.05em] font-bold uppercase text-black m-0 pt-1">
             AT FIRST<br /><span className="text-[#0000FF]">DESIGN</span>
           </h1>
         </div>
         {/* Right: Description aligned under HOME nav */}
-        <div className="lg:col-span-9 pt-4 flex justify-end">
-          <div className="w-[var(--sds-nav-cluster-width,680px)] max-w-full">
-            <p className="text-[17px] leading-[1.44] text-black m-0 max-w-[560px]">
+        <div className="lg:col-span-9 pt-2 md:pt-4 flex justify-start lg:justify-end">
+          <div className="w-full lg:w-[var(--sds-nav-cluster-width,680px)] max-w-full">
+            <p className="text-[15px] sm:text-[17px] leading-[1.44] text-black m-0 max-w-[560px]">
               {getLocText(
                 locale,
                 "Все что вы видите является одним из первичных звеньев того, как мы воспринимаем наш физический мир, именно поэтому философия студии это Дизайн в первую очередь",
@@ -430,14 +430,14 @@ export function Home() {
 
       {/* 2 БЛОК: Recent Projects (Недавние проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
           <div className="flex flex-col">
-            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+            <span className="font-mono text-[14px] sm:text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Недавние проекты", "Recent projects", "Жакында долбоорлор")}
             </h2>
           </div>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[02/RECENT]</span>
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[02/RECENT]</span>
         </div>
 
         <ProjectsNav activeTab={activeFilterTab} onTabChange={setActiveFilterTab} />
@@ -622,14 +622,14 @@ export function Home() {
 
       {/* 4 БЛОК: Recent Products (Недавние продукты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
           <div className="flex flex-col">
-            <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+            <span className="font-mono text-[14px] sm:text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Недавние продукты", "Recent products", "Жакында өнүмдөр")}
             </h2>
           </div>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04/PRODUCTS]</span>
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[04/PRODUCTS]</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
@@ -677,14 +677,14 @@ export function Home() {
       {/* 4.5 БЛОК: Architecture (Архитектура - 2 плашки) */}
       {recentArchitects.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
+          <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
             <div className="flex flex-col">
-              <span className="font-mono text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
-              <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+              <span className="font-mono text-[14px] sm:text-[18px] text-[#808080] uppercase tracking-[0.04em]">SDST</span>
+              <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
                 {t.architects?.title || getLocText(locale, "Архитектура", "Architecture", "Архитектура", "建筑设计", "الهندسة المعمارية", "Architektur")}
               </h2>
             </div>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[04.5/ARCHITECTURE]</span>
+            <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[04.5/ARCHITECTURE]</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
@@ -732,11 +732,11 @@ export function Home() {
 
       {/* 5 БЛОК: Services (Услуги) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
+          <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {getLocText(locale, "Услуги", "Services", "Кызматтар")}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[05/SERVICES]</span>
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[05/SERVICES]</span>
         </div>
 
         <div className="flex flex-col w-full">
@@ -818,11 +818,11 @@ export function Home() {
 
       {/* 6 БЛОК: Featured Projects (Избранные проекты) */}
       <section className="flex flex-col w-full">
-        <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
-          <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
+          <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
             {getLocText(locale, "Избранные проекты", "Featured projects", "Тандалган долбоорлор")}
           </h2>
-          <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[06/FEATURED]</span>
+          <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[06/FEATURED]</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">
@@ -862,13 +862,13 @@ export function Home() {
       </section>
 
       {/* 7 БЛОК: Brands (Бренды) */}
-      <section className="flex flex-col w-full overflow-hidden mb-[100px]">
-        <div className="pb-4 mb-[40px] ">
-          <div className="flex justify-between items-baseline">
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+      <section className="flex flex-col w-full overflow-hidden mb-[60px] md:mb-[100px]">
+        <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px]">
+          <div className="flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Бренды", "Selected brands", "Бренддер")}
             </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07/BRANDS]</span>
+            <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[07/BRANDS]</span>
           </div>
           <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal mt-2 max-w-[600px]">
             {getLocText(locale, "Знакомые вам бренды которые были созданы или обрели обновленный стиль благодаря нашей студии", "Brands you know that were created or have been renewed thanks to our studio", "Сизге тааныш болгон бренддер биздин студия тарабынан түзүлгөн же жаңыланган стилге ээ болгон")}
@@ -944,11 +944,11 @@ export function Home() {
       {/* 7.5 БЛОК: Featured Concepts (Избранные концепты на Главной - 2 в ряд) */}
       {featuredConcepts.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+          <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Концепты и видение", "Concepts & Vision", "Концепциялар жана көрүнүш", "概念与愿景", "المفاهيم والرؤية", "Konzepte & Vision")}
             </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[07.5/FEATURED-CONCEPTS]</span>
+            <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[07.5/FEATURED-CONCEPTS]</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]">
@@ -1000,11 +1000,11 @@ export function Home() {
       {/* 9 БЛОК: Recent WEB / UI UX Projects (Недавние проекты WEB / UI UX) */}
       {recentWebUiUx.length > 0 && (
         <section className="flex flex-col w-full">
-          <div className="pb-4 mb-[40px] flex justify-between items-baseline ">
-            <h2 className="text-[32px] xs:text-[40px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
+          <div className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] flex flex-wrap xs:flex-nowrap justify-between items-end gap-2">
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-medium tracking-[-0.04em] m-0 text-black">
               {getLocText(locale, "Недавние проекты WEB / UI UX", "Recent WEB / UI UX projects", "Акыркы WEB / UI UX долбоорлору", "近期网页与UI/UX项目", "المشاريع الأخيرة للويب وواجهات المستخدم", "Neueste WEB / UI UX Projekte")}
             </h2>
-            <span className="font-mono text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-[15px]">[09/WEB-UI-UX]</span>
+            <span className="font-mono text-[13px] sm:text-[16px] text-[#808080] uppercase border-b border-[#808080] pb-1 sm:pb-[15px] shrink-0">[09/WEB-UI-UX]</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[48px]">

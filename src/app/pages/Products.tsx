@@ -58,9 +58,9 @@ export function Products() {
     <div className="w-full flex flex-col pt-5 pb-[150px]">
       
       {/* Title Block */}
-      <section className="pb-4 mb-[40px] w-auto">
-        <div className="flex justify-between items-baseline gap-4 mb-4">
-          <h1 className="text-[40px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
+      <section className="pb-3 md:pb-4 mb-[24px] sm:mb-[40px] w-auto">
+        <div className="flex justify-between items-baseline gap-4 mb-3 sm:mb-4">
+          <h1 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.2] tracking-[-0.04em] text-[#0000FF] m-0">
             {t.products?.title || getLocText(locale, "Продукты студии", "Studio products", "Студиянын продукциялары")}
           </h1>
           <GridSwitcher cols={cols} onChange={(val) => {
@@ -68,13 +68,13 @@ export function Products() {
             localStorage.setItem("sds_grid_layout", val);
           }} />
         </div>
-        <p className="text-[#808080] text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
+        <p className="text-[#808080] text-[14px] sm:text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">
           {getLocText(locale, "Некоторые из проектов и продуктов, которые были созданы в нашей студии для клиентов, для партнеров и для наших личных визионерских концептов", "Some of the projects and products that was made in our studio for clients, for partners and for our personal visionary concepts", "Биздин студияда кардарлар, өнөктөштөр жана жеке визионердик концепцияларыбыз үчүн жаратылган кээ бир долбоорлор жана өнүмдөр")}
         </p>
       </section>
 
       {/* Products Grid */}
-      <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-[59px]`}>
+      <section className={`grid grid-cols-1 ${cols === "3" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-[40px] md:gap-[59px]`}>
         {products.map((product: any, index: number) => (
           <div key={product.id} className="w-full flex flex-col">
             <Link to={`/products/${product.id}`} className="group flex flex-col flex-1">
@@ -90,10 +90,10 @@ export function Products() {
               </div>
 
               {/* Meta details — two columns with vertical divider */}
-              <div className="mt-[20px] flex justify-between items-stretch gap-0">
+              <div className="mt-[20px] flex flex-col md:flex-row justify-between items-stretch gap-6 md:gap-0">
                 {/* Left column: title + tags + desc */}
-                <div className="flex-[3] min-w-0 flex flex-col pr-5">
-                  <h2 className="text-[28px] md:text-[34px] font-semibold leading-[1.2] tracking-[-0.03em] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
+                <div className="flex-1 md:flex-[3] min-w-0 flex flex-col pr-0 md:pr-5">
+                  <h2 className="text-[22px] xs:text-[26px] md:text-[34px] font-semibold leading-[1.2] tracking-[-0.03em] text-black m-0 group-hover:text-[#0000FF] transition-colors duration-300">
                     {product.name}
                   </h2>
                   {product.category && (
@@ -103,12 +103,12 @@ export function Products() {
                   )}
 
                   {/* Horizontal row of metadata (Category, Class, Year) without icons */}
-                  <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 mb-6">
+                  <div className="flex flex-wrap gap-x-6 sm:gap-x-8 gap-y-2 sm:gap-y-3 mt-4 sm:mt-6 mb-4 sm:mb-6">
                     <div className="flex flex-col">
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
                         {getLocText(locale, "КАТЕГОРИЯ", "CATEGORY", "КАТЕГОРИЯ")}
                       </span>
-                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
+                      <span className="text-[13px] sm:text-[15px] text-black font-normal mt-0.5 sm:mt-1">
                         {product.tags}
                       </span>
                     </div>
@@ -116,22 +116,22 @@ export function Products() {
                       <span className="font-mono text-[11px] tracking-[0.05em] text-[#808080] uppercase">
                         {getLocText(locale, "ГОД", "YEAR", "ЖЫЛ")}
                       </span>
-                      <span className="text-[14px] md:text-[15px] text-black font-normal mt-1">
+                      <span className="text-[13px] sm:text-[15px] text-black font-normal mt-0.5 sm:mt-1">
                         {product.year}
                       </span>
                     </div>
                   </div>
 
                   {product.desc && (
-                    <p className="text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-3">
+                    <p className="text-[14px] sm:text-[16px] leading-[1.44] text-[#808080] m-0 font-normal line-clamp-3">
                       {product.desc}
                     </p>
                   )}
                 </div>
                 {/* Vertical divider stretching to end of description */}
-                <div className="w-[1px] bg-black/60 shrink-0 self-stretch my-0.5"></div>
+                <div className="hidden md:block w-[1px] bg-black/60 shrink-0 self-stretch my-0.5"></div>
                 {/* Right column: index + metadata */}
-                <div className="flex-[2] min-w-0 flex flex-col pl-5">
+                <div className="flex-1 md:flex-[2] min-w-0 flex flex-col pl-0 md:pl-5 border-t md:border-t-0 border-[#E5E5E5] pt-3 md:pt-0">
 
                   {/* Metadata rows with full-width borders */}
                   <div className="w-full flex flex-col">
@@ -142,11 +142,11 @@ export function Products() {
                       { label: t.productDetail?.labels?.location || "Location", value: product.location },
                       { label: t.productDetail?.labels?.projectType || "Project Type", value: product.projectType },
                     ].map((item, rowIdx) => (
-                      <div key={rowIdx} className="flex justify-between items-center py-2.5 border-b border-[#E5E5E5] gap-4">
+                      <div key={rowIdx} className="flex justify-between items-center py-2 sm:py-2.5 border-b border-[#E5E5E5] gap-4">
                         <span className="font-mono text-[11px] md:text-[12px] tracking-[0.04em] text-[#808080] uppercase whitespace-nowrap">
                           {item.label}
                         </span>
-                        <span className="text-[14px] md:text-[15px] text-black font-normal text-right">
+                        <span className="text-[13px] sm:text-[15px] text-black font-normal text-right">
                           {renderCommaSplitList(item.value)}
                         </span>
                       </div>

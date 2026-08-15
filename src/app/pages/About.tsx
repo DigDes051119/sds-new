@@ -80,23 +80,23 @@ export function About() {
                 {getLocText(locale, "Кто мы", "Who we are", "Биз кимбиз")}
               </span>
             </div>
-            <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0">
+            <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0">
               {ab.ourStoryTitle || getLocText(locale, "Наша история", "Our story", "Биздин тарых")}
             </h2>
             <div className="w-[50px] h-[2px] bg-[#0000FF]"></div>
-            <p className="text-[17px] leading-[1.5] text-[#808080] max-w-[450px] m-0 font-normal">
+            <p className="text-[15px] sm:text-[17px] leading-[1.5] text-[#808080] max-w-[450px] m-0 font-normal">
               {ab.manifestoText || ""}
             </p>
           </div>
 
           {/* Right Column (Timeline Horizontal Grid) */}
-          <div className="lg:col-span-7 w-full mt-10 lg:mt-0">
+          <div className="lg:col-span-7 w-full mt-6 lg:mt-0">
             {timeline.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[28px]">
                 {timeline.map((item: any, idx: number) => (
                   <div key={idx} className="flex flex-col">
                     {/* Header */}
-                    <div className="mb-4 h-[84px] flex flex-col justify-start">
+                    <div className="mb-2 sm:mb-4 sm:h-[84px] flex flex-col justify-start">
                       <span className="font-mono text-[14px] font-bold text-[#0000FF] uppercase block mb-1">
                         {item.year}
                       </span>
@@ -144,7 +144,7 @@ export function About() {
 
       {/* Philosophy Foundation Block */}
       {valuesList.length > 0 && (
-        <section className="mb-24 border-b border-[#808080]/30 pb-[100px]">
+        <section className="mb-12 md:mb-24 border-b border-[#808080]/30 pb-[50px] md:pb-[100px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-[28px] items-start">
             {/* Left Column */}
             <div className="lg:col-span-5 flex flex-col gap-6">
@@ -154,7 +154,7 @@ export function About() {
                   {getLocText(locale, "Наша философия", "Our philosophy", "Биздин философия")}
                 </span>
               </div>
-              <h2 className="text-[40px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 whitespace-pre-line">
+              <h2 className="text-[28px] xs:text-[36px] sm:text-[44px] md:text-[54px] font-bold leading-[1.1] tracking-[-0.04em] text-[#191919] m-0 whitespace-pre-line">
                 {ab.valuesSub || "Philosophy\nfoundation"}
               </h2>
               <div className="w-[50px] h-[2px] bg-[#0000FF]"></div>

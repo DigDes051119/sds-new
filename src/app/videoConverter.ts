@@ -39,9 +39,28 @@ export async function convertToWebMNative(
       const fps = 30;
       const stream = canvas.captureStream(fps);
 
-      let mimeType = "video/webm;codecs=vp9";
+      // Attempt to capture and add audio track from source video if available
+      try {
+        if ((video as any).captureStream) {
+          const videoStream = (video as any).captureStream();
+          const audioTracks = videoStream.getAudioTracks();
+          if (audioTracks && audioTracks.length > 0) {
+            stream.addTrack(audioTracks[0]);
+          }
+        } else if ((video as any).mozCaptureStream) {
+          const videoStream = (video as any).mozCaptureStream();
+          const audioTracks = videoStream.getAudioTracks();
+          if (audioTracks && audioTracks.length > 0) {
+            stream.addTrack(audioTracks[0]);
+          }
+        }
+      } catch (e) {
+        console.warn("Could not attach audio track to stream:", e);
+      }
+
+      let mimeType = "video/webm;codecs=vp9,opus";
       if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = "video/webm;codecs=vp8";
+        mimeType = "video/webm;codecs=vp8,opus";
       }
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         mimeType = "video/webm";
@@ -258,7 +277,10 @@ export async function convertToWebM(
       "0",
       "-speed",
       "5",
-      "-an",
+      "-c:a",
+      "libopus",
+      "-b:a",
+      "128k",
       outputFileName,
     ]);
 
