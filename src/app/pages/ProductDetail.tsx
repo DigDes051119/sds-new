@@ -195,8 +195,8 @@ export function ProductDetail() {
                 }`}
               >
                 {block.map((imgUrl: string, imgIdx: number) => {
-                  const isVideo = imgUrl?.startsWith("video:");
-                  const videoUrl = isVideo ? imgUrl.slice(6) : "";
+                  const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm") || imgUrl?.endsWith(".mp4");
+                  const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
 
                   return (
                     <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#F4F6F9]">

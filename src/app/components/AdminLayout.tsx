@@ -126,6 +126,7 @@ export function AdminLayout() {
     "/admin/architects": "architects",
     "/admin/gamedev": "gamedev",
     "/admin/projects": "projects",
+    "/admin/web-ui-ux": "webUiUx",
     "/admin/video": "video",
   };
 

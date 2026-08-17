@@ -488,14 +488,22 @@ export const cmsService = {
   async moveCatalogItem(itemId: string, sourceType: string, targetType: string) {
     if (sourceType === targetType) return { success: false, itemName: itemId };
     const translations = this.getTranslations();
+    const isSourceMainSection = sourceType === "projects" || sourceType === "webUiUx";
+    const isTargetMainSection = targetType === "projects" || targetType === "webUiUx";
+
+    const projectDetails = this.getProjectDetails();
+    const productDetails = this.getProductDetails();
+
     const langs = ["ru", "en", "kg", "zh", "ar", "de"] as const;
     
     let itemMoved = false;
     let itemName = itemId;
     const newTranslations = JSON.parse(JSON.stringify(translations));
+    const newProjectDetails = JSON.parse(JSON.stringify(projectDetails));
+    const newProductDetails = JSON.parse(JSON.stringify(productDetails));
 
     for (const lang of langs) {
-      if (!newTranslations[lang]) continue;
+      if (!newTranslations[lang]) newTranslations[lang] = {};
       if (!newTranslations[lang][sourceType]) newTranslations[lang][sourceType] = { items: [] };
       if (!newTranslations[lang][targetType]) newTranslations[lang][targetType] = { items: [] };
 
@@ -515,10 +523,29 @@ export const cmsService = {
         }
         itemMoved = true;
       }
+
+      // Transfer details
+      const sourceDetailObj = isSourceMainSection ? newProjectDetails[lang]?.[itemId] : (newProductDetails[lang]?.[itemId] || newTranslations[lang]?.productDetail?.products?.[itemId] || newTranslations[lang]?.productDetail?.concepts?.[itemId]);
+      if (sourceDetailObj) {
+        if (isTargetMainSection) {
+          if (!newProjectDetails[lang]) newProjectDetails[lang] = {};
+          newProjectDetails[lang][itemId] = JSON.parse(JSON.stringify(sourceDetailObj));
+        } else {
+          if (!newProductDetails[lang]) newProductDetails[lang] = {};
+          newProductDetails[lang][itemId] = JSON.parse(JSON.stringify(sourceDetailObj));
+          if (!newTranslations[lang].productDetail) newTranslations[lang].productDetail = { products: {}, concepts: {} };
+          if (!newTranslations[lang].productDetail.products) newTranslations[lang].productDetail.products = {};
+          newTranslations[lang].productDetail.products[itemId] = JSON.parse(JSON.stringify(sourceDetailObj));
+        }
+      }
     }
 
     if (itemMoved) {
       await this.updateTranslations(newTranslations);
+      if (isTargetMainSection || isSourceMainSection) {
+        await this.updateProjectDetails(newProjectDetails).catch(() => {});
+      }
+      this.notify();
       return { success: true, itemName };
     }
     return { success: false, itemName };

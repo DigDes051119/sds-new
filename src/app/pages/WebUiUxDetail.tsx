@@ -7,7 +7,6 @@ import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { projectDetailsTranslations } from "../projectDetailsData";
 import projectImg1 from "../../imports/image_low.webp";
-import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import { InlineVideoPlayer } from "../components/InlineVideoPlayer";
 import { parseTextBlock, TextBlockRenderer } from "../components/TextBlockRenderer";
 
@@ -46,12 +45,12 @@ export function WebUiUxDetail() {
   const [activeTab, setActiveTab] = useState<"gallery" | "video">("gallery");
 
   const hasVideos = collageBlocks.some((block: string[]) => 
-    block?.some((url: string) => url?.startsWith("video:"))
+    block?.some((url: string) => url?.startsWith("video:") || url?.endsWith(".webm") || url?.endsWith(".mp4"))
   );
 
   const filteredBlocks = activeTab === "video" 
-    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:"))).filter((block: string[]) => block.length > 0)
-    : collageBlocks.map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:"))).filter((block: string[]) => block.length > 0);
+    ? collageBlocks.map((block: string[]) => block.filter((url: string) => url?.startsWith("video:") || url?.endsWith(".webm") || url?.endsWith(".mp4") || url?.startsWith("text:"))).filter((block: string[]) => block.length > 0)
+    : collageBlocks;
 
   return (
     <div className="w-full flex flex-col pb-[150px] gap-[80px]">
@@ -204,8 +203,8 @@ export function WebUiUxDetail() {
               }`}
             >
               {block.map((imgUrl: string, imgIdx: number) => {
-                const isVideo = imgUrl?.startsWith("video:");
-                const videoUrl = isVideo ? imgUrl.slice(6) : "";
+                const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm") || imgUrl?.endsWith(".mp4");
+                const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
                 return (
                   <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#F4F6F9]">
                     {isVideo ? (

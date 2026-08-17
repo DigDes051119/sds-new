@@ -113,11 +113,9 @@ export function useProjectDetail(catalogType: "projects" | "products" | "concept
 
   const filteredBlocks = activeTab === "video"
     ? rawCollageBlocks
-        .map((block: string[]) => block.filter((url: string) => url?.startsWith("video:") || url?.endsWith(".webm") || url?.endsWith(".mp4")))
+        .map((block: string[]) => block.filter((url: string) => url?.startsWith("video:") || url?.endsWith(".webm") || url?.endsWith(".mp4") || url?.startsWith("text:")))
         .filter((block: string[]) => block.length > 0)
-    : rawCollageBlocks
-        .map((block: string[]) => block.filter((url: string) => !url?.startsWith("video:") && !url?.endsWith(".webm") && !url?.endsWith(".mp4")))
-        .filter((block: string[]) => block.length > 0);
+    : rawCollageBlocks;
 
   const heroImage = listItem?.img || rawCollageBlocks[0]?.[0] || data.processImages[0] || "";
 

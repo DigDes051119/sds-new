@@ -176,7 +176,7 @@ export function ConceptsAndVisionDetail() {
         </div>
       )}
 
-      {/* Gallery */}
+      {/* Gallery Wall / Image Stack */}
       {filteredBlocks.length > 0 && (
         <section className="max-w-[1600px] mx-auto w-full flex flex-col gap-[12px] reveal-visible">
           {filteredBlocks.map((block: string[], blockIdx: number) => {
@@ -197,8 +197,8 @@ export function ConceptsAndVisionDetail() {
                 }`}
               >
                 {block.map((imgUrl: string, imgIdx: number) => {
-                  const isVideo = imgUrl?.startsWith("video:");
-                  const videoUrl = isVideo ? imgUrl.slice(6) : "";
+                  const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm") || imgUrl?.endsWith(".mp4");
+                  const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
                   return (
                     <div key={`${blockIdx}-${imgIdx}`} className="w-full bg-[#F4F6F9]">
                       {isVideo ? (

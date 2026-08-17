@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, Type, Copy } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, Type, Copy, Video, Play, Film } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
@@ -44,16 +44,34 @@ export function AdminProjectsEditor() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
 
-  const handleProjectDragStart = (e: React.DragEvent, index: number) => {
+  const handleProjectDragStart = (e: React.DragEvent, index: number, project: any) => {
     if (isReadOnly) return;
     setDraggedProjectIndex(index);
-    e.dataTransfer.setData("text/plain", index.toString());
+    const dragPayload = JSON.stringify({ index, itemId: project.id, sourceType: "projects", itemName: project.name });
+    e.dataTransfer.setData("application/json", dragPayload);
+    e.dataTransfer.setData("text/plain", dragPayload);
+    (window as any).__draggedAdminCatalogItem = { itemId: project.id, sourceType: "projects", itemName: project.name };
+  };
+
+  const handleProjectDragEnd = () => {
+    setDraggedProjectIndex(null);
+    delete (window as any).__draggedAdminCatalogItem;
   };
 
   const handleProjectDrop = async (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
-    const sourceIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    if (isNaN(sourceIndex) || sourceIndex === targetIndex) return;
+    let sourceIndex = draggedProjectIndex;
+    if (sourceIndex === null) {
+      try {
+        const raw = e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.index === "number") sourceIndex = parsed.index;
+          else if (!isNaN(parseInt(raw, 10))) sourceIndex = parseInt(raw, 10);
+        }
+      } catch {}
+    }
+    if (sourceIndex === null || isNaN(sourceIndex) || sourceIndex === targetIndex) return;
 
     try {
       const newTranslations = JSON.parse(JSON.stringify(translations));
@@ -77,6 +95,7 @@ export function AdminProjectsEditor() {
       alert("Ошибка при сохранении порядка: " + err.message);
     } finally {
       setDraggedProjectIndex(null);
+      delete (window as any).__draggedAdminCatalogItem;
     }
   };
 
@@ -147,15 +166,27 @@ export function AdminProjectsEditor() {
     }
     const isHero = target === "img";
     const key = isHero ? "img" : `${target.blockIdx}-${target.imgIdx}`;
+    const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv)$/i.test(file.name);
     try {
       if (isHero) setUploadingImg(true);
       else setUploadingBlocks(prev => ({ ...prev, [key]: true }));
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || (isVideo ? 'webm' : 'jpg');
       const fileName = `project-${isHero ? "hero" : `block-${target.blockIdx}-${target.imgIdx}`}-${Date.now()}.${fileExt}`;
       const path = `projects/${formId}/${fileName}`;
 
-      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+      let publicUrl = "";
+      if (isVideo) {
+        setIsConverting(true);
+        setConversionProgress(0);
+        const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
+        setIsConverting(false);
+        setConversionProgress(null);
+        const uploaded = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+        publicUrl = `video:${uploaded}`;
+      } else {
+        publicUrl = await supabaseClient.uploadFile("assets", path, file);
+      }
 
       if (isHero) {
         setFormImg(publicUrl);
@@ -170,8 +201,10 @@ export function AdminProjectsEditor() {
         });
       }
     } catch (e: any) {
-      alert("Ошибка при загрузке фотографии: " + e.message);
+      alert("Ошибка при загрузке: " + e.message);
     } finally {
+      setIsConverting(false);
+      setConversionProgress(null);
       if (isHero) setUploadingImg(false);
       else setUploadingBlocks(prev => ({ ...prev, [key]: false }));
     }
@@ -361,6 +394,53 @@ export function AdminProjectsEditor() {
     setFormWebsiteUrl(detailRu.websiteUrl || "");
   };
 
+  const handleUploadMediaFiles = async (files: FileList | File[], blockIdx: number) => {
+    if (isReadOnly) return;
+    if (!formId) {
+      alert("Пожалуйста, сначала укажите ID или название проекта, чтобы файлы загружались в правильную папку.");
+      return;
+    }
+    const key = `${blockIdx}-add-media`;
+    try {
+      setUploadingBlocks(prev => ({ ...prev, [key]: true }));
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv)$/i.test(file.name);
+        const fileExt = file.name.split('.').pop() || (isVideo ? 'webm' : 'jpg');
+        const nextIdx = (formCollageBlocks[blockIdx]?.length || 0) + i;
+        const path = `projects/${formId}/block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
+
+        if (isVideo) {
+          setIsConverting(true);
+          setConversionProgress(0);
+          const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
+          setIsConverting(false);
+          setConversionProgress(null);
+          const publicUrl = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+          uploadedUrls.push(`video:${publicUrl}`);
+        } else {
+          const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+          uploadedUrls.push(publicUrl);
+        }
+      }
+
+      setFormCollageBlocks(prev => {
+        return prev.map((b, bIdx) => {
+          if (bIdx === blockIdx) return [...b, ...uploadedUrls].slice(0, 5);
+          return b;
+        });
+      });
+    } catch (err: any) {
+      alert("Ошибка при загрузке: " + err.message);
+    } finally {
+      setIsConverting(false);
+      setConversionProgress(null);
+      setUploadingBlocks(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
   const handlePhotoDragStart = (e: React.DragEvent, blockIdx: number, imgIdx: number) => {
     if (isReadOnly) return;
     setDraggedPhoto({ blockIdx, imgIdx });
@@ -376,6 +456,13 @@ export function AdminProjectsEditor() {
     e.preventDefault();
     e.stopPropagation();
     setDraggedOverZone(null);
+
+    // If external files dropped
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleUploadPhoto({ blockIdx: targetBlockIdx, imgIdx: targetImgIdx }, e.dataTransfer.files[0]);
+      return;
+    }
+
     if (!draggedPhoto) return;
 
     const { blockIdx: srcBlockIdx, imgIdx: srcImgIdx } = draggedPhoto;
@@ -392,7 +479,7 @@ export function AdminProjectsEditor() {
       if (next[targetBlockIdx].length < 5 || srcBlockIdx === targetBlockIdx) {
         next[targetBlockIdx].splice(targetImgIdx, 0, imgUrl);
       } else {
-        alert("В блоке не может быть больше 5 фотографий!");
+        alert("В блоке не может быть больше 5 элементов!");
         return prev;
       }
 
@@ -404,6 +491,13 @@ export function AdminProjectsEditor() {
   const handlePhotoDropOnBlock = (e: React.DragEvent, targetBlockIdx: number) => {
     e.preventDefault();
     setDraggedOverZone(null);
+
+    // If external files dropped
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleUploadMediaFiles(e.dataTransfer.files, targetBlockIdx);
+      return;
+    }
+
     if (!draggedPhoto) return;
 
     const { blockIdx: srcBlockIdx, imgIdx: srcImgIdx } = draggedPhoto;
@@ -416,7 +510,7 @@ export function AdminProjectsEditor() {
       let next = JSON.parse(JSON.stringify(prev));
 
       if (next[targetBlockIdx].length >= 5) {
-        alert("В блоке не может быть больше 5 фотографий!");
+        alert("В блоке не может быть больше 5 элементов!");
         return prev;
       }
 
@@ -433,6 +527,28 @@ export function AdminProjectsEditor() {
   const handlePhotoDropOnButton = (e: React.DragEvent, action: "start" | "end" | { insertAfter: number }) => {
     e.preventDefault();
     setDraggedOverZone(null);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      if (action === "start") {
+        setFormCollageBlocks(prev => [[], ...prev]);
+        setTimeout(() => handleUploadMediaFiles(files, 0), 50);
+      } else if (action === "end") {
+        const newIdx = formCollageBlocks.length;
+        setFormCollageBlocks(prev => [...prev, []]);
+        setTimeout(() => handleUploadMediaFiles(files, newIdx), 50);
+      } else {
+        const targetIdx = action.insertAfter + 1;
+        setFormCollageBlocks(prev => {
+          const next = [...prev];
+          next.splice(targetIdx, 0, []);
+          return next;
+        });
+        setTimeout(() => handleUploadMediaFiles(files, targetIdx), 50);
+      }
+      return;
+    }
+
     if (!draggedPhoto) return;
 
     const { blockIdx: srcBlockIdx, imgIdx: srcImgIdx } = draggedPhoto;
@@ -796,11 +912,12 @@ export function AdminProjectsEditor() {
                   <div
                     key={project.id}
                     draggable={!isReadOnly}
-                    onDragStart={(e) => handleProjectDragStart(e, realIdx)}
+                    onDragStart={(e) => handleProjectDragStart(e, realIdx, project)}
+                    onDragEnd={handleProjectDragEnd}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => handleProjectDrop(e, realIdx)}
                     className="flex flex-col group/card p-3 rounded-2xl hover:bg-black/[0.02] border border-transparent hover:border-black/[0.04] transition duration-200 relative cursor-grab active:cursor-grabbing"
-                    title="Зажмите и перетащите для изменения порядка"
+                    title="Зажмите и перетащите в другой раздел в меню слева или для изменения порядка"
                   >
                     {/* Hover action overlay on card image */}
                     <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[#eeeee9] mb-3 border border-black/5 relative">
@@ -1450,13 +1567,10 @@ export function AdminProjectsEditor() {
                     );
                   }
 
-                  const visibleItems = block.filter(item => {
-                    const isVid = item?.startsWith("video:") || item?.endsWith(".webm");
-                    return previewActiveTab === "video" ? isVid : !isVid;
-                  });
+                  const visibleItems = block.filter(Boolean);
                   const hasAddSlot = block.filter(Boolean).length < 5;
                   const totalGridElements = visibleItems.length + (hasAddSlot ? 1 : 0);
-                  if (totalGridElements === 0) return null;
+                  if (totalGridElements === 0 && !hasAddSlot) return null;
 
                   const getGridColsClass = (c: number) => {
                     if (c <= 1) return "grid-cols-1";
@@ -1477,7 +1591,7 @@ export function AdminProjectsEditor() {
                     <div key={blockIdx} className="space-y-3 bg-[#fafaf6] p-4 rounded-3xl border border-black/[0.04] w-full">
                       {/* Block Header with Controls */}
                       <div className="flex justify-between items-center px-1">
-                        <span className="text-[11px] text-black/50 font-bold uppercase  flex items-center gap-1.5">
+                        <span className="text-[11px] text-black/50 font-bold uppercase flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-[#0000FF]" />
                           Блок {blockIdx + 1} (Зажмите блок ниже для сортировки ↑↓)
                         </span>
@@ -1522,106 +1636,13 @@ export function AdminProjectsEditor() {
                           ? "border-[#0000FF] bg-[#0000FF]/5 scale-[1.01]"
                           : "border-black/5 hover:border-[#0000FF]/15"
                           }`}
-                        title="Зажмите и тащите вверх/вниз для сортировки блоков • Сюда можно перетащить фото"
+                        title="Зажмите и тащите вверх/вниз для сортировки блоков • Сюда можно перетащить фото или видео"
                       >
                         <div className={`grid gap-3 ${getGridColsClass(totalGridElements)}`}>
                           {block.map((imgUrl, imgIdx) => {
-                            const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm");
-                            const videoUrl = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
-                            const matchesTab = previewActiveTab === "video" ? isVideo : !isVideo;
-                            if (!matchesTab) return null;
-
-                            if (isVideo) {
-                              return (
-                                <motion.div
-                                  key={`video-${blockIdx}-${imgIdx}`}
-                                  layout
-                                  draggable={!isReadOnly}
-                                  onDragStart={(e) => handlePhotoDragStart(e, blockIdx, imgIdx)}
-                                  onDragEnd={handlePhotoDragEnd}
-                                  onDragOver={(e) => e.preventDefault()}
-                                  onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone(`photo-${blockIdx}-${imgIdx}`); }}
-                                  onDragLeave={() => setDraggedOverZone(null)}
-                                  onDrop={(e) => handlePhotoDropOnPhoto(e, blockIdx, imgIdx)}
-                                  onClick={() => {
-                                    if (!isReadOnly) document.getElementById(`replace-video-input-${blockIdx}-${imgIdx}`)?.click();
-                                  }}
-                                  whileHover={{ scale: 1.02 }}
-                                  className={`relative rounded-[1.2rem] overflow-hidden bg-black cursor-pointer border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
-                                    ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
-                                    : "border-black/5"
-                                    } ${getImageAspectClass(totalGridElements)} flex flex-col items-center justify-center`}
-                                  title="Кликните для выбора/замены видеофайла • Зажмите для переноса"
-                                >
-                                  <input
-                                    id={`replace-video-input-${blockIdx}-${imgIdx}`}
-                                    type="file"
-                                    accept="video/mp4,video/quicktime,video/webm"
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-                                      const key = `${blockIdx}-${imgIdx}`;
-                                      try {
-                                        setUploadingBlocks(prev => ({ ...prev, [key]: true }));
-                                        setIsConverting(true);
-                                        setConversionProgress(0);
-
-                                        const convertedFile = await convertToWebM(file, (progress) => {
-                                          setConversionProgress(progress);
-                                        });
-
-                                        setIsConverting(false);
-                                        setConversionProgress(null);
-
-                                        const path = `projects/project-block-video-${blockIdx}-${imgIdx}-${Date.now()}.webm`;
-                                        const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
-
-                                        setFormCollageBlocks(prev => prev.map((b, bIdx) => {
-                                          if (bIdx === blockIdx) {
-                                            return b.map((item, iIdx) => iIdx === imgIdx ? `video:${publicUrl}` : item);
-                                          }
-                                          return b;
-                                        }));
-                                      } catch (err: any) {
-                                        alert("Ошибка при замене видео: " + err.message);
-                                      } finally {
-                                        setIsConverting(false);
-                                        setConversionProgress(null);
-                                        setUploadingBlocks(prev => ({ ...prev, [key]: false }));
-                                      }
-                                    }}
-                                  />
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/75 text-white p-2 text-center">
-                                    {uploadingBlocks[`${blockIdx}-${imgIdx}`] ? (
-                                      <Loader2 className="w-5 h-5 text-white animate-spin mb-1" />
-                                    ) : (
-                                      <span className="text-[14px] mb-1">🎬</span>
-                                    )}
-                                    <span className="text-[8px] font-bold uppercase text-white/50 tracking-wider">Видеофайл</span>
-                                    <span className="text-[6px] opacity-75 truncate max-w-full mt-1 px-1.5">{videoUrl.split("/").pop()}</span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setFormCollageBlocks(prev => {
-                                        return prev.map((b, bIdx) => {
-                                          if (bIdx === blockIdx) {
-                                            return b.filter((_, idx) => idx !== imgIdx);
-                                          }
-                                          return b;
-                                        });
-                                      });
-                                    }}
-                                    className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md z-20 cursor-pointer"
-                                    title="Удалить видео"
-                                  >
-                                    <X className="w-2.5 h-2.5" />
-                                  </button>
-                                </motion.div>
-                              );
-                            }
+                            if (!imgUrl) return null;
+                            const isVideo = imgUrl?.startsWith("video:") || imgUrl?.endsWith(".webm") || imgUrl?.endsWith(".mp4");
+                            const videoSrc = isVideo ? (imgUrl.startsWith("video:") ? imgUrl.slice(6) : imgUrl) : "";
 
                             return (
                               <motion.div
@@ -1638,77 +1659,97 @@ export function AdminProjectsEditor() {
                                   document.getElementById(`file-input-${blockIdx}-${imgIdx}`)?.click();
                                 }}
                                 whileHover={{ scale: 1.02 }}
-                                className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo  ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
+                                className={`relative rounded-[1.2rem] overflow-hidden bg-black/10 cursor-grab border transition-all duration-200 shadow-[0_5px_15px_rgba(0,0,0,0.02)] group/photo ${draggedOverZone === `photo-${blockIdx}-${imgIdx}`
                                   ? "border-[#0000FF] scale-105 shadow-[0_8px_25px_rgba(0,0,255,0.25)] opacity-85"
                                   : "border-black/5"
                                   }`}
                                 title="Зажмите для переноса в другой блок / на кнопки • Кликните для выбора файла"
                               >
-                              <div className={`w-full ${getImageAspectClass(totalGridElements)}`}>
-                                {imgUrl ? (
-                                  <img src={imgUrl} alt="Mockup Process" className="w-full h-full object-cover pointer-events-none" />
-                                ) : (
-                                  <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-black/30 bg-black/5">
-                                    <Camera className="w-3.5 h-3.5" />
-                                    <span className="text-[5px] uppercase font-bold">Выбрать фото</span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Photo controls overlay */}
-                              {imgUrl && (
-                                <>
-                                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                    <div className="flex items-center gap-1 bg-black/60 px-1.5 py-1 rounded border border-white/10">
-                                      <Camera className="w-2.5 h-2.5 text-white" />
-                                      <span className="text-[5px] font-bold uppercase text-white/80">Клик для замены</span>
+                                <div className={`w-full ${getImageAspectClass(totalGridElements)}`}>
+                                  {isVideo ? (
+                                    <div className="w-full h-full relative bg-black flex items-center justify-center overflow-hidden">
+                                      <video
+                                        src={videoSrc}
+                                        className="w-full h-full object-cover pointer-events-none"
+                                        muted
+                                        playsInline
+                                        loop
+                                        onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
+                                        onMouseLeave={(e) => {
+                                          const v = e.currentTarget as HTMLVideoElement;
+                                          v.pause();
+                                          v.currentTime = 0;
+                                        }}
+                                      />
+                                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/70 text-white font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 pointer-events-none z-10">
+                                        <Play className="w-2.5 h-2.5 fill-current text-white" /> VIDEO
+                                      </div>
                                     </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setFormCollageBlocks(prev => {
-                                        return prev.map((b, bIdx) => {
-                                          if (bIdx === blockIdx) {
-                                            return b.filter((_, idx) => idx !== imgIdx);
-                                          }
-                                          return b;
-                                        });
-                                      });
-                                    }}
-                                    className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md opacity-0 group-hover/photo:opacity-100 transition-opacity z-20 cursor-pointer"
-                                    title="Удалить фото"
-                                  >
-                                    <X className="w-2.5 h-2.5" />
-                                  </button>
-                                </>
-                              )}
+                                  ) : (
+                                    <img src={imgUrl} alt="Media Process" className="w-full h-full object-cover pointer-events-none" />
+                                  )}
+                                </div>
 
-                              <input
-                                id={`file-input-${blockIdx}-${imgIdx}`}
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    handleUploadPhoto({ blockIdx, imgIdx }, file);
-                                  }
-                                }}
-                              />
-                            </motion.div>
-                          );
+                                {/* Controls overlay */}
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                  <div className="flex items-center gap-1 bg-black/70 px-2 py-1 rounded-lg border border-white/20">
+                                    {isVideo ? <Video className="w-3 h-3 text-white" /> : <Camera className="w-3 h-3 text-white" />}
+                                    <span className="text-[7px] font-bold uppercase text-white/90">Клик для замены</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFormCollageBlocks(prev => {
+                                      return prev.map((b, bIdx) => {
+                                        if (bIdx === blockIdx) {
+                                          return b.filter((_, idx) => idx !== imgIdx);
+                                        }
+                                        return b;
+                                      });
+                                    });
+                                  }}
+                                  className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md opacity-0 group-hover/photo:opacity-100 transition-opacity z-20 cursor-pointer"
+                                  title="Удалить"
+                                >
+                                  <X className="w-2.5 h-2.5" />
+                                </button>
+
+                                <input
+                                  id={`file-input-${blockIdx}-${imgIdx}`}
+                                  type="file"
+                                  accept="image/*,video/mp4,video/quicktime,video/webm"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleUploadPhoto({ blockIdx, imgIdx }, file);
+                                    }
+                                  }}
+                                />
+                              </motion.div>
+                            );
                           })}
 
-                          {/* Add Photo slot directly inside the block grid */}
-                          {hasAddSlot && previewActiveTab === "gallery" && (
+                          {/* Add Media Slot inside the block grid */}
+                          {hasAddSlot && (
                             <div
-                              onClick={() => {
-                                document.getElementById(`add-photo-input-${blockIdx}`)?.click();
+                              onDragOver={(e) => e.preventDefault()}
+                              onDragEnter={(e) => { e.preventDefault(); setDraggedOverZone(`add-${blockIdx}`); }}
+                              onDragLeave={() => setDraggedOverZone(null)}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                  handleUploadMediaFiles(e.dataTransfer.files, blockIdx);
+                                }
                               }}
-                              className={`rounded-[1.2rem] border border-dashed border-black/15 hover:border-[#0000FF]/50 hover:bg-[#0000FF]/5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors ${getImageAspectClass(totalGridElements)}`}
-                              title="Добавить фото в этот block"
+                              className={`rounded-[1.2rem] border border-dashed p-3 transition-all flex flex-col items-center justify-center gap-2 ${getImageAspectClass(totalGridElements)} ${
+                                draggedOverZone === `add-${blockIdx}`
+                                  ? "border-[#0000FF] bg-[#0000FF]/10"
+                                  : "border-black/15 bg-white/40 hover:border-[#0000FF]/40 hover:bg-[#0000FF]/5"
+                              }`}
+                              title="Добавить фото или видео в этот блок"
                             >
                               <input
                                 id={`add-photo-input-${blockIdx}`}
@@ -1716,100 +1757,51 @@ export function AdminProjectsEditor() {
                                 accept="image/*"
                                 multiple
                                 className="hidden"
-                                onChange={async (e) => {
-                                  const files = e.target.files;
-                                  if (!files || files.length === 0) return;
-                                  const key = `${blockIdx}-add`;
-                                  try {
-                                    setUploadingBlocks(prev => ({ ...prev, [key]: true }));
-                                    const uploadedUrls: string[] = [];
-                                    
-                                    for (let i = 0; i < files.length; i++) {
-                                      const file = files[i];
-                                      const fileExt = file.name.split('.').pop();
-                                      const nextIdx = block.length + i;
-                                      const path = `projects/project-block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
-                                      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
-                                      uploadedUrls.push(publicUrl);
-                                    }
-
-                                    setFormCollageBlocks(prev => {
-                                      return prev.map((b, bIdx) => {
-                                        if (bIdx === blockIdx) return [...b, ...uploadedUrls];
-                                        return b;
-                                      });
-                                    });
-                                  } catch (err: any) {
-                                    alert("Ошибка при загрузке: " + err.message);
-                                  } finally {
-                                    setUploadingBlocks(prev => ({ ...prev, [key]: false }));
-                                  }
+                                onChange={(e) => {
+                                  if (e.target.files) handleUploadMediaFiles(e.target.files, blockIdx);
                                 }}
                               />
-                              {uploadingBlocks[`${blockIdx}-add`] ? (
-                                <Loader2 className="w-3.5 h-3.5 text-[#0000FF] animate-spin" />
+                              <input
+                                id={`add-video-input-${blockIdx}`}
+                                type="file"
+                                accept="video/mp4,video/quicktime,video/webm"
+                                className="hidden"
+                                onChange={(e) => {
+                                  if (e.target.files) handleUploadMediaFiles(e.target.files, blockIdx);
+                                }}
+                              />
+                              {uploadingBlocks[`${blockIdx}-add-media`] ? (
+                                <div className="flex flex-col items-center gap-1.5">
+                                  <Loader2 className="w-5 h-5 text-[#0000FF] animate-spin" />
+                                  <span className="text-[8px] font-bold text-[#0000FF] uppercase tracking-wider text-center">
+                                    {isConverting ? `Конвертация... ${conversionProgress || 0}%` : "Загрузка..."}
+                                  </span>
+                                </div>
                               ) : (
-                                <>
-                                  <Plus className="w-3.5 h-3.5 text-[#0000FF]" />
-                                  <span className="text-[6px] uppercase font-bold text-[#0000FF]/80">Добавить фото</span>
-                                </>
+                                <div className="flex flex-col items-center gap-2 w-full px-2">
+                                  <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
+                                    <button
+                                      type="button"
+                                      onClick={() => document.getElementById(`add-photo-input-${blockIdx}`)?.click()}
+                                      className="px-2.5 py-1.5 bg-[#0000FF]/10 hover:bg-[#0000FF] text-[#0000FF] hover:text-white rounded-xl text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                                    >
+                                      <Camera className="w-3 h-3" /> + Фото
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => document.getElementById(`add-video-input-${blockIdx}`)?.click()}
+                                      className="px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                                    >
+                                      <Video className="w-3 h-3" /> + Видео
+                                    </button>
+                                  </div>
+                                  <span className="text-[7px] uppercase font-bold text-black/35 font-mono tracking-wider text-center">
+                                    или перетащите фото / видео
+                                  </span>
+                                </div>
                               )}
                             </div>
                           )}
-
-                           {/* Add Video slot directly inside the block grid */}
-                           {hasAddSlot && previewActiveTab === "video" && (
-                             <div
-                               onClick={() => {
-                                 if (!isReadOnly) document.getElementById(`add-video-input-${blockIdx}`)?.click();
-                               }}
-                               className={`rounded-[1.2rem] border border-dashed border-[#0000FF]/30 hover:border-[#0000FF]/60 hover:bg-[#0000FF]/5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors ${getImageAspectClass(totalGridElements)}`}
-                               title="Загрузить видеофайл (MP4/MOV/WebM) в этот блок"
-                             >
-                               <input
-                                 id={`add-video-input-${blockIdx}`}
-                                 type="file"
-                                 accept="video/mp4,video/quicktime,video/webm"
-                                 className="hidden"
-                                 onChange={async (e) => {
-                                   const file = e.target.files?.[0];
-                                   if (!file) return;
-                                   const key = `${blockIdx}-add-video`;
-                                   try {
-                                     setUploadingBlocks(prev => ({ ...prev, [key]: true }));
-                                     const fileExt = file.name.split('.').pop();
-                                     const nextIdx = block.length;
-                                     const path = `projects/project-block-video-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
-                                     setIsConverting(true);
-                                     setConversionProgress(0);
-                                     const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
-                                     setIsConverting(false);
-                                     setConversionProgress(null);
-                                     const publicUrl = await supabaseClient.uploadFile("assets", path.replace("." + fileExt, ".webm"), convertedFile);
-
-                                     setFormCollageBlocks(prev => {
-                                       return prev.map((b, bIdx) => {
-                                         if (bIdx === blockIdx) return [...b, `video:${publicUrl}`];
-                                         return b;
-                                       });
-                                     });
-                                   } catch (err: any) {
-                                     alert("Ошибка при загрузке: " + err.message);
-                                   } finally {
-                                     setUploadingBlocks(prev => ({ ...prev, [key]: false }));
-                                   }
-                                 }}
-                               />
-                               {uploadingBlocks[`${blockIdx}-add-video`] ? (
-                                 <Loader2 className="w-3.5 h-3.5 text-[#0000FF] animate-spin" />
-                               ) : (
-                                 <>
-                                   <Plus className="w-3.5 h-3.5 text-[#0000FF]" />
-                                   <span className="text-[6px] uppercase font-bold text-[#0000FF]/85">Добавить видео</span>
-                                 </>
-                               )}
-                             </div>
-                           )}
                         </div>
                       </motion.div>
 
@@ -1830,9 +1822,9 @@ export function AdminProjectsEditor() {
                               ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
                               : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
                               }`}
-                            title="Вставить блок коллажа • Сюда можно перетащить фото"
+                            title="Вставить блок коллажа • Сюда можно перетащить медиа"
                           >
-                            <Plus className="w-3.5 h-3.5" /> Вставить фото-блок сюда
+                            <Plus className="w-3.5 h-3.5" /> Вставить медиа-блок сюда
                           </button>
                           <button
                             type="button"
@@ -1843,7 +1835,7 @@ export function AdminProjectsEditor() {
                               return next;
                             })}
                             className="w-full py-3 border border-dashed font-bold rounded-[1.8rem] text-[9px] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
-                            title="Вставить текстовый блок между фото"
+                            title="Вставить текстовый блок"
                           >
                             <Type className="w-3.5 h-3.5" /> Вставить текст сюда
                           </button>
@@ -1866,9 +1858,9 @@ export function AdminProjectsEditor() {
                       ? "border-[#0000FF] bg-[#0000FF]/15 text-[#0000FF] scale-[1.01] shadow-lg"
                       : "bg-[#0000FF]/5 hover:bg-[#0000FF]/10 border-[#0000FF]/20 hover:border-[#0000FF]/40 text-[#0000FF]"
                       }`}
-                    title="Добавить блок коллажа • Сюда можно перетащить фото"
+                    title="Добавить блок коллажа • Сюда можно перетащить медиа"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Добавить блок фото
+                    <Plus className="w-3.5 h-3.5" /> Добавить медиа-блок (фото / видео)
                   </button>
 
                   <button
