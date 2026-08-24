@@ -5,16 +5,38 @@ import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
 import { motion, AnimatePresence } from "motion/react";
 import { supabaseClient } from "../supabaseClient";
-import { Menu, X, ArrowUp, ThumbsUp } from "lucide-react";
+import { Menu, X, ArrowUp, ThumbsUp, ChevronDown, Globe, Check } from "lucide-react";
+
+const languageDetails: Record<Language, { label: string; name: string }> = {
+  en: { label: "EN", name: "English" },
+  kg: { label: "KG", name: "Кыргызча" },
+  ru: { label: "RU", name: "Русский" },
+  zh: { label: "ZH", name: "中文" },
+  ar: { label: "AR", name: "العربية" },
+  de: { label: "DE", name: "Deutsch" },
+};
 
 
 export function Root() {
   const location = useLocation();
   const outlet = useOutlet();
   const [locale, setLocale] = useState<Language>("en");
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
   const [siteTranslations, setSiteTranslations] = useState(() => cmsService.getTranslations());
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const navRef = useRef<HTMLDivElement>(null);
+
+  // Close language dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -104,9 +126,10 @@ export function Root() {
     setFormError("");
     try {
       await supabaseClient.insertTable("sds_leads", [{
-        name: formName,
-        email: formContact,
-        message: formMessage,
+        name: formName.trim() || "Без имени",
+        email: formContact.trim(),
+        phone: !formContact.includes("@") ? formContact.trim() : "",
+        message: formMessage.trim(),
         archived: false,
         created_at: new Date().toISOString()
       }]);
@@ -435,17 +458,27 @@ export function Root() {
                           >
                             <span>{locale === "ru" ? "Current projects" : locale === "kg" ? "Учурдагы долбоорлор" : "Current projects"}</span>
                           </NavLink>
-                          
+
                           <NavLink
-                            to="/projects/old"
+                            to="/products"
                             className={({ isActive }) =>
-                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
                                 isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
                               }`
                             }
                           >
-                            <span>{locale === "ru" ? "Old projects" : locale === "kg" ? "Эски долбоорлор" : "Old projects"}</span>
-                            <span className="text-[11px] font-mono text-[#808080] font-normal tracking-normal shrink-0">(2005 — 2020)</span>
+                            <span>{locale === "ru" ? "Products" : locale === "kg" ? "Продукциялар" : "Products"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/architectural-projects"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Architecture" : locale === "kg" ? "Архитектура" : "Architecture"}</span>
                           </NavLink>
 
                           <NavLink
@@ -479,6 +512,40 @@ export function Root() {
                             }
                           >
                             <span>{locale === "ru" ? "GameDev" : locale === "kg" ? "GameDev" : "GameDev"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/video"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Video" : locale === "kg" ? "Видео" : "Video"}</span>
+                          </NavLink>
+
+                          <NavLink
+                            to="/music"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Music" : locale === "kg" ? "Музыка" : "Music"}</span>
+                          </NavLink>
+                          
+                          <NavLink
+                            to="/projects/old"
+                            className={({ isActive }) =>
+                              `px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between gap-3 tracking-[0.02em] ${
+                                isActive ? "bg-[#0000FF]/10 text-[#0000FF]" : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                              }`
+                            }
+                          >
+                            <span>{locale === "ru" ? "Old projects" : locale === "kg" ? "Эски долбоорлор" : "Old projects"}</span>
+                            <span className="text-[11px] font-mono text-[#808080] font-normal tracking-normal shrink-0">(2005 — 2020)</span>
                           </NavLink>
                         </div>
                       </div>
@@ -514,26 +581,43 @@ export function Root() {
 
             <span className="hidden md:inline text-[#808080] text-[17px]">|</span>
 
-            {/* Language Switcher */}
-            <div className="flex gap-3">
-              {languageOptions.map((opt) => (
-                <button 
-                  key={opt.code}
-                  onClick={() => setLocale(opt.code)}
-                  className={`text-[17px] font-normal tracking-[-0.15px] uppercase cursor-pointer transition-opacity relative pb-[6px] ${
-                    locale === opt.code ? "text-black" : "text-[#808080] hover:text-black"
-                  }`}
-                >
-                  {opt.label}
-                  {locale === opt.code && (
-                    <motion.div
-                      layoutId="activeLanguage"
-                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-black"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </button>
-              ))}
+            {/* Language Switcher Dropdown (Matching PROJECTS Dropdown Style) */}
+            <div className="relative group/langdropdown">
+              <button 
+                type="button"
+                className="text-[16px] font-medium tracking-[-0.15px] uppercase transition-colors duration-300 group-hover/langdropdown:text-[#0000FF] relative pb-[6px] flex items-center gap-1.5 cursor-pointer text-black"
+                aria-label="Change language"
+              >
+                <span>{locale.toUpperCase()}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-[#808080] group-hover/langdropdown:text-[#0000FF] transition-transform duration-300 group-hover/langdropdown:rotate-180" />
+              </button>
+
+              {/* Dropdown Menu on Hover */}
+              <div className="absolute top-full right-0 pt-3 opacity-0 pointer-events-none group-hover/langdropdown:opacity-100 group-hover/langdropdown:pointer-events-auto transition-all duration-300 ease-out z-[999]">
+                <div className="bg-white border border-black/10 rounded-2xl p-4 min-w-[210px] flex flex-col gap-1 backdrop-blur-xl">
+                  {languageOptions.map((opt) => {
+                    const isSelected = locale === opt.code;
+                    const details = languageDetails[opt.code];
+                    return (
+                      <button
+                        key={opt.code}
+                        type="button"
+                        onClick={() => setLocale(opt.code)}
+                        className={`px-4 py-2.5 rounded-xl text-[13px] font-medium uppercase transition-all duration-200 flex items-center justify-between tracking-[0.02em] cursor-pointer ${
+                          isSelected
+                            ? "bg-[#0000FF]/10 text-[#0000FF]"
+                            : "text-black/80 hover:bg-[#0000FF]/5 hover:text-[#0000FF]"
+                        }`}
+                      >
+                        <span>{details?.name || opt.label}</span>
+                        <span className={`text-[11px] font-mono shrink-0 ${isSelected ? "text-[#0000FF]" : "text-[#808080]"}`}>
+                          [{opt.label}]
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -572,11 +656,14 @@ export function Root() {
                       {isProjects && (
                         <div className="flex flex-wrap gap-2 pt-4 pb-1">
                           {[
-                            { name: locale === "ru" ? "Старые проекты (2005-2020)" : "Old Projects", path: "/projects/old" },
+                            { name: locale === "ru" ? "Продукты" : "Products", path: "/products" },
+                            { name: locale === "ru" ? "Архитектура" : "Architecture", path: "/architectural-projects" },
                             { name: locale === "ru" ? "Концепты и видение" : "Concepts & Vision", path: "/concepts-and-vision" },
                             { name: "Web UI / UX", path: "/web-ui-ux" },
                             { name: "GameDev", path: "/gamedev" },
                             { name: locale === "ru" ? "Видео" : "Video", path: "/video" },
+                            { name: locale === "ru" ? "Музыка" : "Music", path: "/music" },
+                            { name: locale === "ru" ? "Старые проекты (2005-2020)" : "Old Projects", path: "/projects/old" },
                           ].map((sub) => (
                             <NavLink
                               key={sub.path}
@@ -597,20 +684,38 @@ export function Root() {
                 <div className="w-full border-t border-[#808080]/20 my-4" />
 
                 {/* Language Switcher in Mobile Drawer */}
-                <div className="flex flex-wrap gap-6 pt-1 pb-4">
-                  {languageOptions.map((opt) => (
-                    <button
-                      key={opt.code}
-                      onClick={() => setLocale(opt.code)}
-                      className={`text-[16px] font-normal uppercase tracking-tight cursor-pointer transition-all pb-1 relative ${
-                        locale === opt.code
-                          ? "text-[#0000FF] font-medium border-b-2 border-[#0000FF]"
-                          : "text-[#808080] hover:text-black"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                <div className="flex flex-col gap-2 pt-1 pb-4">
+                  <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.08em]">
+                    {locale === "ru" ? "Язык интерфейса" : locale === "kg" ? "Интерфейс тили" : "Interface Language"}
+                  </span>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {languageOptions.map((opt) => {
+                      const isSelected = locale === opt.code;
+                      const details = languageDetails[opt.code];
+                      return (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          onClick={() => {
+                            setLocale(opt.code);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-[#0000FF] border-[#0000FF] text-white shadow-sm"
+                              : "bg-black/[0.03] border-black/10 text-black/80 hover:border-black/30 hover:bg-black/[0.06]"
+                          }`}
+                        >
+                          <span className="font-mono text-[12px] font-bold uppercase tracking-wider">
+                            {opt.label}
+                          </span>
+                          <span className={`text-[11px] mt-0.5 ${isSelected ? "text-white/80" : "text-[#808080]"}`}>
+                            {details?.name || opt.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </motion.div>

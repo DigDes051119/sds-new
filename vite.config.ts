@@ -72,6 +72,18 @@ export default defineConfig({
     },
   },
 
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react-router',
+      'motion/react',
+      'lucide-react',
+      'clsx',
+      'tailwind-merge',
+    ],
+  },
   server: {
     port: 5173,
     strictPort: false,

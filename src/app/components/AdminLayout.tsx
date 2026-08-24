@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { 
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Check, Sun, Moon, 
   Star, Users, FolderGit, MapPin, Shield, Briefcase, Package, Inbox, ExternalLink, RefreshCw,
-  Search, Bell, Sparkles, Images
+  Search, Bell, Sparkles, Images, Music
 } from "lucide-react";
 import { cmsService } from "../cmsService";
 import logo from "../../imports/logo__2_.svg";
@@ -94,6 +94,7 @@ export function AdminLayout() {
     { name: "Архитектура", path: "/admin/architects", icon: FolderGit, permKey: "projects" },
     { name: "GameDev", path: "/admin/gamedev", icon: FolderGit, permKey: "projects" },
     { name: "Видео", path: "/admin/video", icon: FolderGit, permKey: "projects" },
+    { name: "Музыка", path: "/admin/music", icon: Music, permKey: "projects" },
     { name: "Контакты и Карта", path: "/admin/contacts", icon: MapPin, permKey: "contacts" },
     { name: "Услуги", path: "/admin/services", icon: Briefcase, permKey: "services" },
     { name: "Бренды", path: "/admin/brands", icon: Star, permKey: "about" },

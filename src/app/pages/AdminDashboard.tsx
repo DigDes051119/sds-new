@@ -21,10 +21,60 @@ const pathLabels: Record<string, string> = {
   "/": "Главная",
   "/about": "О нас",
   "/projects": "Проекты",
+  "/products": "Продукты",
+  "/architectural-projects": "Архитектура",
+  "/architect-projects": "Архитектура",
+  "/concepts-and-vision": "Концепты и видение",
+  "/web-ui-ux": "Web & UI/UX",
+  "/gamedev": "GameDev",
+  "/video": "Видео",
+  "/music": "Музыка",
   "/services": "Услуги",
   "/contacts": "Контакты",
   "/admin": "Панель администратора"
 };
+
+function formatProjectCaseName(raw: string): string {
+  if (!raw) return "Проект";
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {}
+  
+  decoded = decoded.replace(/[+/_-]+/g, " ").trim();
+  const lower = decoded.toLowerCase();
+
+  if (lower.includes("энем") || lower.includes("мамин") || lower.includes("mom") || lower.includes("mother")) {
+    return "Mom's Recipes (Мамины рецепты)";
+  }
+  if (lower.includes("one ordo") || lower.includes("oneordo") || lower.includes("ван ордо") || lower.includes("ордо")) {
+    return "One Ordo Resort";
+  }
+  if (lower.includes("one construction") || lower.includes("oneconstruction")) {
+    return "One Construction";
+  }
+  if (lower.includes("tooko") || lower.includes("тооко")) {
+    return "TOOKO";
+  }
+  if (lower.includes("ala too") || lower.includes("alatoo") || lower.includes("ала тоо") || lower.includes("алатоо")) {
+    return "Ala-Too Resort";
+  }
+  if (lower === "old" || lower.includes("old project") || lower.includes("oldproject") || lower.includes("архив")) {
+    return "Old Projects Archive (2005-2020)";
+  }
+  if (lower.includes("sandyq") || lower.includes("sandyk") || lower.includes("сандык")) {
+    return "Sandyq";
+  }
+  if (lower.includes("salkyn") || lower.includes("салкында")) {
+    return "Salkyn Tor";
+  }
+
+  return decoded
+    .split(" ")
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
@@ -188,7 +238,11 @@ $$ LANGUAGE plpgsql;`;
 
       const pathCounts: Record<string, number> = {};
       rows.forEach((r) => {
-        pathCounts[r.path] = (pathCounts[r.path] || 0) + 1;
+        let cleanPath = r.path || "/";
+        try {
+          cleanPath = decodeURIComponent(cleanPath);
+        } catch {}
+        pathCounts[cleanPath] = (pathCounts[cleanPath] || 0) + 1;
       });
       const sortedPages = Object.entries(pathCounts)
         .map(([path, count]) => ({ path, count }))
@@ -275,11 +329,15 @@ $$ LANGUAGE plpgsql;`;
 
       const projectViews: Record<string, number> = {};
       rows.forEach((r) => {
-        if (r.path.startsWith("/projects/")) {
-          const parts = r.path.split("/");
-          const caseId = parts[parts.length - 1];
+        if (r.path && (r.path.startsWith("/projects/") || r.path.startsWith("/projects") || r.path.includes("/project/"))) {
+          let rawId = r.path.replace(/^\/projects\/?/, "").replace(/^\/project\/?/, "");
+          try {
+            rawId = decodeURIComponent(rawId);
+          } catch {}
+          const parts = rawId.split("/").filter(Boolean);
+          const caseId = parts[0] || "";
           if (caseId && caseId !== "projects") {
-            const cleanName = caseId.charAt(0).toUpperCase() + caseId.slice(1).replace(/-/g, " ");
+            const cleanName = formatProjectCaseName(caseId);
             projectViews[cleanName] = (projectViews[cleanName] || 0) + 1;
           }
         }
@@ -376,7 +434,18 @@ $$ LANGUAGE plpgsql;`;
         if (!userPaths[r.session_id]) {
           userPaths[r.session_id] = [];
         }
-        const label = pathLabels[r.path] || r.path;
+        let cleanPath = r.path || "/";
+        try {
+          cleanPath = decodeURIComponent(cleanPath);
+        } catch {}
+        let label = pathLabels[cleanPath] || pathLabels[r.path];
+        if (!label) {
+          if (cleanPath.startsWith("/projects/")) {
+            label = `Проект: ${formatProjectCaseName(cleanPath.replace("/projects/", ""))}`;
+          } else {
+            label = cleanPath;
+          }
+        }
         const currentLen = userPaths[r.session_id].length;
         if (currentLen === 0 || userPaths[r.session_id][currentLen - 1] !== label) {
           userPaths[r.session_id].push(label);

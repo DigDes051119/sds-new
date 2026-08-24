@@ -3,25 +3,25 @@ import { createBrowserRouter } from "react-router";
 import { Root } from "./components/Root";
 import { RouteErrorBoundary } from "./components/ErrorBoundary";
 import { Home } from "./pages/Home";
-import { About } from "./pages/About";
-import { Services } from "./pages/Services";
-import { Projects } from "./pages/Projects";
 
+const About = lazy(() => import("./pages/About").then(m => ({ default: m.About })));
+const Services = lazy(() => import("./pages/Services").then(m => ({ default: m.Services })));
+const Projects = lazy(() => import("./pages/Projects").then(m => ({ default: m.Projects })));
 const Contacts = lazy(() => import("./pages/Contacts").then(m => ({ default: m.Contacts })));
-
-import { OldProjects } from "./pages/OldProjects";
-import { ProjectDetail } from "./pages/ProjectDetail";
-import { WebUiUx } from "./pages/WebUiUx";
-import { WebUiUxDetail } from "./pages/WebUiUxDetail";
-import { Products } from "./pages/Products";
-import { ProductDetail } from "./pages/ProductDetail";
-import { ConceptsAndVision } from "./pages/ConceptsAndVision";
-import { ConceptsAndVisionDetail } from "./pages/ConceptsAndVisionDetail";
-import { ArchitectProjects } from "./pages/ArchitectProjects";
-import { ArchitectProjectsDetail } from "./pages/ArchitectProjectsDetail";
-import { GameDev } from "./pages/GameDev";
-import { GameDevDetail } from "./pages/GameDevDetail";
-import { Video } from "./pages/Video";
+const OldProjects = lazy(() => import("./pages/OldProjects").then(m => ({ default: m.OldProjects })));
+const ProjectDetail = lazy(() => import("./pages/ProjectDetail").then(m => ({ default: m.ProjectDetail })));
+const WebUiUx = lazy(() => import("./pages/WebUiUx").then(m => ({ default: m.WebUiUx })));
+const WebUiUxDetail = lazy(() => import("./pages/WebUiUxDetail").then(m => ({ default: m.WebUiUxDetail })));
+const Products = lazy(() => import("./pages/Products").then(m => ({ default: m.Products })));
+const ProductDetail = lazy(() => import("./pages/ProductDetail").then(m => ({ default: m.ProductDetail })));
+const ConceptsAndVision = lazy(() => import("./pages/ConceptsAndVision").then(m => ({ default: m.ConceptsAndVision })));
+const ConceptsAndVisionDetail = lazy(() => import("./pages/ConceptsAndVisionDetail").then(m => ({ default: m.ConceptsAndVisionDetail })));
+const ArchitectProjects = lazy(() => import("./pages/ArchitectProjects").then(m => ({ default: m.ArchitectProjects })));
+const ArchitectProjectsDetail = lazy(() => import("./pages/ArchitectProjectsDetail").then(m => ({ default: m.ArchitectProjectsDetail })));
+const GameDev = lazy(() => import("./pages/GameDev").then(m => ({ default: m.GameDev })));
+const GameDevDetail = lazy(() => import("./pages/GameDevDetail").then(m => ({ default: m.GameDevDetail })));
+const Video = lazy(() => import("./pages/Video").then(m => ({ default: m.Video })));
+const Music = lazy(() => import("./pages/Music").then(m => ({ default: m.Music })));
 
 // Admin pages lazy (heavy admin bundle separated)
 const AdminLayout = lazy(() => import("./components/AdminLayout").then(m => ({ default: m.AdminLayout })));
@@ -34,6 +34,7 @@ const AdminConceptsEditor = lazy(() => import("./pages/AdminCatalogEditor").then
 const AdminArchitectsEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminArchitectsEditor })));
 const AdminGameDevEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminGameDevEditor })));
 const AdminVideoEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminVideoEditor })));
+const AdminMusicEditor = lazy(() => import("./pages/AdminCatalogEditor").then(m => ({ default: m.AdminMusicEditor })));
 const AdminFeaturedProjects = lazy(() => import("./pages/AdminFeaturedProjects").then(m => ({ default: m.AdminFeaturedProjects })));
 const AdminAboutEditor = lazy(() => import("./pages/AdminAboutEditor").then(m => ({ default: m.AdminAboutEditor })));
 const AdminContactsEditor = lazy(() => import("./pages/AdminContactsEditor").then(m => ({ default: m.AdminContactsEditor })));
@@ -64,9 +65,12 @@ export const router = createBrowserRouter([
       { path: "concepts-and-vision/:id", Component: ConceptsAndVisionDetail },
       { path: "architect-projects", Component: ArchitectProjects },
       { path: "architect-projects/:id", Component: ArchitectProjectsDetail },
+      { path: "architectural-projects", Component: ArchitectProjects },
+      { path: "architectural-projects/:id", Component: ArchitectProjectsDetail },
       { path: "gamedev", Component: GameDev },
       { path: "gamedev/:id", Component: GameDevDetail },
       { path: "video", Component: Video },
+      { path: "music", Component: Music },
       { path: "contacts", Component: Contacts },
     ],
   },
@@ -98,6 +102,7 @@ export const router = createBrowserRouter([
       { path: "architects", Component: AdminArchitectsEditor },
       { path: "gamedev", Component: AdminGameDevEditor },
       { path: "video", Component: AdminVideoEditor },
+      { path: "music", Component: AdminMusicEditor },
       { path: "contacts", Component: AdminContactsEditor },
       { path: "services", Component: AdminServicesEditor },
       { path: "brands", Component: AdminBrandsEditor },

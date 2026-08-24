@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { cmsService } from "../cmsService";
-import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, ArrowLeftRight, Type, Copy, Video, Play, Film } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Save, X, Image, Loader2, Camera, ChevronUp, ChevronDown, ArrowLeftRight, Type, Copy, Video, Play, Film, Music } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { translateText } from "../translateHelper";
 import { logAdminAction } from "../adminLogger";
@@ -28,7 +28,7 @@ const slugify = (text: string) => {
 };
 
 interface CatalogConfig {
-  type: "products" | "concepts" | "architects" | "gamedev" | "video";
+  type: "products" | "concepts" | "architects" | "gamedev" | "video" | "music";
   titleRu: string;
   titleEn: string;
   titleKg: string;
@@ -101,9 +101,132 @@ const CONFIGS: Record<string, CatalogConfig> = {
     defaultTitleEn: "Video & Motion",
     defaultTitleKg: "Видео жана Анимация",
   },
+  music: {
+    type: "music",
+    titleRu: "Музыка",
+    titleEn: "Music",
+    titleKg: "Музыка",
+    logSection: "Управление Музыкой",
+    itemTypeLabelRu: "музыкальный трек",
+    itemTypeLabelRuGenitive: "музыкального трека",
+    defaultTitleRu: "Музыка и саунд-дизайн",
+    defaultTitleEn: "Music & Sound Design",
+    defaultTitleKg: "Музыка жана үн дизайны",
+  },
 };
 
-export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "architects" | "gamedev" | "video" }) {
+/** Automatically inspects audio files (format, size, duration, bpm, clean name) */
+async function extractAudioMetadata(file: File): Promise<{
+  format: string;
+  fileSize: string;
+  duration: string;
+  bpm: string;
+  trackName: string;
+}> {
+  // 1. File Size
+  const sizeMb = file.size / (1024 * 1024);
+  const fileSize = sizeMb >= 1 ? `${sizeMb.toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`;
+
+  // 2. Clean Track Name & Extension
+  const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").trim();
+  const rawExt = (file.name.split(".").pop() || "mp3").toUpperCase();
+
+  let duration = "03:30";
+  let format = rawExt === "WAV" ? "WAV 24-bit" : rawExt === "FLAC" ? "FLAC Lossless" : "MP3 320kbps";
+  let bpm = "128 BPM";
+
+  // 3. Audio Duration & Bitrate Detection
+  try {
+    const audioObj = document.createElement("audio");
+    audioObj.preload = "metadata";
+    const objectUrl = URL.createObjectURL(file);
+    audioObj.src = objectUrl;
+
+    await new Promise<void>((resolve) => {
+      audioObj.onloadedmetadata = () => {
+        const sec = Math.round(audioObj.duration);
+        if (!isNaN(sec) && sec > 0) {
+          const mins = Math.floor(sec / 60);
+          const remainingSec = sec % 60;
+          duration = `${String(mins).padStart(2, "0")}:${String(remainingSec).padStart(2, "0")}`;
+
+          const bitrateKbps = Math.round((file.size * 8) / (sec * 1000));
+          if (rawExt === "MP3") {
+            if (bitrateKbps >= 300) format = "MP3 320kbps";
+            else if (bitrateKbps >= 240) format = "MP3 256kbps";
+            else if (bitrateKbps >= 180) format = "MP3 192kbps";
+            else if (bitrateKbps >= 115) format = "MP3 128kbps";
+            else format = `MP3 ${bitrateKbps}kbps`;
+          } else if (rawExt === "WAV") {
+            format = "WAV 24-bit";
+          } else if (rawExt === "FLAC") {
+            format = "FLAC Lossless";
+          } else {
+            format = `${rawExt} ${bitrateKbps}kbps`;
+          }
+        }
+        resolve();
+      };
+      audioObj.onerror = () => resolve();
+      setTimeout(resolve, 2000);
+    });
+    URL.revokeObjectURL(objectUrl);
+  } catch (e) {
+    console.warn("Audio duration extraction skipped:", e);
+  }
+
+  // 4. BPM Analysis using Web Audio API
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtx) {
+      const audioCtx = new AudioCtx();
+      // Slice first 3MB for fast decoding
+      const slice = file.slice(0, 3 * 1024 * 1024);
+      const arrayBuffer = await slice.arrayBuffer();
+      const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const channelData = decodedBuffer.getChannelData(0);
+      const sampleRate = decodedBuffer.sampleRate;
+
+      // Peak detection (energy thresholding)
+      const peaks: number[] = [];
+      const threshold = 0.65;
+      const step = Math.floor(sampleRate / 100); // 10ms
+
+      for (let i = 0; i < channelData.length; i += step) {
+        if (Math.abs(channelData[i]) > threshold) {
+          peaks.push(i);
+        }
+      }
+
+      if (peaks.length > 8) {
+        const intervals: number[] = [];
+        for (let i = 1; i < Math.min(peaks.length, 180); i++) {
+          const diff = peaks[i] - peaks[i - 1];
+          const sec = diff / sampleRate;
+          if (sec >= 0.33 && sec <= 1.0) { // 60 to 180 BPM range
+            const potentialBpm = Math.round(60 / sec);
+            if (potentialBpm >= 65 && potentialBpm <= 175) {
+              intervals.push(potentialBpm);
+            }
+          }
+        }
+
+        if (intervals.length > 0) {
+          intervals.sort((a, b) => a - b);
+          const median = intervals[Math.floor(intervals.length / 2)];
+          bpm = `${median} BPM`;
+        }
+      }
+      audioCtx.close().catch(() => {});
+    }
+  } catch (err) {
+    console.warn("BPM detection skipped:", err);
+  }
+
+  return { format, fileSize, duration, bpm, trackName: baseName };
+}
+
+export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "architects" | "gamedev" | "video" | "music" }) {
   const cfg = CONFIGS[type];
   const [translations, setTranslations] = useState(() => cmsService.getTranslations());
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
@@ -245,7 +368,8 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
         const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
         setIsConverting(false);
         setConversionProgress(null);
-        const uploaded = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+        const fileExt = convertedFile.name.split('.').pop() || file.name.split('.').pop() || "mp4";
+        const uploaded = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, `.${fileExt}`), convertedFile);
         publicUrl = `video:${uploaded}`;
       } else {
         publicUrl = await supabaseClient.uploadFile("assets", path, file);
@@ -273,6 +397,36 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     }
   };
 
+  const handleAudioFileUpload = async (file: File) => {
+    if (isReadOnly || !file) return;
+    try {
+      setUploadingVideo(true);
+
+      // 1. Instantly parse audio metadata (format, filesize, duration, bpm, name)
+      const meta = await extractAudioMetadata(file);
+      setFormFormat(meta.format);
+      setFormFileSize(meta.fileSize);
+      setFormBpm(meta.bpm);
+      setFormDuration(meta.duration);
+
+      if (!formNameRu.trim() && meta.trackName) {
+        setFormNameRu(meta.trackName);
+        if (!formId) setFormId(slugify(meta.trackName));
+      }
+
+      // 2. Upload audio file to Supabase storage
+      const targetFolder = formId.trim() || slugify(meta.trackName || "") || `music-${Date.now()}`;
+      const fileExt = file.name.split('.').pop() || "mp3";
+      const path = `music/${targetFolder}/track-${Date.now()}.${fileExt}`;
+      const publicUrl = await supabaseClient.uploadFile("assets", path, file);
+      setFormVideo(publicUrl);
+    } catch (err: any) {
+      alert("Ошибка при обработке и загрузке аудио: " + err.message);
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const handleUploadMediaFiles = async (files: FileList | File[], blockIdx: number) => {
     if (isReadOnly) return;
     if (!formId) {
@@ -287,7 +441,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv)$/i.test(file.name);
-        const fileExt = file.name.split('.').pop() || (isVideo ? 'webm' : 'jpg');
+        const fileExt = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
         const nextIdx = (formCollageBlocks[blockIdx]?.length || 0) + i;
         const path = `${type}/${formId}/block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
 
@@ -297,7 +451,8 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
           const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
           setIsConverting(false);
           setConversionProgress(null);
-          const publicUrl = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+          const actualExt = convertedFile.name.split('.').pop() || fileExt;
+          const publicUrl = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, `.${actualExt}`), convertedFile);
           uploadedUrls.push(`video:${publicUrl}`);
         } else {
           const publicUrl = await supabaseClient.uploadFile("assets", path, file);
@@ -529,6 +684,12 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
   const [formResult2En, setFormResult2En] = useState("");
   const [formResult2Kg, setFormResult2Kg] = useState("");
 
+  // Music specific metadata
+  const [formFormat, setFormFormat] = useState("MP3 320kbps");
+  const [formFileSize, setFormFileSize] = useState("");
+  const [formBpm, setFormBpm] = useState("");
+  const [formDuration, setFormDuration] = useState("");
+
   const categories = [
     { key: "branding", label: "Branding" },
     { key: "industrial", label: "Industrial Design" },
@@ -546,18 +707,18 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
 
   const resetForm = () => {
     setFormId("");
-    setFormCategoryKey("industrial");
+    setFormCategoryKey(type === "music" ? "electronic" : "industrial");
     setFormImg("https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600");
     setFormNameRu("");
     setFormNameEn("");
     setFormNameKg("");
-    setFormCategoryRu("Индустриальный дизайн");
-    setFormCategoryEn("Industrial Design");
-    setFormCategoryKg("Өнөр жай дизайны");
+    setFormCategoryRu(type === "music" ? "Electronic / Cinematic" : "Индустриальный дизайн");
+    setFormCategoryEn(type === "music" ? "Electronic / Cinematic" : "Industrial Design");
+    setFormCategoryKg(type === "music" ? "Electronic / Cinematic" : "Өнөр жай дизайны");
     setFormDescRu("");
     setFormDescEn("");
     setFormDescKg("");
-    setFormClientRu("");
+    setFormClientRu(type === "music" ? "Steel Drake Sound" : "");
     setFormClientEn("");
     setFormClientKg("");
     setFormYear(new Date().getFullYear().toString());
@@ -585,6 +746,10 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     setFormResult2Kg("");
     setFormCollageTheme("light");
     setFormVideo("");
+    setFormFormat("MP3 320kbps");
+    setFormFileSize("");
+    setFormBpm("");
+    setFormDuration("");
   };
 
   const startAdding = () => {
@@ -612,7 +777,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     const detailKg = productDetails.kg[id] || {};
 
     setFormId(id);
-    setFormCategoryKey(projRu.categoryKey || "industrial");
+    setFormCategoryKey(projRu.categoryKey || (type === "music" ? "electronic" : "industrial"));
     setFormImg(projRu.img || "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600");
 
     setFormNameRu(projRu.name || detailRu.name || "");
@@ -645,6 +810,11 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
     setFormChallengeRu(detailRu.challenge || "");
     setFormChallengeEn(detailEn.challenge || "");
     setFormChallengeKg(detailKg.challenge || "");
+
+    setFormFormat(detailRu.format || "MP3 320kbps");
+    setFormFileSize(detailRu.fileSize || "");
+    setFormBpm(detailRu.bpm || "");
+    setFormDuration(detailRu.duration || "");
 
     const initialBlocks = detailRu.collageBlocks && detailRu.collageBlocks.length > 0
       ? JSON.parse(JSON.stringify(detailRu.collageBlocks))
@@ -778,6 +948,10 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
           collageBlocks: cleanBlocks,
           collageTheme: formCollageTheme,
           videoUrl: formVideo || "",
+          format: formFormat || "MP3 320kbps",
+          fileSize: formFileSize || "",
+          bpm: formBpm || "",
+          duration: formDuration || "",
           results: [results1[lang], results2[lang]].filter(Boolean)
         };
 
@@ -1179,12 +1353,12 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
       )}
 
       {(editingId || isAdding) && (
-        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-10 items-start">
+        <div className={`grid ${type === "music" ? "grid-cols-1 w-full" : "lg:grid-cols-[1fr_1.1fr]"} gap-10 items-start`}>
           <motion.form
              onSubmit={handleSave}
              initial={{ opacity: 0, y: 15 }}
              animate={{ opacity: 1, y: 0 }}
-             className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8"
+             className="bg-white/[0.01] border border-white/[0.06] rounded-3xl p-8 space-y-8 w-full"
           >
             <div className="flex justify-between items-center pb-4 border-b border-white/[0.06]">
               <h3 className="text-xl font-bold tracking-tight text-white/90">
@@ -1202,310 +1376,572 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               </button>
             </div>
 
-            {/* Card 1: Основные параметры */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                1. Основные параметры {type === "video" && <span className="text-white/40 normal-case font-normal">(необязательно)</span>}
-              </h4>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    Название (RU) {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
-                  </label>
-                  <input
-                    type="text"
-                    value={formNameRu}
-                    onChange={(e) => handleNameRuChange(e.target.value)}
-                    placeholder={type === "video" ? "Название видео (необязательно)" : "Chyraq"}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required={type !== "video"}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    Категория (RU) {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
-                  </label>
-                  <input
-                    type="text"
-                    value={formCategoryRu}
-                    onChange={(e) => setFormCategoryRu(e.target.value)}
-                    placeholder={type === "video" ? "Видео / Motion" : "Индустриальный дизайн"}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required={type !== "video"}
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">Категория (Ключ фильтра)</label>
-                  <select
-                    value={formCategoryKey}
-                    onChange={(e) => setFormCategoryKey(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                  >
-                    {categories.map((c) => (
-                      <option key={c.key} value={c.key} className="bg-[#080810] text-white">
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    Год {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
-                  </label>
-                  <input
-                    type="text"
-                    value={formYear}
-                    onChange={(e) => setFormYear(e.target.value)}
-                    placeholder={type === "video" ? "2026 (необязательно)" : "2026"}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    required={type !== "video"}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2: URL и Внешний вид */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                2. URL и Внешний вид
-              </h4>
-              <div className={`grid gap-6 ${type === "video" ? "grid-cols-1" : "md:grid-cols-2"}`}>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    ID (URL латиница) {type === "video" && <span className="text-white/30 lowercase">(сгенерируется автоматически, если пусто)</span>}
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formId}
-                      onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-                      placeholder={type === "video" ? "video-id (необязательно)" : "chyraq"}
-                      className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                      required={type !== "video"}
-                    />
-                    <button
-                      type="button"
-                      onClick={generateSlugFromName}
-                      className="px-4 bg-[#0000FF]/15 hover:bg-[#0000FF]/30 text-[#0066FF] border border-[#0000FF]/25 font-bold rounded-xl text-xs transition duration-200 active:scale-95 cursor-pointer"
-                      title="Сгенерировать ID из названия"
-                    >
-                      Авто
-                    </button>
-                  </div>
-                </div>
-                {type !== "video" && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тема коллажей</label>
-                    <select
-                      value={formCollageTheme}
-                      onChange={(e) => setFormCollageTheme(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    >
-                      <option value="light" className="bg-[#080810] text-white">Светлая</option>
-                      <option value="dark" className="bg-[#080810] text-white">Темная</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Card 3: Обложка (Hero Image) */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
-              <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
-                  3. Обложка и Видеофайл
-                </h4>
-                {type !== "video" && (
-                  <div className="relative cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleUploadPhoto("img", file);
-                      }}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                      disabled={isReadOnly || uploadingImg}
-                    />
-                    <button
-                      type="button"
-                      disabled={uploadingImg}
-                      className="px-3.5 py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition"
-                    >
-                      {uploadingImg ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Camera className="w-3.5 h-3.5" />
-                      )}
-                      Загрузить обложку
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                {type !== "video" && (
-                  <div className="space-y-2">
-                    <label className="text-[10px] text-white/40 uppercase">Ссылка на обложку</label>
-                    <input
-                      type="text"
-                      value={formImg}
-                      onChange={(e) => setFormImg(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-xs text-white focus:border-[#0066FF] outline-none"
-                      placeholder="Вставьте ссылку на картинку или загрузите новую"
-                    />
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-[10px] text-white/40 uppercase block mb-1">Обложка</span>
-                    {type === "video" ? (
-                      <div
-                        onClick={() => !uploadingImg && document.getElementById("file-input-cover-direct")?.click()}
-                        className={`rounded-2xl overflow-hidden border border-white/5 relative cursor-pointer group flex items-center justify-center ${
-                          formImg ? "max-h-[250px] w-fit mx-auto" : "aspect-video w-full bg-black/40"
-                        }`}
-                      >
+            {type === "music" ? (
+              /* ─── 2-Column Wide Layout for Music ─── */
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* Left Column: Basic params & Specs */}
+                <div className="space-y-6">
+                  {/* Card 1: Основные параметры & ID */}
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                      1. Основные параметры и ID
+                    </h4>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Название трека (RU)</label>
                         <input
-                          id="file-input-cover-direct"
+                          type="text"
+                          value={formNameRu}
+                          onChange={(e) => handleNameRuChange(e.target.value)}
+                          placeholder="Cyber Horizon"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Автор / Исполнитель (RU)</label>
+                        <input
+                          type="text"
+                          value={formClientRu}
+                          onChange={(e) => setFormClientRu(e.target.value)}
+                          placeholder="Steel Drake Sound"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Жанр (Ключ фильтра)</label>
+                        <select
+                          value={formCategoryKey}
+                          onChange={(e) => setFormCategoryKey(e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                        >
+                          {[
+                            { key: "electronic", label: "Electronic / Cinematic" },
+                            { key: "ambient", label: "Ambient & Space" },
+                            { key: "gamedev", label: "GameDev OST" },
+                            { key: "synthwave", label: "Synthwave" },
+                            { key: "automotive", label: "Automotive / Dynamic" },
+                            { key: "sound", label: "Sound Design / FX" }
+                          ].map((c) => (
+                            <option key={c.key} value={c.key} className="bg-[#080810] text-white">
+                              {c.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Год релиза</label>
+                        <input
+                          type="text"
+                          value={formYear}
+                          onChange={(e) => setFormYear(e.target.value)}
+                          placeholder="2026"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">ID (URL латиница)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formId}
+                          onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+                          placeholder="cyber-horizon"
+                          className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-white focus:border-[#0066FF] outline-none text-sm"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={generateSlugFromName}
+                          className="px-4 bg-[#0000FF]/15 hover:bg-[#0000FF]/30 text-[#0066FF] border border-[#0000FF]/25 font-bold rounded-xl text-xs transition duration-200 active:scale-95 cursor-pointer"
+                          title="Сгенерировать ID из названия"
+                        >
+                          Авто
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Характеристики и Описание */}
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                      2. Характеристики и Описание трека (RU)
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-white/50">Формат</label>
+                        <input
+                          type="text"
+                          value={formFormat}
+                          onChange={(e) => setFormFormat(e.target.value)}
+                          placeholder="MP3 320kbps"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-white/50">Размер</label>
+                        <input
+                          type="text"
+                          value={formFileSize}
+                          onChange={(e) => setFormFileSize(e.target.value)}
+                          placeholder="8.4 MB"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-white/50">BPM (Темп)</label>
+                        <input
+                          type="text"
+                          value={formBpm}
+                          onChange={(e) => setFormBpm(e.target.value)}
+                          placeholder="128 BPM"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-white/50">Длительность</label>
+                        <input
+                          type="text"
+                          value={formDuration}
+                          onChange={(e) => setFormDuration(e.target.value)}
+                          placeholder="03:42"
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-white focus:border-[#0066FF] outline-none text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        Описание трека (RU)
+                      </label>
+                      <textarea
+                        value={formDescRu}
+                        onChange={(e) => setFormDescRu(e.target.value)}
+                        placeholder="Атмосферный саундтрек для кинематографичных презентаций, концептуальных видео и игр..."
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none min-h-[160px] text-sm leading-relaxed resize-y"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Media (Cover & Audio) */}
+                <div className="space-y-6">
+                  {/* Card 3: Обложка трека */}
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                    <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
+                        3. Обложка трека
+                      </h4>
+                      <div className="relative cursor-pointer">
+                        <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) handleUploadPhoto("img", file);
                           }}
-                          className="hidden"
+                          className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                           disabled={isReadOnly || uploadingImg}
                         />
-                        {formImg ? (
-                          <>
-                            <img src={formImg} alt="Hero Preview" className="max-h-[250px] w-auto object-contain group-hover:opacity-40 transition block" />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                              <span className="text-white font-bold text-xs flex items-center gap-1.5"><Camera size={14} /> Загрузить обложку</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-white/20 text-xs flex flex-col items-center gap-1.5">
-                            <Camera className="w-8 h-8" />
-                            <span className="text-[10px] uppercase font-mono font-bold text-white/40">Загрузить обложку</span>
-                          </div>
-                        )}
-                        {uploadingImg && !isConverting && (
-                          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#0066FF]" />
-                          </div>
-                        )}
+                        <button
+                          type="button"
+                          disabled={uploadingImg}
+                          className="px-3.5 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
+                        >
+                          {uploadingImg ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Camera className="w-3.5 h-3.5" />
+                          )}
+                          Загрузить обложку
+                        </button>
                       </div>
-                    ) : (
-                      <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 relative">
-                        <img src={formImg} alt="Hero Preview" className="w-full h-full object-cover" />
+                    </div>
+
+                    <div
+                      onClick={() => !uploadingImg && document.getElementById("file-input-cover-music")?.click()}
+                      className="rounded-2xl overflow-hidden border border-white/10 relative cursor-pointer group flex items-center justify-center transition-colors hover:border-[#0000FF]/50 h-[220px] w-full bg-black/40"
+                    >
+                      <input
+                        id="file-input-cover-music"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleUploadPhoto("img", file);
+                        }}
+                        className="hidden"
+                        disabled={isReadOnly || uploadingImg}
+                      />
+                      {formImg ? (
+                        <>
+                          <img src={formImg} alt="Cover Preview" className="h-full w-full object-cover group-hover:opacity-40 transition block" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                            <span className="text-white font-bold text-xs flex items-center gap-1.5"><Camera size={14} /> Изменить обложку</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-white/20 text-xs flex flex-col items-center gap-2 py-8">
+                          <Camera className="w-8 h-8" />
+                          <span className="text-[10px] uppercase font-mono font-bold text-white/50">Нажмите для выбора обложки</span>
+                        </div>
+                      )}
+                      {uploadingImg && !isConverting && (
+                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#0066FF]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card 4: Аудиофайл трека */}
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                    <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
+                        4. Аудиофайл трека
+                      </h4>
+                      <div className="relative cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleAudioFileUpload(file);
+                          }}
+                          className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                          disabled={isReadOnly || uploadingVideo}
+                        />
+                        <button
+                          type="button"
+                          disabled={uploadingVideo}
+                          className="px-3.5 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
+                        >
+                          {uploadingVideo ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Music className="w-3.5 h-3.5" />
+                          )}
+                          Загрузить MP3 / WAV
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => !uploadingVideo && document.getElementById("file-input-audio-music")?.click()}
+                      className="rounded-2xl overflow-hidden border border-white/10 relative cursor-pointer group flex items-center justify-center transition-colors hover:border-[#0000FF]/50 p-6 bg-black/40 min-h-[140px]"
+                    >
+                      <input
+                        id="file-input-audio-music"
+                        type="file"
+                        accept="audio/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleAudioFileUpload(file);
+                        }}
+                        className="hidden"
+                        disabled={isReadOnly || uploadingVideo}
+                      />
+                      {formVideo ? (
+                        <div className="w-full space-y-3 text-center">
+                          <audio src={formVideo} controls className="w-full h-10" />
+                          <span className="text-white/40 text-[10px] uppercase font-mono block">Кликните, чтобы заменить аудиофайл</span>
+                        </div>
+                      ) : (
+                        <div className="text-white/20 text-xs flex flex-col items-center gap-2 py-4">
+                          <Music className="w-8 h-8" />
+                          <span className="text-[10px] uppercase font-mono font-bold text-white/50">Нажмите для загрузки трека (MP3 / WAV)</span>
+                        </div>
+                      )}
+                      {uploadingVideo && (
+                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#0066FF]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* ─── Standard Layout for Other Catalog Types ─── */
+              <>
+                {/* Card 1: Основные параметры */}
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                    1. Основные параметры {type === "video" && <span className="text-white/40 normal-case font-normal">(необязательно)</span>}
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        {type === "video" ? "Название видео (RU)" : "Название (RU)"}
+                      </label>
+                      <input
+                        type="text"
+                        value={formNameRu}
+                        onChange={(e) => handleNameRuChange(e.target.value)}
+                        placeholder={type === "video" ? "Название видео (необязательно)" : "Chyraq"}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        required={type !== "video"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        Категория (RU)
+                      </label>
+                      <input
+                        type="text"
+                        value={formCategoryRu}
+                        onChange={(e) => setFormCategoryRu(e.target.value)}
+                        placeholder={type === "video" ? "Видео / Motion" : "Индустриальный дизайн"}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        required={type !== "video"}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        Категория (Ключ фильтра)
+                      </label>
+                      <select
+                        value={formCategoryKey}
+                        onChange={(e) => setFormCategoryKey(e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                      >
+                        {categories.map((c) => (
+                          <option key={c.key} value={c.key} className="bg-[#080810] text-white">
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        {type === "video" ? "Год (опционально)" : "Год"}
+                      </label>
+                      <input
+                        type="text"
+                        value={formYear}
+                        onChange={(e) => setFormYear(e.target.value)}
+                        placeholder="2026"
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        required={type !== "video"}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: URL и Идентификатор */}
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                    2. URL и Идентификатор
+                  </h4>
+                  <div className={`grid gap-6 ${type === "video" ? "grid-cols-1" : "md:grid-cols-2"}`}>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        ID (URL латиница) {type === "video" && <span className="text-white/30 lowercase">(сгенерируется автоматически, если пусто)</span>}
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formId}
+                          onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+                          placeholder={type === "video" ? "video-id (необязательно)" : "chyraq"}
+                          className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                          required={type !== "video"}
+                        />
+                        <button
+                          type="button"
+                          onClick={generateSlugFromName}
+                          className="px-4 bg-[#0000FF]/15 hover:bg-[#0000FF]/30 text-[#0066FF] border border-[#0000FF]/25 font-bold rounded-xl text-xs transition duration-200 active:scale-95 cursor-pointer"
+                          title="Сгенерировать ID из названия"
+                        >
+                          Авто
+                        </button>
+                      </div>
+                    </div>
+                    {type !== "video" && (
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тема коллажей</label>
+                        <select
+                          value={formCollageTheme}
+                          onChange={(e) => setFormCollageTheme(e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        >
+                          <option value="light" className="bg-[#080810] text-white">Светлая</option>
+                          <option value="dark" className="bg-[#080810] text-white">Темная</option>
+                        </select>
                       </div>
                     )}
                   </div>
-
-                  {type === "video" && (
-                    <div>
-                      <span className="text-[10px] text-white/40 uppercase block mb-1">Видео</span>
-                      <div
-                        onClick={() => !(uploadingImg || uploadingVideo) && document.getElementById("file-input-video-direct")?.click()}
-                        className={`rounded-2xl overflow-hidden border border-white/5 relative cursor-pointer group flex items-center justify-center ${
-                          formVideo ? "max-h-[250px] w-fit mx-auto" : "aspect-video w-full bg-black/40"
-                        }`}
-                      >
-                        <input
-                          id="file-input-video-direct"
-                          type="file"
-                          accept="video/mp4,video/quicktime,video/webm"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            try {
-                              setUploadingImg(true);
-                              setUploadingVideo(true);
-                              setIsConverting(true);
-                              setConversionProgress(0);
-                              const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
-                              setIsConverting(false);
-                              setConversionProgress(null);
-                              const fileExt = convertedFile.name.split('.').pop() || file.name.split('.').pop() || "mp4";
-                              const targetFolder = formId.trim() || `video-${Date.now()}`;
-                              const path = `video/${targetFolder}/main-video-${Date.now()}.${fileExt}`;
-                              const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
-                              setFormVideo(publicUrl);
-
-                              // Auto-extract video frame and set as cover image
-                              try {
-                                const coverFile = await extractVideoFrame(file);
-                                const coverPath = `video/${targetFolder}/main-cover-${Date.now()}.jpg`;
-                                const coverUrl = await supabaseClient.uploadFile("assets", coverPath, coverFile);
-                                setFormImg(coverUrl);
-                              } catch (frameErr) {
-                                console.warn("Failed to extract video frame:", frameErr);
-                              }
-                            } catch (err: any) {
-                              alert("Ошибка при загрузке видео: " + err.message);
-                            } finally {
-                              setUploadingImg(false);
-                              setUploadingVideo(false);
-                            }
-                          }}
-                          className="hidden"
-                          disabled={isReadOnly || uploadingImg || uploadingVideo}
-                        />
-                        {isConverting || uploadingVideo ? (
-                          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white gap-2 z-20 aspect-video w-full min-w-[200px]">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#0000FF]" />
-                            <span className="text-[10px] font-bold uppercase">
-                              {isConverting 
-                                ? (conversionProgress !== null ? `Сжатие: ${Math.round(conversionProgress)}%` : "Сжатие...") 
-                                : "Загрузка видео..."
-                              }
-                            </span>
-                          </div>
-                        ) : formVideo ? (
-                          <>
-                            <video src={formVideo} className="max-h-[250px] w-auto object-contain group-hover:opacity-40 transition block" muted autoPlay loop playsInline />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                              <span className="text-white font-bold text-xs flex items-center gap-1.5">🎬 Заменить видео</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-white/20 text-xs flex flex-col items-center gap-1.5">
-                            <span className="text-xl">🎬</span>
-                            <span className="text-[10px] uppercase font-mono font-bold text-white/40">Загрузить видео</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
-            </div>
 
-            {/* Card 4: Детальное описание и характеристики */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                4. Детальное описание и Характеристики (RU)
-              </h4>
-              <div className="space-y-4">
-                {type === "video" ? (
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-white/50">Клиент</label>
-                    <input
-                      type="text"
-                      value={formClientRu}
-                      onChange={(e) => setFormClientRu(e.target.value)}
-                      placeholder="Chyraq Labs"
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    />
+                {/* Card 3: Обложка и Медиа */}
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+                  <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
+                      {type === "video" ? "3. Обложка и Видеофайл" : "3. Обложка (Hero Image)"}
+                    </h4>
+                    <div className="relative cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleUploadPhoto("img", file);
+                        }}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                        disabled={isReadOnly || uploadingImg}
+                      />
+                      <button
+                        type="button"
+                        disabled={uploadingImg}
+                        className="px-3.5 py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-white/90 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        {uploadingImg ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Camera className="w-3.5 h-3.5" />
+                        )}
+                        Загрузить обложку
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="grid md:grid-cols-2 gap-6">
+
+                  <div className="space-y-4">
+                    <div className={type === "video" ? "grid grid-cols-1 sm:grid-cols-2 gap-6" : "w-full"}>
+                      <div>
+                        <span className="text-[10px] text-white/40 uppercase block mb-1.5">Обложка</span>
+                        <div
+                          onClick={() => !uploadingImg && document.getElementById("file-input-cover-direct")?.click()}
+                          className={`rounded-2xl overflow-hidden border border-white/10 relative cursor-pointer group flex items-center justify-center transition-colors hover:border-[#0000FF]/50 ${
+                            formImg ? "max-h-[250px] w-full bg-black/40" : "aspect-video w-full bg-black/40"
+                          }`}
+                        >
+                          <input
+                            id="file-input-cover-direct"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleUploadPhoto("img", file);
+                            }}
+                            className="hidden"
+                            disabled={isReadOnly || uploadingImg}
+                          />
+                          {formImg ? (
+                            <>
+                              <img src={formImg} alt="Hero Preview" className="max-h-[250px] w-full object-cover group-hover:opacity-40 transition block" />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                <span className="text-white font-bold text-xs flex items-center gap-1.5"><Camera size={14} /> Изменить обложку</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-white/20 text-xs flex flex-col items-center gap-2 py-8">
+                              <Camera className="w-8 h-8" />
+                              <span className="text-[10px] uppercase font-mono font-bold text-white/50">Нажмите для выбора обложки</span>
+                            </div>
+                          )}
+                          {uploadingImg && !isConverting && (
+                            <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                              <Loader2 className="w-6 h-6 animate-spin text-[#0066FF]" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {type === "video" && (
+                        <div>
+                          <span className="text-[10px] text-white/40 uppercase block mb-1">Видео</span>
+                          <div
+                            onClick={() => !(uploadingImg || uploadingVideo) && document.getElementById("file-input-video-direct")?.click()}
+                            className={`rounded-2xl overflow-hidden border border-white/5 relative cursor-pointer group flex items-center justify-center ${
+                              formVideo ? "max-h-[250px] w-fit mx-auto" : "aspect-video w-full bg-black/40"
+                            }`}
+                          >
+                            <input
+                              id="file-input-video-direct"
+                              type="file"
+                              accept="video/mp4,video/quicktime,video/webm"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  setUploadingImg(true);
+                                  setUploadingVideo(true);
+                                  setIsConverting(true);
+                                  setConversionProgress(0);
+                                  const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p));
+                                  setIsConverting(false);
+                                  setConversionProgress(null);
+                                  const fileExt = convertedFile.name.split('.').pop() || file.name.split('.').pop() || "mp4";
+                                  const targetFolder = formId.trim() || `video-${Date.now()}`;
+                                  const path = `video/${targetFolder}/main-video-${Date.now()}.${fileExt}`;
+                                  const publicUrl = await supabaseClient.uploadFile("assets", path, convertedFile);
+                                  setFormVideo(publicUrl);
+
+                                  try {
+                                    const coverFile = await extractVideoFrame(file);
+                                    const coverPath = `video/${targetFolder}/main-cover-${Date.now()}.jpg`;
+                                    const coverUrl = await supabaseClient.uploadFile("assets", coverPath, coverFile);
+                                    setFormImg(coverUrl);
+                                  } catch (frameErr) {
+                                    console.warn("Failed to extract video frame:", frameErr);
+                                  }
+                                } catch (err: any) {
+                                  alert("Ошибка при загрузке видео: " + err.message);
+                                } finally {
+                                  setUploadingImg(false);
+                                  setUploadingVideo(false);
+                                }
+                              }}
+                              className="hidden"
+                              disabled={isReadOnly || uploadingImg || uploadingVideo}
+                            />
+                            {isConverting || uploadingVideo ? (
+                              <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white gap-2 z-20 aspect-video w-full min-w-[200px]">
+                                <Loader2 className="w-6 h-6 animate-spin text-[#0000FF]" />
+                                <span className="text-[10px] font-bold uppercase">
+                                  {isConverting 
+                                    ? (conversionProgress !== null ? `Сжатие: ${Math.round(conversionProgress)}%` : "Сжатие...") 
+                                    : "Загрузка видео..."
+                                  }
+                                </span>
+                              </div>
+                            ) : formVideo ? (
+                              <>
+                                <video src={formVideo} className="max-h-[250px] w-auto object-contain group-hover:opacity-40 transition block" muted autoPlay loop playsInline />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                  <span className="text-white font-bold text-xs flex items-center gap-1.5">🎬 Заменить видео</span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-white/20 text-xs flex flex-col items-center gap-1.5">
+                                <span className="text-xl">🎬</span>
+                                <span className="text-[10px] uppercase font-mono font-bold text-white/40">Загрузить видео</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 4: Детальное описание и характеристики */}
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                    4. Детальное описание и Характеристики (RU)
+                  </h4>
+                  <div className="space-y-4">
+                    {type === "video" ? (
                       <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-wider text-white/50">Клиент</label>
                         <input
@@ -1516,127 +1952,142 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                           className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Услуга</label>
-                        <input
-                          type="text"
-                          value={formServiceRu}
-                          onChange={(e) => setFormServiceRu(e.target.value)}
-                          placeholder="Industrial Design"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
+                    ) : (
+                      <>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Клиент</label>
+                            <input
+                              type="text"
+                              value={formClientRu}
+                              onChange={(e) => setFormClientRu(e.target.value)}
+                              placeholder="Chyraq Labs"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Услуга</label>
+                            <input
+                              type="text"
+                              value={formServiceRu}
+                              onChange={(e) => setFormServiceRu(e.target.value)}
+                              placeholder="Industrial Design"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6 mt-4">
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Студия</label>
+                            <input
+                              type="text"
+                              value={formStudioRu}
+                              onChange={(e) => setFormStudioRu(e.target.value)}
+                              placeholder="Steel Drake Studio"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Дизайнер</label>
+                            <input
+                              type="text"
+                              value={formDesignerRu}
+                              onChange={(e) => setFormDesignerRu(e.target.value)}
+                              placeholder="Иван Иванов"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Локация</label>
+                            <input
+                              type="text"
+                              value={formLocationRu}
+                              onChange={(e) => setFormLocationRu(e.target.value)}
+                              placeholder="Бишкек, Кыргызстан"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тип проекта</label>
+                            <input
+                              type="text"
+                              value={formProjectTypeRu}
+                              onChange={(e) => setFormProjectTypeRu(e.target.value)}
+                              placeholder="Коммерческий"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                          <div className="space-y-2 col-span-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-white/50">Класс</label>
+                            <input
+                              type="text"
+                              value={formProductClass}
+                              onChange={(e) => setFormProductClass(e.target.value)}
+                              placeholder="-"
+                              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        Задача и Вызов {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                      </label>
+                      <textarea
+                        value={formChallengeRu}
+                        onChange={(e) => setFormChallengeRu(e.target.value)}
+                        placeholder={type === "video" ? "Краткое описание задачи или вызова (необязательно)..." : "Разработать премиальный настольный светильник..."}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-28 text-base"
+                        required={type !== "video"}
+                      />
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 mt-4">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Студия</label>
-                        <input
-                          type="text"
-                          value={formStudioRu}
-                          onChange={(e) => setFormStudioRu(e.target.value)}
-                          placeholder="Steel Drake Studio"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Дизайнер</label>
-                        <input
-                          type="text"
-                          value={formDesignerRu}
-                          onChange={(e) => setFormDesignerRu(e.target.value)}
-                          placeholder="Иван Иванов"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Локация</label>
-                        <input
-                          type="text"
-                          value={formLocationRu}
-                          onChange={(e) => setFormLocationRu(e.target.value)}
-                          placeholder="Бишкек, Кыргызстан"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Тип проекта</label>
-                        <input
-                          type="text"
-                          value={formProjectTypeRu}
-                          onChange={(e) => setFormProjectTypeRu(e.target.value)}
-                          placeholder="Коммерческий"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
-                      <div className="space-y-2 col-span-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white/50">Класс</label>
-                        <input
-                          type="text"
-                          value={formProductClass}
-                          onChange={(e) => setFormProductClass(e.target.value)}
-                          placeholder="-"
-                          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                        Описание реализации {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
+                      </label>
+                      <textarea
+                        value={formDescRu}
+                        onChange={(e) => setFormDescRu(e.target.value)}
+                        placeholder={type === "video" ? "Детали проекта (необязательно)..." : "Инновационный минималистичный настольный светильник..."}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-32 text-base"
+                        required={type !== "video"}
+                      />
                     </div>
-                  </>
+                  </div>
+                </div>
+
+                {type !== "video" && (
+                  /* Card 5: Результаты */
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
+                      5. Результаты (RU)
+                    </h4>
+                    <p className="text-xs text-white/40">
+                      Введите до двух ключевых метрик или достижений. (Например: "Победитель Interior Design Show 2026").
+                    </p>
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        value={formResult1Ru}
+                        onChange={(e) => setFormResult1Ru(e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        placeholder="Результат 1 (например: 1 место на выставке)"
+                      />
+                      <input
+                        type="text"
+                        value={formResult2Ru}
+                        onChange={(e) => setFormResult2Ru(e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                        placeholder="Результат 2 (например: более 10 000 продаж)"
+                      />
+                    </div>
+                  </div>
                 )}
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    Задача и Вызов {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
-                  </label>
-                  <textarea
-                    value={formChallengeRu}
-                    onChange={(e) => setFormChallengeRu(e.target.value)}
-                    placeholder={type === "video" ? "Краткое описание задачи или вызова (необязательно)..." : "Разработать премиальный настольный светильник..."}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-28 text-base"
-                    required={type !== "video"}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                    Описание реализации {type === "video" && <span className="text-white/30 lowercase">(опционально)</span>}
-                  </label>
-                  <textarea
-                    value={formDescRu}
-                    onChange={(e) => setFormDescRu(e.target.value)}
-                    placeholder={type === "video" ? "Детали проекта (необязательно)..." : "Инновационный минималистичный настольный светильник..."}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none h-32 text-base"
-                    required={type !== "video"}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {type !== "video" && (
-              /* Card 5: Результаты */
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
-                  5. Результаты (RU)
-                </h4>
-                <p className="text-xs text-white/40">
-                  Введите до двух ключевых метрик или достижений. (Например: "Победитель Interior Design Show 2026").
-                </p>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={formResult1Ru}
-                    onChange={(e) => setFormResult1Ru(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    placeholder="Результат 1 (например: 1 место на выставке)"
-                  />
-                  <input
-                    type="text"
-                    value={formResult2Ru}
-                    onChange={(e) => setFormResult2Ru(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                    placeholder="Результат 2 (например: более 10 000 продаж)"
-                  />
-                </div>
-              </div>
+              </>
             )}
 
             <div className="grid grid-cols-2 gap-4 pt-4">
@@ -1669,8 +2120,9 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
             </div>
           </motion.form>
 
-          {/* Right Column: Live Mockup Preview & Collage Builder */}
-          <div className="sticky top-6 space-y-4 max-h-[85vh] overflow-y-auto border border-white/[0.08] rounded-3xl p-6 bg-[#161622] shadow-2xl">
+          {/* Right Column: Live Mockup Preview & Collage Builder (hidden for music) */}
+          {type !== "music" && (
+            <div className="sticky top-6 space-y-4 max-h-[85vh] overflow-y-auto border border-white/[0.08] rounded-3xl p-6 bg-[#161622] shadow-2xl">
             <div className="flex justify-between items-center mb-2">
               <h4 className="text-sm font-bold uppercase tracking-wider text-white/50 font-sans">Предпросмотр в реальном времени</h4>
             </div>
@@ -2188,6 +2640,7 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
               </div>
             )}
             </div>
+          )}
           </div>
         )}
       </div>
@@ -2213,3 +2666,8 @@ export function AdminGameDevEditor() {
 export function AdminVideoEditor() {
   return <AdminCatalogEditor type="video" />;
 }
+
+export function AdminMusicEditor() {
+  return <AdminCatalogEditor type="music" />;
+}
+

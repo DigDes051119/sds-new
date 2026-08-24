@@ -34,11 +34,17 @@ export const cmsService = {
 
   // Initialize and load dynamic data from Supabase asynchronously
   async initSupabaseSync() {
+    // Fire all three syncs in parallel instead of sequentially
+    const [translationsResult, projectDetailsResult, archiveResult] = await Promise.allSettled([
+      supabaseClient.fetchTable("sds_translations").catch(() => null),
+      supabaseClient.fetchTable("sds_project_details").catch(() => null),
+      supabaseClient.fetchTable("sds_archive_items").catch(() => null),
+    ]);
+
+    // 1. Apply translations
     try {
-      // 1. Try syncing translations
-      const translationRows = await supabaseClient.fetchTable("sds_translations");
+      const translationRows = translationsResult.status === "fulfilled" ? translationsResult.value : null;
       if (translationRows && translationRows.length > 0) {
-        // Assume single row containing the translations JSON
         const remoteTranslations = translationRows[0].data;
         if (remoteTranslations) {
           lastRemoteTranslationsStr = JSON.stringify(remoteTranslations);
@@ -51,9 +57,9 @@ export const cmsService = {
       console.warn("Supabase translations sync fallback to local storage:", e);
     }
 
+    // 2. Apply project details
     try {
-      // 2. Try syncing project details
-      const projectDetailsRows = await supabaseClient.fetchTable("sds_project_details");
+      const projectDetailsRows = projectDetailsResult.status === "fulfilled" ? projectDetailsResult.value : null;
       if (projectDetailsRows && projectDetailsRows.length > 0) {
         const remoteDetails = projectDetailsRows[0].data;
         if (remoteDetails) {
@@ -66,9 +72,9 @@ export const cmsService = {
       console.warn("Supabase project details sync fallback to local storage:", e);
     }
 
+    // 3. Apply archive items
     try {
-      // 3. Try syncing archive items
-      const archiveRows = await supabaseClient.fetchTable("sds_archive_items").catch(() => null);
+      const archiveRows = archiveResult.status === "fulfilled" ? archiveResult.value : null;
       if (archiveRows && archiveRows.length > 0 && archiveRows[0]?.data) {
         safeLocalStorage.setItem("sds_archive_items", JSON.stringify(archiveRows[0].data));
         memoryArchiveItems = null;

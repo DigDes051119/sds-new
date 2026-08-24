@@ -316,6 +316,10 @@ export const translations = {
       title: "Video",
       items: [],
     },
+    music: {
+      title: "Music & Sound",
+      items: [],
+    },
     projectCategories: {
       all: "All",
       branding: "Branding",
@@ -915,6 +919,10 @@ export const translations = {
       title: "Видео",
       items: [],
     },
+    music: {
+      title: "Музыка жана үн",
+      items: [],
+    },
     projectCategories: {
       all: "Баардыгы",
       branding: "Брендинг",
@@ -1326,6 +1334,10 @@ export const translations = {
       title: "Видео",
       items: [],
     },
+    music: {
+      title: "Музыка и саунд-дизайн",
+      items: [],
+    },
     projectCategories: {
       all: "Все",
       branding: "Брендирование",
@@ -1552,6 +1564,14 @@ export const translations = {
       title: "GameDev",
       items: []
     },
+    video: {
+      title: "视频",
+      items: []
+    },
+    music: {
+      title: "音乐与声音设计",
+      items: []
+    },
     concepts: {
       title: "Concepts & Vision",
       items: []
@@ -1753,6 +1773,14 @@ export const translations = {
       title: "تطوير الألعاب",
       items: []
     },
+    video: {
+      title: "فيديو",
+      items: []
+    },
+    music: {
+      title: "الموسيقى وتصميم الصوت",
+      items: []
+    },
     concepts: {
       title: "الرؤى والمفاهيم",
       items: []
@@ -1952,6 +1980,14 @@ export const translations = {
     },
     gamedev: {
       title: "GameDev",
+      items: []
+    },
+    video: {
+      title: "Video",
+      items: []
+    },
+    music: {
+      title: "Musik & Sounddesign",
       items: []
     },
     concepts: {

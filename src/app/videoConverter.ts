@@ -30,7 +30,11 @@ export async function convertToWebMNative(
       const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", {
+        colorSpace: "srgb",
+        alpha: false,
+        desynchronized: false,
+      });
       if (ctx) {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
@@ -39,23 +43,32 @@ export async function convertToWebMNative(
       const fps = 30;
       const stream = canvas.captureStream(fps);
 
-      // Attempt to capture and add audio track from source video if available
+      // Web Audio API stream capture for 100% intact audio preservation without speaker playback
+      let audioCtx: AudioContext | null = null;
       try {
-        if ((video as any).captureStream) {
-          const videoStream = (video as any).captureStream();
-          const audioTracks = videoStream.getAudioTracks();
-          if (audioTracks && audioTracks.length > 0) {
-            stream.addTrack(audioTracks[0]);
-          }
-        } else if ((video as any).mozCaptureStream) {
-          const videoStream = (video as any).mozCaptureStream();
-          const audioTracks = videoStream.getAudioTracks();
+        const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtxClass) {
+          audioCtx = new AudioCtxClass();
+          const source = audioCtx.createMediaElementSource(video);
+          const dest = audioCtx.createMediaStreamDestination();
+          source.connect(dest);
+          // Connect to stream destination only (diverts away from speakers)
+          const audioTracks = dest.stream.getAudioTracks();
           if (audioTracks && audioTracks.length > 0) {
             stream.addTrack(audioTracks[0]);
           }
         }
-      } catch (e) {
-        console.warn("Could not attach audio track to stream:", e);
+      } catch (audioErr) {
+        console.warn("Web Audio capture fallback to captureStream:", audioErr);
+        try {
+          if ((video as any).captureStream) {
+            const videoStream = (video as any).captureStream();
+            const audioTracks = videoStream.getAudioTracks();
+            if (audioTracks && audioTracks.length > 0) {
+              stream.addTrack(audioTracks[0]);
+            }
+          }
+        } catch (e) {}
       }
 
       let mimeType = "video/webm;codecs=vp9,opus";
@@ -70,7 +83,7 @@ export async function convertToWebMNative(
       try {
         recorder = new MediaRecorder(stream, {
           mimeType,
-          videoBitsPerSecond: 16000000 // 16 Mbps ultra-high quality WebM
+          videoBitsPerSecond: 8000000 // 8 Mbps high quality WebM
         });
       } catch (e) {
         recorder = new MediaRecorder(stream);
@@ -85,6 +98,7 @@ export async function convertToWebMNative(
 
       recorder.onstop = () => {
         URL.revokeObjectURL(videoUrl);
+        if (audioCtx && audioCtx.state !== "closed") audioCtx.close().catch(() => {});
         const webmBlob = new Blob(chunks, { type: "video/webm" });
         const originalBaseName = file.name.substring(0, file.name.lastIndexOf(".")) || file.name;
         const finalFileName = `${originalBaseName}.webm`;
@@ -92,7 +106,7 @@ export async function convertToWebMNative(
         resolve(resultFile);
       };
 
-      let animId: number;
+      let callbackId: number | null = null;
       const duration = video.duration || 1;
 
       function renderFrame() {
@@ -104,17 +118,21 @@ export async function convertToWebMNative(
           onProgress(pct);
         }
 
-        animId = requestAnimationFrame(renderFrame);
+        if ("requestVideoFrameCallback" in video) {
+          (video as any).requestVideoFrameCallback(renderFrame);
+        } else {
+          callbackId = requestAnimationFrame(renderFrame);
+        }
       }
 
       video.onended = () => {
-        cancelAnimationFrame(animId);
+        if (callbackId !== null) cancelAnimationFrame(callbackId);
         if (onProgress) onProgress(100);
         setTimeout(() => {
           if (recorder.state !== "inactive") {
             recorder.stop();
           }
-        }, 150);
+        }, 200);
       };
 
       recorder.start(100);
@@ -122,6 +140,7 @@ export async function convertToWebMNative(
         renderFrame();
       }).catch((err) => {
         URL.revokeObjectURL(videoUrl);
+        if (audioCtx && audioCtx.state !== "closed") audioCtx.close().catch(() => {});
         reject(err);
       });
     };
@@ -216,8 +235,9 @@ async function getFFmpeg() {
 }
 
 /**
- * Main WebM Video Conversion Entry Point.
- * Keeps standard web video formats (MP4, WebM, MOV) 100% intact to preserve full audio & 60fps quality.
+ * Main Video Handler:
+ * Always converts incoming video files (MP4, MOV, etc.) to optimized .webm format
+ * with high-quality VP9/VP8 encoding, accurate colors and smooth framerate.
  */
 export async function convertToWebM(
   file: File,
@@ -225,28 +245,20 @@ export async function convertToWebM(
 ): Promise<File> {
   const lowerName = file.name.toLowerCase();
   
-  // 1. Direct Web-Compatible Video formats:
-  // MP4, WebM, QuickTime (MOV) are natively supported by modern browsers with hardware decoding and audio.
-  if (
-    file.type.includes("mp4") ||
-    file.type.includes("webm") ||
-    file.type.includes("quicktime") ||
-    lowerName.endsWith(".mp4") ||
-    lowerName.endsWith(".webm") ||
-    lowerName.endsWith(".mov")
-  ) {
+  // If file is already a WebM, keep it directly
+  if (file.type === "video/webm" || (lowerName.endsWith(".webm") && file.type.includes("webm"))) {
     if (onProgress) onProgress(100);
     return file;
   }
 
-  // 2. Try Native Offline Hardware-Accelerated Browser Conversion (0 Network Requests!)
+  // 1. Try Native Offline Hardware-Accelerated Browser Conversion (0 Network Requests!)
   try {
     return await convertToWebMNative(file, onProgress);
   } catch (nativeErr) {
     console.warn("Native browser conversion failed, trying WASM FFmpeg...", nativeErr);
   }
 
-  // 3. Fallback to FFmpeg WASM Converter
+  // 2. Fallback to FFmpeg WASM Converter
   const ffmpeg = await getFFmpeg();
 
   const progressHandler = ({ progress }: { progress: number }) => {

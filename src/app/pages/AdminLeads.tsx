@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Inbox, Archive, Trash2, RefreshCw, Phone, User, Clock,
+  Inbox, Archive, Trash2, RefreshCw, Phone, Mail, MessageSquare, User, Clock,
   CheckCircle, AlertCircle, ChevronDown, ChevronUp, X, ArchiveRestore
 } from "lucide-react";
 import { supabaseClient } from "../supabaseClient";
@@ -9,7 +9,9 @@ import { supabaseClient } from "../supabaseClient";
 interface Lead {
   id: number;
   name: string;
-  phone: string;
+  phone?: string;
+  email?: string;
+  message?: string;
   created_at: string;
   archived?: boolean;
   note?: string;
@@ -45,12 +47,14 @@ export function AdminLeads() {
   const [noteText, setNoteText] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-  const sqlHint = `-- Выполните в Supabase SQL Editor для настройки таблицы sds_leads:
+  const sqlHint = `-- Таблица sds_leads в Supabase:
 
 CREATE TABLE IF NOT EXISTS sds_leads (
   id bigint generated always as identity primary key,
   name text not null,
-  phone text not null,
+  email text default '',
+  phone text default '',
+  message text default '',
   archived boolean default false,
   note text default '',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -331,15 +335,21 @@ CREATE POLICY "Allow anon delete leads" ON sds_leads FOR DELETE TO anon USING (t
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                        <span className="text-white/50 text-xs flex items-center gap-1">
-                          <Phone className="w-3 h-3" /> {lead.phone}
-                        </span>
+                        {(lead.email || lead.phone) && (
+                          <span className="text-white/60 text-xs flex items-center gap-1">
+                            {lead.email ? <Mail className="w-3 h-3 text-[#0066FF]" /> : <Phone className="w-3 h-3" />}
+                            {lead.email || lead.phone}
+                          </span>
+                        )}
                         <span className="text-white/30 text-xs flex items-center gap-1">
                           <Clock className="w-3 h-3" /> {timeAgo(lead.created_at)}
                         </span>
                       </div>
+                      {lead.message && !isExpanded && (
+                        <p className="text-white/50 text-xs mt-1 truncate max-w-md">💬 {lead.message}</p>
+                      )}
                       {lead.note && !isExpanded && (
-                        <p className="text-white/35 text-xs mt-1 truncate max-w-md">📝 {lead.note}</p>
+                        <p className="text-white/35 text-xs mt-0.5 truncate max-w-md">📝 {lead.note}</p>
                       )}
                     </div>
 
@@ -406,14 +416,25 @@ CREATE POLICY "Allow anon delete leads" ON sds_leads FOR DELETE TO anon USING (t
                             </div>
                             <div className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-4">
                               <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                                <Phone className="w-3 h-3" /> Телефон
+                                {lead.email ? <Mail className="w-3 h-3 text-[#0066FF]" /> : <Phone className="w-3 h-3" />} Контакт (Email / Телефон)
                               </p>
-                              <a
-                                href={`tel:${lead.phone}`}
-                                className="text-sm font-semibold text-[#0066FF] hover:underline"
-                              >
-                                {lead.phone}
-                              </a>
+                              {lead.email ? (
+                                <a
+                                  href={`mailto:${lead.email}`}
+                                  className="text-sm font-semibold text-[#0066FF] hover:underline break-all"
+                                >
+                                  {lead.email}
+                                </a>
+                              ) : lead.phone ? (
+                                <a
+                                  href={`tel:${lead.phone}`}
+                                  className="text-sm font-semibold text-[#0066FF] hover:underline"
+                                >
+                                  {lead.phone}
+                                </a>
+                              ) : (
+                                <span className="text-sm text-white/30">—</span>
+                              )}
                             </div>
                             <div className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-4">
                               <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-1 flex items-center gap-1.5">
@@ -422,6 +443,18 @@ CREATE POLICY "Allow anon delete leads" ON sds_leads FOR DELETE TO anon USING (t
                               <p className="text-sm font-semibold">{formatDate(lead.created_at)}</p>
                             </div>
                           </div>
+
+                          {/* Client Message */}
+                          {lead.message && (
+                            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 space-y-1.5">
+                              <p className="text-[10px] font-semibold text-[#0066FF] uppercase tracking-wider flex items-center gap-1.5">
+                                <MessageSquare className="w-3 h-3" /> Сообщение клиента
+                              </p>
+                              <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">
+                                {lead.message}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Note */}
                           <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-4 space-y-3">

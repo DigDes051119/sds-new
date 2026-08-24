@@ -344,7 +344,7 @@ function InstagramVideoPlayer({ src }: { src: string }) {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center cursor-pointer select-none bg-black/40" onClick={togglePlay}>
+    <div className="relative w-full h-full flex items-center justify-center cursor-pointer select-none bg-transparent" onClick={togglePlay}>
       <video
         ref={videoRef}
         src={src}

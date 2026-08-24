@@ -124,6 +124,25 @@ export function ProjectsNav({ activeTab, onTabChange }: ProjectsNavProps = {}) {
         ar: "إخراج الفيديو وتصميم الحركة لدينا",
         de: "Unsere Regie- und Motion-Design-Arbeiten"
       }
+    },
+    {
+      path: "/music",
+      label: {
+        en: "Music",
+        ru: "Музыка",
+        kg: "Музыка",
+        zh: "音乐",
+        ar: "موسيقى",
+        de: "Musik"
+      },
+      subtext: {
+        en: "Soundtracks & audio design",
+        ru: "Саундтреки и звуковой дизайн",
+        kg: "Саундтректер жана үн дизайны",
+        zh: "原声带与音频设计",
+        ar: "الموسيقى التصويرية والتصميم الصوتي",
+        de: "Soundtracks & Audiodesign"
+      }
     }
   ];
 

@@ -80,7 +80,7 @@ export const supabaseClient = {
   async fetchTable(tableName: string) {
     const token = this.getToken() || SUPABASE_KEY;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 12000);
+    const timer = setTimeout(() => controller.abort(), 5000);
 
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?select=*`, {

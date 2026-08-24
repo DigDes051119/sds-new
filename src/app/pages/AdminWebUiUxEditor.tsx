@@ -182,7 +182,8 @@ export function AdminWebUiUxEditor() {
         const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
         setIsConverting(false);
         setConversionProgress(null);
-        const uploaded = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+        const actualExt = convertedFile.name.split('.').pop() || file.name.split('.').pop() || "mp4";
+        const uploaded = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, `.${actualExt}`), convertedFile);
         publicUrl = `video:${uploaded}`;
       } else {
         publicUrl = await supabaseClient.uploadFile("assets", path, file);
@@ -408,7 +409,7 @@ export function AdminWebUiUxEditor() {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv)$/i.test(file.name);
-        const fileExt = file.name.split('.').pop() || (isVideo ? 'webm' : 'jpg');
+        const fileExt = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
         const nextIdx = (formCollageBlocks[blockIdx]?.length || 0) + i;
         const path = `projects/${formId}/block-${blockIdx}-${nextIdx}-${Date.now()}.${fileExt}`;
 
@@ -418,7 +419,8 @@ export function AdminWebUiUxEditor() {
           const convertedFile = await convertToWebM(file, (p) => setConversionProgress(p)).catch(() => file);
           setIsConverting(false);
           setConversionProgress(null);
-          const publicUrl = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, ".webm"), convertedFile);
+          const actualExt = convertedFile.name.split('.').pop() || fileExt;
+          const publicUrl = await supabaseClient.uploadFile("assets", path.replace(/\.[^/.]+$/, `.${actualExt}`), convertedFile);
           uploadedUrls.push(`video:${publicUrl}`);
         } else {
           const publicUrl = await supabaseClient.uploadFile("assets", path, file);
