@@ -707,21 +707,21 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
 
   const resetForm = () => {
     setFormId("");
-    setFormCategoryKey(type === "music" ? "electronic" : "industrial");
-    setFormImg("https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600");
+    setFormCategoryKey(type === "music" ? "electronic" : type === "video" ? "motion" : "industrial");
+    setFormImg(type === "video" ? "" : "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=1600");
     setFormNameRu("");
     setFormNameEn("");
     setFormNameKg("");
-    setFormCategoryRu(type === "music" ? "Electronic / Cinematic" : "Индустриальный дизайн");
-    setFormCategoryEn(type === "music" ? "Electronic / Cinematic" : "Industrial Design");
-    setFormCategoryKg(type === "music" ? "Electronic / Cinematic" : "Өнөр жай дизайны");
+    setFormCategoryRu(type === "music" ? "Electronic / Cinematic" : type === "video" ? "" : "Индустриальный дизайн");
+    setFormCategoryEn(type === "music" ? "Electronic / Cinematic" : type === "video" ? "" : "Industrial Design");
+    setFormCategoryKg(type === "music" ? "Electronic / Cinematic" : type === "video" ? "" : "Өнөр жай дизайны");
     setFormDescRu("");
     setFormDescEn("");
     setFormDescKg("");
     setFormClientRu(type === "music" ? "Steel Drake Sound" : "");
     setFormClientEn("");
     setFormClientKg("");
-    setFormYear(new Date().getFullYear().toString());
+    setFormYear(type === "video" ? "" : new Date().getFullYear().toString());
     setFormServiceRu("");
     setFormServiceEn("");
     setFormServiceKg("");
@@ -1676,66 +1676,83 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] border-b border-white/[0.04] pb-2">
                     1. Основные параметры {type === "video" && <span className="text-white/40 normal-case font-normal">(необязательно)</span>}
                   </h4>
-                  <div className="grid md:grid-cols-2 gap-6">
+                  {type === "video" ? (
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                        {type === "video" ? "Название видео (RU)" : "Название (RU)"}
+                        Название видео (RU)
                       </label>
                       <input
                         type="text"
                         value={formNameRu}
                         onChange={(e) => handleNameRuChange(e.target.value)}
-                        placeholder={type === "video" ? "Название видео (необязательно)" : "Chyraq"}
+                        placeholder="Название видео (необязательно)"
                         className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        required={type !== "video"}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                        Категория (RU)
-                      </label>
-                      <input
-                        type="text"
-                        value={formCategoryRu}
-                        onChange={(e) => setFormCategoryRu(e.target.value)}
-                        placeholder={type === "video" ? "Видео / Motion" : "Индустриальный дизайн"}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        required={type !== "video"}
-                      />
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                            Название (RU)
+                          </label>
+                          <input
+                            type="text"
+                            value={formNameRu}
+                            onChange={(e) => handleNameRuChange(e.target.value)}
+                            placeholder="Chyraq"
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                            Категория (RU)
+                          </label>
+                          <input
+                            type="text"
+                            value={formCategoryRu}
+                            onChange={(e) => setFormCategoryRu(e.target.value)}
+                            placeholder="Индустриальный дизайн"
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                        Категория (Ключ фильтра)
-                      </label>
-                      <select
-                        value={formCategoryKey}
-                        onChange={(e) => setFormCategoryKey(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                      >
-                        {categories.map((c) => (
-                          <option key={c.key} value={c.key} className="bg-[#080810] text-white">
-                            {c.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-white/50">
-                        {type === "video" ? "Год (опционально)" : "Год"}
-                      </label>
-                      <input
-                        type="text"
-                        value={formYear}
-                        onChange={(e) => setFormYear(e.target.value)}
-                        placeholder="2026"
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
-                        required={type !== "video"}
-                      />
-                    </div>
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                            Категория (Ключ фильтра)
+                          </label>
+                          <select
+                            value={formCategoryKey}
+                            onChange={(e) => setFormCategoryKey(e.target.value)}
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                          >
+                            {categories.map((c) => (
+                              <option key={c.key} value={c.key} className="bg-[#080810] text-white">
+                                {c.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-white/50">
+                            Год
+                          </label>
+                          <input
+                            type="text"
+                            value={formYear}
+                            onChange={(e) => setFormYear(e.target.value)}
+                            placeholder="2026"
+                            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-white focus:border-[#0066FF] outline-none text-base"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Card 2: URL и Идентификатор */}
@@ -2159,9 +2176,11 @@ export function AdminCatalogEditor({ type }: { type: "products" | "concepts" | "
                   <div className="p-4 bg-[#f3f3f3] flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-black/10">
                     <div className="space-y-4">
                       <div>
-                        <span className="font-mono text-[9px] text-[#808080] uppercase tracking-wider block mb-1">
-                          {formYear || "2026"} — {formCategoryRu || "Видео"}
-                        </span>
+                        {(formYear || formCategoryRu) ? (
+                          <span className="font-mono text-[9px] text-[#808080] uppercase tracking-wider block mb-1">
+                            {[formYear, formCategoryRu].filter(Boolean).join(" — ")}
+                          </span>
+                        ) : null}
                         <h3 className="text-lg font-bold uppercase leading-tight m-0 truncate">
                           {formNameRu || "Название видео"}
                         </h3>

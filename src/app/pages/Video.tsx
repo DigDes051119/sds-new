@@ -1,10 +1,136 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, Play, Pause } from "lucide-react";
 import { LanguageContext, getLocText } from "../i18n";
 import { cmsService } from "../cmsService";
 import { ProjectsNav } from "../components/ProjectsNav";
+
+/**
+ * Lazy video card for the masonry grid.
+ * Shows cover image by default. Loads and plays video only on hover.
+ * Pauses and unloads video when hover ends or modal opens.
+ */
+function LazyVideoCard({
+  item,
+  index,
+  onOpen,
+  isModalOpen,
+}: {
+  item: any;
+  index: number;
+  onOpen: (i: number) => void;
+  isModalOpen: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [hovering, setHovering] = useState(false);
+
+  const isVideo =
+    item.videoUrl?.startsWith("video:") ||
+    item.videoUrl?.endsWith(".webm") ||
+    item.videoUrl?.endsWith(".mp4");
+  const realUrl = item.videoUrl?.startsWith("video:")
+    ? item.videoUrl.slice(6)
+    : item.videoUrl;
+
+  // Pause grid video when modal opens
+  useEffect(() => {
+    if (isModalOpen && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [isModalOpen]);
+
+  const handleMouseEnter = () => {
+    if (isModalOpen) return;
+    setHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHovering(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  // Start playing when hovering
+  useEffect(() => {
+    if (hovering && isVideo && videoRef.current && !isModalOpen) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [hovering, isVideo, isModalOpen]);
+
+  return (
+    <div
+      key={item.id}
+      onClick={() => onOpen(index)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="break-inside-avoid mb-2 w-full group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
+    >
+      {isVideo ? (
+        <>
+          {/* Cover image shown when not hovering */}
+          {item.img && (
+            <img
+              src={item.img}
+              alt={item.name || ""}
+              className={`w-full h-auto object-cover block transition-all duration-500 group-hover:scale-[1.03] ${
+                hovering ? "opacity-0 absolute inset-0" : "opacity-100"
+              }`}
+              loading="lazy"
+            />
+          )}
+
+          {/* Video element — only loads src when hovering */}
+          <video
+            ref={videoRef}
+            src={hovering ? realUrl : undefined}
+            className={`w-full h-auto object-cover block transition-all duration-500 group-hover:scale-[1.03] ${
+              hovering ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none"
+            }`}
+            muted
+            playsInline
+            loop
+            preload="none"
+          />
+
+          {/* Play icon hint when not hovering */}
+          {!hovering && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
+              <div className="bg-black/50 rounded-full p-3 backdrop-blur-sm">
+                <Play className="w-5 h-5 text-white fill-white" />
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <img
+          src={item.img}
+          alt={item.name}
+          className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
+      )}
+
+      {/* Overlay with info on hover (only if filled) */}
+      {(item.name || item.detail?.year || item.category) ? (
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10 pointer-events-none">
+          {(item.detail?.year || item.category) && (
+            <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em] mb-1">
+              {[item.detail?.year, item.category].filter(Boolean).join(" — ")}
+            </span>
+          )}
+          {item.name && (
+            <h3 className="text-[18px] font-bold text-white uppercase leading-none m-0">
+              {item.name}
+            </h3>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function Video() {
   const { t, locale } = useContext(LanguageContext);
@@ -36,15 +162,15 @@ export function Video() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [activeMediaIdx, setActiveMediaIdx] = useState(0);
 
-  const openModalAt = (index: number) => {
+  const openModalAt = useCallback((index: number) => {
     setActiveIdx(index);
     setActiveMediaIdx(0);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
-  };
+  }, []);
 
   const currentItem = videos[activeIdx];
   const collageBlocks = currentItem?.detail?.collageBlocks || [];
@@ -100,52 +226,15 @@ export function Video() {
 
       {/* Dense Masonry Puzzle Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2 w-full mt-4">
-        {videos.map((item: any, index: number) => {
-          const isVideo = item.videoUrl?.startsWith("video:") || item.videoUrl?.endsWith(".webm") || item.videoUrl?.endsWith(".mp4");
-          const realUrl = item.videoUrl?.startsWith("video:") ? item.videoUrl.slice(6) : item.videoUrl;
-
-          return (
-            <div
-              key={item.id}
-              onClick={() => openModalAt(index)}
-              className="break-inside-avoid mb-2 w-full group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
-            >
-              {isVideo ? (
-                <video
-                  src={realUrl}
-                  className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
-                  muted
-                  playsInline
-                  autoPlay
-                  loop
-                />
-              ) : (
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
-                  loading="lazy"
-                />
-              )}
-
-              {/* Overlay with info on hover (only if filled) */}
-              {(item.name || item.detail?.year || item.category) ? (
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10 pointer-events-none">
-                  {(item.detail?.year || item.category) && (
-                    <span className="font-mono text-[11px] text-[#808080] uppercase tracking-[0.04em] mb-1">
-                      {[item.detail?.year, item.category].filter(Boolean).join(" — ")}
-                    </span>
-                  )}
-                  {item.name && (
-                    <h3 className="text-[18px] font-bold text-white uppercase leading-none m-0">
-                      {item.name}
-                    </h3>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
+        {videos.map((item: any, index: number) => (
+          <LazyVideoCard
+            key={item.id}
+            item={item}
+            index={index}
+            onOpen={openModalAt}
+            isModalOpen={isModalOpen}
+          />
+        ))}
       </div>
 
       {/* Detail Popup Modal */}
@@ -191,19 +280,18 @@ export function Video() {
                   </div>
 
                   <div className="flex-1 relative flex items-center justify-center px-[25px] py-[20px] overflow-hidden">
-                    <AnimatePresence mode="wait">
-                      {currentItem?.videoUrl?.startsWith("video:") || currentItem?.videoUrl?.endsWith(".webm") || currentItem?.videoUrl?.endsWith(".mp4") ? (
-                          <InstagramVideoPlayer
-                            src={currentItem.videoUrl?.startsWith("video:") ? currentItem.videoUrl.slice(6) : currentItem.videoUrl}
-                          />
-                      ) : (
-                        <img
-                          src={currentItem.img}
-                          alt={currentItem.name || "Video"}
-                          className="max-w-full max-h-full object-contain rounded-[4px]"
+                    {currentItem?.videoUrl?.startsWith("video:") || currentItem?.videoUrl?.endsWith(".webm") || currentItem?.videoUrl?.endsWith(".mp4") ? (
+                        <InstagramVideoPlayer
+                          key={currentItem.id}
+                          src={currentItem.videoUrl?.startsWith("video:") ? currentItem.videoUrl.slice(6) : currentItem.videoUrl}
                         />
-                      )}
-                    </AnimatePresence>
+                    ) : (
+                      <img
+                        src={currentItem.img}
+                        alt={currentItem.name || "Video"}
+                        className="max-w-full max-h-full object-contain rounded-[4px]"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -294,27 +382,42 @@ export function Video() {
 function InstagramVideoPlayer({ src }: { src: string }) {
   const { locale } = useContext(LanguageContext);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [showPlayOverlay, setShowPlayOverlay] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = isMuted;
-    videoRef.current.volume = 1;
-    
-    // Autoplay muted (compliant with all modern mobile and desktop browser autoplay policies)
-    const playPromise = videoRef.current.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          videoRef.current.play().catch(() => {});
-        }
-      });
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Reset state on mount / src change
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+
+    video.muted = true;
+    setIsMuted(true);
+    video.volume = 1;
+    video.load(); // force reload for new src
+
+    const onCanPlay = () => {
+      // Only autoplay if the component is still mounted with this src
+      if (video.src.includes(src.split("/").pop() || "__none__")) {
+        video.play().catch(() => {});
+      }
+    };
+
+    video.addEventListener("canplay", onCanPlay, { once: true });
+
+    // Cleanup: pause video when component unmounts (modal closes)
+    return () => {
+      video.removeEventListener("canplay", onCanPlay);
+      video.pause();
+      video.removeAttribute("src");
+      video.load(); // release media resources
+    };
   }, [src]);
 
   const togglePlay = () => {
@@ -349,7 +452,6 @@ function InstagramVideoPlayer({ src }: { src: string }) {
         ref={videoRef}
         src={src}
         className="max-w-full max-h-full object-contain rounded-[4px]"
-        autoPlay
         muted={isMuted}
         loop
         playsInline
