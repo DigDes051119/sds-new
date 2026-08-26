@@ -340,7 +340,72 @@ export function Home() {
         desc: detail.desc || detail.challenge || p.desc || ""
       };
     });
+  } else if (activeFilterTab === "/music") {
+    isArchiveOrVideo = true;
+    detailPathPrefix = "/music";
+    const musicItems = siteTranslations[locale]?.music?.items || siteTranslations["en"]?.music?.items || [];
+    currentFilteredProjects = musicItems.slice(0, 4).map((p: any) => ({
+      id: p.id,
+      title: p.name || p.title || "",
+      image: p.img || "",
+      tags: p.category || "Music",
+      year: p.year || "2026",
+      desc: p.desc || p.artist || ""
+    }));
   }
+
+  const getRecentProjectsButtonInfo = () => {
+    switch (activeFilterTab) {
+      case "/concepts-and-vision":
+        return {
+          to: "/concepts-and-vision",
+          label: getLocText(locale, "Смотреть все концепты \u2192", "View all concepts \u2192", "Бардык концепттерди көрүү \u2192", "查看所有概念 \u2192", "عرض جميع المفاهيم \u2192", "Alle Konzepte anzeigen \u2192")
+        };
+      case "/gamedev":
+        return {
+          to: "/gamedev",
+          label: getLocText(locale, "Смотреть все геймдев проекты \u2192", "View all gamedev projects \u2192", "Бардык геймдев долбоорлорун көрүү \u2192", "查看所有游戏开发项目 \u2192", "عرض جميع مشاريع تطوير الألعاب \u2192", "Alle Gamedev-Projekte anzeigen \u2192")
+        };
+      case "/web-ui-ux":
+        return {
+          to: "/web-ui-ux",
+          label: getLocText(locale, "Смотреть все Web / UI UX проекты \u2192", "View all Web / UI UX projects \u2192", "Бардык Web / UI UX долбоорлорун көрүү \u2192", "查看所有网页与UI/UX项目 \u2192", "عرض جميع مشاريع الويب وواجهات المستخدم \u2192", "Alle Web / UI UX Projekte anzeigen \u2192")
+        };
+      case "/projects/old":
+        return {
+          to: "/projects/old",
+          label: getLocText(locale, "Смотреть все старые проекты \u2192", "View all old projects \u2192", "Бардык эски долбоорлорду көрүү \u2192", "查看所有旧项目 \u2192", "عرض جميع المشاريع القديمة \u2192", "Alle alten Projekte anzeigen \u2192")
+        };
+      case "/video":
+        return {
+          to: "/video",
+          label: getLocText(locale, "Смотреть все видео \u2192", "View all videos \u2192", "Бардык видеолорду көрүү \u2192", "查看所有视频 \u2192", "عرض جميع مقاطع الفيديو \u2192", "Alle Videos anzeigen \u2192")
+        };
+      case "/music":
+        return {
+          to: "/music",
+          label: getLocText(locale, "Смотреть всю музыку \u2192", "View all music \u2192", "Бардык музыкаларды көрүү \u2192", "查看所有音乐 \u2192", "عرض جميع المقاطع الموسيقية \u2192", "Alle Musik anzeigen \u2192")
+        };
+      case "/products":
+        return {
+          to: "/products",
+          label: getLocText(locale, "Смотреть все продукты \u2192", "View all products \u2192", "Бардык өнүмдөрдү көрүү \u2192", "查看所有产品 \u2192", "عرض جميع المنتجات \u2192", "Alle Produkte anzeigen \u2192")
+        };
+      case "/architect-projects":
+        return {
+          to: "/architect-projects",
+          label: getLocText(locale, "Смотреть все проекты архитектуры \u2192", "View all architecture projects \u2192", "Бардык архитектура долбоорлорун көрүү \u2192", "查看所有建筑项目 \u2192", "عرض جميع المشاريع المعمارية \u2192", "Alle Architekturprojekte anzeigen \u2192")
+        };
+      case "/projects":
+      default:
+        return {
+          to: "/projects",
+          label: getLocText(locale, "Смотреть все проекты \u2192", "View all projects \u2192", "Бардык долбоорлорду көрүү \u2192", "查看所有项目 \u2192", "عرض جميع المشاريع \u2192", "Alle Projekte anzeigen \u2192")
+        };
+    }
+  };
+
+  const recentProjectsBtn = getRecentProjectsButtonInfo();
 
   // Block 3: Advantages list based on i18n about values
   const advantages = [
@@ -553,6 +618,16 @@ export function Home() {
               </div>
             );
           })}
+        </div>
+
+        {/* View all projects button for active category */}
+        <div className="mt-[32px] sm:mt-[48px] w-full z-10">
+          <Link 
+            to={recentProjectsBtn.to} 
+            className="block w-full border border-[#0000FF] py-[20px] text-[17px] font-mono tracking-[0.06em] uppercase text-[#0000FF] hover:bg-[#0000FF] hover:text-white transition-all duration-300 text-center"
+          >
+            {recentProjectsBtn.label}
+          </Link>
         </div>
       </section>
 
