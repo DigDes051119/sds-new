@@ -26,12 +26,21 @@ export function cleanSlug(s?: string): string {
   try {
     s = decodeURIComponent(s);
   } catch {}
-  return s.toLowerCase().trim().replace(/[^\p{L}\p{N}]/gu, "");
+  try {
+    return s.toLowerCase().trim().replace(/[^\p{L}\p{N}]/gu, "");
+  } catch {
+    return s.toLowerCase().trim().replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, "");
+  }
 }
 
 export function cleanTranslitSlug(s?: string): string {
   if (!s) return "";
-  return transliterate(s).toLowerCase().trim().replace(/[^\p{L}\p{N}]/gu, "");
+  const transliterated = transliterate(s).toLowerCase().trim();
+  try {
+    return transliterated.replace(/[^\p{L}\p{N}]/gu, "");
+  } catch {
+    return transliterated.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, "");
+  }
 }
 
 export const projectAliases: Record<string, string[]> = {

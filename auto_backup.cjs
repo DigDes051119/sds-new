@@ -14,22 +14,32 @@ const MEDIA_DIR = path.join(BACKUP_BASE_DIR, 'media');
 if (!fs.existsSync(BACKUP_BASE_DIR)) fs.mkdirSync(BACKUP_BASE_DIR, { recursive: true });
 if (!fs.existsSync(MEDIA_DIR)) fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
-// Функция рекурсивного копирования папки кода (игнорируя node_modules, .git, backups)
+// Функция рекурсивного копирования папки кода (игнорируя node_modules, .git, backups, dist, .claude, etc.)
 function copyDirSync(src, dest) {
     if (!fs.existsSync(src)) return;
     fs.mkdirSync(dest, { recursive: true });
-    const entries = fs.readdirSync(src, { withFileTypes: true });
+    let entries = [];
+    try {
+        entries = fs.readdirSync(src, { withFileTypes: true });
+    } catch {
+        return;
+    }
 
     for (let entry of entries) {
-        if (['node_modules', '.git', 'backups', 'dist'].includes(entry.name)) continue;
+        if (['node_modules', '.git', 'backups', 'dist', '.claude', '.agents', '.codewhale', '.rtk'].includes(entry.name)) continue;
 
         const srcPath = path.join(src, entry.name);
         const destPath = path.join(dest, entry.name);
 
-        if (entry.isDirectory()) {
-            copyDirSync(srcPath, destPath);
-        } else {
-            fs.copyFileSync(srcPath, destPath);
+        try {
+            const stat = fs.statSync(srcPath);
+            if (stat.isDirectory()) {
+                copyDirSync(srcPath, destPath);
+            } else if (stat.isFile()) {
+                fs.copyFileSync(srcPath, destPath);
+            }
+        } catch (err) {
+            // ignore inaccessible files / broken symlinks
         }
     }
 }
@@ -66,8 +76,20 @@ function extractUrls(obj, urls = new Set()) {
     return urls;
 }
 
+function getLocalTimestamp() {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const y = now.getFullYear();
+    const m = pad(now.getMonth() + 1);
+    const d = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mm = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    return `${y}-${m}-${d}_${hh}-${mm}-${ss}`;
+}
+
 async function runBackup() {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const timestamp = getLocalTimestamp();
     console.log(`\n========================================`);
     console.log(`🚀 ЗАПУСК ПОЛНОГО БЭКАПА (КОД + БД + МЕДИА): ${new Date().toLocaleString()}`);
     console.log(`========================================`);

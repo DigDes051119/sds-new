@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { transformTo2K } from '../../supabaseClient'
 
 const ERROR_IMG_SRC =
@@ -11,15 +11,40 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 export function ImageWithFallback(props: ImageProps) {
   const [didError, setDidError] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
-
-  const handleError = () => {
-    setDidError(true)
-  }
+  const imgRef = useRef<HTMLImageElement>(null)
 
   const { src: rawSrc, alt, style, className, priority, loading, ...rest } = props;
-  const src = transformTo2K(rawSrc || '');
+  const isVideo = Boolean(
+    rawSrc && (
+      rawSrc.startsWith('video:') ||
+      rawSrc.endsWith('.webm') ||
+      rawSrc.endsWith('.mp4') ||
+      rawSrc.includes('.mp4?') ||
+      rawSrc.includes('.webm?')
+    )
+  );
 
-  const finalLoading = loading ?? "eager";
+  const realSrc = isVideo && rawSrc?.startsWith('video:')
+    ? rawSrc.slice(6)
+    : (rawSrc || '');
+
+  const src = isVideo ? realSrc : transformTo2K(realSrc);
+
+  // Safari WebKit Fix: check if image is already completed in cache on mount/src change
+  useEffect(() => {
+    setDidError(false);
+    if (!isVideo && imgRef.current) {
+      if (imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+        setIsLoaded(true);
+      }
+    }
+  }, [src, isVideo]);
+
+  const handleError = () => {
+    setDidError(true);
+  };
+
+  const finalLoading = loading ?? (priority ? "eager" : "lazy");
   const fetchPriority = priority ? "high" : undefined;
 
   const isAbsolute = className?.includes('absolute');
@@ -27,7 +52,7 @@ export function ImageWithFallback(props: ImageProps) {
   const hasHAuto = className?.includes('h-auto');
   const objectFitClass = hasObjectContain ? 'object-contain' : 'object-cover';
 
-  const wrapperClass = `${isAbsolute ? 'absolute' : 'relative'} overflow-hidden ${
+  const wrapperClass = `${isAbsolute ? 'absolute' : 'relative'} w-full h-full overflow-hidden ${
     className
       ?.replace(/\babsolute\b/g, '')
       ?.replace(/\binset-0\b/g, '')
@@ -48,33 +73,53 @@ export function ImageWithFallback(props: ImageProps) {
     } : {})
   };
 
-  return didError ? (
-    <div
-      className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
-      style={style}
-    >
-      <div className="flex items-center justify-center w-full h-full">
-        <img 
-          src={ERROR_IMG_SRC} 
-          alt="Error loading image" 
-          decoding="async"
-          loading="lazy"
-          {...rest} 
-          data-original-url={rawSrc} 
-         />
+  if (didError) {
+    return (
+      <div
+        className={`inline-block bg-gray-100 text-center align-middle w-full h-full ${className ?? ''}`}
+        style={style}
+      >
+        <div className="flex items-center justify-center w-full h-full">
+          <img 
+            src={ERROR_IMG_SRC} 
+            alt="Error loading image" 
+            decoding="async"
+            loading="lazy"
+            {...rest} 
+            data-original-url={rawSrc} 
+          />
+        </div>
       </div>
-    </div>
-  ) : (
+    );
+  }
+
+  if (isVideo) {
+    return (
+      <div className={wrapperClass} style={finalStyle}>
+        <video
+          src={src}
+          autoPlay
+          muted
+          playsInline
+          loop
+          className={`${hasHAuto ? 'w-full h-auto block' : 'w-full h-full'} ${objectFitClass}`}
+        />
+      </div>
+    );
+  }
+
+  return (
     <div className={wrapperClass} style={finalStyle}>
-      {/* Pulse Skeleton Screen Placeholder */}
+      {/* Pulse Skeleton Screen Placeholder - only before initial paint */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-[#eeeee9] animate-pulse rounded-[inherit] z-10" />
+        <div className="absolute inset-0 bg-[#eeeee9] animate-pulse rounded-[inherit] z-10 pointer-events-none" />
       )}
       
       <img 
+        ref={imgRef}
         src={src} 
-        alt={alt} 
-        className={`${hasHAuto ? 'w-full h-auto block' : 'w-full h-full'} ${objectFitClass} scale-[1.01] transition-opacity duration-500 ease-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        alt={alt || ''} 
+        className={`${hasHAuto ? 'w-full h-auto block' : 'w-full h-full'} ${objectFitClass} scale-[1.01] transition-opacity duration-300 ease-out`}
         decoding="async"
         loading={finalLoading}
         {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
@@ -83,5 +128,5 @@ export function ImageWithFallback(props: ImageProps) {
         onError={handleError} 
       />
     </div>
-  )
+  );
 }

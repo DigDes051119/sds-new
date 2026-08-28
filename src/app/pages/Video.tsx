@@ -11,6 +11,11 @@ import { ProjectsNav } from "../components/ProjectsNav";
  * Shows cover image by default. Loads and plays video only on hover.
  * Pauses and unloads video when hover ends or modal opens.
  */
+/**
+ * Autoplaying video card for the grid.
+ * Plays video automatically on mount (muted, loop, inline).
+ * Pauses when modal opens.
+ */
 function LazyVideoCard({
   item,
   index,
@@ -23,7 +28,6 @@ function LazyVideoCard({
   isModalOpen: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hovering, setHovering] = useState(false);
 
   const isVideo =
     item.videoUrl?.startsWith("video:") ||
@@ -33,82 +37,39 @@ function LazyVideoCard({
     ? item.videoUrl.slice(6)
     : item.videoUrl;
 
-  // Pause grid video when modal opens
+  // Autoplay immediately on mount & handle pause/resume when modal toggles
   useEffect(() => {
-    if (isModalOpen && videoRef.current) {
-      videoRef.current.pause();
-    }
-  }, [isModalOpen]);
-
-  const handleMouseEnter = () => {
-    if (isModalOpen) return;
-    setHovering(true);
-  };
-
-  const handleMouseLeave = () => {
-    setHovering(false);
     if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      if (isModalOpen) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => {});
+      }
     }
-  };
-
-  // Start playing when hovering
-  useEffect(() => {
-    if (hovering && isVideo && videoRef.current && !isModalOpen) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [hovering, isVideo, isModalOpen]);
+  }, [isModalOpen, realUrl]);
 
   return (
     <div
       key={item.id}
       onClick={() => onOpen(index)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="break-inside-avoid mb-2 w-full group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
+      className="w-full aspect-[9/16] group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
     >
       {isVideo ? (
-        <>
-          {/* Cover image shown when not hovering */}
-          {item.img && (
-            <img
-              src={item.img}
-              alt={item.name || ""}
-              className={`w-full h-auto object-cover block transition-all duration-500 group-hover:scale-[1.03] ${
-                hovering ? "opacity-0 absolute inset-0" : "opacity-100"
-              }`}
-              loading="lazy"
-            />
-          )}
-
-          {/* Video element — only loads src when hovering */}
-          <video
-            ref={videoRef}
-            src={hovering ? realUrl : undefined}
-            className={`w-full h-auto object-cover block transition-all duration-500 group-hover:scale-[1.03] ${
-              hovering ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none"
-            }`}
-            muted
-            playsInline
-            loop
-            preload="none"
-          />
-
-          {/* Play icon hint when not hovering */}
-          {!hovering && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
-              <div className="bg-black/50 rounded-full p-3 backdrop-blur-sm">
-                <Play className="w-5 h-5 text-white fill-white" />
-              </div>
-            </div>
-          )}
-        </>
+        <video
+          ref={videoRef}
+          src={realUrl}
+          poster={item.img || undefined}
+          autoPlay
+          muted
+          playsInline
+          loop
+          className="w-full h-full object-cover block"
+        />
       ) : (
         <img
           src={item.img}
           alt={item.name}
-          className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover block"
           loading="lazy"
         />
       )}
@@ -224,8 +185,8 @@ export function Video() {
       {/* Premium Sorting Sub-navigation */}
       <ProjectsNav />
 
-      {/* Dense Masonry Puzzle Grid */}
-      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2 w-full mt-4">
+      {/* Dense Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full mt-4">
         {videos.map((item: any, index: number) => (
           <LazyVideoCard
             key={item.id}
@@ -247,16 +208,16 @@ export function Video() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closeModal}
-              className="absolute inset-0 bg-black/95 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/95"
             />
 
             {/* Layout Wrapper */}
             <div className="relative w-full max-w-[1500px] h-full max-h-[90vh] z-10">
               <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
+                initial={{ opacity: 0, scale: 0.99 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                exit={{ opacity: 0, scale: 0.99 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="w-full h-full bg-[#f3f3f3] text-black overflow-hidden flex flex-col lg:flex-row rounded-[8px]"
               >
                 {/* Media Player Column */}
@@ -382,41 +343,23 @@ export function Video() {
 function InstagramVideoPlayer({ src }: { src: string }) {
   const { locale } = useContext(LanguageContext);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [showPlayOverlay, setShowPlayOverlay] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Reset state on mount / src change
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-
     video.muted = true;
     setIsMuted(true);
-    video.volume = 1;
-    video.load(); // force reload for new src
+    setIsPlaying(true);
 
-    const onCanPlay = () => {
-      // Only autoplay if the component is still mounted with this src
-      if (video.src.includes(src.split("/").pop() || "__none__")) {
-        video.play().catch(() => {});
-      }
-    };
+    video.play().catch(() => {});
 
-    video.addEventListener("canplay", onCanPlay, { once: true });
-
-    // Cleanup: pause video when component unmounts (modal closes)
     return () => {
-      video.removeEventListener("canplay", onCanPlay);
       video.pause();
-      video.removeAttribute("src");
-      video.load(); // release media resources
     };
   }, [src]);
 
@@ -438,11 +381,19 @@ function InstagramVideoPlayer({ src }: { src: string }) {
     if (!videoRef.current) return;
     const nextMuted = !isMuted;
     videoRef.current.muted = nextMuted;
-    videoRef.current.volume = 1;
     setIsMuted(nextMuted);
     if (!nextMuted && videoRef.current.paused) {
       videoRef.current.play().catch(() => {});
       setIsPlaying(true);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    const bar = progressBarRef.current;
+    if (video && bar && video.duration > 0) {
+      const pct = (video.currentTime / video.duration) * 100;
+      bar.style.width = `${pct}%`;
     }
   };
 
@@ -451,29 +402,25 @@ function InstagramVideoPlayer({ src }: { src: string }) {
       <video
         ref={videoRef}
         src={src}
-        className="max-w-full max-h-full object-contain rounded-[4px]"
+        className="max-w-full max-h-full object-contain rounded-[4px] transform-gpu"
         muted={isMuted}
         loop
         playsInline
+        autoPlay
         preload="auto"
-        onTimeUpdate={() => {
-          if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
-            setDuration(videoRef.current.duration || 0);
-          }
-        }}
+        onTimeUpdate={handleTimeUpdate}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />
 
-      {/* Instagram-like Centered Play/Pause Icon Animation on click */}
+      {/* Centered Play/Pause Icon Animation on click */}
       <AnimatePresence>
         {showPlayOverlay && (
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="absolute p-5 bg-[#0000FF]/90 rounded-full text-white pointer-events-none z-10 shadow-2xl shadow-[#0000FF]/40"
           >
             {!isPlaying ? (
@@ -485,21 +432,20 @@ function InstagramVideoPlayer({ src }: { src: string }) {
         )}
       </AnimatePresence>
 
-      {/* Video Progress Line */}
-      {duration > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 z-20">
-          <div
-            className="h-full bg-[#0000FF] transition-all duration-100 ease-linear"
-            style={{ width: `${(currentTime / duration) * 100}%` }}
-          />
-        </div>
-      )}
+      {/* Video Progress Line (Direct DOM width, zero React re-render overhead) */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 z-20 pointer-events-none">
+        <div
+          ref={progressBarRef}
+          className="h-full bg-[#0000FF]"
+          style={{ width: "0%" }}
+        />
+      </div>
 
       {/* Sound Toggle Button Bottom-Right */}
       <button
         type="button"
         onClick={toggleMute}
-        className={`absolute bottom-6 right-6 px-4 py-2 rounded-full backdrop-blur-md transition duration-300 active:scale-95 z-30 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider font-bold shadow-lg cursor-pointer ${
+        className={`absolute bottom-6 right-6 px-4 py-2 rounded-full transition duration-300 active:scale-95 z-30 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider font-bold shadow-lg cursor-pointer ${
           isMuted
             ? "bg-black/70 hover:bg-black/90 text-white border border-white/20"
             : "bg-[#0000FF] hover:bg-[#0000FF]/90 text-white border border-transparent shadow-[#0000FF]/30"

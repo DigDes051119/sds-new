@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from "react";
 import { LanguageContext, getLocText } from "../i18n";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { cmsService } from "../cmsService";
+import { safeLocalStorage } from "../safeStorage";
 import { GridSwitcher } from "../components/GridSwitcher";
 
 function renderCommaSplitList(text: any) {
@@ -23,7 +24,7 @@ function renderCommaSplitList(text: any) {
 export function ArchitectProjects() {
   const { t, locale } = useContext(LanguageContext);
   const [productDetails, setProductDetails] = useState(() => cmsService.getProductDetails());
-  const [cols, setCols] = useState(() => localStorage.getItem("sds_grid_layout") || "2");
+  const [cols, setCols] = useState(() => safeLocalStorage.getItem("sds_grid_layout") || "2");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -48,9 +49,9 @@ export function ArchitectProjects() {
       client: item.client || detail.client || "",
       studio: item.studio || detail.studio || "-",
       designer: item.designer || detail.designer || "-",
-      location: item.location || detail.location || "-",
-      projectType: item.projectType || detail.projectType || "-",
-      class: item.class || detail.class || "-"
+      location: detail.location || "-",
+      projectType: detail.projectType || "-",
+      class: detail.class || "-"
     };
   });
 
@@ -65,7 +66,7 @@ export function ArchitectProjects() {
           </h1>
           <GridSwitcher cols={cols} onChange={(val) => {
             setCols(val);
-            localStorage.setItem("sds_grid_layout", val);
+            safeLocalStorage.setItem("sds_grid_layout", val);
           }} />
         </div>
         <p className="text-[#808080] text-[14px] sm:text-[16px] leading-[1.44] m-0 font-normal max-w-[650px]">

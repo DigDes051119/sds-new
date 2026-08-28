@@ -511,7 +511,7 @@ export function Home() {
 
         <div className={
           activeFilterTab === "/video"
-            ? "columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2 w-full mt-4"
+            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full mt-4"
             : activeFilterTab === "/projects/old"
               ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[20px] lg:gap-x-[24px] gap-y-[40px]"
               : "grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[48px]"
@@ -524,13 +524,14 @@ export function Home() {
               return (
                 <div
                   key={`recent-${project.id}-${activeFilterTab}`}
-                  className="break-inside-avoid mb-2 w-full group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
+                  className="w-full aspect-[9/16] group relative cursor-pointer overflow-hidden rounded-[8px] bg-[#111]"
                 >
                   <Link to="/video" className="block relative w-full h-full">
                     {isVideo ? (
                       <video
                         src={realUrl}
-                        className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+                        poster={project.image || undefined}
+                        className="w-full h-full object-cover block"
                         muted
                         playsInline
                         autoPlay
@@ -540,7 +541,7 @@ export function Home() {
                       <img
                         src={project.image}
                         alt={project.title}
-                        className="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.03]"
+                        className="w-full h-full object-cover block"
                       />
                     )}
 

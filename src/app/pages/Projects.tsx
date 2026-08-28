@@ -10,12 +10,13 @@ import projectImg1 from "../../imports/image_low.webp";
 import projectImg2 from "../../imports/image_2026-06-09_10-31-16_low.webp";
 import coverTooko from "../../imports/cover_tooko.webp";
 
+import { safeLocalStorage } from "../safeStorage";
 import { findInObjectCaseInsensitive, getProjectCardInfo, COVER_MOMS } from "../utils/slugUtils";
 
 export function Projects() {
   const { t, locale } = useContext(LanguageContext);
   const [projectDetails, setProjectDetails] = useState(() => cmsService.getProjectDetails());
-  const [cols, setCols] = useState(() => localStorage.getItem("sds_grid_layout") || "2");
+  const [cols, setCols] = useState(() => safeLocalStorage.getItem("sds_grid_layout") || "2");
 
   useEffect(() => {
     return cmsService.subscribe(() => {
@@ -54,7 +55,7 @@ export function Projects() {
           </h1>
           <GridSwitcher cols={cols} onChange={(val) => {
             setCols(val);
-            localStorage.setItem("sds_grid_layout", val);
+            safeLocalStorage.setItem("sds_grid_layout", val);
           }} />
         </div>
       </section>
