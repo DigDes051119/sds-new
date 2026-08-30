@@ -1,0 +1,11 @@
+# Robots.txt for Sanarip Med AI
+User-agent: *
+Allow: /
+Disallow: /#admin
+Disallow: /#analytics
+
+# Crawl-delay for bot protection
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: https://sanarip-med.kg/sitemap.xml

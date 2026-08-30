@@ -22,6 +22,7 @@ const GameDev = lazy(() => import("./pages/GameDev").then(m => ({ default: m.Gam
 const GameDevDetail = lazy(() => import("./pages/GameDevDetail").then(m => ({ default: m.GameDevDetail })));
 const Video = lazy(() => import("./pages/Video").then(m => ({ default: m.Video })));
 const Music = lazy(() => import("./pages/Music").then(m => ({ default: m.Music })));
+const SanaripMedAi = lazy(() => import("./pages/SanaripMedAi").then(m => ({ default: m.SanaripMedAi })));
 
 // Admin pages lazy (heavy admin bundle separated)
 const AdminLayout = lazy(() => import("./components/AdminLayout").then(m => ({ default: m.AdminLayout })));
@@ -81,6 +82,16 @@ export const router = createBrowserRouter([
       return null;
     },
     Component: () => null,
+  },
+  {
+    path: "/sanarip-med-ai",
+    Component: SanaripMedAi,
+    ErrorBoundary: RouteErrorBoundary,
+  },
+  {
+    path: "/sanarip-med-ai/*",
+    Component: SanaripMedAi,
+    ErrorBoundary: RouteErrorBoundary,
   },
   {
     path: "/admin/login",

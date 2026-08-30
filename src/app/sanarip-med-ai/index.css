@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-size: 16px;
+  }
+  
+  html {
+    font-size: 16px;
+    scroll-behavior: auto; /* Lenis handles smooth scrolling */
+  }
+
+  body {
+    background-color: #F3F5F9;
+    color: #0F172A;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Global removal of all drop shadows across the website */
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+
+/* Custom Light Scrollbar for page */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Chat Feed Ultra-Sleek Floating Scrollbar (Apple Style) */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4) !important;
+  border-radius: 9999px !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(9, 99, 141, 0.7) !important;
+}
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+/* Brand Text Gradient */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #09638D 0%, #61DED3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

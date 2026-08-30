@@ -1,0 +1,27 @@
+/* Sanarip Med AI Specific Styles */
+
+/* Chat Feed Ultra-Sleek Floating Scrollbar (Apple Style) */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4) !important;
+  border-radius: 9999px !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(9, 99, 141, 0.7) !important;
+}
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+/* Brand Text Gradient */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #09638D 0%, #61DED3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
