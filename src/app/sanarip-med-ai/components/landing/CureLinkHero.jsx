@@ -64,7 +64,7 @@ export const CureLinkHero = () => {
         <header className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-full px-6 py-4 flex items-center justify-between w-full relative">
           
           <motion.a custom={2.6} variants={revealVariant} initial="hidden" animate="visible" href="#" className="flex items-center gap-2 shrink-0">
-            <SanaripLogo className="h-10 sm:h-12" />
+            <SanaripLogo className="h-12 sm:h-14 md:h-[58px]" />
           </motion.a>
 
           {/* Centered Navigation */}

@@ -90,7 +90,7 @@ export const FooterCTA = () => {
           
           {/* Col 1: Logo & Info */}
           <div className="lg:col-span-4 space-y-5">
-            <SanaripLogo className="h-11 sm:h-12" />
+            <SanaripLogo className="h-12 sm:h-14 md:h-[54px]" />
             <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed max-w-sm">
               {t('hero.description')}
             </p>
