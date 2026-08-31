@@ -1,11 +1,9 @@
-import { queryInstantClinicalAI } from '../services/clinicalAIEngine.js';
-
 // Base REST API URL for Sanarip Med AI Server
 const DEFAULT_LOCAL_URL = 'http://127.0.0.1:8000';
 const SESSION_STORAGE_KEY = 'sanarip_clinical_session_id';
 
 /**
- * Get active API base URL (supports environment variable, localStorage custom URL, or proxy fallback)
+ * Get active API base URL (supports custom URL, environment variable, or default)
  */
 export function getApiBaseUrl() {
   if (typeof window !== 'undefined') {
@@ -85,7 +83,7 @@ async function fetchWithCascade(path, options = {}) {
   for (const url of endpoints) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options.timeout || 12000);
+      const timeoutId = setTimeout(() => controller.abort(), options.timeout || 15000);
       const fetchOptions = {
         ...options,
         signal: controller.signal,
@@ -103,8 +101,8 @@ async function fetchWithCascade(path, options = {}) {
 }
 
 /**
- * Send text symptom query to Sanarip Med AI Server (POST /api/chat/message)
- * Body: { "session_id": "unique_id", "message": "текст сообщения" }
+ * Send text symptom query directly to Sanarip Med AI Server (POST /api/chat/message)
+ * Body: { "session_id": "unique_id", "message": "текст сообщения", "lang": "ru|kg|en" }
  * Response: { "reply": "текст ответа", "suggested_doctors": [...], "suggested_clinics": [...] }
  */
 export async function sendClinicalQueryToAI(query, lang = 'ru', options = {}) {
@@ -122,7 +120,7 @@ export async function sendClinicalQueryToAI(query, lang = 'ru', options = {}) {
         message: query,
         lang: lang
       }),
-      timeout: 15000
+      timeout: 20000
     });
 
     if (data) {
@@ -145,22 +143,23 @@ export async function sendClinicalQueryToAI(query, lang = 'ru', options = {}) {
       };
     }
   } catch (err) {
-    console.warn('[Sanarip Med AI] Live AI server error, using fallback:', err?.message || err);
+    console.warn('[Sanarip Med AI] Backend error:', err?.message || err);
   }
 
-  // Graceful fallback if backend is unreachable
-  await new Promise(resolve => setTimeout(resolve, 350));
-  const fallback = queryInstantClinicalAI(query, lang);
+  // Pure network error notification
   return {
-    ...fallback,
+    success: false,
     isLiveServer: false,
+    text: lang === 'kg'
+      ? 'Сервер менен байланыш үзүлдү. Сураныч, интернетти текшерип, кайра жазып көрүңүз.'
+      : 'Сервер временно недоступен. Пожалуйста, проверьте подключение к серверу и повторите запрос.',
     suggestedDoctors: [],
     suggestedClinics: []
   };
 }
 
 /**
- * Send injury / rash photo to Vision Diagnostics Engine (POST /api/chat/vision)
+ * Send injury / rash photo directly to Vision Diagnostics Engine (POST /api/chat/vision)
  * Multipart form data: image, session_id, message, lang
  */
 export async function sendVisionQueryToAI(imageFile, message = '', lang = 'ru') {
@@ -176,7 +175,7 @@ export async function sendVisionQueryToAI(imageFile, message = '', lang = 'ru') 
     const data = await fetchWithCascade('/api/chat/vision', {
       method: 'POST',
       body: formData,
-      timeout: 25000
+      timeout: 30000
     });
 
     if (data) {
@@ -196,23 +195,23 @@ export async function sendVisionQueryToAI(imageFile, message = '', lang = 'ru') 
   }
 
   return {
-    success: true,
+    success: false,
     isLiveServer: false,
     type: lang === 'kg' 
-      ? 'Жаракаттын алгачкы талдоосу аяктады' 
-      : 'Визуальный экспресс-анализ повреждения завершен',
-    severity: '5 / 10 (Средняя)',
+      ? 'Сүрөттү талдоодо ката кетти' 
+      : 'Ошибка анализа изображения',
+    severity: '—',
     recommendation: lang === 'kg' 
-      ? 'Жараатты тазалап, дарыгердин кароосунан өтүңүз.' 
-      : 'Промойте антисептиком и покажитесь профильному врачу.',
-    action: lang === 'kg' ? 'Консультацияга жазылуу' : 'Запись на консультацию',
+      ? 'Сервер жооп берген жок. Симптомдорду текст түрүндө жазыңыз.' 
+      : 'Сервер недоступен. Пожалуйста, опишите симптомы текстом.',
+    action: lang === 'kg' ? 'Кайра аракет кылуу' : 'Повторить попытку',
     threat: false,
-    status: '✅ Стабильно'
+    status: '⚠️ Ошибка'
   };
 }
 
 /**
- * Send voice audio record to Voice Triage Engine (POST /api/chat/voice)
+ * Send voice audio record directly to Voice Triage Engine (POST /api/chat/voice)
  * Multipart form data: audio, session_id, lang
  */
 export async function sendVoiceQueryToAI(audioBlob, lang = 'ru') {
@@ -227,7 +226,7 @@ export async function sendVoiceQueryToAI(audioBlob, lang = 'ru') {
     const data = await fetchWithCascade('/api/chat/voice', {
       method: 'POST',
       body: formData,
-      timeout: 25000
+      timeout: 30000
     });
 
     if (data) {
