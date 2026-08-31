@@ -419,17 +419,17 @@ export const HeroAIChat = () => {
         setMessages(prev => [...prev, aiMsg]);
       }
     } catch (err) {
-      const fallbackMsg = {
+      const errorMsg = {
         id: Date.now() + 1,
         sender: 'ai',
         text: currentLang === 'kg'
-          ? 'Симптомдор сакталса же күчөсө, профилдик дарыгердин очной кароосунан өтүүнү сунуштайм.'
-          : 'Если симптомы сохраняются или усиливаются, рекомендую записаться на очный осмотр к профильному врачу.',
+          ? '⚠️ Сервер менен байланыш үзүлдү. Сураныч, байланышты текшериңиз.'
+          : '⚠️ Не удалось получить ответ от сервера Sanarip Med AI. Проверьте подключение к сети.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actionType: 'booking',
-        actionLabel: currentLang === 'kg' ? '📅 Дарыгерге жазылуу' : '📅 Записаться к врачу'
+        actionType: 'consultation',
+        buttons: []
       };
-      setMessages(prev => [...prev, fallbackMsg]);
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsTyping(false);
       setAttachedImage(null);
