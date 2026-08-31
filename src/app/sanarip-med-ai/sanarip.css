@@ -1,7 +1,7 @@
 /* ==========================================================================
-   Sanarip Med AI - Style Isolation & Preservation
-   Ensures complete fidelity to the original landing page (http://localhost:3000)
-   without inheriting Studio styles (0px border-radius, Everett font, etc.)
+   Sanarip Med AI - Style Isolation & Complete Flat Modern Look
+   - Zero drop shadows across all cards, badges, pills, and containers
+   - Zero borders & outlines across all cards, badges, pills, and header
    ========================================================================== */
 
 /* Page-level body isolation when on Sanarip route */
@@ -30,7 +30,6 @@ body.sanarip-page {
 /* Base typography within Sanarip */
 .sanarip-root :is(h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, label) {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  border-color: inherit;
 }
 
 /* Reset forced 0px border-radius and unwanted studio global borders */
@@ -96,7 +95,9 @@ body.sanarip-page {
   border-radius: 9999px !important;
 }
 
-/* Global removal of drop shadows from original Sanarip */
+/* ==========================================================================
+   GLOBAL REMOVAL OF ALL SHADOWS AND BORDERS ACROSS ALL PLATES / CARDS / PILLS
+   ========================================================================== */
 .sanarip-root,
 .sanarip-root *,
 .sanarip-root *::before,
@@ -105,13 +106,20 @@ body.sanarip-page {
   text-shadow: none !important;
 }
 
-/* Specific shadows when explicitly styled */
-.sanarip-root .shadow-soft {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05) !important;
-}
-
-.sanarip-root .shadow-curelink {
-  box-shadow: 0 25px 50px -12px rgba(28, 100, 242, 0.18) !important;
+/* Remove all card outlines, pill strokes and floating header borders */
+.sanarip-root header,
+.sanarip-root header *,
+.sanarip-root .rounded-full,
+.sanarip-root [class*="rounded-"],
+.sanarip-root .bg-white,
+.sanarip-root [class*="border-slate-"],
+.sanarip-root [class*="border-white"],
+.sanarip-root [class*="border-black"],
+.sanarip-root [class*="border-neutral-"],
+.sanarip-root [class*="border-gray-"] {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Keyframe & Marquee animations */
