@@ -411,6 +411,7 @@ export const HeroAIChat = () => {
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           actionType: response.actionType || 'booking',
           actionLabel: response.actionLabel || (currentLang === 'kg' ? '📅 Дарыгерге жазылуу' : '📅 Записаться на прием'),
+          buttons: response.buttons || [],
           suggestedDoctors: response.suggestedDoctors || [],
           suggestedClinics: response.suggestedClinics || []
         };
@@ -855,6 +856,21 @@ export const HeroAIChat = () => {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Interactive Quick Reply Buttons if returned by Server */}
+                      {msg.buttons && msg.buttons.length > 0 && (
+                        <div className="pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+                          {msg.buttons.map((btnText, bIdx) => (
+                            <button
+                              key={bIdx}
+                              onClick={() => handleSend(btnText)}
+                              className="px-4 py-2 rounded-full bg-[#09638D]/10 hover:bg-[#09638D] text-[#09638D] hover:text-white font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-xs"
+                            >
+                              <span>{btnText}</span>
+                            </button>
+                          ))}
                         </div>
                       )}
 

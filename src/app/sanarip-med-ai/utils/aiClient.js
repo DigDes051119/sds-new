@@ -127,6 +127,7 @@ export async function sendClinicalQueryToAI(query, lang = 'ru', options = {}) {
       const replyText = data.reply || data.text || data.message || data.response || '';
       const suggestedDoctors = data.suggested_doctors || data.doctors || [];
       const suggestedClinics = data.suggested_clinics || data.clinics || [];
+      const buttons = Array.isArray(data.buttons) ? data.buttons : [];
       const triageCode = data.triage_code || data.triageCode || null;
       const actionType = data.action_type || data.actionType || (suggestedDoctors.length ? 'booking' : 'consultation');
       const actionLabel = data.action_label || data.actionLabel || null;
@@ -135,6 +136,7 @@ export async function sendClinicalQueryToAI(query, lang = 'ru', options = {}) {
         success: true,
         isLiveServer: true,
         text: replyText,
+        buttons,
         suggestedDoctors,
         suggestedClinics,
         triageCode,
