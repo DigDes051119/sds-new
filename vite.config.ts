@@ -107,6 +107,13 @@ export default defineConfig({
     strictPort: false,
     host: '0.0.0.0',
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     warmup: {
       clientFiles: [
         './src/main.tsx',
@@ -122,6 +129,13 @@ export default defineConfig({
     strictPort: false,
     host: '0.0.0.0',
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     target: ['es2020', 'safari14', 'chrome87', 'firefox78', 'edge88'],
