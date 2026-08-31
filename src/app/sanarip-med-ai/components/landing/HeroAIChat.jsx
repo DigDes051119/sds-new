@@ -643,11 +643,24 @@ export const HeroAIChat = () => {
 
           {/* Active Conversation Feed */}
           <div 
-            data-lenis-prevent
-            className={`absolute inset-x-0 top-0 bottom-28 overflow-y-auto pr-2 sm:pr-3 space-y-5 pb-4 overscroll-contain chat-scrollbar [mask-image:linear-gradient(to_bottom,transparent_0%,black_24px,black_100%)] transition-opacity duration-300 transform-gpu z-10 ${
+            className={`absolute inset-x-0 top-0 bottom-28 overflow-y-auto pr-2 sm:pr-3 space-y-5 pb-4 chat-scrollbar [mask-image:linear-gradient(to_bottom,transparent_0%,black_24px,black_100%)] transition-opacity duration-300 transform-gpu z-10 ${
               isChatExpanded && showMessagesFeed ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
             }`}
             ref={messagesContainerRef}
+            onWheel={(e) => {
+              const el = messagesContainerRef.current;
+              if (!el) return;
+              const { scrollTop, scrollHeight, clientHeight } = el;
+              const isScrollingDown = e.deltaY > 0;
+              const isAtBottom = scrollTop + clientHeight >= scrollHeight - 3;
+              const isAtTop = scrollTop <= 0;
+
+              if ((isScrollingDown && isAtBottom) || (!isScrollingDown && isAtTop)) {
+                if (window.__lenis) {
+                  window.__lenis.scrollTo(window.scrollY + e.deltaY * 1.5, { immediate: true });
+                }
+              }
+            }}
           >
             <div className="h-4 shrink-0" />
 
