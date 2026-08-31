@@ -152,6 +152,136 @@ const GEMINI_SUGGESTIONS = {
   ]
 };
 
+/**
+ * Parses Markdown formatting (**bold**, *italic*, lists, headings, dividers)
+ * and renders clean, beautifully styled React typography elements with zero raw asterisks.
+ */
+function renderFormattedMessage(rawText, isUser = false) {
+  if (!rawText) return null;
+  if (isUser) {
+    return (
+      <div className="text-base leading-relaxed font-normal whitespace-pre-line text-white">
+        {rawText}
+      </div>
+    );
+  }
+
+  const parseInline = (str) => {
+    const parts = [];
+    const regex = /(\*\*|__)(.*?)\1|(\*|_)(.*?)\3/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(str)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(str.slice(lastIndex, match.index));
+      }
+      if (match[2] !== undefined) {
+        parts.push(
+          <strong key={match.index} className="font-extrabold text-slate-950">
+            {match[2]}
+          </strong>
+        );
+      } else if (match[4] !== undefined) {
+        parts.push(
+          <em key={match.index} className="italic text-slate-700">
+            {match[4]}
+          </em>
+        );
+      }
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < str.length) {
+      parts.push(str.slice(lastIndex));
+    }
+    return parts.length > 0 ? parts : str;
+  };
+
+  const lines = rawText.split('\n');
+  const elements = [];
+  let currentList = null;
+
+  const flushList = () => {
+    if (currentList) {
+      elements.push(
+        <ul key={`list-${elements.length}`} className="space-y-1.5 my-2 pl-0.5">
+          {currentList.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2.5 text-slate-800 text-[15px] leading-relaxed">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#09638D] mt-2 shrink-0" />
+              <div className="flex-1">{parseInline(item)}</div>
+            </li>
+          ))}
+        </ul>
+      );
+      currentList = null;
+    }
+  };
+
+  lines.forEach((line, lineIdx) => {
+    const trimmed = line.trim();
+
+    // Horizontal rule
+    if (/^(\-{3,}|\_{3,}|\*{3,})$/.test(trimmed)) {
+      flushList();
+      elements.push(<hr key={lineIdx} className="my-3 border-slate-200" />);
+      return;
+    }
+
+    // Headings
+    const headingMatch = trimmed.match(/^(#{1,4})\s+(.+)$/);
+    if (headingMatch) {
+      flushList();
+      elements.push(
+        <div key={lineIdx} className="font-extrabold text-slate-900 text-base sm:text-lg mt-3 mb-1">
+          {parseInline(headingMatch[2])}
+        </div>
+      );
+      return;
+    }
+
+    // Bullet item (- or * or •)
+    const bulletMatch = trimmed.match(/^[-*•]\s+(.+)$/);
+    if (bulletMatch) {
+      if (!currentList) currentList = [];
+      currentList.push(bulletMatch[1]);
+      return;
+    }
+
+    // Numbered list item (1. or 2.)
+    const numberMatch = trimmed.match(/^(\d+)[.)]\s+(.+)$/);
+    if (numberMatch) {
+      flushList();
+      elements.push(
+        <div key={lineIdx} className="flex items-start gap-2 text-slate-800 text-[15px] leading-relaxed my-1 pl-0.5">
+          <span className="font-bold text-[#09638D] shrink-0 min-w-[20px]">{numberMatch[1]}.</span>
+          <div className="flex-1">{parseInline(numberMatch[2])}</div>
+        </div>
+      );
+      return;
+    }
+
+    // Empty line
+    if (!trimmed) {
+      flushList();
+      elements.push(<div key={lineIdx} className="h-2" />);
+      return;
+    }
+
+    // Paragraph
+    flushList();
+    elements.push(
+      <p key={lineIdx} className="text-slate-800 text-[15px] leading-relaxed font-normal">
+        {parseInline(trimmed)}
+      </p>
+    );
+  });
+
+  flushList();
+
+  return <div className="space-y-1">{elements}</div>;
+}
+
 export const HeroAIChat = () => {
   const { language, t } = useLanguage();
   const currentLang = (language || 'RU').toLowerCase();
@@ -681,11 +811,7 @@ export const HeroAIChat = () => {
                         <img src={msg.image} alt="User upload" className="rounded-2xl max-h-48 object-cover mb-2" />
                       )}
 
-                      <div className={`text-base leading-relaxed font-normal whitespace-pre-line ${
-                        msg.sender === 'user' ? 'text-white' : 'text-slate-800'
-                      }`}>
-                        {msg.text}
-                      </div>
+                      {renderFormattedMessage(msg.text, msg.sender === 'user')}
 
                       {/* Suggested Doctors Grid if returned by Server */}
                       {msg.suggestedDoctors && msg.suggestedDoctors.length > 0 && (
