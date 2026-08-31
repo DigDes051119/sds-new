@@ -1,27 +1,166 @@
-/* Sanarip Med AI Specific Styles */
+/* ==========================================================================
+   Sanarip Med AI - Style Isolation & Preservation
+   Ensures complete fidelity to the original landing page (http://localhost:3000)
+   without inheriting Studio styles (0px border-radius, Everett font, etc.)
+   ========================================================================== */
+
+/* Page-level body isolation when on Sanarip route */
+body.sanarip-page {
+  background-color: #F3F5F9 !important;
+  color: #0F172A !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 16px !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sanarip root container */
+.sanarip-root {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color-scheme: light;
+  background-color: #F3F5F9;
+  color: #0F172A;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base typography within Sanarip */
+.sanarip-root :is(h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, label) {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  border-color: inherit;
+}
+
+/* Reset forced 0px border-radius and unwanted studio global borders */
+.sanarip-root *:not([class*="tracking-"]) {
+  letter-spacing: normal;
+}
+
+/* Ensure buttons, cards, pills and containers have their intended radius */
+.sanarip-root .rounded-none {
+  border-radius: 0px !important;
+}
+
+.sanarip-root .rounded-sm {
+  border-radius: 0.125rem !important;
+}
+
+.sanarip-root .rounded {
+  border-radius: 0.25rem !important;
+}
+
+.sanarip-root .rounded-md {
+  border-radius: 0.375rem !important;
+}
+
+.sanarip-root .rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+.sanarip-root .rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+.sanarip-root .rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+.sanarip-root .rounded-3xl {
+  border-radius: 1.5rem !important;
+}
+
+.sanarip-root .rounded-4xl,
+.sanarip-root .rounded-\[2rem\] {
+  border-radius: 2rem !important;
+}
+
+.sanarip-root .rounded-\[2\.5rem\] {
+  border-radius: 2.5rem !important;
+}
+
+.sanarip-root .rounded-\[3rem\] {
+  border-radius: 3rem !important;
+}
+
+.sanarip-root .rounded-\[48px\] {
+  border-radius: 48px !important;
+}
+
+.sanarip-root .rounded-\[56px\] {
+  border-radius: 56px !important;
+}
+
+.sanarip-root .rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Global removal of drop shadows from original Sanarip */
+.sanarip-root,
+.sanarip-root *,
+.sanarip-root *::before,
+.sanarip-root *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Specific shadows when explicitly styled */
+.sanarip-root .shadow-soft {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05) !important;
+}
+
+.sanarip-root .shadow-curelink {
+  box-shadow: 0 25px 50px -12px rgba(28, 100, 242, 0.18) !important;
+}
+
+/* Keyframe & Marquee animations */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.sanarip-root .animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+/* Custom Light Scrollbar for page */
+body.sanarip-page::-webkit-scrollbar {
+  width: 6px;
+}
+body.sanarip-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+body.sanarip-page::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+body.sanarip-page::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
 
 /* Chat Feed Ultra-Sleek Floating Scrollbar (Apple Style) */
-.chat-scrollbar::-webkit-scrollbar {
+.sanarip-root .chat-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
-.chat-scrollbar::-webkit-scrollbar-track {
+.sanarip-root .chat-scrollbar::-webkit-scrollbar-track {
   background: transparent !important;
 }
-.chat-scrollbar::-webkit-scrollbar-thumb {
+.sanarip-root .chat-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.4) !important;
   border-radius: 9999px !important;
 }
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+.sanarip-root .chat-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(9, 99, 141, 0.7) !important;
 }
-.chat-scrollbar {
+.sanarip-root .chat-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
 }
 
 /* Brand Text Gradient */
-.text-gradient-brand {
-  background: linear-gradient(135deg, #09638D 0%, #61DED3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.sanarip-root .text-gradient-brand {
+  background: linear-gradient(135deg, #09638D 0%, #61DED3 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }

@@ -81,7 +81,7 @@ export function App() {
   }, [isAdminOpen]);
 
   return (
-    <div id="top" className="bg-[#F3F5F9] text-slate-900 selection:bg-[#1C64F2]/20 selection:text-[#1C64F2] min-h-screen font-sans">
+    <div id="top" className="sanarip-root bg-[#F3F5F9] text-slate-900 selection:bg-[#1C64F2]/20 selection:text-[#1C64F2] min-h-screen font-sans">
       {isAdminOpen ? (
         /* Full-Screen Admin & Analytics Panel */
         <AdminDashboard onClose={closeAdmin} />

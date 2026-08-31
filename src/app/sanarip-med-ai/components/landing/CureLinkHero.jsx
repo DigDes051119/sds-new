@@ -153,24 +153,28 @@ export const CureLinkHero = () => {
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="w-[100vw] h-[100vh] shrink-0 relative"
             >
-              {VIDEOS.map((src, index) => (
-                <video
-                  key={src}
-                  ref={(el) => (videoRefs.current[index] = el)}
-                  src={src}
-                  muted
-                  playsInline
-                  onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
-                  onTimeUpdate={(e) => {
-                    if (index === currentVideoIndex && index === 0 && e.target.currentTime >= 4) {
-                      handleVideoEnded();
-                    }
-                  }}
-                  className={`absolute inset-0 w-full h-full object-cover transform-gpu ${
-                    index === currentVideoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                />
-              ))}
+              {VIDEOS.map((src, index) => {
+                const isLoaded = index === currentVideoIndex || index === (currentVideoIndex + 1) % VIDEOS.length;
+                return (
+                  <video
+                    key={src}
+                    ref={(el) => (videoRefs.current[index] = el)}
+                    src={isLoaded ? src : undefined}
+                    preload={index === currentVideoIndex ? "auto" : "metadata"}
+                    muted
+                    playsInline
+                    onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
+                    onTimeUpdate={(e) => {
+                      if (index === currentVideoIndex && index === 0 && e.target.currentTime >= 4) {
+                        handleVideoEnded();
+                      }
+                    }}
+                    className={`absolute inset-0 w-full h-full object-cover transform-gpu ${
+                      index === currentVideoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  />
+                );
+              })}
             </motion.div>
           </div>
 

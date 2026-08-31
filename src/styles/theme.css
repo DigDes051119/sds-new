@@ -90,13 +90,13 @@
 }
 
 @layer base {
-  * {
+  body:not(.sanarip-page) *:not(.sanarip-root, .sanarip-root *) {
     border-color: var(--color-concrete);
     outline: none;
     border-radius: 0px !important;
   }
 
-  body {
+  body:not(.sanarip-page) {
     background-color: var(--color-paper);
     color: var(--color-pure-black);
     font-family: var(--font-twk-everett);
@@ -107,35 +107,35 @@
     -moz-osx-font-smoothing: auto;
   }
 
-  h1 {
+  body:not(.sanarip-page) h1:not(.sanarip-root, .sanarip-root *) {
     font-size: var(--text-display);
     font-weight: 700;
     line-height: var(--leading-display);
     letter-spacing: var(--tracking-display);
   }
 
-  h2 {
+  body:not(.sanarip-page) h2:not(.sanarip-root, .sanarip-root *) {
     font-size: var(--text-heading);
     font-weight: 700;
     line-height: var(--leading-heading);
     letter-spacing: var(--tracking-heading);
   }
 
-  h3 {
+  body:not(.sanarip-page) h3:not(.sanarip-root, .sanarip-root *) {
     font-size: var(--text-subheading);
     font-weight: 700;
     line-height: var(--leading-subheading);
     letter-spacing: var(--tracking-subheading);
   }
 
-  h4, h5, h6 {
+  body:not(.sanarip-page) :is(h4, h5, h6):not(.sanarip-root, .sanarip-root *) {
     font-size: var(--text-body);
     font-weight: 700;
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
   }
 
-  p, label, button, input, textarea {
+  body:not(.sanarip-page) :is(p, label, button, input, textarea):not(.sanarip-root, .sanarip-root *) {
     font-size: var(--text-body);
     font-weight: 400;
     line-height: var(--leading-body);
@@ -143,7 +143,7 @@
     font-family: var(--font-twk-everett);
   }
 
-  a {
+  body:not(.sanarip-page) a:not(.sanarip-root, .sanarip-root *) {
     font-family: var(--font-twk-everett);
     transition: opacity 0.2s ease;
   }
